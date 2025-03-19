@@ -1,0 +1,7 @@
+{
+    "plugintypes": {
+        "archivingactivitydriver": "local/driver/activity",
+        "archivingstoragedriver": "local/driver/storage",
+        "archivingeventconnector": "local/driver/event"
+    }
+}

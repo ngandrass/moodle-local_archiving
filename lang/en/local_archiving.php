@@ -24,4 +24,13 @@
  */
 // @codingStandardsIgnoreFile
 
+// Common
 $string['pluginname'] = 'Archiving';
+
+// Sub-plugins
+$string['subplugintype_archivingactivitydriver'] = 'Activity archiving driver';
+$string['subplugintype_archivingactivitydriver_plural'] = 'Activity archiving drivers';
+$string['subplugintype_archivingstoragedriver'] = 'Storage driver';
+$string['subplugintype_archivingstoragedriver_plural'] = 'Storage drivers';
+$string['subplugintype_archivingeventconnector'] = 'External event connector';
+$string['subplugintype_archivingeventconnector_plural'] = 'External event connectors';

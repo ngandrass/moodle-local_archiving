@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Core renderer.
+ * Core renderer
  *
  * @package     local_archiving
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Plugin version and other meta-data are defined here
  *
  * @package     local_archiving
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>

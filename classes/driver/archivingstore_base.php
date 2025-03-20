@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Interface definitions for storage drivers.
+ * Interface definitions for storage drivers
  *
  * @package     local_archiving
  * @category    driver
@@ -32,9 +32,9 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 abstract class archivingstore_base {
 
     /**
-     * Returns the name of this driver.
+     * Returns the name of this driver
      *
-     * @return string Name of the driver.
+     * @return string Name of the driver
      */
     abstract public static function get_name(): string;
 

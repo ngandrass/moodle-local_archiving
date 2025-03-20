@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Code to be executed after the plugin's database scheme has been installed is defined here.
+ * Code to be executed after the plugin's database scheme has been installed is
+ * defined here
  *
  * @package     local_archiving
  * @category    upgrade
@@ -28,7 +29,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Custom code to be run on installing the plugin.
+ * Custom code to be run on installing the plugin
  */
 function xmldb_local_archiving_install() {
     return true;

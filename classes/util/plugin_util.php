@@ -34,15 +34,15 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Utility functions for working with subplugins.
+ * Utility functions for working with subplugins
  */
 class plugin_util {
 
     /**
      * Returns a list of all installed archivingmod plugins and their respective
-     * metadata.
+     * metadata
      *
-     * @return array List of installed archivingmod plugins.
+     * @return array List of installed archivingmod plugins
      */
     public static function get_activity_archiving_drivers(): array {
         // Retrieve list of installed archivingmod plugins.
@@ -67,9 +67,9 @@ class plugin_util {
 
     /**
      * Returns a list of all installed archivingstore plugins and their
-     * respective metadata.
+     * respective metadata
      *
-     * @return array List of installed archivingstore plugins.
+     * @return array List of installed archivingstore plugins
      */
     public static function get_storage_drivers(): array {
         // Retrieve list of installed archivingstore plugins.
@@ -93,9 +93,9 @@ class plugin_util {
 
     /**
      * Returns a list of all installed archivingevent plugins and their
-     * respective metadata.
+     * respective metadata
      *
-     * @return array List of installed archivingevent plugins.
+     * @return array List of installed archivingevent plugins
      */
     public static function get_event_connectors(): array {
         // Retrieve list of installed archivingevent plugins.

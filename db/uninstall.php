@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Code that is executed before the tables and data are dropped during the plugin uninstallation.
+ * Code that is executed before the tables and data are dropped during the plugin uninstallation
  *
  * @package     local_archiving
  * @category    upgrade
@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Custom uninstallation procedure.
+ * Custom uninstallation procedure
  */
 function xmldb_local_archiving_uninstall() {
     return true;

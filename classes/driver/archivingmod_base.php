@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Interface definitions for activity archiving drivers.
+ * Interface definitions for activity archiving drivers
  *
  * @package     local_archiving
  * @category    driver
@@ -32,25 +32,25 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 abstract class archivingmod_base {
 
     /**
-     * Returns the name of this driver.
+     * Returns the name of this driver
      *
-     * @return string Name of the driver.
+     * @return string Name of the driver
      */
     abstract public static function get_name(): string;
 
     /**
      * Returns a list of supported Moodle activities by this driver as a list of
-     * frankenstyle plugin names (e.g., 'mod_quiz').
+     * frankenstyle plugin names (e.g., 'mod_quiz')
      *
-     * @return array List of supported activities.
+     * @return array List of supported activities
      */
     abstract public static function get_supported_activities(): array;
 
     /**
      * Provides access to the Moodle form that holds all settings for a single
-     * archiving task.
+     * archiving task
      *
-     * @return \moodleform Form for the task settings.
+     * @return \moodleform Form for the task settings
      */
     abstract public function get_task_settings_form(): \moodleform;
 

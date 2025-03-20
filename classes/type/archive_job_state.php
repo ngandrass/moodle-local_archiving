@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class archive_job_state {
 
-    /** @var int Job is uninitialized  */
+    /** @var int Job is uninitialized */
     public const STATE_UNINITIALIZED = 0;
 
     /** @var int Job is initialized and queued for processing */

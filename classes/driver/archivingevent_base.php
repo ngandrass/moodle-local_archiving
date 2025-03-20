@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Interface definitions for external event connectors.
+ * Interface definitions for external event connectors
  *
  * @package     local_archiving
  * @category    driver
@@ -32,9 +32,9 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 abstract class archivingevent_base {
 
     /**
-     * Returns the name of this external event connector.
+     * Returns the name of this external event connector
      *
-     * @return string Name of the external event connector.
+     * @return string Name of the external event connector
      */
     abstract public static function get_name(): string;
 

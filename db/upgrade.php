@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Code to be executed during the plugin's database scheme upgrade.
+ * Code to be executed during the plugin's database scheme upgrade
  *
  * @package     local_archiving
  * @category    upgrade
@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Custom code to be run to update the plugin database.
+ * Custom code to be run to update the plugin database
  *
  * @param int $oldversion The version we are upgrading from
  * @return true

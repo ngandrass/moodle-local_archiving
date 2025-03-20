@@ -29,8 +29,8 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Inject navigation nodes
  *
- * @param settings_navigation $settingsnav The root node of the settings navigation.
- * @param context $ctx Current context.
+ * @param settings_navigation $settingsnav The root node of the settings navigation
+ * @param context $ctx Current context
  * @return void
  * @throws \core\exception\moodle_exception
  * @throws coding_exception

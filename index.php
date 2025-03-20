@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Main entry point for archiving manager.
+ * Main entry point for archiving manager
  *
  * @package     local_archiving
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>

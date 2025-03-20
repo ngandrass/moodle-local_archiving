@@ -23,6 +23,8 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_archiving\util\plugin_util;
+
 require_once(__DIR__ . '/../../config.php');
 
 $courseid = required_param('courseid', PARAM_INT);
@@ -47,4 +49,22 @@ require_login($courseid);
 $renderer = $PAGE->get_renderer('local_archiving');
 echo $OUTPUT->header();
 echo $renderer->index();
+
+// DEBUG start
+echo "<h3>Activity Archiving Drivers</h3>";
+echo "<pre>";
+print_r(plugin_util::get_activity_archiving_drivers());
+echo "</pre>";
+
+echo "<h3>Storage Drivers</h3>";
+echo "<pre>";
+print_r(plugin_util::get_storage_drivers());
+echo "</pre>";
+
+echo "<h3>Event Connectors</h3>";
+echo "<pre>";
+print_r(plugin_util::get_event_connectors());
+echo "</pre>";
+// DEBUG end
+
 echo $OUTPUT->footer();

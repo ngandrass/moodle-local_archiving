@@ -54,6 +54,8 @@ function local_archiving_extend_settings_navigation(settings_navigation $setting
 
         // Append to course administration node.
         $parentnode = $settingsnav->find('courseadmin', null);
-        $parentnode->add_node($node);
+        if ($parentnode) {
+            $parentnode->add_node($node);
+        }
     }
 }

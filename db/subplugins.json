@@ -1,7 +1,12 @@
 {
     "plugintypes": {
-        "archivingactivitydriver": "local/driver/activity",
-        "archivingstoragedriver": "local/driver/storage",
-        "archivingeventconnector": "local/driver/event"
+        "archivingmod": "local/archiving/driver/mod",
+        "archivingstore": "local/archiving/driver/store",
+        "archivingevent": "local/archiving/driver/event"
+    },
+    "subplugintypes": {
+        "archivingmod": "driver/mod",
+        "archivingstore": "driver/store",
+        "archivingevent": "driver/event"
     }
 }

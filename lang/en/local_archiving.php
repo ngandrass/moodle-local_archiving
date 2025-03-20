@@ -28,9 +28,9 @@
 $string['pluginname'] = 'Archiving';
 
 // Sub-plugins
-$string['subplugintype_archivingactivitydriver'] = 'Activity archiving driver';
-$string['subplugintype_archivingactivitydriver_plural'] = 'Activity archiving drivers';
-$string['subplugintype_archivingstoragedriver'] = 'Storage driver';
-$string['subplugintype_archivingstoragedriver_plural'] = 'Storage drivers';
-$string['subplugintype_archivingeventconnector'] = 'External event connector';
-$string['subplugintype_archivingeventconnector_plural'] = 'External event connectors';
+$string['subplugintype_archivingmod'] = 'Activity archiving driver';
+$string['subplugintype_archivingmod_plural'] = 'Activity archiving drivers';
+$string['subplugintype_archivingstore'] = 'Storage driver';
+$string['subplugintype_archivingstore_plural'] = 'Storage drivers';
+$string['subplugintype_archivingevent'] = 'External event connector';
+$string['subplugintype_archivingevent_plural'] = 'External event connectors';

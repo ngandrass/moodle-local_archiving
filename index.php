@@ -23,6 +23,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_archiving\util\mod_util;
 use local_archiving\util\plugin_util;
 
 require_once(__DIR__ . '/../../config.php');
@@ -56,6 +57,11 @@ echo "<pre>";
 print_r(plugin_util::get_activity_archiving_drivers());
 echo "</pre>";
 
+echo "<h5>Supported Activities</h5>";
+echo "<pre>";
+print_r(plugin_util::get_supported_activities());
+echo "</pre>";
+
 echo "<h3>Storage Drivers</h3>";
 echo "<pre>";
 print_r(plugin_util::get_storage_drivers());
@@ -65,6 +71,16 @@ echo "<h3>Event Connectors</h3>";
 echo "<pre>";
 print_r(plugin_util::get_event_connectors());
 echo "</pre>";
+
+echo "<h1>Activities</h1>";
+echo "<pre>";
+foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
+    $supstr = $obj->supported ? 'Yes' : 'No';
+    echo "[{$obj->cm->modname}]: {$obj->cm->name} (Supported: {$supstr})<br>";
+}
+echo "</pre>";
+
+
 // DEBUG end
 
 echo $OUTPUT->footer();

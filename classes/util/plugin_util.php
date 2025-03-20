@@ -66,6 +66,24 @@ class plugin_util {
     }
 
     /**
+     * Retrieves a list of all Moodle activities that are supported by at least
+     * one of the installed activity archiving driver plugins
+     *
+     * @return array List of supported activities for archiving
+     */
+    public static function get_supported_activities(): array {
+        $res = [];
+
+        foreach (self::get_activity_archiving_drivers() as $archiver) {
+            foreach ($archiver['activities'] as $activitiy) {
+                $res[$activitiy] = $activitiy;
+            }
+        }
+
+        return $res;
+    }
+
+    /**
      * Returns a list of all installed archivingstore plugins and their
      * respective metadata
      *

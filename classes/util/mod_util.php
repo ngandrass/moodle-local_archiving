@@ -50,7 +50,7 @@ class mod_util {
         foreach ($modinfo->cms as $cm) {
             $res[$cm->id] = (object) [
                 'cm' => $cm,
-                'supported' => array_key_exists('mod_'.$cm->modname, $supported_activities),
+                'supported' => array_key_exists($cm->modname, $supported_activities),
             ];
         }
 

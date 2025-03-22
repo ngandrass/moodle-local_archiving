@@ -41,6 +41,9 @@ $string['export_course_backup'] = 'Export full Moodle course backup (.mbz)';
 $string['export_course_backup_help'] = 'This will export a full Moodle course backup (.mbz) including everything inside this course. This can be useful if you want to import this course into another Moodle instance.';
 $string['export_cm_backup'] = 'Export Moodle activity backup (.mbz)';
 $string['export_cm_backup_help'] = 'This will export a Moodle backup (.mbz) of the targeted activity. This can be useful if you want to import this activity independent of this course into another Moodle instance.';
+$string['job_create_form_header'] = 'Create Archive';
+$string['job_create_form_header_desc'] = 'This form triggers the creation of a new archive. Jobs are processed asynchronously in the background and take some time to complete. You can always check the current status on the overview page.';
+$string['job_create_form_header_typed'] = 'Create {$a} Archive';
 
 // Job settings: Filename pattern.
 $string['archive_filename_pattern'] = 'Archive name';

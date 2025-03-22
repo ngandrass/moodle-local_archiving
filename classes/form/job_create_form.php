@@ -96,7 +96,11 @@ class job_create_form extends \moodleform {
      * @throws \coding_exception
      */
     protected function definition_header(): void {
-        $this->_form->addElement('html', '<h1>'.get_string('job_create_form_header', 'local_archiving').'</h1>');
+        $this->_form->addElement('html', '<h1>'.get_string(
+            'job_create_form_header_typed',
+            'local_archiving',
+            get_string('pluginname', "mod_{$this->handler}")
+        ).'</h1>');
         $this->_form->addElement('html', '<p>'.get_string('job_create_form_header_desc', 'local_archiving').'</p>');
     }
 

@@ -29,6 +29,9 @@ namespace local_archiving\driver;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
+/**
+ * Interface for activity archiving driver (archivingmod) sub-plugins
+ */
 abstract class archivingmod_base {
 
     /**

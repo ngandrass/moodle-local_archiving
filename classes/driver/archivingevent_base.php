@@ -29,6 +29,9 @@ namespace local_archiving\driver;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
+/**
+ * Interface for external event connector (archivingevent) sub-plugins
+ */
 abstract class archivingevent_base {
 
     /**

@@ -29,6 +29,9 @@ namespace local_archiving\driver;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
+/**
+ * Interface for storege driver (archivingstore) sub-plugins
+ */
 abstract class archivingstore_base {
 
     /**

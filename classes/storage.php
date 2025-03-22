@@ -40,6 +40,7 @@ class storage {
         'coursename',
         'courseshortname',
         'cmid',
+        'cmtype',
         'cmname',
         'date',
         'time',

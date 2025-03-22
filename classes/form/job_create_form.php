@@ -99,9 +99,22 @@ class job_create_form extends \moodleform {
         $this->_form->addElement('html', '<h1>'.get_string(
             'job_create_form_header_typed',
             'local_archiving',
-            get_string('pluginname', "mod_{$this->handler}")
+            get_string('pluginname', "mod_{$this->handler}"),
         ).'</h1>');
         $this->_form->addElement('html', '<p>'.get_string('job_create_form_header_desc', 'local_archiving').'</p>');
+
+        $this->_form->addElement(
+            'static',
+            'cm_modname',
+            get_string('activitytype', 'local_archiving'),
+            get_string('pluginname', "mod_{$this->cminfo->modname}")
+        );
+        $this->_form->addElement(
+            'static',
+            'cm_name',
+            get_string('name'),
+            "<p class=\"mb-5\">{$this->cminfo->name}</p>"
+        );
     }
 
     /**

@@ -84,6 +84,23 @@ class plugin_util {
     }
 
     /**
+     * Tries to find an installed activity archiving driver (archivingmod) for
+     * the given activity type (dm modname)
+     *
+     * @param string $modname Name of the course module
+     * @return string|null Class of the chosen driver or null if no driver is available
+     */
+    public static function get_archiving_driver_for_cm(string $modname): ?string {
+        foreach (self::get_activity_archiving_drivers() as $driver) {
+            if (array_search($modname, $driver['activities']) !== false) {
+                return $driver['class'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Returns a list of all installed archivingstore plugins and their
      * respective metadata
      *

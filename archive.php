@@ -16,81 +16,63 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Main entry point for archiving manager. Course archiving overview page.
+ * Activity archiving overview
  *
  * @package     local_archiving
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_archiving\util\mod_util;
 use local_archiving\util\plugin_util;
 
 require_once(__DIR__ . '/../../config.php');
 
+// Get course and course module.
 $courseid = required_param('courseid', PARAM_INT);
-$ctx = context_course::instance($courseid);
-$course = get_course($courseid);
+$cmid = required_param('cmid', PARAM_INT);
+
+$coursectx = context_course::instance($courseid);
+$ctx = context_module::instance($cmid);
+list($course, $cm) = get_course_and_cm_from_cmid($cmid);
 
 // Check login and capabilities.
 require_login($courseid);
 // TODO: Check capability
 
 // Setup page.
-$PAGE->set_context($ctx);
+$PAGE->set_context($coursectx);
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
-$PAGE->set_heading($course->fullname);
+$PAGE->set_heading($cm->name);
 $PAGE->set_url(new moodle_url(
-    '/local/archiving/index.php',
-    ['courseid' => $courseid]
+    '/local/archiving/archive.php',
+    [
+        'courseid' => $courseid,
+        'cmid' => $cmid,
+    ]
 ));
 //$PAGE->set_pagelayout('incourse');
-
 
 // Render output.
 $renderer = $PAGE->get_renderer('local_archiving');
 echo $OUTPUT->header();
-echo $renderer->index();
 
-// DEBUG start
-echo "<h3>Activity Archiving Drivers</h3>";
-echo "<pre>";
-print_r(plugin_util::get_activity_archiving_drivers());
-echo "</pre>";
+// vvvvv DEBUG start vvvvv
 
-echo "<h5>Supported Activities</h5>";
-echo "<pre>";
-print_r(plugin_util::get_supported_activities());
-echo "</pre>";
-
-echo "<h3>Storage Drivers</h3>";
-echo "<pre>";
-print_r(plugin_util::get_storage_drivers());
-echo "</pre>";
-
-echo "<h3>Event Connectors</h3>";
-echo "<pre>";
-print_r(plugin_util::get_event_connectors());
-echo "</pre>";
-
-echo "<h1>Activities</h1>";
-echo "<pre>";
-foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
-    $supstr = $obj->supported ? 'Yes' : 'No';
-    $url = new moodle_url('/local/archiving/archive.php', [
-        'courseid' => $courseid,
-        'cmid' => $obj->cm->id,
-    ]);
-    echo "<a href=\"{$url}\">[{$obj->cm->modname}]: {$obj->cm->name} (Supported: {$supstr})</a><br>";
+$driverclass = plugin_util::get_archiving_driver_for_cm($cm->modname);
+if (!$driverclass) {
+    throw new \moodle_exception('supported_archive_driver_not_found', 'local_archiving');
 }
-echo "</pre>";
 
 /** @var \local_archiving\driver\archivingmod_base $driver */
-$driver = new (plugin_util::get_activity_archiving_drivers()['quiz']['class'])();
-$cm = mod_util::get_cms_with_metadata($courseid)[86]->cm;
+$driver = new $driverclass();
+
+
 $form = $driver->get_task_settings_form('quiz', $cm);
 $form->display();
 
-// DEBUG end
+$backurl = new moodle_url('/local/archiving/index.php', array('courseid' => $courseid));
+echo "<a href=\"{$backurl}\">Go back to overview</a>";
+
+// ^^^^^ DEBUG end ^^^^^
 
 echo $OUTPUT->footer();

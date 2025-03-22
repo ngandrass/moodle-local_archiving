@@ -80,6 +80,12 @@ foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
 }
 echo "</pre>";
 
+/** @var \local_archiving\driver\archivingmod_base $driver */
+$driver = new (plugin_util::get_activity_archiving_drivers()['quiz']['class'])();
+$cm = mod_util::get_cms_with_metadata($courseid)[86]->cm;
+$form = $driver->get_task_settings_form('quiz', $cm);
+$form->display();
+
 // DEBUG end
 
 echo $OUTPUT->footer();

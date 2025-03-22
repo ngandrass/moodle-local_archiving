@@ -26,6 +26,7 @@
 
 // Common.
 $string['pluginname'] = 'Archiving';
+$string['create_archive'] = 'Create archive';
 
 // Sub-plugins.
 $string['subplugintype_archivingmod'] = 'Activity archiving driver';

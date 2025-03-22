@@ -25,6 +25,8 @@
 
 namespace local_archiving\driver;
 
+use local_archiving\form\job_create_form;
+
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -55,8 +57,8 @@ abstract class archivingmod_base {
      *
      * @param string $handler Name of the archivingmod sub-plugin that handles this job
      * @param \cm_info $cminfo Info object for the targeted course module
-     * @return \moodleform Form for the task settings
+     * @return job_create_form Form for the task settings
      */
-    abstract public function get_task_settings_form(string $handler, \cm_info $cminfo): \moodleform;
+    abstract public function get_task_settings_form(string $handler, \cm_info $cminfo): job_create_form;
 
 }

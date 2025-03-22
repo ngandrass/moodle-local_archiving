@@ -67,7 +67,7 @@ if (!$driverclass) {
 $driver = new $driverclass();
 
 
-$form = $driver->get_task_settings_form('quiz', $cm);
+$form = $driver->get_task_settings_form($cm->modname, $cm);
 $form->display();
 
 $backurl = new moodle_url('/local/archiving/index.php', array('courseid' => $courseid));

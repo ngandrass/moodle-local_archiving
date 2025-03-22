@@ -77,20 +77,17 @@ echo "<h1>Activities</h1>";
 echo "<pre>";
 foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
     $supstr = $obj->supported ? 'Yes' : 'No';
-    $url = new moodle_url('/local/archiving/archive.php', [
-        'courseid' => $courseid,
-        'cmid' => $obj->cm->id,
-    ]);
-    echo "<a href=\"{$url}\">[{$obj->cm->modname}]: {$obj->cm->name} (Supported: {$supstr})</a><br>";
+    if ($obj->supported) {
+        $url = new moodle_url('/local/archiving/archive.php', [
+            'courseid' => $courseid,
+            'cmid' => $obj->cm->id,
+        ]);
+        echo "<a href=\"{$url}\">[{$obj->cm->modname}]: {$obj->cm->name} (Supported: {$supstr})</a><br>";
+    } else {
+        echo "[{$obj->cm->modname}]: {$obj->cm->name} (Supported: {$supstr})<br>";
+    }
 }
 echo "</pre>";
-
-/** @var \local_archiving\driver\archivingmod_base $driver */
-$driver = new (plugin_util::get_activity_archiving_drivers()['quiz']['class'])();
-$cm = mod_util::get_cms_with_metadata($courseid)[86]->cm;
-$form = $driver->get_task_settings_form('quiz', $cm);
-$form->display();
-
 // DEBUG end
 
 echo $OUTPUT->footer();

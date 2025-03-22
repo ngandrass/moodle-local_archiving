@@ -80,7 +80,6 @@ foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
 }
 echo "</pre>";
 
-
 // DEBUG end
 
 echo $OUTPUT->footer();

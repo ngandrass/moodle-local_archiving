@@ -42,6 +42,14 @@ if ($hassiteconfig) {
             get_string('setting_header_common_desc', 'local_archiving')
         ));
 
+        // Job timeout.
+        $settings->add(new admin_setting_configtext('local_archiving/job_timeout_min',
+            get_string('setting_job_timeout_min', 'local_archiving'),
+            get_string('setting_job_timeout_min_desc', 'local_archiving'),
+            '120',
+            PARAM_INT
+        ));
+
         // Job Presets.
         $settings->add(new admin_setting_heading('local_archiving/header_job_presets',
             get_string('setting_header_job_presets', 'local_archiving'),

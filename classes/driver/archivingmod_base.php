@@ -53,8 +53,10 @@ abstract class archivingmod_base {
      * Provides access to the Moodle form that holds all settings for a single
      * archiving task
      *
+     * @param string $handler Name of the archivingmod sub-plugin that handles this job
+     * @param \cm_info $cminfo Info object for the targeted course module
      * @return \moodleform Form for the task settings
      */
-    abstract public function get_task_settings_form(): \moodleform;
+    abstract public function get_task_settings_form(string $handler, \cm_info $cminfo): \moodleform;
 
 }

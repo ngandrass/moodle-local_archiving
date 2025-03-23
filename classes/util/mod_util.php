@@ -44,13 +44,13 @@ class mod_util {
      */
     public static function get_cms_with_metadata(int $courseid): array {
         $modinfo = get_fast_modinfo($courseid);
-        $supported_activities = plugin_util::get_supported_activities();
+        $supported = plugin_util::get_supported_activities();
 
         $res = [];
         foreach ($modinfo->cms as $cm) {
             $res[$cm->id] = (object) [
                 'cm' => $cm,
-                'supported' => array_key_exists($cm->modname, $supported_activities),
+                'supported' => array_key_exists($cm->modname, $supported),
             ];
         }
 

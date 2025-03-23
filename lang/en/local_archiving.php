@@ -37,6 +37,11 @@ $string['subplugintype_archivingstore_plural'] = 'Storage drivers';
 $string['subplugintype_archivingevent'] = 'External event connector';
 $string['subplugintype_archivingevent_plural'] = 'External event connectors';
 
+// Capabilities.
+$string['archiving:view'] = 'View archiving overview page and sub-pages';
+$string['archiving:create'] = 'Create new archives';
+$string['archiving:delete'] = 'Delete archives and metadata';
+
 // Job settings: General.
 $string['export_course_backup'] = 'Export full Moodle course backup (.mbz)';
 $string['export_course_backup_help'] = 'This will export a full Moodle course backup (.mbz) including everything inside this course. This can be useful if you want to import this course into another Moodle instance.';

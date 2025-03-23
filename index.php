@@ -34,7 +34,7 @@ $course = get_course($courseid);
 
 // Check login and capabilities.
 require_login($courseid);
-// TODO: Check capability
+require_capability('local/archiving:view', $ctx);
 
 // Setup page.
 $PAGE->set_context($ctx);

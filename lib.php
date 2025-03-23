@@ -38,24 +38,26 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 function local_archiving_extend_settings_navigation(settings_navigation $settingsnav, context $ctx) {
     // Inject archiving overview node into course navigation.
     if ($ctx && ($ctx instanceof context_course || $ctx instanceof context_module)) {
-        // Construct new navigation node.
-        $url = new moodle_url(
-            '/local/archiving/index.php',
-            ['courseid' => $ctx->get_course_context()->instanceid]
-        );
-        $node = navigation_node::create(
-            get_string('pluginname', 'local_archiving'),
-            $url,
-            navigation_node::TYPE_SETTING,
-            'local_archiving',
-            'local_archiving',
-            new pix_icon('i/settings', '')
-        );
+        if (has_capability('local/archiving:view', $ctx)) {
+            // Construct new navigation node.
+            $url = new moodle_url(
+                '/local/archiving/index.php',
+                ['courseid' => $ctx->get_course_context()->instanceid]
+            );
+            $node = navigation_node::create(
+                get_string('pluginname', 'local_archiving'),
+                $url,
+                navigation_node::TYPE_SETTING,
+                'local_archiving',
+                'local_archiving',
+                new pix_icon('i/settings', '')
+            );
 
-        // Append to course administration node.
-        $parentnode = $settingsnav->find('courseadmin', null);
-        if ($parentnode) {
-            $parentnode->add_node($node);
+            // Append to course administration node.
+            $parentnode = $settingsnav->find('courseadmin', null);
+            if ($parentnode) {
+                $parentnode->add_node($node);
+            }
         }
     }
 }

@@ -52,13 +52,17 @@ abstract class archivingmod_base {
     abstract public static function get_supported_activities(): array;
 
     /**
-     * Provides access to the Moodle form that holds all settings for a single
-     * archiving task
+     * Provides access to the Moodle form that holds all settings for creating a
+     * single archiving job. Generic settings are populated by the base class
+     * and can be extended as needed.
      *
      * @param string $handler Name of the archivingmod sub-plugin that handles this job
      * @param \cm_info $cminfo Info object for the targeted course module
      * @return job_create_form Form for the task settings
+     * @throws \dml_exception
      */
-    abstract public function get_task_settings_form(string $handler, \cm_info $cminfo): job_create_form;
+    public function get_job_create_form(string $handler, \cm_info $cminfo): job_create_form {
+        return new job_create_form($handler, $cminfo);
+    }
 
 }

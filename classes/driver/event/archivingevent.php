@@ -23,7 +23,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_archiving\driver;
+namespace local_archiving\driver\event;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Interface for external event connector (archivingevent) sub-plugins
  */
-abstract class archivingevent_base {
+abstract class archivingevent {
 
     /**
      * Returns the name of this external event connector

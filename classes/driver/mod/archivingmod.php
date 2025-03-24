@@ -23,7 +23,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_archiving\driver;
+namespace local_archiving\driver\mod;
 
 use local_archiving\form\job_create_form;
 
@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Interface for activity archiving driver (archivingmod) sub-plugins
  */
-abstract class archivingmod_base {
+abstract class archivingmod {
 
     /** @var int ID of the course the targeted activity is part of */
     protected int $courseid;
@@ -88,5 +88,25 @@ abstract class archivingmod_base {
     public function get_job_create_form(string $handler, \cm_info $cminfo): job_create_form {
         return new job_create_form($handler, $cminfo);
     }
+
+    /**
+     * Creates a new activity archiving task
+     *
+     * @param int $jobid ID of the archive job this task will be associated with
+     * @param \stdClass $tasksettings All task settings from the job_create_form
+     * @return task A newly created task object that is not yet scheduled for execution
+     */
+    abstract public function create_task(int $jobid, \stdClass $tasksettings): task;
+
+    /**
+     * Executes the given task
+     *
+     * This function has to be implemented by the respective activity archiving
+     * driver and handles all the activity-specific stuff.
+     *
+     * @param task $task The activity archiving task to execute
+     * @return void
+     */
+    abstract public function execute_task(task $task): void;
 
 }

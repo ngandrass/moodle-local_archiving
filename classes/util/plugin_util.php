@@ -25,9 +25,9 @@
 
 namespace local_archiving\util;
 
-use local_archiving\driver\archivingevent_base;
-use local_archiving\driver\archivingmod_base;
-use local_archiving\driver\archivingstore_base;
+use local_archiving\driver\event\archivingevent;
+use local_archiving\driver\mod\archivingmod;
+use local_archiving\driver\store\archivingstore;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -51,7 +51,7 @@ class plugin_util {
 
         // Iterate over all plugins and collect their metadata.
         foreach ($plugins as $pluginname => $basedir) {
-            /** @var archivingmod_base $pluginclass */
+            /** @var archivingmod $pluginclass */
             $pluginclass = '\\archivingmod_'.$pluginname.'\\archivingmod';
 
             $res[$pluginname] = [
@@ -113,7 +113,7 @@ class plugin_util {
 
         // Iterate over all plugins and collect their metadata.
         foreach ($plugins as $pluginname => $basedir) {
-            /** @var archivingstore_base $pluginclass */
+            /** @var archivingstore $pluginclass */
             $pluginclass = '\\archivingstore_'.$pluginname.'\\archivingstore';
 
             $res[$pluginname] = [
@@ -139,7 +139,7 @@ class plugin_util {
 
         // Iterate over all plugins and collect their metadata.
         foreach ($plugins as $pluginname => $basedir) {
-            /** @var archivingevent_base $pluginclass */
+            /** @var archivingevent $pluginclass */
             $pluginclass = '\\archivingevent_'.$pluginname.'\\archivingevent';
 
             $res[$pluginname] = [

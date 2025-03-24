@@ -63,7 +63,7 @@ if (!$driverclass) {
     throw new \moodle_exception('supported_archive_driver_not_found', 'local_archiving');
 }
 
-/** @var \local_archiving\driver\archivingmod_base $driver */
+/** @var \local_archiving\driver\mod\archivingmod $driver */
 $driver = new $driverclass($courseid, $cmid);
 
 

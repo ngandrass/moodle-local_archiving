@@ -39,6 +39,23 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 class plugin_util {
 
     /**
+     * Retrieves the given subplugin class name for the given driver type and modname
+     *
+     * @param string $modtype Type of the subplugin to look for (e.g., 'archivingmod')
+     * @param string $modname Name of the subplugin to look for (e.g., 'quiz')
+     * @return string|null Fully-quallified class name of the subplugin class if found, null otherwise
+     */
+    public static function get_subplugin_by_name(string $modtype, string $modname): ?string {
+        $archivingmod = "\\{$modtype}_{$modname}\\${modtype}";
+
+        if (!class_exists($archivingmod)) {
+            return null;
+        }
+
+        return $archivingmod;
+    }
+
+    /**
      * Returns a list of all installed archivingmod plugins and their respective
      * metadata
      *
@@ -52,7 +69,7 @@ class plugin_util {
         // Iterate over all plugins and collect their metadata.
         foreach ($plugins as $pluginname => $basedir) {
             /** @var archivingmod $pluginclass */
-            $pluginclass = '\\archivingmod_'.$pluginname.'\\archivingmod';
+            $pluginclass = self::get_subplugin_by_name('archivingmod', $pluginname);
 
             $res[$pluginname] = [
                 'name' => $pluginclass::get_name(),
@@ -114,7 +131,7 @@ class plugin_util {
         // Iterate over all plugins and collect their metadata.
         foreach ($plugins as $pluginname => $basedir) {
             /** @var archivingstore $pluginclass */
-            $pluginclass = '\\archivingstore_'.$pluginname.'\\archivingstore';
+            $pluginclass = self::get_subplugin_by_name('archivingstore', $pluginname);
 
             $res[$pluginname] = [
                 'name' => $pluginclass::get_name(),
@@ -140,7 +157,7 @@ class plugin_util {
         // Iterate over all plugins and collect their metadata.
         foreach ($plugins as $pluginname => $basedir) {
             /** @var archivingevent $pluginclass */
-            $pluginclass = '\\archivingevent_'.$pluginname.'\\archivingevent';
+            $pluginclass = self::get_subplugin_by_name('archivingevent', $pluginname);
 
             $res[$pluginname] = [
                 'name' => $pluginclass::get_name(),

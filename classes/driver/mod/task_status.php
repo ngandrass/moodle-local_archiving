@@ -61,4 +61,7 @@ class task_status {
     /** @var int The task timed out and therefore could not be completed */
     public const STATUS_TIMEOUT = 251;
 
+    /** @var int The task status is unknown due to an internal data error */
+    public const STATUS_UNKNOWN = 255;
+
 }

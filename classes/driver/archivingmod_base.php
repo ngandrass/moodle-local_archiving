@@ -36,6 +36,23 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 abstract class archivingmod_base {
 
+    /** @var int ID of the course the targeted activity is part of */
+    protected int $courseid;
+
+    /** @var int ID of the targeted course module / activity */
+    protected int $cmid;
+
+    /**
+     * Create a new activity archiving driver instance
+     *
+     * @param int $courseid ID of the course the targeted activity is part of
+     * @param int $cmid ID of the targeted course module / activity
+     */
+    public function __construct(int $courseid, int $cmid) {
+        $this->courseid = $courseid;
+        $this->cmid = $cmid;
+    }
+
     /**
      * Returns the name of this driver
      *
@@ -50,6 +67,13 @@ abstract class archivingmod_base {
      * @return array List of supported activities
      */
     abstract public static function get_supported_activities(): array;
+
+    /**
+     * Determines if the targeted activity is ready to be archived.
+     *
+     * @return bool True if the activity is ready to be archived
+     */
+    abstract public function can_be_archived(): bool;
 
     /**
      * Provides access to the Moodle form that holds all settings for creating a

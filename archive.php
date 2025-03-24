@@ -64,11 +64,15 @@ if (!$driverclass) {
 }
 
 /** @var \local_archiving\driver\archivingmod_base $driver */
-$driver = new $driverclass();
+$driver = new $driverclass($courseid, $cmid);
 
 
 $form = $driver->get_job_create_form($cm->modname, $cm);
 $form->display();
+
+if (!$driver->can_be_archived()) {
+    echo "<b>ATTENTION: Activity is not ready to be archived.</b><br>";
+}
 
 $backurl = new moodle_url('/local/archiving/index.php', array('courseid' => $courseid));
 echo "<a href=\"{$backurl}\">Go back to overview</a>";

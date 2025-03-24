@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * State of an archive job
+ * Status of an archive job
  *
  * @package     local_archiving
  * @category    type
@@ -30,44 +30,47 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * States an archive job can be in
+ * Status values an archive job can have
  */
-class archive_job_state {
+class archive_job_status {
 
     /** @var int Job is uninitialized */
-    public const STATE_UNINITIALIZED = 0;
+    public const STATUS_UNINITIALIZED = 0;
 
     /** @var int Job is initialized and queued for processing */
-    public const STATE_QUEUED = 10;
+    public const STATUS_QUEUED = 10;
 
     /** @var int Job is currently being processed */
-    public const STATE_PROCESSING = 20;
+    public const STATUS_PROCESSING = 20;
 
     /** @var int Activity archiving currently takes place */
-    public const STATE_ACTIVITY_ARCHIVING = 30;
+    public const STATUS_ACTIVITY_ARCHIVING = 30;
 
     /** @var int Job data is being post-processed */
-    public const STATE_POST_PROCESSING = 40;
+    public const STATUS_POST_PROCESSING = 40;
 
     /** @var int Job data is being stored */
-    public const STATE_STORE = 50;
+    public const STATUS_STORE = 50;
 
     /** @var int Temporary job data is being cleaned up */
-    public const STATE_CLEANUP = 60;
+    public const STATUS_CLEANUP = 60;
 
     /** @var int Job is completed. This state is final. */
-    public const STATE_COMPLETED = 70;
+    public const STATUS_COMPLETED = 70;
 
     /** @var int An error occurred that yet needs to be triaged */
-    public const STATE_ERROR = 200;
+    public const STATUS_ERROR = 200;
 
     /** @var int An error occurred that can be recovered from */
-    public const STATE_RECOVERABLE_ERROR = 210;
+    public const STATUS_RECOVERABLE_ERROR = 210;
 
     /** @var int An error occurred that cannot be recovered from. This state is final. */
-    public const STATE_FAILURE = 220;
+    public const STATUS_FAILURE = 220;
 
     /** @var int Internal error handling / post-processing is running */
-    public const STATE_ERROR_HANDLING = 230;
+    public const STATUS_ERROR_HANDLING = 230;
+
+    /** @var int Job stataus is unknown due to an internal data error */
+    public const STATUS_UNKNOWN = 255;
 
 }

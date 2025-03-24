@@ -82,7 +82,7 @@ class archive_job {
         global $DB;
 
         // Check context.
-        if (!$context instanceof \context_module) {
+        if (!($context instanceof \context_module)) {
             throw new \moodle_exception('invalid_context', 'local_archiving');
         }
 
@@ -200,6 +200,23 @@ class archive_job {
     }
 
     /**
+     * Determines if this job can be further processed by calling its execute()
+     * function or if it has reached a final state
+     *
+     * @return bool True if this job reached a final state
+     */
+    public function is_completed(): bool {
+        switch ($this->get_status()) {
+            case archive_job_status::STATUS_COMPLETED:
+            case archive_job_status::STATUS_TIMEOUT:
+            case archive_job_status::STATUS_FAILURE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Calculates an progress approximation for this job. Values range from 0
      * to 100 percent. The progress value is no indicator for job status!
      *
@@ -208,6 +225,18 @@ class archive_job {
     public function get_progress(): int {
         // TODO: Implement.
         return 0;
+    }
+
+    /**
+     * Retrieves all activity archiving tasks that are associated with this job
+     *
+     * @return array List of activity archiving tasks associated with this job
+     */
+    public function get_activity_archiving_tasks(): array {
+        global $DB;
+
+        // TODO: Implement.
+        return [];
     }
 
 }

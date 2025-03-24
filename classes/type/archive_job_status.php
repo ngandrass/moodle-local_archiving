@@ -56,7 +56,7 @@ class archive_job_status {
     public const STATUS_CLEANUP = 60;
 
     /** @var int Job is completed. This state is final. */
-    public const STATUS_COMPLETED = 70;
+    public const STATUS_COMPLETED = 100;
 
     /** @var int An error occurred that yet needs to be triaged */
     public const STATUS_ERROR = 200;
@@ -64,11 +64,14 @@ class archive_job_status {
     /** @var int An error occurred that can be recovered from */
     public const STATUS_RECOVERABLE_ERROR = 210;
 
-    /** @var int An error occurred that cannot be recovered from. This state is final. */
-    public const STATUS_FAILURE = 220;
-
     /** @var int Internal error handling / post-processing is running */
-    public const STATUS_ERROR_HANDLING = 230;
+    public const STATUS_ERROR_HANDLING = 220;
+
+    /** @var int Job has exceeded its maximum processing time and was aborted. This state is final. */
+    public const STATUS_TIMEOUT = 230;
+
+    /** @var int An error occurred that cannot be recovered from. This state is final. */
+    public const STATUS_FAILURE = 240;
 
     /** @var int Job stataus is unknown due to an internal data error */
     public const STATUS_UNKNOWN = 255;

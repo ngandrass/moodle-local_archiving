@@ -68,7 +68,6 @@ class archive_job {
      *
      * @param \context $context Context this job is run in
      * @param int $userid ID of the user that owns this job
-     * @param int $status Initial status of this job
      * @return archive_job Created archive job instance
      *
      * @throws \dml_exception
@@ -76,8 +75,7 @@ class archive_job {
      */
     public static function create(
         \context $context,
-        int $userid,
-        int $status = archive_job_status::STATUS_UNINITIALIZED
+        int $userid
     ): archive_job {
         global $DB;
 
@@ -91,7 +89,7 @@ class archive_job {
         $id = $DB->insert_record(db_table::JOB, [
             'contextid' => $context->id,
             'userid' => $userid,
-            'status' => $status,
+            'status' => archive_job_status::STATUS_UNINITIALIZED,
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
@@ -117,9 +115,44 @@ class archive_job {
         return new self($job->id, $context, $job->userid);
     }
 
+    /**
+     * Prepares this job and pushes it to the task queue, thereby scheduling it
+     * for execution
+     *
+     * @return void
+     * @throws \dml_exception
+     */
+    public function enqueue(): void {
+        $this->set_status(archive_job_status::STATUS_QUEUED);
+    }
+
+    /**
+     * Main processing loop. Once the scheduler picks this job from the queue,
+     * this function is called. It will be called periodically until this job
+     * reached a final state, as indicated by is_completed().
+     *
+     * @return void
+     * @throws \dml_exception
+     */
     public function execute(): void {
         // TODO.
         echo "Well, I did some thing! Not ...";
+
+        $status = $this->get_status();
+        if ($status < archive_job_status::STATUS_PROCESSING) {
+            $this->set_status(archive_job_status::STATUS_PROCESSING);
+            return;
+        }
+
+        if ($status < archive_job_status::STATUS_POST_PROCESSING) {
+            $this->set_status(archive_job_status::STATUS_POST_PROCESSING);
+            return;
+        }
+
+        if ($status < archive_job_status::STATUS_COMPLETED) {
+            $this->set_status(archive_job_status::STATUS_COMPLETED);
+            return;
+        }
     }
 
     /**

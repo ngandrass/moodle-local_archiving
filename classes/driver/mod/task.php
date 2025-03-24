@@ -44,7 +44,7 @@ class task {
     /** @var int Moodle context this task is run in */
     protected int $context;
 
-    /** @var ?\stdClass Job specific settings (lazy-loaded) */
+    /** @var ?\stdClass Task specific settings (lazy-loaded) */
     protected ?\stdClass $settings;
 
     /**

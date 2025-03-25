@@ -68,10 +68,25 @@ $driver = new $driverclass($courseid, $cmid);
 
 
 $form = $driver->get_job_create_form($cm->modname, $cm);
-$form->display();
 
-if (!$driver->can_be_archived()) {
-    echo "<b>ATTENTION: Activity is not ready to be archived.</b><br>";
+if ($form->is_submitted() && $form->is_validated()) {
+    require_capability('local/archiving:create', $ctx);
+
+    $jobsettings = $form->get_data();
+    if (!$jobsettings) {
+        throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
+    }
+    \local_archiving\archive_job::create($ctx, $USER->id, $jobsettings);
+
+    echo "<h1>Created archive job!</h1>";
+    echo "<pre>";
+    print_r($jobsettings);
+    echo "</pre>";
+} else {
+    $form->display();
+    if (!$driver->can_be_archived()) {
+        echo "<b>ATTENTION: Activity is not ready to be archived.</b><br>";
+    }
 }
 
 $backurl = new moodle_url('/local/archiving/index.php', array('courseid' => $courseid));

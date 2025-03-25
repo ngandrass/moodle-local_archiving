@@ -46,7 +46,7 @@ class plugin_util {
      * @return string|null Fully-quallified class name of the subplugin class if found, null otherwise
      */
     public static function get_subplugin_by_name(string $modtype, string $modname): ?string {
-        $archivingmod = "\\{$modtype}_{$modname}\\${modtype}";
+        $archivingmod = "\\{$modtype}_{$modname}\\{$modtype}";
 
         if (!class_exists($archivingmod)) {
             return null;

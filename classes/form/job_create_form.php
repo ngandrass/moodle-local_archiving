@@ -25,7 +25,6 @@
 
 namespace local_archiving\form;
 
-use archivingmod_quiz\task;
 use local_archiving\storage;
 use local_archiving\util\time_util;
 
@@ -56,6 +55,8 @@ class job_create_form extends \moodleform {
      * @throws \dml_exception
      */
     public function __construct(string $handler, \cm_info $cminfo) {
+        global $PAGE;
+
         $this->handler = $handler;
         $this->cminfo = $cminfo;
         $this->config = (object) [
@@ -64,7 +65,8 @@ class job_create_form extends \moodleform {
         ];
 
         // Superclass constructor must be called after members are set to have $this->config populated.
-        parent::__construct();
+        // Pass $PAGE-url explicitly to implicitly carry over existing GET params ;).
+        parent::__construct($PAGE->url);
     }
 
     /**
@@ -260,7 +262,7 @@ class job_create_form extends \moodleform {
 
         if (!\local_archiving\storage::is_valid_filename_pattern(
             $data['archive_filename_pattern'],
-            task::ATTEMPT_FILENAME_PATTERN_VARIABLES
+            storage::ARCHIVE_FILENAME_PATTERN_VARIABLES
         )) {
             $errors['archive_filename_pattern'] = get_string('error_invalid_archive_filename_pattern', 'local_archiving');
         }

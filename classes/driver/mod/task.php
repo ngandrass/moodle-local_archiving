@@ -53,7 +53,7 @@ class task {
     /** @var string Name of the archivingmod driver that handles this task */
     protected string $archivingmod;
 
-    /** @var ?\stdClass Task specific settings (lazy-loaded) */
+    /** @var ?\stdClass Optional task specific settings (lazy-loaded) */
     protected ?\stdClass $settings;
 
     /**
@@ -89,7 +89,7 @@ class task {
      * @param \context $context
      * @param int $userid
      * @param string $archivingmod
-     * @param \stdClass $settings
+     * @param ?\stdClass $settings
      * @param int $status
      * @return task
      * @throws \dml_exception
@@ -100,7 +100,7 @@ class task {
         \context $context,
         int $userid,
         string $archivingmod,
-        \stdClass $settings,
+        ?\stdClass $settings = null,
         int $status = task_status::STATUS_UNINITIALIZED
     ): task {
         global $DB;
@@ -122,7 +122,7 @@ class task {
             'userid' => $context->userid,
             'status' => $status,
             'progress' => 0,
-            'settings' => json_encode($settings),
+            'settings' => $settings ? json_encode($settings) : null,
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
@@ -146,7 +146,7 @@ class task {
     }
 
     /**
-     * Retrieves the task settings object
+     * Retrieves the optional task settings object
      *
      * @return \stdClass Task settings object
      * @throws \dml_exception
@@ -156,7 +156,13 @@ class task {
             global $DB;
 
             $settingsjson = $DB->get_field(db_table::ACTIVITY_TASK, 'settings', ['id' => $this->taskid], MUST_EXIST);
-            $this->settings = json_decode($settingsjson);
+
+            if (!$settingsjson) {
+                // If no task specific settings are present, create empty class to prevent future DB queries.
+                $this->settings = new \stdClass();
+            } else {
+                $this->settings = json_decode($settingsjson);
+            }
         }
 
         return $this->settings;

@@ -47,6 +47,9 @@ class archive_job {
     /** @var int ID of the user that owns this job */
     protected int $userid;
 
+    /** @var \stdClass|null Job settings object (lazy-loaded) */
+    protected ?\stdClass $settings;
+
     /**
      * Constructs an archive job instance. This does not create the job in the
      * database. To create a new or retrieve an existing job use the respective
@@ -60,6 +63,7 @@ class archive_job {
         $this->id = $jobid;
         $this->context = $context;
         $this->userid = $userid;
+        $this->settings = null;
     }
 
     /**
@@ -75,7 +79,8 @@ class archive_job {
      */
     public static function create(
         \context $context,
-        int $userid
+        int $userid,
+        \stdClass $settings
     ): archive_job {
         global $DB;
 
@@ -90,6 +95,7 @@ class archive_job {
             'contextid' => $context->id,
             'userid' => $userid,
             'status' => archive_job_status::STATUS_UNINITIALIZED,
+            'settings' => json_encode($settings),
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
@@ -258,6 +264,29 @@ class archive_job {
     public function get_progress(): int {
         // TODO: Implement.
         return 0;
+    }
+
+    /**
+     * Retrieves the job settings object. Settings are are immutable and available
+     * only while a job is active (not completed yet).
+     *
+     * @return \stdClass Job settings object
+     * @throws \dml_exception
+     */
+    public function get_settings(): \stdClass {
+        if ($this->settings === null) {
+            global $DB;
+
+            $settingsjson = $DB->get_field(db_table::JOB, 'settings', ['id' => $this->id], MUST_EXIST);
+            if (!$settingsjson) {
+                // If no task specific settings are present, create empty class to prevent future DB queries.
+                $this->settings = new \stdClass();
+            } else {
+                $this->settings = json_decode($settingsjson);
+            }
+        }
+
+        return $this->settings;
     }
 
     /**

@@ -7,6 +7,7 @@
           <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="ID of the context this job is run in"/>
           <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user that initiated this job"/>
           <FIELD NAME="status" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Status of this job"/>
+          <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialized JSON object with job settings"/>
           <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was created"/>
           <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was updated"/>
         </FIELDS>
@@ -39,7 +40,7 @@
           <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user that initiated this task"/>
           <FIELD NAME="status" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Status of this job"/>
           <FIELD NAME="progress" TYPE="number" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Task progress in percent (0-100)"/>
-          <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialized JSON object with task settings"/>
+          <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialized JSON object with optional task settings"/>
           <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was created"/>
           <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was updated"/>
         </FIELDS>

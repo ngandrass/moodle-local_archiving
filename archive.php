@@ -23,6 +23,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_archiving\task\process_archive_job;
 use local_archiving\util\plugin_util;
 
 require_once(__DIR__ . '/../../config.php');
@@ -76,7 +77,9 @@ if ($form->is_submitted() && $form->is_validated()) {
     if (!$jobsettings) {
         throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
     }
-    \local_archiving\archive_job::create($ctx, $USER->id, $jobsettings);
+    $job = \local_archiving\archive_job::create($ctx, $USER->id, $jobsettings);
+    $task = process_archive_job::create($job);
+    \core\task\manager::queue_adhoc_task($task);
 
     echo "<h1>Created archive job!</h1>";
     echo "<pre>";

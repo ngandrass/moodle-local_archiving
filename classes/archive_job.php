@@ -184,6 +184,7 @@ class archive_job {
      * @throws \dml_exception
      */
     public function enqueue(): void {
+        // FIXME: Stopped here. We need to move task scheduling code here!
         $this->set_status(archive_job_status::STATUS_QUEUED);
     }
 
@@ -192,28 +193,44 @@ class archive_job {
      * this function is called. It will be called periodically until this job
      * reached a final state, as indicated by is_completed().
      *
+     * Do not perform active waiting here, but instead yield by returning in
+     * order to free up resources. This method will be automatically called
+     * again in the future.
+     *
+     * @param bool $failonlocktimeout If true, an exception will be thrown if
+     * the lock could not be acquired after a given timeout.
      * @return void
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
-    public function execute(): void {
-        // TODO.
-        echo "Well, I did some thing! Not ...";
+    public function execute(bool $failonlocktimeout = false): void {
+        $lock = $this->lock($failonlocktimeout);
+        if (!$lock) {
+            return;
+        }
 
         $status = $this->get_status();
+
         if ($status < archive_job_status::STATUS_PROCESSING) {
             $this->set_status(archive_job_status::STATUS_PROCESSING);
+            $lock->release();
             return;
         }
 
         if ($status < archive_job_status::STATUS_POST_PROCESSING) {
             $this->set_status(archive_job_status::STATUS_POST_PROCESSING);
+            $lock->release();
             return;
         }
 
         if ($status < archive_job_status::STATUS_COMPLETED) {
             $this->set_status(archive_job_status::STATUS_COMPLETED);
+            $lock->release();
             return;
         }
+
+        $lock->release();
     }
 
     /**
@@ -291,6 +308,7 @@ class archive_job {
             'status' => $status,
             'timemodified' => time(),
         ]);
+        mtrace("Job status updated: $status");
     }
 
     /**

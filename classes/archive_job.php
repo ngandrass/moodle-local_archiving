@@ -182,9 +182,15 @@ class archive_job {
      *
      * @return void
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function enqueue(): void {
-        // FIXME: Stopped here. We need to move task scheduling code here!
+        if ($this->is_completed()) {
+            throw new \moodle_exception('completed_job_cant_be_started_again', 'local_archiving');
+        }
+
+        $task = task\process_archive_job::create($this);
+        \core\task\manager::queue_adhoc_task($task);
         $this->set_status(archive_job_status::STATUS_QUEUED);
     }
 

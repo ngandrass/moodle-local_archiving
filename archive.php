@@ -78,8 +78,7 @@ if ($form->is_submitted() && $form->is_validated()) {
         throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
     }
     $job = \local_archiving\archive_job::create($ctx, $USER->id, $jobsettings);
-    $task = process_archive_job::create($job);
-    \core\task\manager::queue_adhoc_task($task);
+    $job->enqueue();
 
     echo "<h1>Created archive job!</h1>";
     echo "<pre>";

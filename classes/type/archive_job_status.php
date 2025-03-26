@@ -73,7 +73,7 @@ class archive_job_status {
     /** @var int An error occurred that cannot be recovered from. This state is final. */
     public const STATUS_FAILURE = 240;
 
-    /** @var int Job stataus is unknown due to an internal data error */
+    /** @var int Job status is unknown due to an internal data error */
     public const STATUS_UNKNOWN = 255;
 
 }

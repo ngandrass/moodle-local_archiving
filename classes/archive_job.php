@@ -25,6 +25,7 @@
 
 namespace local_archiving;
 
+use local_archiving\exception\yield_exception;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 
@@ -47,6 +48,9 @@ class archive_job {
     /** @var int ID of the user that owns this job */
     protected int $userid;
 
+    /** @var int Unix timestamp of creation time */
+    protected int $timecreated;
+
     /** @var \stdClass|null Job settings object (lazy-loaded) */
     protected ?\stdClass $settings;
 
@@ -58,11 +62,13 @@ class archive_job {
      * @param int $jobid ID of this archive job
      * @param \context $context Moodle context this archive job is run in
      * @param int $userid ID of the user that owns this job
+     * @param int $timecreated Unix timestamp of creation time
      */
-    protected function __construct(int $jobid, \context $context, int $userid) {
+    protected function __construct(int $jobid, \context $context, int $userid, int $timecreated) {
         $this->id = $jobid;
         $this->context = $context;
         $this->userid = $userid;
+        $this->timecreated = $timecreated;
         $this->settings = null;
     }
 
@@ -100,7 +106,7 @@ class archive_job {
             'timemodified' => $now,
         ]);
 
-        return new self($id, $context, $userid);
+        return new self($id, $context, $userid, $now);
     }
 
     /**
@@ -118,7 +124,7 @@ class archive_job {
         $job = $DB->get_record(db_table::JOB, ['id' => $jobid], '*', MUST_EXIST);
         $context = \context::instance_by_id($job->contextid);
 
-        return new self($job->id, $context, $job->userid);
+        return new self($job->id, $context, $job->userid, $job->timecreated);
     }
 
     /**
@@ -211,6 +217,7 @@ class archive_job {
      * @throws \moodle_exception
      */
     public function execute(bool $failonlocktimeout = false): void {
+        // Acquire lock for job execution.
         $lock = $this->lock($failonlocktimeout);
         if (!$lock) {
             return;
@@ -218,25 +225,70 @@ class archive_job {
 
         $status = $this->get_status();
 
-        if ($status < archive_job_status::STATUS_PROCESSING) {
-            $this->set_status(archive_job_status::STATUS_PROCESSING);
-            $lock->release();
-            return;
-        }
+        /*
+         * We are sequentially processing through all job stages here. We work
+         * on a local copy $status that is persisted once the try-catch block is
+         * either completed or one part of the code threw a yield_exception,
+         * hereby persisting the current status, releasing the lock and giving
+         * back control to the task scheduler.
+         */
+        try {
+            // Do not process uninitialized jobs.
+            if ($status == archive_job_status::STATUS_UNINITIALIZED) {
+                throw new \moodle_exception('invalid_archive_job_state', 'local_archiving');
+            }
 
-        if ($status < archive_job_status::STATUS_POST_PROCESSING) {
-            $this->set_status(archive_job_status::STATUS_POST_PROCESSING);
-            $lock->release();
-            return;
-        }
+            // Timeout if required.
+            if ($this->is_overdue()) {
+                // TODO: Call cleanup logic.
+                $status = archive_job_status::STATUS_TIMEOUT;
+                throw new \moodle_exception('archive_job_timed_out', 'local_archiving');
+            }
 
-        if ($status < archive_job_status::STATUS_COMPLETED) {
-            $this->set_status(archive_job_status::STATUS_COMPLETED);
-            $lock->release();
-            return;
-        }
+            // Queued -> Processing.
+            if ($status == archive_job_status::STATUS_QUEUED) {
+                // TODO: Create activity archiving task.
+                $status = archive_job_status::STATUS_PROCESSING;
+            }
 
-        $lock->release();
+            // Processing -> Activity archiving.
+            if ($status == archive_job_status::STATUS_PROCESSING) {
+                $status = archive_job_status::STATUS_ACTIVITY_ARCHIVING;
+
+                // Yield for asynchronous activity archiving to complete.
+                throw new yield_exception();
+            }
+
+            // Activity archiving -> Post processing.
+            if ($status == archive_job_status::STATUS_ACTIVITY_ARCHIVING) {
+                // TODO: Check if activity archiving tasks are completed.
+                $status = archive_job_status::STATUS_POST_PROCESSING;
+            }
+
+            // Post processing -> Store.
+            if ($status == archive_job_status::STATUS_POST_PROCESSING) {
+                // TODO: Do we need post processing?
+                $status = archive_job_status::STATUS_STORE;
+
+                // Yield for asynchronous archive store task to complete.
+                throw new yield_exception();
+            }
+
+            // Store -> Cleanup.
+            if ($status == archive_job_status::STATUS_STORE) {
+                $status = archive_job_status::STATUS_CLEANUP;
+            }
+
+            // Cleanup -> Completed.
+            if ($status == archive_job_status::STATUS_CLEANUP) {
+                $status = archive_job_status::STATUS_COMPLETED;
+            }
+        } catch (yield_exception $e) { // @codingStandardsIgnoreLine
+            // Just catch the yield silently and let everything else bubble up.
+        } finally {
+            $this->set_status($status);
+            $lock->release();
+        }
     }
 
     /**
@@ -332,6 +384,21 @@ class archive_job {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Determines if this job is overdue and should be timed out if not already done
+     *
+     * @return bool True if this jobs lifetime surpassed its timeout
+     * @throws \dml_exception
+     */
+    public function is_overdue(): bool {
+        $jobtimeoutsec = get_config('local_archiving', 'job_timeout_min') * 60;
+        if (time() > $this->timecreated + $jobtimeoutsec) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

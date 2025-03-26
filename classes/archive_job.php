@@ -122,6 +122,61 @@ class archive_job {
     }
 
     /**
+     * Retrieves the unique lock resource identifier for this job
+     *
+     * @return string Resource identifier for this job
+     */
+    protected function get_lock_resource(): string {
+        return "jobid_{$this->id}";
+    }
+
+    /**
+     * Tries to acquire a lock for this archive job. Raises an exception if lock
+     * could not be acquired after $timeoutsec by default.
+     *
+     * ATTENTION: Caller takes ownership of lock and is responsible for unlocking!
+     *
+     * @param bool $timeouterror If true, a failure to acquire a lock will throw an exception
+     * @param int $timeoutsec Number of seconds to wait for the resource to become available
+     * @return bool|\core\lock\lock Lock object if acquired successfully, false otherwise
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    protected function lock(bool $timeouterror = true, int $timeoutsec = 15) {
+        $lockfactory = \core\lock\lock_config::get_lock_factory('local_archiving_archive_job');
+        $jobtimeoutmin = get_config('local_archiving', 'job_timeout_min');
+
+        if (!$lock = $lockfactory->get_lock(
+            $this->get_lock_resource(),
+            $timeoutsec,
+            ($jobtimeoutmin ?: 6 * 60) * 60
+        )) {
+            mtrace("Failed to acquire lock for '{$this->get_lock_resource()}' after {$timeoutsec} seconds.");
+            if ($timeouterror) {
+                throw new \moodle_exception('locktimeout');
+            }
+        }
+
+        return $lock;
+    }
+
+    /**
+     * Tries to acquire a lock for this archive job. Will return immediately
+     * without an error if lock could not be acquired.
+     *
+     * ATTENTION: Caller takes ownership of lock and is responsible for releasing!
+     *
+     * @return bool|\core\lock\lock Lock object if acquired successfully, false otherwise
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    protected function try_lock() {
+        return $this->lock(false, 0);
+    }
+
+    /**
      * Prepares this job and pushes it to the task queue, thereby scheduling it
      * for execution
      *

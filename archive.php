@@ -89,6 +89,9 @@ if ($form->is_submitted() && $form->is_validated()) {
     if (!$driver->can_be_archived()) {
         echo "<b>ATTENTION: Activity is not ready to be archived.</b><br>";
     }
+
+    $jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
+    $jobtbl->out(20, true);
 }
 
 $backurl = new moodle_url('/local/archiving/index.php', array('courseid' => $courseid));

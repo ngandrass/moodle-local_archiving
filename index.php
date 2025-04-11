@@ -53,6 +53,25 @@ echo $OUTPUT->header();
 echo $renderer->index();
 
 // DEBUG start
+echo "<h1>Activities</h1>";
+echo "<pre>";
+foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
+    $supstr = $obj->supported ? 'Yes' : 'No';
+    if ($obj->supported) {
+        $url = new moodle_url('/local/archiving/archive.php', [
+            'courseid' => $courseid,
+            'cmid' => $obj->cm->id,
+        ]);
+        echo "<a href=\"{$url}\">[{$obj->cm->modname}]: {$obj->cm->name} (Supported: {$supstr})</a><br>";
+    } else {
+        echo "[{$obj->cm->modname}]: {$obj->cm->name} (Supported: {$supstr})<br>";
+    }
+}
+echo "</pre>";
+
+$jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
+$jobtbl->out(20, true);
+
 echo "<h3>Activity Archiving Drivers</h3>";
 echo "<pre>";
 print_r(plugin_util::get_activity_archiving_drivers());
@@ -73,21 +92,6 @@ echo "<pre>";
 print_r(plugin_util::get_event_connectors());
 echo "</pre>";
 
-echo "<h1>Activities</h1>";
-echo "<pre>";
-foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
-    $supstr = $obj->supported ? 'Yes' : 'No';
-    if ($obj->supported) {
-        $url = new moodle_url('/local/archiving/archive.php', [
-            'courseid' => $courseid,
-            'cmid' => $obj->cm->id,
-        ]);
-        echo "<a href=\"{$url}\">[{$obj->cm->modname}]: {$obj->cm->name} (Supported: {$supstr})</a><br>";
-    } else {
-        echo "[{$obj->cm->modname}]: {$obj->cm->name} (Supported: {$supstr})<br>";
-    }
-}
-echo "</pre>";
 // DEBUG end
 
 echo $OUTPUT->footer();

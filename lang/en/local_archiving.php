@@ -24,10 +24,12 @@
  */
 // @codingStandardsIgnoreFile
 
-// Common.
 $string['pluginname'] = 'Archiving';
-$string['create_archive'] = 'Create archive';
+
+// Common.
 $string['activitytype'] = 'Activity type';
+$string['create_archive'] = 'Create archive';
+$string['id'] = 'ID';
 
 // Sub-plugins.
 $string['subplugintype_archivingmod'] = 'Activity archiving driver';

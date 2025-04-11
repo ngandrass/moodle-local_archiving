@@ -55,8 +55,11 @@ class archive_job_status {
     /** @var int Temporary job data is being cleaned up */
     public const STATUS_CLEANUP = 60;
 
-    /** @var int Job is completed. This state is final. */
+    /** @var int Job is completed. This state is final until future deletion. */
     public const STATUS_COMPLETED = 100;
+
+    /** @var int Job completed in the past and now the archive data is deleted. */
+    public const STATUS_DELETED = 110;
 
     /** @var int An error occurred that yet needs to be triaged */
     public const STATUS_ERROR = 200;
@@ -75,5 +78,72 @@ class archive_job_status {
 
     /** @var int Job status is unknown due to an internal data error */
     public const STATUS_UNKNOWN = 255;
+
+    /**
+     * Returns the localized string representation of the given archive job
+     * status value
+     *
+     * @param int $status Raw status value
+     * @return string Localized status name
+     * @throws \coding_exception
+     */
+    public static function get_status_name(int $status): string {
+        return get_string('job_status_'.$status, 'local_archiving');
+    }
+
+    /**
+     * Returns the localized help string for the given status value
+     *
+     * @param int $status Raw status value
+     * @return string Localized help string
+     * @throws \coding_exception
+     */
+    public static function get_status_help(int $status): string {
+        return get_string('job_status_'.$status.'_help', 'local_archiving');
+    }
+
+    /**
+     * Returns the color class for the given status value
+     *
+     * @param int $status Raw status value
+     * @return string CSS color class name
+     */
+    public static function get_status_color(int $status): string {
+        switch ($status) {
+            case self::STATUS_PROCESSING:
+            case self::STATUS_ACTIVITY_ARCHIVING:
+            case self::STATUS_POST_PROCESSING:
+                return 'primary';
+            case self::STATUS_STORE:
+            case self::STATUS_CLEANUP:
+                return 'info';
+            case self::STATUS_COMPLETED:
+                return 'success';
+            case self::STATUS_ERROR:
+            case self::STATUS_RECOVERABLE_ERROR:
+            case self::STATUS_ERROR_HANDLING:
+            case self::STATUS_TIMEOUT:
+            case self::STATUS_FAILURE:
+                return 'danger';
+        }
+
+        return 'secondary';
+    }
+
+    /**
+     * Returns localized status name and help text as well as the respective
+     * CSS color class for the given status value
+     *
+     * @param int $status Raw status value
+     * @return object Object with color, text and help properties
+     * @throws \coding_exception
+     */
+    public static function get_status_display_args(int $status): object {
+        return (object) [
+            'text' => self::get_status_name($status),
+            'help' => self::get_status_help($status),
+            'color' => self::get_status_color($status),
+        ];
+    }
 
 }

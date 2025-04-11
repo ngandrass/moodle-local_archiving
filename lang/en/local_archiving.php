@@ -42,6 +42,38 @@ $string['archiving:view'] = 'View archiving overview page and sub-pages';
 $string['archiving:create'] = 'Create new archives';
 $string['archiving:delete'] = 'Delete archives and metadata';
 
+// Job status.
+$string['job_status_0'] = 'Uninitialized';
+$string['job_status_0_help'] = 'The job has not been initialized yet.';
+$string['job_status_10'] = 'Queued';
+$string['job_status_10_help'] = 'The job has been initialized and waits for execution.';
+$string['job_status_20'] = 'Processing';
+$string['job_status_20_help'] = 'The job is currently being processed.';
+$string['job_status_30'] = 'Activity Archiving';
+$string['job_status_30_help'] = 'The targeted activity is currently being archived.';
+$string['job_status_40'] = 'Post-Processing';
+$string['job_status_40_help'] = 'The activity data is currently being post-processed.';
+$string['job_status_50'] = 'Storing';
+$string['job_status_50_help'] = 'The archived data is currently being transferred to storage.';
+$string['job_status_60'] = 'Cleanup';
+$string['job_status_60_help'] = 'The job is being finalized and cleanup tasks are performed.';
+$string['job_status_100'] = 'Completed';
+$string['job_status_100_help'] = 'The job has been completed successfully.';
+$string['job_status_110'] = 'Deleted';
+$string['job_status_110_help'] = 'The archived data has been removed. The job metadata still exists and can be fully deleted, if required';
+$string['job_status_200'] = 'Error';
+$string['job_status_200_help'] = 'An error occurred during the job processing that is yet to be triaged.';
+$string['job_status_210'] = 'Recoverable Error';
+$string['job_status_210_help'] = 'A recoverable error occurred. The job will be retried soon.';
+$string['job_status_220'] = 'Error Handling';
+$string['job_status_220_help'] = 'An error occurred during the job processing that is currently being handled.';
+$string['job_status_230'] = 'Timeout';
+$string['job_status_230_help'] = 'The job has been aborted due to a timeout. This can happen for very large activities. Please contact your system administrator if this problem persists.';
+$string['job_status_240'] = 'Failure';
+$string['job_status_240_help'] = 'The job has failed. Please try again and contact your system administrator if this problem persists.';
+$string['job_status_255'] = 'Unknown';
+$string['job_status_255_help'] = 'The job status is unknown. Please open a bug report if this problem persists.';
+
 // Job settings: General.
 $string['export_course_backup'] = 'Export full Moodle course backup (.mbz)';
 $string['export_course_backup_help'] = 'This will export a full Moodle course backup (.mbz) including everything inside this course. This can be useful if you want to import this course into another Moodle instance.';

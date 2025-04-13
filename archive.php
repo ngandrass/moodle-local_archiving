@@ -23,10 +23,11 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_archiving\task\process_archive_job;
 use local_archiving\util\plugin_util;
 
 require_once(__DIR__ . '/../../config.php');
+
+global $OUTPUT, $PAGE;
 
 // Get course and course module.
 $courseid = required_param('courseid', PARAM_INT);

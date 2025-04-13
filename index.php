@@ -28,6 +28,8 @@ use local_archiving\util\plugin_util;
 
 require_once(__DIR__ . '/../../config.php');
 
+global $OUTPUT, $PAGE;
+
 $courseid = required_param('courseid', PARAM_INT);
 $ctx = context_course::instance($courseid);
 $course = get_course($courseid);

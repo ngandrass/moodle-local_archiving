@@ -73,7 +73,7 @@ abstract class archivingmod {
      *
      * @return string Internal identifier of this driver
      */
-    abstract public static function get_modname(): string;
+    abstract public static function get_plugname(): string;
 
     /**
      * Returns a list of supported Moodle activities by this driver as a list of
@@ -133,7 +133,7 @@ abstract class archivingmod {
             $job->get_id(),
             $this->context,
             $job->get_userid(),
-            $this->get_modname(),
+            $this->get_plugname(),
             $tasksettings,
         );
     }

@@ -26,6 +26,8 @@
 namespace local_archiving\driver\store;
 
 // @codingStandardsIgnoreLine
+use local_archiving\exception\storage_exception;
+
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
@@ -35,10 +37,56 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 abstract class archivingstore {
 
     /**
-     * Returns the name of this driver
+     * Returns the localized name of this driver
      *
-     * @return string Name of the driver
+     * @return string Localized name of the driver
      */
     abstract public static function get_name(): string;
+
+    /**
+     * @return string
+     */
+    abstract public static function get_plugname(): string;
+
+    /**
+     * Checks if this storage is available for use
+     *
+     * @return bool True if the storage is available, false otherwise
+     */
+    abstract public function is_available(): bool;
+
+    /**
+     * Returns the amount of free space available in this storage in bytes
+     *
+     * @return int Available space in bytes
+     */
+    abstract public function get_free_bytes(): int;
+
+    /**
+     * Transfers the given Moodle file to this storage under the given path
+     *
+     * @param \stored_file $file The Moodle file to be stored
+     * @param string $path The path to store the file under
+     * @throws storage_exception
+     */
+    abstract public function store(\stored_file $file, string $path): void;
+
+    /**
+     * Retrieves the file stored under the given path
+     *
+     * @param string $path The path to retrieve the file from
+     * @return \stored_file The retrieved file
+     * @throws storage_exception
+     */
+    abstract public function retrieve(string $path): \stored_file;
+
+    /**
+     * Deletes the file stored under the given path
+     *
+     * @param string $path The path to delete the file from
+     * @param bool $strict If true, the file will be deleted even if it is not empty
+     * @throws storage_exception
+     */
+    abstract public function delete(string $path, bool $strict = false): void;
 
 }

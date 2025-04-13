@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Exception used to signal an early yield to allow freeing resources used in a
- * try ... catch block
+ * Exception used to signal a problem when working with a storage
  *
  * @package     local_archiving
  * @category    exception
@@ -31,21 +30,8 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Used to signal a yield from within a try ... catch block to allow grouping
- * code to free up resources without having to nest everything inside 12 layers
- * of if statements ...
- *
- * I'll get the developer that brings the Python "with" statement to PHP a beer ...
+ * Used to signal a problem when working with a storage
  */
-class yield_exception extends \moodle_exception {
-
-    /**
-     * @inheritDoc
-     */
-    public function __construct($errorcode = '', $module = '', $link = '', $a = null, $debuginfo = null) {
-        $errorcode = $errorcode ?: 'yield';
-        $module = $module ?: 'local_archiving';
-        parent::__construct($errorcode, $module, $link, $a, $debuginfo);
-    }
+class storage_exception extends \moodle_exception {
 
 }

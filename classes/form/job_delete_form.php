@@ -1,0 +1,102 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Form for deleting archive jobs
+ *
+ * @package    local_archiving
+ * @copyright  2025 Niels Gandraß <niels@gandrass.de>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace local_archiving\form;
+
+use local_archiving\archive_job;
+use local_archiving\type\archive_job_status;
+
+defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
+
+require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
+
+
+/**
+ * Form to delete an archiving job
+ */
+class job_delete_form extends \moodleform {
+
+    /** @var int ID of the context this form is associated with */
+    protected int $contextid;
+
+    /** @var archive_job Archive job this form is associated with */
+    protected archive_job $job;
+
+    /** @var string Desired redirect URL */
+    protected string $wantsurl;
+
+    public function __construct(int $contextid, int $jobid, string $wantsurl) {
+        global $PAGE;
+
+        $this->contextid = $contextid;
+        $this->wantsurl = $wantsurl;
+
+        // Get and validate job.
+        $this->job = archive_job::get_by_id($jobid);
+        if ($this->job->get_context()->id != $contextid) {
+            throw new \moodle_exception('invalidcontext', 'local_archiving');
+        }
+
+        parent::__construct($PAGE->url);
+    }
+
+    /**
+     * Full form definition
+     *
+     * @throws \dml_exception
+     * @throws \coding_exception
+     */
+    public function definition() {
+        global $OUTPUT;
+
+        // Print delete warning.
+        $this->_form->addElement('html', $OUTPUT->notification(
+            '<h4>'.get_string('delete_job', 'local_archiving').'</h4>'.
+            '<p>'.get_string('delete_job_warning', 'local_archiving').'</p>'.
+            '<code>'.
+                get_string('jobid', 'local_archiving').': '.$this->job->get_id().'<br>'.
+                get_string('status').': '.archive_job_status::get_status_name($this->job->get_status()).
+            '</code>',
+            \core\output\notification::NOTIFY_WARNING,
+            false
+        ));
+
+        // Form data.
+        $this->_form->addElement('hidden', 'action', 'jobdelete');
+        $this->_form->setType('action', PARAM_TEXT);
+
+        $this->_form->addElement('hidden', 'contextid', required_param('contextid', PARAM_INT));
+        $this->_form->setType('contextid', PARAM_INT);
+
+        $this->_form->addElement('hidden', 'jobid', required_param('jobid', PARAM_INT));
+        $this->_form->setType('jobid', PARAM_INT);
+
+        $this->_form->addElement('hidden', 'wantsurl', optional_param('wantsurl', '', PARAM_URL));
+        $this->_form->setType('wantsurl', PARAM_URL);
+
+        // Action buttons.
+        $this->add_action_buttons(true, get_string('delete'));
+    }
+
+}

@@ -30,6 +30,7 @@ $string['pluginname'] = 'Archiving';
 $string['activitytype'] = 'Activity type';
 $string['create_archive'] = 'Create archive';
 $string['id'] = 'ID';
+$string['jobid'] = 'Job ID';
 
 // Sub-plugins.
 $string['subplugintype_archivingmod'] = 'Activity archiving driver';
@@ -43,6 +44,10 @@ $string['subplugintype_archivingevent_plural'] = 'External event connectors';
 $string['archiving:view'] = 'View archiving overview page and sub-pages';
 $string['archiving:create'] = 'Create new archives';
 $string['archiving:delete'] = 'Delete archives and metadata';
+
+// Job management.
+$string['delete_job'] = 'Delete archive job';
+$string['delete_job_warning'] = 'Are you sure that you want to delete this archive job <b>including all archived data?</b>';
 
 // Job status.
 $string['job_status_0'] = 'Uninitialized';

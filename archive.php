@@ -92,6 +92,7 @@ if ($form->is_submitted() && $form->is_validated()) {
     }
 
     $jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
+    $jobtbl->define_baseurl($PAGE->url);
     $jobtbl->out(20, true);
 }
 

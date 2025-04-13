@@ -72,6 +72,7 @@ foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
 echo "</pre>";
 
 $jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
+$jobtbl->define_baseurl($PAGE->url);
 $jobtbl->out(20, true);
 
 echo "<h3>Activity Archiving Drivers</h3>";

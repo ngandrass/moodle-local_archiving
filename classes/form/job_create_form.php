@@ -142,10 +142,10 @@ class job_create_form extends \moodleform {
             'advcheckbox',
             'export_course_backup',
             '&nbsp;',
-            get_string('export_course_backup', 'quiz_archiver'),
+            get_string('export_course_backup', 'local_archiving'),
             $this->config->core->job_preset_export_course_backup_locked ? 'disabled' : null
         );
-        $this->_form->addHelpButton('export_course_backup', 'export_course_backup', 'quiz_archiver');
+        $this->_form->addHelpButton('export_course_backup', 'export_course_backup', 'local_archiving');
         $this->_form->setDefault('export_course_backup', $this->config->core->job_preset_export_course_backup);
     }
 

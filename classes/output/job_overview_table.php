@@ -150,7 +150,20 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_actions($values) {
-        return "TODO";
+        global $PAGE;
+        $html = '';
+
+        // Action: Delete.
+        $deleteurl = new \moodle_url('/local/archiving/manage.php', [
+            'action' => 'jobdelete',
+            'contextid' => $values->contextid,
+            'jobid' => $values->id,
+            'wantsurl' => $PAGE->url->out(true),
+        ]);
+        // @codingStandardsIgnoreLine
+        $html .= '<a href="'.$deleteurl.'" class="btn btn-danger mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('delete').'" alt="'.get_string('delete').'"><i class="fa fa-times"></i></a>';
+
+        return $html;
     }
 
 }

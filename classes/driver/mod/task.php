@@ -25,6 +25,7 @@
 
 namespace local_archiving\driver\mod;
 
+use local_archiving\exception\yield_exception;
 use local_archiving\type\db_table;
 use local_archiving\util\plugin_util;
 
@@ -44,8 +45,8 @@ class task {
     /** @var int ID of the archive job this task is associated with */
     protected int $jobid;
 
-    /** @var \context Moodle context this task is run in */
-    protected \context $context;
+    /** @var \context_module Moodle context this task is run in */
+    protected \context_module $context;
 
     /** @var int ID of the user that owns this task */
     protected int $userid;
@@ -63,14 +64,14 @@ class task {
      *
      * @param int $taskid
      * @param int $jobid
-     * @param \context $context
+     * @param \context_module $context
      * @param int $userid
      * @param string $archivingmod
      */
     protected function __construct(
         int $taskid,
         int $jobid,
-        \context $context,
+        \context_module $context,
         int $userid,
         string $archivingmod
     ) {
@@ -83,10 +84,11 @@ class task {
     }
 
     /**
-     * TODO
+     * Creates a new activity archiving task object and inserts it into the
+     * database. This method does not execute the task.
      *
      * @param int $jobid
-     * @param \context $context
+     * @param \context_module $context
      * @param int $userid
      * @param string $archivingmod
      * @param ?\stdClass $settings
@@ -97,7 +99,7 @@ class task {
      */
     public static function create(
         int $jobid,
-        \context $context,
+        \context_module $context,
         int $userid,
         string $archivingmod,
         ?\stdClass $settings = null,
@@ -106,9 +108,6 @@ class task {
         global $DB;
 
         // Validate input.
-        if (!($context instanceof \context_module)) {
-            throw new \moodle_exception('invalid_context', 'local_archiving');
-        }
         if (!plugin_util::get_subplugin_by_name('archivingmod', $archivingmod)) {
             throw new \moodle_exception('invalid_archivingmod', 'local_archiving');
         }
@@ -119,7 +118,7 @@ class task {
             'jobid' => $jobid,
             'archivingmod' => $archivingmod,
             'contextid' => $context->id,
-            'userid' => $context->userid,
+            'userid' => $userid,
             'status' => $status,
             'progress' => 0,
             'settings' => $settings ? json_encode($settings) : null,
@@ -131,7 +130,7 @@ class task {
     }
 
     /**
-     * TODO
+     * Loads an existing activity archiving task object from the database
      *
      * @throws \coding_exception
      * @throws \dml_exception
@@ -142,7 +141,55 @@ class task {
         $task = $DB->get_record(db_table::ACTIVITY_TASK, ['id' => $taskid], '*', MUST_EXIST);
         $context = \context::instance_by_id($task->contextid);
 
+        if (!$context instanceof \context_module) {
+            throw new \moodle_exception('invalidcontext', 'local_archiving');
+        }
+
         return new self($task->id, $task->jobid, $context, $task->userid, $task->archivingmod);
+    }
+
+    /**
+     * Retrieves all jobs associated with the given jobid
+     *
+     * @param int $jobid ID of the job to retrieve tasks for
+     * @return array List of tasks associated with the given jobid
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public static function get_by_jobid(int $jobid): array {
+        global $DB;
+
+        $tasks = $DB->get_records(db_table::ACTIVITY_TASK, ['jobid' => $jobid]);
+
+        $result = [];
+        foreach ($tasks as $task) {
+            $context = \context::instance_by_id($task->contextid);
+
+            if (!$context instanceof \context_module) {
+                throw new \moodle_exception('invalidcontext', 'local_archiving');
+            }
+
+            $result[] = new self($task->id, $task->jobid, $context, $task->userid, $task->archivingmod);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Executes this task via the associated activity archiving driver
+     *
+     * @return void
+     * @throws yield_exception If the task is waiting for an asynchronous
+     * operation to completed or event to occur.
+     */
+    public function execute(): void {
+        /** @var archivingmod $driver */
+        $driver = new $this->archivingmod(
+            $this->context->get_course_context()->instanceid,
+            $this->context->instanceid
+        );
+        $driver->execute_task($this);
     }
 
     /**
@@ -249,6 +296,7 @@ class task {
             'id' => $this->taskid,
             'progress' => $progress,
         ]);
+        mtrace("Activity archiving task {$this->taskid} progress updated: {$progress}%");
     }
 
 }

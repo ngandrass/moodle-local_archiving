@@ -25,9 +25,13 @@
 
 namespace local_archiving;
 
+use local_archiving\driver\mod\archivingmod;
+use local_archiving\driver\mod\task;
 use local_archiving\exception\yield_exception;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
+use local_archiving\util\mod_util;
+use local_archiving\util\plugin_util;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -42,8 +46,14 @@ class archive_job {
     /** @var int ID of the archive job this task is associated with */
     protected int $id;
 
-    /** @var \context Moodle context this job is run in */
-    protected \context $context;
+    /** @var \context_module Moodle context this job is run in */
+    protected \context_module $context;
+
+    /** @var int ID of the course this job is run in */
+    protected int $courseid;
+
+    /** @var int ID of the course module this job is run for */
+    protected int $cmid;
 
     /** @var int ID of the user that owns this job */
     protected int $userid;
@@ -60,13 +70,15 @@ class archive_job {
      * static functions.
      *
      * @param int $jobid ID of this archive job
-     * @param \context $context Moodle context this archive job is run in
+     * @param \context_module $context Moodle context this archive job is run in
      * @param int $userid ID of the user that owns this job
      * @param int $timecreated Unix timestamp of creation time
      */
-    protected function __construct(int $jobid, \context $context, int $userid, int $timecreated) {
+    protected function __construct(int $jobid, \context_module $context, int $userid, int $timecreated) {
         $this->id = $jobid;
         $this->context = $context;
+        $this->courseid = $context->get_course_context()->instanceid;
+        $this->cmid = $context->instanceid;
         $this->userid = $userid;
         $this->timecreated = $timecreated;
         $this->settings = null;
@@ -115,7 +127,6 @@ class archive_job {
      * @param int $jobid The ID of the job to retrieve
      * @return archive_job Archive job instance
      *
-     * @throws \coding_exception
      * @throws \dml_exception
      */
     public static function get_by_id(int $jobid): archive_job {
@@ -123,6 +134,10 @@ class archive_job {
 
         $job = $DB->get_record(db_table::JOB, ['id' => $jobid], '*', MUST_EXIST);
         $context = \context::instance_by_id($job->contextid);
+
+        if (!($context instanceof \context_module)) {
+            throw new \moodle_exception('invalid_context', 'local_archiving');
+        }
 
         return new self($job->id, $context, $job->userid, $job->timecreated);
     }
@@ -195,7 +210,7 @@ class archive_job {
             throw new \moodle_exception('completed_job_cant_be_started_again', 'local_archiving');
         }
 
-        $task = task\process_archive_job::create($this);
+        $task = \local_archiving\task\process_archive_job::create($this);
         \core\task\manager::queue_adhoc_task($task);
         $this->set_status(archive_job_status::STATUS_QUEUED);
     }
@@ -253,16 +268,23 @@ class archive_job {
 
             // Processing -> Activity archiving.
             if ($status == archive_job_status::STATUS_PROCESSING) {
-                $status = archive_job_status::STATUS_ACTIVITY_ARCHIVING;
+                $this->create_activity_archiving_task();
 
-                // Yield for asynchronous activity archiving to complete.
-                throw new yield_exception();
+                // Update job status early because task execution can take some time ...
+                $status = archive_job_status::STATUS_ACTIVITY_ARCHIVING;
+                $this->set_status($status);
             }
 
             // Activity archiving -> Post processing.
             if ($status == archive_job_status::STATUS_ACTIVITY_ARCHIVING) {
-                // TODO: Check if activity archiving tasks are completed.
-                $status = archive_job_status::STATUS_POST_PROCESSING;
+                $driver = $this->activity_archiving_driver();
+                $driver->execute_all_tasks_for_job($this->get_id());
+
+                if ($driver->is_all_tasks_for_job_completed($this->get_id())) {
+                    $status = archive_job_status::STATUS_POST_PROCESSING;
+                } else {
+                    throw new yield_exception();
+                }
             }
 
             // Post processing -> Store.
@@ -283,12 +305,51 @@ class archive_job {
             if ($status == archive_job_status::STATUS_CLEANUP) {
                 $status = archive_job_status::STATUS_COMPLETED;
             }
-        } catch (yield_exception $e) { // @codingStandardsIgnoreLine
-            // Just catch the yield silently and let everything else bubble up.
+        } catch (\Exception $e) {
+            // Catch the yield silently and let everything else bubble up.
+            if (!$e instanceof yield_exception) {
+                $status = archive_job_status::STATUS_FAILURE;
+                throw $e;
+            }
         } finally {
             $this->set_status($status);
             $lock->release();
         }
+    }
+
+    /**
+     * Returns a new instance of the activity archiving driver for this job
+     *
+     * @return archivingmod Activity archiving driver instance
+     * @throws \moodle_exception
+     */
+    protected function activity_archiving_driver(): archivingmod {
+        $cminfo = mod_util::get_cm_info($this->context);
+        $driverclass = plugin_util::get_archiving_driver_for_cm($cminfo->modname);
+
+        if (!$driverclass) {
+            throw new \moodle_exception('no_supported_activity_archiving_driver_found', 'local_archiving');
+        }
+
+        return new $driverclass($this->context);
+    }
+
+    /**
+     * Creates a new activity archiving task using the respective activity
+     * archiving driver
+     *
+     * @return task|null Activity archiving task or null if no task could be created
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    protected function create_activity_archiving_task(): ?task {
+        $driver = $this->activity_archiving_driver();
+        if (!$driver->can_be_archived()) {
+            // Handle this as a hard fail for now but maybe we want to try again here?
+            throw new \moodle_exception('activity_not_ready_for_archiving', 'local_archiving');
+        }
+
+        return $driver->create_task($this, $this->get_settings());
     }
 
     /**
@@ -321,9 +382,9 @@ class archive_job {
     /**
      * Retrieves the Moodle context this job is run in
      *
-     * @return \context Moodle context this job is run in
+     * @return \context_module Moodle context this job is run in
      */
-    public function get_context(): \context {
+    public function get_context(): \context_module {
         return $this->context;
     }
 
@@ -366,7 +427,7 @@ class archive_job {
             'status' => $status,
             'timemodified' => time(),
         ]);
-        mtrace("Job status updated: $status");
+        mtrace("Job status updated: ".archive_job_status::get_status_name($status)." ({$status})");
     }
 
     /**
@@ -433,18 +494,6 @@ class archive_job {
         }
 
         return $this->settings;
-    }
-
-    /**
-     * Retrieves all activity archiving tasks that are associated with this job
-     *
-     * @return array List of activity archiving tasks associated with this job
-     */
-    public function get_activity_archiving_tasks(): array {
-        global $DB;
-
-        // TODO: Implement.
-        return [];
     }
 
 }

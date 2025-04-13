@@ -25,7 +25,10 @@
 
 namespace local_archiving\driver\mod;
 
+use local_archiving\archive_job;
+use local_archiving\exception\yield_exception;
 use local_archiving\form\job_create_form;
+use local_archiving\type\db_table;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -36,6 +39,9 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 abstract class archivingmod {
 
+    /** @var \context_module Moodle context this driver instance is for */
+    protected \context_module $context;
+
     /** @var int ID of the course the targeted activity is part of */
     protected int $courseid;
 
@@ -45,20 +51,29 @@ abstract class archivingmod {
     /**
      * Create a new activity archiving driver instance
      *
-     * @param int $courseid ID of the course the targeted activity is part of
-     * @param int $cmid ID of the targeted course module / activity
+     * @param \context_module $context Moodle context this driver instance is for
      */
-    public function __construct(int $courseid, int $cmid) {
-        $this->courseid = $courseid;
-        $this->cmid = $cmid;
+    public function __construct(\context_module $context) {
+        $this->context = $context;
+        $this->courseid = $context->get_course_context()->instanceid;
+        $this->cmid = $context->instanceid;
     }
 
     /**
-     * Returns the name of this driver
+     * Returns the localized name of this driver
      *
-     * @return string Name of the driver
+     * @return string Localized name of the driver
      */
     abstract public static function get_name(): string;
+
+    /**
+     * Returns the internal identifier for this driver. This function should
+     * return the last part of the frankenstyle plugin name (e.g., 'quiz' for
+     * 'archivingmod_quiz').
+     *
+     * @return string Internal identifier of this driver
+     */
+    abstract public static function get_modname(): string;
 
     /**
      * Returns a list of supported Moodle activities by this driver as a list of
@@ -76,6 +91,19 @@ abstract class archivingmod {
     abstract public function can_be_archived(): bool;
 
     /**
+     * Executes the given task
+     *
+     * This function has to be implemented by the respective activity archiving
+     * driver and handles all the activity-specific stuff.
+     *
+     * @param task $task The activity archiving task to execute
+     * @return void
+     * @throws yield_exception If the task is waiting for an asynchronous
+     * operation to completed or event to occur.
+     */
+    abstract public function execute_task(task $task): void;
+
+    /**
      * Provides access to the Moodle form that holds all settings for creating a
      * single archiving job. Generic settings are populated by the base class
      * and can be extended as needed.
@@ -90,23 +118,70 @@ abstract class archivingmod {
     }
 
     /**
-     * Creates a new activity archiving task
+     * Creates a new activity archiving task. This function can be overridden to
+     * perform additional activity-specific actions before or after creating a
+     * new activity archiving task.
      *
-     * @param int $jobid ID of the archive job this task will be associated with
+     * @param archive_job $job Archive job this task will be associated with
      * @param \stdClass $tasksettings All task settings from the job_create_form
      * @return task A newly created task object that is not yet scheduled for execution
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
-    abstract public function create_task(int $jobid, \stdClass $tasksettings): task;
+    public function create_task(archive_job $job, \stdClass $tasksettings): task {
+        return task::create(
+            $job->get_id(),
+            $this->context,
+            $job->get_userid(),
+            $this->get_modname(),
+            $tasksettings,
+        );
+    }
 
     /**
-     * Executes the given task
+     * Executes all tasks that are associated with the given jobid
      *
-     * This function has to be implemented by the respective activity archiving
-     * driver and handles all the activity-specific stuff.
-     *
-     * @param task $task The activity archiving task to execute
+     * @param int $jobid ID of the job to execute tasks for
      * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws yield_exception
      */
-    abstract public function execute_task(task $task): void;
+    public function execute_all_tasks_for_job(int $jobid): void {
+        foreach (task::get_by_jobid($jobid) as $task) {
+            $shouldyield = false;
+            try {
+                $this->execute_task($task);
+            } catch (yield_exception $e) {
+                $shouldyield = true;
+            } finally {
+                if ($shouldyield) {
+                    throw new yield_exception();
+                }
+            }
+        }
+    }
+
+    /**
+     * Determines if all tasks associated with the given job are completed
+     *
+     * @param int $jobid ID of the job to check
+     * @return bool True if all tasks are completed, false otherwise
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function is_all_tasks_for_job_completed(int $jobid): bool {
+        $tasks = task::get_by_jobid($jobid);
+
+        foreach ($tasks as $task) {
+            if (!$task->is_completed()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
 }

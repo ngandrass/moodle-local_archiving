@@ -57,4 +57,16 @@ class mod_util {
         return $res;
     }
 
+    /**
+     * Retrieves the cm_info object for the given module context object
+     *
+     * @param \context_module $ctx The module context to get the cm_info for
+     * @return \cm_info The cm_info object for the given module context
+     * @throws \moodle_exception
+     */
+    public static function get_cm_info(\context_module $ctx): \cm_info {
+        $cinfo = get_fast_modinfo($ctx->get_course_context()->instanceid);
+        return $cinfo->get_cm($ctx->instanceid);
+    }
+
 }

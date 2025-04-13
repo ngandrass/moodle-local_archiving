@@ -73,6 +73,9 @@ class process_archive_job extends \core\task\adhoc_task {
      * @throws \moodle_exception
      */
     public function reschedule(int $delaysec = 30): void {
+        // FIXME: Debug mode. Remove delaysec override later!
+        $delaysec = 5;
+
         mtrace('Rescheduling self for future run after '.$delaysec.' seconds.');
         $task = self::create($this->get_archive_job());
         $task->set_next_run_time(time() + $delaysec);

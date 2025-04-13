@@ -27,7 +27,7 @@ use local_archiving\util\plugin_util;
 
 require_once(__DIR__ . '/../../config.php');
 
-global $OUTPUT, $PAGE;
+global $OUTPUT, $PAGE, $USER;
 
 // Get course and course module.
 $courseid = required_param('courseid', PARAM_INT);
@@ -66,7 +66,7 @@ if (!$driverclass) {
 }
 
 /** @var \local_archiving\driver\mod\archivingmod $driver */
-$driver = new $driverclass($courseid, $cmid);
+$driver = new $driverclass($ctx);
 
 
 $form = $driver->get_job_create_form($cm->modname, $cm);

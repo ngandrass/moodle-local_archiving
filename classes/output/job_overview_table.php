@@ -41,6 +41,12 @@ require_once($CFG->libdir.'/tablelib.php');
  */
 class job_overview_table extends \table_sql {
 
+    /** @var \context_course Course context this table is associated with */
+    protected \context_course $coursectx;
+
+    /** @var \course_modinfo Cached course_modinfo object */
+    protected \course_modinfo $coursemodinfo;
+
     /**
      * Constructor
      *
@@ -53,10 +59,15 @@ class job_overview_table extends \table_sql {
     public function __construct(string $uniqueid, \context $ctx) {
         parent::__construct($uniqueid);
 
+        // Validate context and pre-cache modinfo.
         if (!($ctx instanceof \context_course || $ctx instanceof \context_module)) {
             throw new \coding_exception(get_string('invalidcontext', 'local_archiving'));
         }
 
+        $this->coursectx = $ctx->get_course_context();
+        $this->coursemodinfo = get_fast_modinfo($this->coursectx->instanceid);
+
+        // Setup table.
         $this->define_columns([
             'id',
             'contextid',
@@ -109,8 +120,10 @@ class job_overview_table extends \table_sql {
      * @throws \coding_exception
      */
     public function col_contextid($values) {
-        // TODO: Create proper activity link.
-        return \context::instance_by_id($values->contextid)->path;
+        $modctx = \context::instance_by_id($values->contextid);
+        $cm = $this->coursemodinfo->get_cm($modctx->instanceid);
+
+        return '<a href="'.$cm->get_url().'">'.$cm->name.'</a>';
     }
 
     /**

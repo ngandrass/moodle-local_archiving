@@ -466,11 +466,32 @@ class archive_job {
      * Calculates an progress approximation for this job. Values range from 0
      * to 100 percent. The progress value is no indicator for job status!
      *
-     * @return int Job progress approximation in percent (0 to 100))
+     * @return ?int Job progress approximation in percent (0 to 100)) or null if
+     * no progress can be calculated
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
-    public function get_progress(): int {
-        // TODO: Implement.
-        return 0;
+    public function get_progress(): ?int {
+        switch ($this->get_status()) {
+            case archive_job_status::STATUS_QUEUED:
+            case archive_job_status::STATUS_PROCESSING:
+                return 0;
+            case archive_job_status::STATUS_ACTIVITY_ARCHIVING:
+                $tasks = task::get_by_jobid($this->id);
+                $total = array_reduce($tasks, fn ($carry, $task) => $carry + $task->get_progress(), 0);
+                return 0.6 * ($total / count($tasks));
+            case archive_job_status::STATUS_POST_PROCESSING:
+                return 60;
+            case archive_job_status::STATUS_STORE:
+                return 60 + 20;  // TODO: Implement.
+            case archive_job_status::STATUS_CLEANUP:
+                return 99;
+            case archive_job_status::STATUS_COMPLETED:
+                return 100;
+        }
+
+        return null;
     }
 
     /**

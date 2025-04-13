@@ -24,6 +24,7 @@
 
 namespace local_archiving\output;
 
+use local_archiving\archive_job;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 
@@ -143,12 +144,24 @@ class job_overview_table extends \table_sql {
      * @param \stdClass $values Values of the current row
      * @return string HTML code to be displayed
      * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function col_status($values) {
+        $job = archive_job::get_by_id($values->id);
         $status = archive_job_status::get_status_display_args($values->status);
 
         $statustooltiphtml = 'data-toggle="tooltip" data-placement="top" title="'.$status->help.'"';
         $html = '<span class="badge badge-'.$status->color.'" '.$statustooltiphtml.'>'.$status->text.'</span><br/>';
+
+        $progress = $job->get_progress();
+        if ($progress !== null && $progress < 100) {
+            // @codingStandardsIgnoreLine
+            $html .= '<span title="'.get_string('progress', 'local_archiving').' alt="'.get_string('progress', 'local_archiving').'" data-toggle="tooltip" data-placement="top">';
+            $html .= '<i class="fa fa-spinner"></i>&nbsp;'.$progress.'%';
+            $html .= '</span><br/>';
+        }
+
         $html .= '<small>'.date('H:i:s', $values->timemodified).'</small>';
 
         return $html;

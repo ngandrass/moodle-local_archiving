@@ -31,6 +31,7 @@ $string['activitytype'] = 'Activity type';
 $string['create_archive'] = 'Create archive';
 $string['id'] = 'ID';
 $string['jobid'] = 'Job ID';
+$string['progress'] = 'Progress';
 
 // Sub-plugins.
 $string['subplugintype_archivingmod'] = 'Activity archiving driver';

@@ -289,7 +289,20 @@ class archive_job {
 
             // Post processing -> Store.
             if ($status == archive_job_status::STATUS_POST_PROCESSING) {
-                // Retrieve all artifacts
+                // Check that we have artifacts artifacts.
+                $artifacts = [];
+                foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
+                    $artifacts = array_merge($artifacts, $task->get_linked_artifacts());
+                }
+
+                if (empty($artifacts)) {
+                    $status = archive_job_status::STATUS_FAILURE;
+                    throw new \moodle_exception('no_activity_artifacts_found', 'local_archiving');
+                }
+
+                // Store artifacts.
+                // TODO: Actually trigger artifact storing here ... ;)
+                // Most likely move this one branch lower...
                 $status = archive_job_status::STATUS_STORE;
 
                 // Yield for asynchronous archive store task to complete.

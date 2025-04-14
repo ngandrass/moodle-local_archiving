@@ -138,6 +138,32 @@ abstract class archivingmod {
     }
 
     /**
+     * Cancels the given activity archiving task. This function can be overridden
+     * if the activity archiving driver needs to perform additional actions
+     * before or after a tasks status is set to STATUS_CANCELED.
+     *
+     * @param task $task The task to cancel
+     * @return void
+     * @throws \dml_exception
+     */
+    public function cancel_task(task $task): void {
+        $task->set_status(task_status::STATUS_CANCELED);
+    }
+
+    /**
+     * Deletes the given activity archiving task. This function can be overridden
+     * if the activity archiving driver needs to perform additional actions
+     * before or after a task is deleted from the database.
+     *
+     * @param task $task
+     * @return void
+     * @throws \dml_exception
+     */
+    public function delete_task(task $task): void {
+        $task->delete_from_db();
+    }
+
+    /**
      * Executes all tasks that are associated with the given jobid
      *
      * @param int $jobid ID of the job to execute tasks for

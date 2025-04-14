@@ -67,26 +67,27 @@ abstract class archivingstore {
      *
      * @param \stored_file $file The Moodle file to be stored
      * @param string $path The path to store the file under
+     * @return file_handle Handle of the stored file
      * @throws storage_exception
      */
-    abstract public function store(\stored_file $file, string $path): void;
+    abstract public function store(\stored_file $file, string $path): file_handle;
 
     /**
      * Retrieves the file stored under the given path
      *
-     * @param string $path The path to retrieve the file from
+     * @param file_handle $handle Handle of the file to retrieve
      * @return \stored_file The retrieved file
      * @throws storage_exception
      */
-    abstract public function retrieve(string $path): \stored_file;
+    abstract public function retrieve(file_handle $handle): \stored_file;
 
     /**
-     * Deletes the file stored under the given path
+     * Deletes the given file from storage if possible
      *
-     * @param string $path The path to delete the file from
+     * @param file_handle $handle Handle of the file to delete
      * @param bool $strict If true, the file will be deleted even if it is not empty
      * @throws storage_exception
      */
-    abstract public function delete(string $path, bool $strict = false): void;
+    abstract public function delete(file_handle $handle, bool $strict = false): void;
 
 }

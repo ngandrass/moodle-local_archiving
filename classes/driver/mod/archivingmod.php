@@ -28,7 +28,6 @@ namespace local_archiving\driver\mod;
 use local_archiving\archive_job;
 use local_archiving\exception\yield_exception;
 use local_archiving\form\job_create_form;
-use local_archiving\type\db_table;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore

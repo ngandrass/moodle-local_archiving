@@ -16,9 +16,9 @@
 
 namespace local_archiving\local\admin\setting;
 
-// @codingStandardsIgnoreLine
 use local_archiving\storage;
 
+// @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

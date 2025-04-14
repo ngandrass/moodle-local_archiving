@@ -25,14 +25,14 @@
 
 namespace local_archiving\driver\store;
 
-// @codingStandardsIgnoreLine
 use local_archiving\exception\storage_exception;
 
+// @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Interface for storege driver (archivingstore) sub-plugins
+ * Interface for storage driver (archivingstore) sub-plugins
  */
 abstract class archivingstore {
 

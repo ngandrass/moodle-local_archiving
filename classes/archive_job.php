@@ -289,7 +289,7 @@ class archive_job {
 
             // Post processing -> Store.
             if ($status == archive_job_status::STATUS_POST_PROCESSING) {
-                // TODO: Do we need post processing?
+                // Retrieve all artifacts
                 $status = archive_job_status::STATUS_STORE;
 
                 // Yield for asynchronous archive store task to complete.

@@ -248,11 +248,15 @@ final class task {
      * it must override the archivingmod::delete_task() method.
      *
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function delete_from_db(): void {
         global $DB;
 
         // TODO: Free temporary files, stop other async stuff, and cleanup potentially other stuff.
+        foreach ($this->get_linked_artifacts() as $artifact) {
+            $this->unlink_artifact($artifact, true);
+        }
 
         $DB->delete_records(db_table::ACTIVITY_TASK, ['id' => $this->taskid]);
     }
@@ -384,6 +388,75 @@ final class task {
             'progress' => $progress,
         ]);
         mtrace("Activity archiving task {$this->taskid} progress updated: {$progress}%");
+    }
+
+    /**
+     * Returns a list of all artifacts that are linked to this task
+     *
+     * @return \stored_file[] List of linked artifacts
+     * @throws \dml_exception
+     */
+    public function get_linked_artifacts(): array {
+        global $DB;
+
+        $artifacts = $DB->get_records(db_table::FILE, [
+            'jobid' => $this->jobid,
+            'taskid' => $this->taskid,
+        ]);
+
+        $fs = get_file_storage();
+        $result = [];
+        foreach ($artifacts as $artifact) {
+            $result[$artifact->id] = $fs->get_file_by_id($artifact->fileid);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Links the given stored_file to this task.
+     *
+     * @param \stored_file $artifactfile
+     * @return void
+     * @throws \dml_exception
+     */
+    public function link_artifact(\stored_file $artifactfile): void {
+        global $DB;
+
+        $DB->insert_record(db_table::FILE, [
+            'jobid' => $this->jobid,
+            'taskid' => $this->taskid,
+            'fileid' => $artifactfile->get_id(),
+        ]);
+    }
+
+    /**
+     * Unlinks the given artifactfile from this task.
+     *
+     * @param \stored_file $artifactfile The stored_file to unlink
+     * @param bool $delete If true, the file will also be deleted from the filesystem
+     * @return void
+     * @throws \dml_exception On DB errors
+     * @throws \moodle_exception If trying to delete a file that is still linked to other tasks / jobs
+     */
+    public function unlink_artifact(\stored_file $artifactfile, bool $delete = false): void {
+        global $DB;
+
+        $DB->delete_records(db_table::FILE, [
+            'jobid' => $this->jobid,
+            'taskid' => $this->taskid,
+            'fileid' => $artifactfile->get_id(),
+        ]);
+
+        if ($delete) {
+            $referencestoartifact = $DB->count_records(db_table::FILE, ['fileid' => $artifactfile->get_id()]);
+
+            if ($referencestoartifact > 0) {
+                throw new \moodle_exception('artifactfile_still_linked', 'local_archiving');
+            }
+
+            $artifactfile->delete();
+        }
     }
 
 }

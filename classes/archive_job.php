@@ -361,10 +361,16 @@ class archive_job {
     public function delete(): void {
         global $DB;
 
-        // TODO: Stop and cleanup potentially scheduled / running tasks.
+        // Handle activity archiving tasks.
+        $archivingtasks = task::get_by_jobid($this->id);
+        foreach ($archivingtasks as $task) {
+            $task->cancel();
+            $task->delete();
+        }
 
         // TODO: Free files and potentially other stuff.
 
+        // Delete records from the database.
         $DB->delete_records(db_table::METADATA, ['jobid' => $this->id]);
         $DB->delete_records(db_table::FILE, ['jobid' => $this->id]);
         $DB->delete_records(db_table::JOB, ['id' => $this->id]);

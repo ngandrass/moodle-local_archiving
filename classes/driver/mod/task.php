@@ -51,8 +51,11 @@ class task {
     /** @var int ID of the user that owns this task */
     protected int $userid;
 
-    /** @var string Name of the archivingmod driver that handles this task */
-    protected string $archivingmod;
+    /** @var string Name of the activity archiving driver that handles this task */
+    protected string $archivingmodname;
+
+    /** @var archivingmod|null Instance of the associated activity archiving driver (lazy-loaded) */
+    protected ?archivingmod $archivingmod;
 
     /** @var ?\stdClass Optional task specific settings (lazy-loaded) */
     protected ?\stdClass $settings;
@@ -66,20 +69,21 @@ class task {
      * @param int $jobid
      * @param \context_module $context
      * @param int $userid
-     * @param string $archivingmod
+     * @param string $archivingmodname
      */
     protected function __construct(
         int $taskid,
         int $jobid,
         \context_module $context,
         int $userid,
-        string $archivingmod
+        string $archivingmodname
     ) {
         $this->taskid = $taskid;
         $this->jobid = $jobid;
         $this->context = $context;
         $this->userid = $userid;
-        $this->archivingmod = $archivingmod;
+        $this->archivingmodname = $archivingmodname;
+        $this->archivingmod = null;
         $this->settings = null;
     }
 
@@ -90,7 +94,7 @@ class task {
      * @param int $jobid
      * @param \context_module $context
      * @param int $userid
-     * @param string $archivingmod
+     * @param string $archivingmodname
      * @param ?\stdClass $settings
      * @param int $status
      * @return task
@@ -101,14 +105,14 @@ class task {
         int $jobid,
         \context_module $context,
         int $userid,
-        string $archivingmod,
+        string $archivingmodname,
         ?\stdClass $settings = null,
         int $status = task_status::STATUS_UNINITIALIZED
     ): task {
         global $DB;
 
         // Validate input.
-        if (!plugin_util::get_subplugin_by_name('archivingmod', $archivingmod)) {
+        if (!plugin_util::get_subplugin_by_name('archivingmod', $archivingmodname)) {
             throw new \moodle_exception('invalid_archivingmod', 'local_archiving');
         }
 
@@ -116,7 +120,7 @@ class task {
         $now = time();
         $taskid = $DB->insert_record(db_table::ACTIVITY_TASK, [
             'jobid' => $jobid,
-            'archivingmod' => $archivingmod,
+            'archivingmod' => $archivingmodname,
             'contextid' => $context->id,
             'userid' => $userid,
             'status' => $status,
@@ -126,7 +130,7 @@ class task {
             'timemodified' => $now,
         ]);
 
-        return new self($taskid, $jobid, $context, $userid, $archivingmod);
+        return new self($taskid, $jobid, $context, $userid, $archivingmodname);
     }
 
     /**
@@ -152,7 +156,7 @@ class task {
      * Retrieves all jobs associated with the given jobid
      *
      * @param int $jobid ID of the job to retrieve tasks for
-     * @return array List of tasks associated with the given jobid
+     * @return self[] List of tasks associated with the given jobid
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
@@ -177,19 +181,80 @@ class task {
     }
 
     /**
+     * Returns an instance of the activity archiving driver that handles this task
+     *
+     * @return archivingmod Instance of the activity archiving driver
+     * @throws \moodle_exception
+     */
+    protected function archivingmod(): archivingmod {
+        if ($this->archivingmod instanceof archivingmod) {
+            return $this->archivingmod;
+        }
+
+        $driverclass = plugin_util::get_subplugin_by_name('archivingmod', $this->archivingmodname);
+        if (!$driverclass) {
+            throw new \moodle_exception('invalid_archivingmod', 'local_archiving');
+        }
+
+        $this->archivingmod = new $driverclass($this->context);
+
+        return $this->archivingmod;
+    }
+
+    /**
      * Executes this task via the associated activity archiving driver
+     *
+     * This is just a convenience wrapper.
      *
      * @return void
      * @throws yield_exception If the task is waiting for an asynchronous
+     * @throws \moodle_exception
      * operation to completed or event to occur.
      */
     public function execute(): void {
-        /** @var archivingmod $driver */
-        $driver = new $this->archivingmod(
-            $this->context->get_course_context()->instanceid,
-            $this->context->instanceid
-        );
-        $driver->execute_task($this);
+        $this->archivingmod()->execute_task($this);
+    }
+
+    /**
+     * Cancels this task via the associated activity archiving driver
+     *
+     * This is just a convenience wrapper.
+     *
+     * @return void
+     * @throws \moodle_exception
+     */
+    public function cancel(): void {
+        $this->archivingmod()->cancel_task($this);
+    }
+
+    /**
+     * Deletes this task via the associated activity archiving driver
+     *
+     * This is just a convenience wrapper.
+     *
+     * @return void
+     * @throws \moodle_exception
+     */
+    public function delete(): void {
+        $this->archivingmod()->delete_task($this);
+    }
+
+    /**
+     * Deletes an activity archiving task and everything that is associated with
+     * it from the database.
+     *
+     * This method is called from archivingmod::delete() and handles the generic
+     * task deletetion. If an archivingmod needs to perform additional actions
+     * it must override the archivingmod::delete_task() method.
+     *
+     * @throws \dml_exception
+     */
+    public function delete_from_db(): void {
+        global $DB;
+
+        // TODO: Free temporary files, stop other async stuff, and cleanup potentially other stuff.
+
+        $DB->delete_records(db_table::ACTIVITY_TASK, ['id' => $this->taskid]);
     }
 
     /**
@@ -213,6 +278,28 @@ class task {
         }
 
         return $this->settings;
+    }
+
+    /**
+     * Clears this tasks settings inside the database. This option is irreversible.
+     *
+     * @param bool $force If true, force clear task settings even if the task is not completed yet
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception If the task it not yet completed
+     */
+    public function clear_settings(bool $force = false): void {
+        global $DB;
+
+        if (!$this->is_completed() && !$force) {
+            throw new \moodle_exception('task_settings_cant_be_cleared', 'local_archiving');
+        }
+
+        $DB->update_record(db_table::ACTIVITY_TASK, [
+            'id' => $this->taskid,
+            'settings' => null,
+        ]);
+        $this->settings = new \stdClass();
     }
 
     /**

@@ -38,7 +38,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @property-read int $filesize Filesize in bytes
  * @property-read string $filekey Optional unique key for identifying the file
  */
-class file_handle {
+final class file_handle {
 
     /** @var string Name of the storage driver that works with this file handle */
     protected string $archivingstore;

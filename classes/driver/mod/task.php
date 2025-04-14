@@ -37,7 +37,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * An asynchronous activity archiving task. Holds all information and state for a single
  * activity archiving task.
  */
-class task {
+final class task {
 
     /** @var int ID of this activity archiving task */
     protected int $taskid;

@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Status values of an activity archiving task
  */
-class task_status {
+final class task_status {
 
     /** @var int The task has not been initialized yet */
     public const STATUS_UNINITIALIZED = 0;

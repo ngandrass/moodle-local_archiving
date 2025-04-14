@@ -65,12 +65,13 @@ abstract class archivingstore {
     /**
      * Transfers the given Moodle file to this storage under the given path
      *
+     * @param int $jobid ID of the archive job this file is associated with
      * @param \stored_file $file The Moodle file to be stored
      * @param string $path The path to store the file under
      * @return file_handle Handle of the stored file
      * @throws storage_exception
      */
-    abstract public function store(\stored_file $file, string $path): file_handle;
+    abstract public function store(int $jobid, \stored_file $file, string $path): file_handle;
 
     /**
      * Retrieves the file stored under the given path

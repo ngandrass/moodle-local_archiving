@@ -136,8 +136,11 @@ final class activity_archiving_task {
     /**
      * Loads an existing activity archiving task object from the database
      *
+     * @param int $taskid ID of the task to load
+     * @return self The loaded task object
      * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public static function get_by_id(int $taskid): activity_archiving_task {
         global $DB;

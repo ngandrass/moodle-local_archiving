@@ -27,6 +27,7 @@ namespace local_archiving;
 
 use local_archiving\driver\mod\archivingmod;
 use local_archiving\driver\mod\activity_archiving_task;
+use local_archiving\driver\store\archivingstore;
 use local_archiving\exception\yield_exception;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
@@ -300,17 +301,27 @@ class archive_job {
                     throw new \moodle_exception('no_activity_artifacts_found', 'local_archiving');
                 }
 
-                // Store artifacts.
-                // TODO: Actually trigger artifact storing here ... ;)
-                // Most likely move this one branch lower...
                 $status = archive_job_status::STATUS_STORE;
 
-                // Yield for asynchronous archive store task to complete.
+                // TODO: Should this be async or sync? Currently it is sync but it might change ... Yield for asynchronous archive store task to complete.
                 throw new yield_exception();
             }
 
             // Store -> Cleanup.
             if ($status == archive_job_status::STATUS_STORE) {
+                // Store artifacts.
+                $driverclass = plugin_util::get_subplugin_by_name('archivingstore', 'localdir');
+                /** @var archivingstore $driver */
+                $driver = new $driverclass();
+                $tasks = activity_archiving_task::get_by_jobid($this->id);
+
+                foreach ($tasks as $task) {
+                    foreach ($task->get_linked_artifacts() as $artifact) {
+                        $driver->store($this->id, $artifact, "job-{$this->id}");
+                        $task->unlink_artifact($artifact, true);
+                    }
+                }
+
                 $status = archive_job_status::STATUS_CLEANUP;
             }
 

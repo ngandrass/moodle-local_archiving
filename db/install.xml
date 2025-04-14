@@ -45,25 +45,41 @@
           <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was updated"/>
         </FIELDS>
         <KEYS>
-          <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+          <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
           <KEY NAME="jobid" TYPE="foreign" FIELDS="jobid" REFTABLE="local_archiving_job" REFFIELDS="id"/>
           <KEY NAME="contextid" TYPE="foreign" FIELDS="contextid" REFTABLE="context" REFFIELDS="id"/>
           <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
         </KEYS>
       </TABLE>
 
-      <TABLE NAME="local_archiving_file" COMMENT="Assigns temporary Moodle files to archive jobs">
+      <TABLE NAME="local_archiving_tempfile" COMMENT="Assigns temporary Moodle files to archive jobs">
         <FIELDS>
-          <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+          <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
           <FIELD NAME="jobid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the archiving job this file is associated with"/>
           <FIELD NAME="taskid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Optional ID of the activity archiving task this file is associated with"/>
           <FIELD NAME="fileid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the file in the Moodle filestore"/>
         </FIELDS>
         <KEYS>
-          <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+          <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
           <KEY NAME="jobid" TYPE="foreign" FIELDS="jobid" REFTABLE="local_archiving_job" REFFIELDS="id"/>
           <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="local_archiving_activity_task" REFFIELDS="id"/>
           <KEY NAME="fileid" TYPE="foreign" FIELDS="fileid" REFTABLE="files" REFFIELDS="id"/>
+        </KEYS>
+      </TABLE>
+
+      <TABLE NAME="local_archiving_file" COMMENT="Holds persistent file handles for archive jobs">
+        <FIELDS>
+          <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+          <FIELD NAME="jobid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the archiving job this file handle is associated with"/>
+          <FIELD NAME="archivingstore" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the archiving driver responsible for this file"/>
+          <FIELD NAME="filename" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the file"/>
+          <FIELD NAME="filepath" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Path of the file inside the storage (if applicable)"/>
+          <FIELD NAME="filekey" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Unique key identifying the file inside the storage (if applicable)"/>
+          <FIELD NAME="filesize" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Size of the file in bytes"/>
+        </FIELDS>
+        <KEYS>
+          <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+          <KEY NAME="jobid" TYPE="foreign" FIELDS="jobid" REFTABLE="local_archiving_job" REFFIELDS="id"/>
         </KEYS>
       </TABLE>
     </TABLES>

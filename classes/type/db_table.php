@@ -43,7 +43,10 @@ class db_table {
     /** @var string Name of the activity tasks table */
     public const ACTIVITY_TASK = 'local_archiving_activity_task';
 
-    /** @var string Name of the file table */
-    public const FILE = 'local_archiving_file';
+    /** @var string Name of the table associating temporary Moodle files with jobs / tasks */
+    public const TEMPFILE = 'local_archiving_tempfile';
+
+    /** @var string Name of the table that holds persistent file handles */
+    public const FILE_HANDLE = 'local_archiving_file';
 
 }

@@ -399,7 +399,7 @@ final class activity_archiving_task {
     public function get_linked_artifacts(): array {
         global $DB;
 
-        $artifacts = $DB->get_records(db_table::FILE, [
+        $artifacts = $DB->get_records(db_table::TEMPFILE, [
             'jobid' => $this->jobid,
             'taskid' => $this->taskid,
         ]);
@@ -423,7 +423,7 @@ final class activity_archiving_task {
     public function link_artifact(\stored_file $artifactfile): void {
         global $DB;
 
-        $DB->insert_record(db_table::FILE, [
+        $DB->insert_record(db_table::TEMPFILE, [
             'jobid' => $this->jobid,
             'taskid' => $this->taskid,
             'fileid' => $artifactfile->get_id(),
@@ -442,14 +442,14 @@ final class activity_archiving_task {
     public function unlink_artifact(\stored_file $artifactfile, bool $delete = false): void {
         global $DB;
 
-        $DB->delete_records(db_table::FILE, [
+        $DB->delete_records(db_table::TEMPFILE, [
             'jobid' => $this->jobid,
             'taskid' => $this->taskid,
             'fileid' => $artifactfile->get_id(),
         ]);
 
         if ($delete) {
-            $referencestoartifact = $DB->count_records(db_table::FILE, ['fileid' => $artifactfile->get_id()]);
+            $referencestoartifact = $DB->count_records(db_table::TEMPFILE, ['fileid' => $artifactfile->get_id()]);
 
             if ($referencestoartifact > 0) {
                 throw new \moodle_exception('artifactfile_still_linked', 'local_archiving');

@@ -95,12 +95,12 @@ abstract class archivingmod {
      * This function has to be implemented by the respective activity archiving
      * driver and handles all the activity-specific stuff.
      *
-     * @param task $task The activity archiving task to execute
+     * @param activity_archiving_task $task The activity archiving task to execute
      * @return void
      * @throws yield_exception If the task is waiting for an asynchronous
      * operation to completed or event to occur.
      */
-    abstract public function execute_task(task $task): void;
+    abstract public function execute_task(activity_archiving_task $task): void;
 
     /**
      * Provides access to the Moodle form that holds all settings for creating a
@@ -123,12 +123,12 @@ abstract class archivingmod {
      *
      * @param archive_job $job Archive job this task will be associated with
      * @param \stdClass $tasksettings All task settings from the job_create_form
-     * @return task A newly created task object that is not yet scheduled for execution
+     * @return activity_archiving_task A newly created task object that is not yet scheduled for execution
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    public function create_task(archive_job $job, \stdClass $tasksettings): task {
-        return task::create(
+    public function create_task(archive_job $job, \stdClass $tasksettings): activity_archiving_task {
+        return activity_archiving_task::create(
             $job->get_id(),
             $this->context,
             $job->get_userid(),
@@ -142,12 +142,12 @@ abstract class archivingmod {
      * if the activity archiving driver needs to perform additional actions
      * before or after a tasks status is set to STATUS_CANCELED.
      *
-     * @param task $task The task to cancel
+     * @param activity_archiving_task $task The task to cancel
      * @return void
      * @throws \dml_exception
      */
-    public function cancel_task(task $task): void {
-        $task->set_status(task_status::STATUS_CANCELED);
+    public function cancel_task(activity_archiving_task $task): void {
+        $task->set_status(activity_archiving_task_status::STATUS_CANCELED);
     }
 
     /**
@@ -155,11 +155,11 @@ abstract class archivingmod {
      * if the activity archiving driver needs to perform additional actions
      * before or after a task is deleted from the database.
      *
-     * @param task $task
+     * @param activity_archiving_task $task
      * @return void
      * @throws \dml_exception
      */
-    public function delete_task(task $task): void {
+    public function delete_task(activity_archiving_task $task): void {
         $task->delete_from_db();
     }
 
@@ -174,7 +174,7 @@ abstract class archivingmod {
      * @throws yield_exception
      */
     public function execute_all_tasks_for_job(int $jobid): void {
-        foreach (task::get_by_jobid($jobid) as $task) {
+        foreach (activity_archiving_task::get_by_jobid($jobid) as $task) {
             $shouldyield = false;
             try {
                 $this->execute_task($task);
@@ -198,7 +198,7 @@ abstract class archivingmod {
      * @throws \moodle_exception
      */
     public function is_all_tasks_for_job_completed(int $jobid): bool {
-        $tasks = task::get_by_jobid($jobid);
+        $tasks = activity_archiving_task::get_by_jobid($jobid);
 
         foreach ($tasks as $task) {
             if (!$task->is_completed()) {

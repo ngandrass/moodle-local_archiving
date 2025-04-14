@@ -37,7 +37,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * An asynchronous activity archiving task. Holds all information and state for a single
  * activity archiving task.
  */
-final class task {
+final class activity_archiving_task {
 
     /** @var int ID of this activity archiving task */
     protected int $taskid;
@@ -97,7 +97,7 @@ final class task {
      * @param string $archivingmodname
      * @param ?\stdClass $settings
      * @param int $status
-     * @return task
+     * @return activity_archiving_task
      * @throws \dml_exception
      * @throws \moodle_exception
      */
@@ -107,8 +107,8 @@ final class task {
         int $userid,
         string $archivingmodname,
         ?\stdClass $settings = null,
-        int $status = task_status::STATUS_UNINITIALIZED
-    ): task {
+        int $status = activity_archiving_task_status::STATUS_UNINITIALIZED
+    ): activity_archiving_task {
         global $DB;
 
         // Validate input.
@@ -139,7 +139,7 @@ final class task {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public static function get_by_id(int $taskid): task {
+    public static function get_by_id(int $taskid): activity_archiving_task {
         global $DB;
 
         $task = $DB->get_record(db_table::ACTIVITY_TASK, ['id' => $taskid], '*', MUST_EXIST);
@@ -317,7 +317,7 @@ final class task {
         try {
             return $DB->get_field(db_table::ACTIVITY_TASK, 'status', ['id' => $this->taskid], MUST_EXIST);
         } catch (\dml_exception $e) {
-            return task_status::STATUS_UNKNOWN;
+            return activity_archiving_task_status::STATUS_UNKNOWN;
         }
     }
 
@@ -345,10 +345,10 @@ final class task {
      */
     public function is_completed(): bool {
         switch ($this->get_status()) {
-            case task_status::STATUS_FINISHED:
-            case task_status::STATUS_CANCELED:
-            case task_status::STATUS_FAILED:
-            case task_status::STATUS_TIMEOUT:
+            case activity_archiving_task_status::STATUS_FINISHED:
+            case activity_archiving_task_status::STATUS_CANCELED:
+            case activity_archiving_task_status::STATUS_FAILED:
+            case activity_archiving_task_status::STATUS_TIMEOUT:
                 return true;
             default:
                 return false;

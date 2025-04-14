@@ -26,7 +26,7 @@
 namespace local_archiving;
 
 use local_archiving\driver\mod\archivingmod;
-use local_archiving\driver\mod\task;
+use local_archiving\driver\mod\activity_archiving_task;
 use local_archiving\exception\yield_exception;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
@@ -304,7 +304,7 @@ class archive_job {
             // Cleanup -> Completed.
             if ($status == archive_job_status::STATUS_CLEANUP) {
                 // Cleanup temporary settings objects from DB.
-                foreach (task::get_by_jobid($this->id) as $task) {
+                foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
                     $task->clear_settings();
                 }
                 $this->clear_settings(true);
@@ -344,11 +344,11 @@ class archive_job {
      * Creates a new activity archiving task using the respective activity
      * archiving driver
      *
-     * @return task|null Activity archiving task or null if no task could be created
+     * @return activity_archiving_task|null Activity archiving task or null if no task could be created
      * @throws \coding_exception
      * @throws \moodle_exception
      */
-    protected function create_activity_archiving_task(): ?task {
+    protected function create_activity_archiving_task(): ?activity_archiving_task {
         $driver = $this->activity_archiving_driver();
         if (!$driver->can_be_archived()) {
             // Handle this as a hard fail for now but maybe we want to try again here?
@@ -369,7 +369,7 @@ class archive_job {
         global $DB;
 
         // Handle activity archiving tasks.
-        $archivingtasks = task::get_by_jobid($this->id);
+        $archivingtasks = activity_archiving_task::get_by_jobid($this->id);
         foreach ($archivingtasks as $task) {
             $task->cancel();
             $task->delete();
@@ -491,7 +491,7 @@ class archive_job {
             case archive_job_status::STATUS_PROCESSING:
                 return 0;
             case archive_job_status::STATUS_ACTIVITY_ARCHIVING:
-                $tasks = task::get_by_jobid($this->id);
+                $tasks = activity_archiving_task::get_by_jobid($this->id);
                 $total = array_reduce($tasks, fn ($carry, $task) => $carry + $task->get_progress(), 0);
                 return 0.6 * ($total / count($tasks));
             case archive_job_status::STATUS_POST_PROCESSING:

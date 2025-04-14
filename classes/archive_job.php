@@ -303,6 +303,12 @@ class archive_job {
 
             // Cleanup -> Completed.
             if ($status == archive_job_status::STATUS_CLEANUP) {
+                // Cleanup temporary settings objects from DB.
+                foreach (task::get_by_jobid($this->id) as $task) {
+                    $task->clear_settings();
+                }
+                $this->clear_settings(true);
+
                 $status = archive_job_status::STATUS_COMPLETED;
             }
         } catch (\Exception $e) {
@@ -357,6 +363,7 @@ class archive_job {
      * database
      *
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function delete(): void {
         global $DB;
@@ -521,6 +528,28 @@ class archive_job {
         }
 
         return $this->settings;
+    }
+
+    /**
+     * Clears this jobs settings inside the database. This option is irreversible.
+     *
+     * @param bool $force If true, force clear job settings even if the job is not completed yet
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception If the job it not yet completed
+     */
+    public function clear_settings(bool $force = false): void {
+        global $DB;
+
+        if (!$this->is_completed() && !$force) {
+            throw new \moodle_exception('job_settings_cant_be_cleared', 'local_archiving');
+        }
+
+        $DB->update_record(db_table::JOB, [
+            'id' => $this->id,
+            'settings' => null,
+        ]);
+        $this->settings = new \stdClass();
     }
 
 }

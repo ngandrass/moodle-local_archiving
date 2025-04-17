@@ -24,11 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-// TODO: Raise minimum Moodle version to v4.5 (LTS) and PHP to v8.1 accordingly
-
 $plugin->component = 'local_archiving';
 $plugin->release = '0.1.0';
 $plugin->version = 2025032401;
-$plugin->requires = 2022112800;
-$plugin->supported = [401, 406];
+$plugin->requires = 2024100700;
+$plugin->supported = [405, 500];
 $plugin->maturity = MATURITY_ALPHA;

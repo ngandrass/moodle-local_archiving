@@ -18,7 +18,6 @@
  * Database table name mappings
  *
  * @package     local_archiving
- * @category    type
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -32,22 +31,21 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Database table name mappings
  */
-class db_table {
-    // TODO: Replace with enumeration
+enum db_table: string {
 
     /** @var string Name of the job table */
-    public const JOB = 'local_archiving_job';
+    case JOB = 'local_archiving_job';
 
     /** @var string Name of the metadata table */
-    public const METADATA = 'local_archiving_metadata';
+    case METADATA = 'local_archiving_metadata';
 
     /** @var string Name of the activity tasks table */
-    public const ACTIVITY_TASK = 'local_archiving_activity_task';
+    case ACTIVITY_TASK = 'local_archiving_activity_task';
 
     /** @var string Name of the table associating temporary Moodle files with jobs / tasks */
-    public const TEMPFILE = 'local_archiving_tempfile';
+    case TEMPFILE = 'local_archiving_tempfile';
 
     /** @var string Name of the table that holds persistent file handles */
-    public const FILE_HANDLE = 'local_archiving_file';
+    case FILE_HANDLE = 'local_archiving_file';
 
 }

@@ -98,7 +98,7 @@ final class activity_archiving_task {
 
         // Create instance in DB.
         $now = time();
-        $taskid = $DB->insert_record(db_table::ACTIVITY_TASK, [
+        $taskid = $DB->insert_record(db_table::ACTIVITY_TASK->value, [
             'jobid' => $jobid,
             'archivingmod' => $archivingmodname,
             'contextid' => $context->id,
@@ -125,7 +125,7 @@ final class activity_archiving_task {
     public static function get_by_id(int $taskid): activity_archiving_task {
         global $DB;
 
-        $task = $DB->get_record(db_table::ACTIVITY_TASK, ['id' => $taskid], '*', MUST_EXIST);
+        $task = $DB->get_record(db_table::ACTIVITY_TASK->value, ['id' => $taskid], '*', MUST_EXIST);
         $context = \context::instance_by_id($task->contextid);
 
         if (!$context instanceof \context_module) {
@@ -147,7 +147,7 @@ final class activity_archiving_task {
     public static function get_by_jobid(int $jobid): array {
         global $DB;
 
-        $tasks = $DB->get_records(db_table::ACTIVITY_TASK, ['jobid' => $jobid]);
+        $tasks = $DB->get_records(db_table::ACTIVITY_TASK->value, ['jobid' => $jobid]);
 
         $result = [];
         foreach ($tasks as $task) {
@@ -241,7 +241,7 @@ final class activity_archiving_task {
             $this->unlink_artifact($artifact, true);
         }
 
-        $DB->delete_records(db_table::ACTIVITY_TASK, ['id' => $this->taskid]);
+        $DB->delete_records(db_table::ACTIVITY_TASK->value, ['id' => $this->taskid]);
     }
 
     /**
@@ -254,7 +254,7 @@ final class activity_archiving_task {
         if (is_null($this->settings)) {
             global $DB;
 
-            $settingsjson = $DB->get_field(db_table::ACTIVITY_TASK, 'settings', ['id' => $this->taskid], MUST_EXIST);
+            $settingsjson = $DB->get_field(db_table::ACTIVITY_TASK->value, 'settings', ['id' => $this->taskid], MUST_EXIST);
 
             if (!$settingsjson) {
                 // If no task specific settings are present, create empty class to prevent future DB queries.
@@ -282,7 +282,7 @@ final class activity_archiving_task {
             throw new \moodle_exception('task_settings_cant_be_cleared', 'local_archiving');
         }
 
-        $DB->update_record(db_table::ACTIVITY_TASK, [
+        $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
             'settings' => null,
         ]);
@@ -298,7 +298,7 @@ final class activity_archiving_task {
         global $DB;
 
         try {
-            return $DB->get_field(db_table::ACTIVITY_TASK, 'status', ['id' => $this->taskid], MUST_EXIST);
+            return $DB->get_field(db_table::ACTIVITY_TASK->value, 'status', ['id' => $this->taskid], MUST_EXIST);
         } catch (\dml_exception $e) {
             return activity_archiving_task_status::STATUS_UNKNOWN;
         }
@@ -314,7 +314,7 @@ final class activity_archiving_task {
     public function set_status(int $status): void {
         global $DB;
 
-        $DB->update_record(db_table::ACTIVITY_TASK, [
+        $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
             'status' => $status,
         ]);
@@ -346,7 +346,7 @@ final class activity_archiving_task {
      */
     public function get_progress(): int {
         global $DB;
-        return $DB->get_field(db_table::ACTIVITY_TASK, 'progress', ['id' => $this->taskid], MUST_EXIST);
+        return $DB->get_field(db_table::ACTIVITY_TASK->value, 'progress', ['id' => $this->taskid], MUST_EXIST);
     }
 
     /**
@@ -366,7 +366,7 @@ final class activity_archiving_task {
             throw new \moodle_exception('invalid_progress_value', 'local_archiving');
         }
 
-        $DB->update_record(db_table::ACTIVITY_TASK, [
+        $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
             'progress' => $progress,
         ]);
@@ -382,7 +382,7 @@ final class activity_archiving_task {
     public function get_linked_artifacts(): array {
         global $DB;
 
-        $artifacts = $DB->get_records(db_table::TEMPFILE, [
+        $artifacts = $DB->get_records(db_table::TEMPFILE->value, [
             'jobid' => $this->jobid,
             'taskid' => $this->taskid,
         ]);
@@ -406,7 +406,7 @@ final class activity_archiving_task {
     public function link_artifact(\stored_file $artifactfile): void {
         global $DB;
 
-        $DB->insert_record(db_table::TEMPFILE, [
+        $DB->insert_record(db_table::TEMPFILE->value, [
             'jobid' => $this->jobid,
             'taskid' => $this->taskid,
             'fileid' => $artifactfile->get_id(),
@@ -425,14 +425,14 @@ final class activity_archiving_task {
     public function unlink_artifact(\stored_file $artifactfile, bool $delete = false): void {
         global $DB;
 
-        $DB->delete_records(db_table::TEMPFILE, [
+        $DB->delete_records(db_table::TEMPFILE->value, [
             'jobid' => $this->jobid,
             'taskid' => $this->taskid,
             'fileid' => $artifactfile->get_id(),
         ]);
 
         if ($delete) {
-            $referencestoartifact = $DB->count_records(db_table::TEMPFILE, ['fileid' => $artifactfile->get_id()]);
+            $referencestoartifact = $DB->count_records(db_table::TEMPFILE->value, ['fileid' => $artifactfile->get_id()]);
 
             if ($referencestoartifact > 0) {
                 throw new \moodle_exception('artifactfile_still_linked', 'local_archiving');

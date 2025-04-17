@@ -99,10 +99,10 @@ class archive_job {
 
         // Create object.
         $now = time();
-        $id = $DB->insert_record(db_table::JOB, [
+        $id = $DB->insert_record(db_table::JOB->value, [
             'contextid' => $context->id,
             'userid' => $userid,
-            'status' => archive_job_status::STATUS_UNINITIALIZED,
+            'status' => archive_job_status::STATUS_UNINITIALIZED->value,
             'settings' => json_encode($settings),
             'timecreated' => $now,
             'timemodified' => $now,
@@ -122,7 +122,7 @@ class archive_job {
     public static function get_by_id(int $jobid): archive_job {
         global $DB;
 
-        $job = $DB->get_record(db_table::JOB, ['id' => $jobid], '*', MUST_EXIST);
+        $job = $DB->get_record(db_table::JOB->value, ['id' => $jobid], '*', MUST_EXIST);
         $context = \context::instance_by_id($job->contextid);
 
         if (!($context instanceof \context_module)) {
@@ -391,9 +391,9 @@ class archive_job {
         // TODO: Free files and potentially other stuff.
 
         // Delete records from the database.
-        $DB->delete_records(db_table::METADATA, ['jobid' => $this->id]);
-        $DB->delete_records(db_table::TEMPFILE, ['jobid' => $this->id]);
-        $DB->delete_records(db_table::JOB, ['id' => $this->id]);
+        $DB->delete_records(db_table::METADATA->value, ['jobid' => $this->id]);
+        $DB->delete_records(db_table::TEMPFILE->value, ['jobid' => $this->id]);
+        $DB->delete_records(db_table::JOB->value, ['id' => $this->id]);
     }
 
     /**
@@ -426,13 +426,13 @@ class archive_job {
     /**
      * Retrieves the current job status
      *
-     * @return int Current job status
+     * @return archive_job_status Current job status
      */
-    public function get_status(): int {
+    public function get_status(): archive_job_status {
         global $DB;
 
         try {
-            return $DB->get_field(db_table::JOB, 'status', ['id' => $this->id], MUST_EXIST);
+            return archive_job_status::from($DB->get_field(db_table::JOB->value, 'status', ['id' => $this->id], MUST_EXIST));
         } catch (\dml_exception $e) {
             return archive_job_status::STATUS_UNKNOWN;
         }
@@ -441,19 +441,20 @@ class archive_job {
     /**
      * Changes the current job status to the given value
      *
-     * @param int $status New status
+     * @param archive_job_status $status New status
      * @return void
      * @throws \dml_exception
+     * @throws \coding_exception
      */
-    public function set_status(int $status): void {
+    public function set_status(archive_job_status $status): void {
         global $DB;
 
-        $DB->update_record(db_table::JOB, [
+        $DB->update_record(db_table::JOB->value, [
             'id' => $this->id,
-            'status' => $status,
+            'status' => $status->value,
             'timemodified' => time(),
         ]);
-        mtrace("Job status updated: ".archive_job_status::get_status_name($status)." ({$status})");
+        mtrace("Job status updated: ".$status->name()." ({$status->value})");
     }
 
     /**
@@ -515,9 +516,9 @@ class archive_job {
                 return 99;
             case archive_job_status::STATUS_COMPLETED:
                 return 100;
+            default:
+                return null;
         }
-
-        return null;
     }
 
     /**
@@ -531,7 +532,7 @@ class archive_job {
         if ($this->settings === null) {
             global $DB;
 
-            $settingsjson = $DB->get_field(db_table::JOB, 'settings', ['id' => $this->id], MUST_EXIST);
+            $settingsjson = $DB->get_field(db_table::JOB->value, 'settings', ['id' => $this->id], MUST_EXIST);
             if (!$settingsjson) {
                 // If no task specific settings are present, create empty class to prevent future DB queries.
                 $this->settings = new \stdClass();
@@ -558,7 +559,7 @@ class archive_job {
             throw new \moodle_exception('job_settings_cant_be_cleared', 'local_archiving');
         }
 
-        $DB->update_record(db_table::JOB, [
+        $DB->update_record(db_table::JOB->value, [
             'id' => $this->id,
             'settings' => null,
         ]);

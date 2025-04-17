@@ -89,7 +89,7 @@ class job_overview_table extends \table_sql {
 
         $this->set_sql(
             'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, u.username',
-            '{'.db_table::JOB.'} j '.
+            '{'.db_table::JOB->value.'} j '.
                 'JOIN {user} u ON j.userid = u.id '.
                 'JOIN {context} ctx ON ctx.id = j.contextid',
             "ctx.path LIKE :ctxpath",
@@ -149,7 +149,7 @@ class job_overview_table extends \table_sql {
      */
     public function col_status($values) {
         $job = archive_job::get_by_id($values->id);
-        $status = archive_job_status::get_status_display_args($values->status);
+        $status = archive_job_status::from($values->status)->status_display_args();
 
         $statustooltiphtml = 'data-toggle="tooltip" data-placement="top" title="'.$status->help.'"';
         $html = '<span class="badge badge-'.$status->color.'" '.$statustooltiphtml.'>'.$status->text.'</span><br/>';

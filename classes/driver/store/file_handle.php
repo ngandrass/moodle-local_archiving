@@ -113,7 +113,7 @@ final class file_handle {
         }
 
         // Insert into DB.
-        $id = $DB->insert_record(db_table::FILE_HANDLE, [
+        $id = $DB->insert_record(db_table::FILE_HANDLE->value, [
             'jobid' => $jobid,
             'archivingstore' => $archivingstorename,
             'filename' => $filename,
@@ -143,7 +143,7 @@ final class file_handle {
     public static function get_by_id(int $id): file_handle {
         global $DB;
 
-        $handle = $DB->get_record(db_table::FILE_HANDLE, ['id' => $id], '*', MUST_EXIST);
+        $handle = $DB->get_record(db_table::FILE_HANDLE->value, ['id' => $id], '*', MUST_EXIST);
         return new self(
             $handle->id,
             $handle->jobid,
@@ -165,7 +165,7 @@ final class file_handle {
     public static function get_by_jobid(int $jobid): array {
         global $DB;
 
-        $handles = $DB->get_records(db_table::FILE_HANDLE, ['jobid' => $jobid]);
+        $handles = $DB->get_records(db_table::FILE_HANDLE->value, ['jobid' => $jobid]);
 
         return array_map(fn ($handle) => new self(
             $handle->id,
@@ -190,7 +190,7 @@ final class file_handle {
     public function destroy(bool $removefile = false): void {
         global $DB;
 
-        $DB->delete_records(db_table::FILE_HANDLE, ['id' => $this->id]);
+        $DB->delete_records(db_table::FILE_HANDLE->value, ['id' => $this->id]);
         if ($removefile) {
             $this->archivingstore()->delete($this);
         }

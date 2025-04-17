@@ -80,7 +80,7 @@ class job_delete_form extends \moodleform {
             '<p>'.get_string('delete_job_warning', 'local_archiving').'</p>'.
             '<code>'.
                 get_string('jobid', 'local_archiving').': '.$this->job->get_id().'<br>'.
-                get_string('status').': '.archive_job_status::get_status_name($this->job->get_status()).
+                get_string('status').': '.$this->job->get_status()->name.
             '</code>',
             \core\output\notification::NOTIFY_WARNING,
             false

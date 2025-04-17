@@ -18,7 +18,6 @@
  * An asynchronous activity archiving task
  *
  * @package     local_archiving
- * @category    driver
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,6 +25,7 @@
 namespace local_archiving\driver\mod;
 
 use local_archiving\exception\yield_exception;
+use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\db_table;
 use local_archiving\util\plugin_util;
 
@@ -71,13 +71,13 @@ final class activity_archiving_task {
      * Creates a new activity archiving task object and inserts it into the
      * database. This method does not execute the task.
      *
-     * @param int $jobid
-     * @param \context_module $context
-     * @param int $userid
-     * @param string $archivingmodname
-     * @param ?\stdClass $settings
-     * @param int $status
-     * @return activity_archiving_task
+     * @param int $jobid ID of the archive job this task is associated with
+     * @param \context_module $context Moodle context this task is run in
+     * @param int $userid ID of the user that owns this task
+     * @param string $archivingmodname Name of the activity archiving driver that handles this task
+     * @param ?\stdClass $settings Optional task specific settings
+     * @param activity_archiving_task_status $status Status of the task
+     * @return activity_archiving_task The created task object
      * @throws \dml_exception
      * @throws \moodle_exception
      */
@@ -87,7 +87,7 @@ final class activity_archiving_task {
         int $userid,
         string $archivingmodname,
         ?\stdClass $settings = null,
-        int $status = activity_archiving_task_status::STATUS_UNINITIALIZED
+        activity_archiving_task_status $status = activity_archiving_task_status::STATUS_UNINITIALIZED
     ): activity_archiving_task {
         global $DB;
 
@@ -103,7 +103,7 @@ final class activity_archiving_task {
             'archivingmod' => $archivingmodname,
             'contextid' => $context->id,
             'userid' => $userid,
-            'status' => $status,
+            'status' => $status->value,
             'progress' => 0,
             'settings' => $settings ? json_encode($settings) : null,
             'timecreated' => $now,
@@ -292,13 +292,15 @@ final class activity_archiving_task {
     /**
      * Retrieves the current status of this task
      *
-     * @return int Job status value
+     * @return activity_archiving_task_status Task status
      */
-    public function get_status(): int {
+    public function get_status(): activity_archiving_task_status {
         global $DB;
 
         try {
-            return $DB->get_field(db_table::ACTIVITY_TASK->value, 'status', ['id' => $this->taskid], MUST_EXIST);
+            return activity_archiving_task_status::from(
+                $DB->get_field(db_table::ACTIVITY_TASK->value, 'status', ['id' => $this->taskid], MUST_EXIST)
+            );
         } catch (\dml_exception $e) {
             return activity_archiving_task_status::STATUS_UNKNOWN;
         }
@@ -307,16 +309,16 @@ final class activity_archiving_task {
     /**
      * Changes the current task status to the given value
      *
-     * @param int $status New status value
+     * @param activity_archiving_task_status $status New task status
      * @return void
      * @throws \dml_exception
      */
-    public function set_status(int $status): void {
+    public function set_status(activity_archiving_task_status $status): void {
         global $DB;
 
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
-            'status' => $status,
+            'status' => $status->value,
         ]);
     }
 

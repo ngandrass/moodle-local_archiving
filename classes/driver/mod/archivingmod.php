@@ -28,6 +28,7 @@ namespace local_archiving\driver\mod;
 use local_archiving\archive_job;
 use local_archiving\exception\yield_exception;
 use local_archiving\form\job_create_form;
+use local_archiving\type\activity_archiving_task_status;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore

@@ -18,12 +18,11 @@
  * Status values of an activity archiving task
  *
  * @package     local_archiving
- * @category    driver
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_archiving\driver\mod;
+namespace local_archiving\type;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -32,37 +31,36 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Status values of an activity archiving task
  */
-final class activity_archiving_task_status {
-    // TODO: Replace with enumeration
+enum activity_archiving_task_status: int {
 
     /** @var int The task has not been initialized yet */
-    public const STATUS_UNINITIALIZED = 0;
+    case STATUS_UNINITIALIZED = 0;
 
     /** @var int The task was created and initialized */
-    public const STATUS_CREATED = 20;
+    case STATUS_CREATED = 20;
 
     /** @var int The task is scheduled for execution but currently pending */
-    public const STATUS_AWAITING_PROCESSING = 40;
+    case STATUS_AWAITING_PROCESSING = 40;
 
     /** @var int The task is currently being executed */
-    public const STATUS_RUNNING = 100;
+    case STATUS_RUNNING = 100;
 
     /** @var int The task is currently being finalized */
-    public const STATUS_FINALIZING = 200;
+    case STATUS_FINALIZING = 200;
 
     /** @var int The task was finished successfully */
-    public const STATUS_FINISHED = 220;
+    case STATUS_FINISHED = 220;
 
     /** @var int The task was gracefully aborted */
-    public const STATUS_CANCELED = 240;
+    case STATUS_CANCELED = 240;
 
     /** @var int The task failed before if could be completed */
-    public const STATUS_FAILED = 250;
+    case STATUS_FAILED = 250;
 
     /** @var int The task timed out and therefore could not be completed */
-    public const STATUS_TIMEOUT = 251;
+    case STATUS_TIMEOUT = 251;
 
     /** @var int The task status is unknown due to an internal data error */
-    public const STATUS_UNKNOWN = 255;
+    case STATUS_UNKNOWN = 255;
 
 }

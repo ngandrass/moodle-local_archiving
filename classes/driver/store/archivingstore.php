@@ -18,7 +18,6 @@
  * Interface definitions for storage drivers
  *
  * @package     local_archiving
- * @category    driver
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

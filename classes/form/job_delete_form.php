@@ -49,6 +49,7 @@ class job_delete_form extends \moodleform {
      * @throws \dml_exception
      * @throws \moodle_exception
      */
+    #[\Override]
     public function __construct(
         protected int $contextid,
         int $jobid,
@@ -71,6 +72,7 @@ class job_delete_form extends \moodleform {
      * @throws \dml_exception
      * @throws \coding_exception
      */
+    #[\Override]
     public function definition() {
         global $OUTPUT;
 

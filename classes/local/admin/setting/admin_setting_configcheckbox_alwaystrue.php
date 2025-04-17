@@ -36,6 +36,7 @@ class admin_setting_configcheckbox_alwaystrue extends \admin_setting_configcheck
      *
      * @return int Always 1, because this setting is always true
      */
+    #[\Override]
     public function get_setting() {
         return 1;
     }
@@ -45,6 +46,7 @@ class admin_setting_configcheckbox_alwaystrue extends \admin_setting_configcheck
      *
      * @return bool Always true, because this setting is always read only
      */
+    #[\Override]
     public function is_readonly(): bool {
         return true;
     }

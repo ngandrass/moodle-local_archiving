@@ -48,6 +48,7 @@ class job_create_form extends \moodleform {
      * @param \cm_info $cminfo Info object for the targeted course module
      * @throws \dml_exception
      */
+    #[\Override]
     public function __construct(
         protected string $handler,
         protected \cm_info $cminfo
@@ -70,6 +71,7 @@ class job_create_form extends \moodleform {
      * @throws \dml_exception
      * @throws \coding_exception
      */
+    #[\Override]
     public function definition() {
         $this->definition_header();
 
@@ -252,6 +254,7 @@ class job_create_form extends \moodleform {
      * @return array Associative array with error messages for invalid fields
      * @throws \coding_exception
      */
+    #[\Override]
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
 
@@ -272,6 +275,7 @@ class job_create_form extends \moodleform {
      * @return \stdClass Cleared, submitted form data
      * @throws \dml_exception
      */
+    #[\Override]
     public function get_data(): \stdClass {
         $data = parent::get_data();
 

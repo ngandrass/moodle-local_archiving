@@ -44,6 +44,7 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
      * @param mixed $paramtype int means PARAM_XXX type, string is a allowed format in regex
      * @param int|null $size default field size
      */
+    #[\Override]
     public function __construct(
         $name,
         $visiblename,
@@ -64,6 +65,7 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
      * @return mixed true if ok string if error found
      * @throws \coding_exception
      */
+    #[\Override]
     public function validate($data) {
         // Basic data validation.
         $parentvalidation = parent::validate($data);

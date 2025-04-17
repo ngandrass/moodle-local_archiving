@@ -47,6 +47,7 @@ class process_archive_job extends \core\task\adhoc_task {
      * @return process_archive_job New task instance
      * @throws \moodle_exception
      */
+    #[\Override]
     public static function create(archive_job $job): process_archive_job {
         // Validate given archive job.
         if ($job->is_completed()) {
@@ -72,6 +73,7 @@ class process_archive_job extends \core\task\adhoc_task {
      * @throws \dml_exception
      * @throws \moodle_exception
      */
+    #[\Override]
     public function reschedule(int $delaysec = 30): void {
         // FIXME: Debug mode. Remove delaysec override later!
         $delaysec = 5;
@@ -89,6 +91,7 @@ class process_archive_job extends \core\task\adhoc_task {
      * @throws \coding_exception
      * @throws \dml_exception
      */
+    #[\Override]
     public function get_archive_job(): archive_job {
         // TODO: Maybe cache this inside self, if performance becomes an issue.
         return archive_job::get_by_id(
@@ -110,6 +113,7 @@ class process_archive_job extends \core\task\adhoc_task {
      * @throws \dml_exception
      * @throws \moodle_exception
      */
+    #[\Override]
     public function execute(): void {
         $job = $this->get_archive_job();
 

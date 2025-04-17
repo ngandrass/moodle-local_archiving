@@ -38,6 +38,7 @@ class archivingmod extends \core\plugininfo\base {
      *
      * @return bool
      */
+    #[\Override]
     public function is_uninstall_allowed(): bool {
         return true;
     }
@@ -47,6 +48,7 @@ class archivingmod extends \core\plugininfo\base {
      *
      * @return bool
      */
+    #[\Override]
     public static function plugintype_supports_disabling(): bool {
         // TODO: Add support for enabling / disabling
         return parent::plugintype_supports_disabling();

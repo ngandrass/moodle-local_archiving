@@ -41,4 +41,13 @@ abstract class archivingevent {
      */
     abstract public static function get_name(): string;
 
+    /**
+     * Returns the internal identifier for this external event connector. This
+     * function should return the last part of the frankenstyle plugin name
+     * (e.g., 'cms' for 'archivingevent_cms').
+     *
+     * @return string Internal identifier of external event connector
+     */
+    abstract public static function get_plugname(): string;
+
 }

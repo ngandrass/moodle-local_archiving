@@ -44,7 +44,11 @@ abstract class archivingstore {
     abstract public static function get_name(): string;
 
     /**
-     * @return string
+     * Returns the internal identifier for this driver. This function should
+     * return the last part of the frankenstyle plugin name (e.g., 'localdir'
+     * for 'archivingstore_localdir').
+     *
+     * @return string Internal identifier of this driver
      */
     abstract public static function get_plugname(): string;
 

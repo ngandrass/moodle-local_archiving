@@ -25,10 +25,10 @@
 
 namespace local_archiving\driver\store;
 
-// @codingStandardsIgnoreLine
 use local_archiving\type\db_table;
 use local_archiving\util\plugin_util;
 
+// @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
@@ -43,29 +43,8 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 final class file_handle {
 
-    /** @var int ID of this file handle */
-    protected int $id;
-
-    /** @var int ID of the archiving job this file is associated with */
-    protected int $jobid;
-
-    /** @var string Name of the storage driver that works with this file handle */
-    protected string $archivingstorename;
-
     /** @var archivingstore|null Instance of the storage driver that is responsible for this file handle (lazy-loaded) */
     protected ?archivingstore $archivingstore;
-
-    /** @var string Name of the referenced file */
-    protected string $filename;
-
-    /** @var string Path of the referenced file */
-    protected string $filepath;
-
-    /** @var int Filesize in bytes */
-    protected int $filesize;
-
-    /** @var string Optional unique key for identifying the file */
-    protected string $filekey;
 
     /**
      * Constructor
@@ -78,21 +57,15 @@ final class file_handle {
      * @param string $filekey Optional unique key for identifying the file
      */
     protected function __construct(
-        int $id,
-        int $jobid,
-        string $archivingstorename,
-        string $filename,
-        string $filepath,
-        int $filesize,
-        string $filekey = ''
+        protected readonly int $id,
+        protected readonly int $jobid,
+        protected readonly string $archivingstorename,
+        protected readonly string $filename,
+        protected readonly string $filepath,
+        protected readonly int $filesize,
+        protected readonly string $filekey = ''
     ) {
-        $this->id = $id;
-        $this->jobid = $jobid;
-        $this->archivingstorename = $archivingstorename;
-        $this->filename = $filename;
-        $this->filepath = $filepath;
-        $this->filesize = $filesize;
-        $this->filekey = $filekey;
+
     }
 
     /**

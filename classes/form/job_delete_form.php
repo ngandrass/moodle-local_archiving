@@ -37,20 +37,24 @@ require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
  */
 class job_delete_form extends \moodleform {
 
-    /** @var int ID of the context this form is associated with */
-    protected int $contextid;
-
     /** @var archive_job Archive job this form is associated with */
     protected archive_job $job;
 
-    /** @var string Desired redirect URL */
-    protected string $wantsurl;
-
-    public function __construct(int $contextid, int $jobid, string $wantsurl) {
+    /**
+     * Creates a new form instance
+     *
+     * @param int $contextid ID of the context this form is associated with
+     * @param int $jobid ID of the archive job this form is associated with
+     * @param string $wantsurl Desired redirect URL
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function __construct(
+        protected int $contextid,
+        int $jobid,
+        protected string $wantsurl
+    ) {
         global $PAGE;
-
-        $this->contextid = $contextid;
-        $this->wantsurl = $wantsurl;
 
         // Get and validate job.
         $this->job = archive_job::get_by_id($jobid);

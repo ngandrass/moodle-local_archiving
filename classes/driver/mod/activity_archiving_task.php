@@ -39,21 +39,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 final class activity_archiving_task {
 
-    /** @var int ID of this activity archiving task */
-    protected int $taskid;
-
-    /** @var int ID of the archive job this task is associated with */
-    protected int $jobid;
-
-    /** @var \context_module Moodle context this task is run in */
-    protected \context_module $context;
-
-    /** @var int ID of the user that owns this task */
-    protected int $userid;
-
-    /** @var string Name of the activity archiving driver that handles this task */
-    protected string $archivingmodname;
-
     /** @var archivingmod|null Instance of the associated activity archiving driver (lazy-loaded) */
     protected ?archivingmod $archivingmod;
 
@@ -65,24 +50,19 @@ final class activity_archiving_task {
      * in the database. For creating or loading tasks use the respective static
      * methods.
      *
-     * @param int $taskid
-     * @param int $jobid
-     * @param \context_module $context
-     * @param int $userid
-     * @param string $archivingmodname
+     * @param int $taskid ID of this activity archiving task
+     * @param int $jobid ID of the archive job this task is associated with
+     * @param \context_module $context Moodle context this task is run in
+     * @param int $userid ID of the user that owns this task
+     * @param string $archivingmodname Name of the activity archiving driver that handles this task
      */
     protected function __construct(
-        int $taskid,
-        int $jobid,
-        \context_module $context,
-        int $userid,
-        string $archivingmodname
+        protected readonly int $taskid,
+        protected readonly int $jobid,
+        protected readonly \context_module $context,
+        protected readonly int $userid,
+        protected readonly string $archivingmodname,
     ) {
-        $this->taskid = $taskid;
-        $this->jobid = $jobid;
-        $this->context = $context;
-        $this->userid = $userid;
-        $this->archivingmodname = $archivingmodname;
         $this->archivingmod = null;
         $this->settings = null;
     }

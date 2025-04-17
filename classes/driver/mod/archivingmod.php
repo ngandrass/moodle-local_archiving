@@ -38,22 +38,18 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 abstract class archivingmod {
 
-    /** @var \context_module Moodle context this driver instance is for */
-    protected \context_module $context;
-
     /** @var int ID of the course the targeted activity is part of */
-    protected int $courseid;
+    protected readonly int $courseid;
 
     /** @var int ID of the targeted course module / activity */
-    protected int $cmid;
+    protected readonly int $cmid;
 
     /**
      * Create a new activity archiving driver instance
      *
      * @param \context_module $context Moodle context this driver instance is for
      */
-    public function __construct(\context_module $context) {
-        $this->context = $context;
+    public function __construct(protected readonly \context_module $context) {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
     }

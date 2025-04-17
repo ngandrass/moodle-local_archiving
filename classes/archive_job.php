@@ -44,23 +44,11 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class archive_job {
 
-    /** @var int ID of the archive job this task is associated with */
-    protected int $id;
-
-    /** @var \context_module Moodle context this job is run in */
-    protected \context_module $context;
-
     /** @var int ID of the course this job is run in */
     protected int $courseid;
 
     /** @var int ID of the course module this job is run for */
     protected int $cmid;
-
-    /** @var int ID of the user that owns this job */
-    protected int $userid;
-
-    /** @var int Unix timestamp of creation time */
-    protected int $timecreated;
 
     /** @var \stdClass|null Job settings object (lazy-loaded) */
     protected ?\stdClass $settings;
@@ -70,18 +58,19 @@ class archive_job {
      * database. To create a new or retrieve an existing job use the respective
      * static functions.
      *
-     * @param int $jobid ID of this archive job
+     * @param int $id ID of this archive job
      * @param \context_module $context Moodle context this archive job is run in
      * @param int $userid ID of the user that owns this job
      * @param int $timecreated Unix timestamp of creation time
      */
-    protected function __construct(int $jobid, \context_module $context, int $userid, int $timecreated) {
-        $this->id = $jobid;
-        $this->context = $context;
+    protected function __construct(
+        protected readonly int $id,
+        protected readonly \context_module $context,
+        protected readonly int $userid,
+        protected readonly int $timecreated
+    ) {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
-        $this->userid = $userid;
-        $this->timecreated = $timecreated;
         $this->settings = null;
     }
 

@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Database table name mappings
  */
 class db_table {
+    // TODO: Replace with enumeration
 
     /** @var string Name of the job table */
     public const JOB = 'local_archiving_job';

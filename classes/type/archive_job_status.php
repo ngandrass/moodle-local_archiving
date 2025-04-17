@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Status values an archive job can have
  */
 class archive_job_status {
+    // TODO: Replace with enumeration
 
     /** @var int Job is uninitialized */
     public const STATUS_UNINITIALIZED = 0;

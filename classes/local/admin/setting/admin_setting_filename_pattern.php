@@ -33,9 +33,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class admin_setting_filename_pattern extends \admin_setting_configtext {
 
-    /** @var array Variable names to allow during validation */
-    protected array $allowedvariables = [];
-
     /**
      * Creates a new instance of this setting
      *
@@ -52,7 +49,7 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
         $visiblename,
         $description,
         $defaultsetting,
-        array $allowedvariables,
+        protected array $allowedvariables,
         $paramtype = PARAM_RAW,
         $size = null
     ) {

@@ -38,12 +38,6 @@ require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
  */
 class job_create_form extends \moodleform {
 
-    /** @var string Frankenstyle name of the archivingmod plugin that will handle this job */
-    protected string $handler;
-
-    /** @var \cm_info Info object for the targeted course module */
-    protected \cm_info $cminfo;
-
     /** @var \stdClass Moodle admin settings values for 'core' (local_archiving) and the respective 'handler' (archivingmod_*) */
     protected \stdClass $config;
 
@@ -54,11 +48,12 @@ class job_create_form extends \moodleform {
      * @param \cm_info $cminfo Info object for the targeted course module
      * @throws \dml_exception
      */
-    public function __construct(string $handler, \cm_info $cminfo) {
+    public function __construct(
+        protected string $handler,
+        protected \cm_info $cminfo
+    ) {
         global $PAGE;
 
-        $this->handler = $handler;
-        $this->cminfo = $cminfo;
         $this->config = (object) [
             'core' => get_config('local_archiving'),
             'handler' => get_config("archivingmod_{$this->handler}"),

@@ -154,8 +154,6 @@ class job_create_form extends \moodleform {
      * @throws \coding_exception
      */
     protected function definition_advanced_settings(): void {
-        global $CFG;
-
         // Archive filename pattern.
         $this->_form->addElement(
             'text',
@@ -163,29 +161,24 @@ class job_create_form extends \moodleform {
             get_string('archive_filename_pattern', 'local_archiving'),
             $this->config->core->job_preset_archive_filename_pattern_locked ? 'disabled' : null
         );
-        if ($CFG->branch > 402) {
-            $this->_form->addHelpButton(
-                'archive_filename_pattern',
-                'archive_filename_pattern',
-                'local_archiving',
-                '',
-                false,
-                [
-                    'variables' => array_reduce(
-                        storage::ARCHIVE_FILENAME_PATTERN_VARIABLES,
-                        fn($res, $varname) => $res."<li>".
-                                "<code>\${".$varname."}</code>: ".
-                                get_string('archive_filename_pattern_variable_'.$varname, 'local_archiving').
-                            "</li>",
-                        ""
-                    ),
-                    'forbiddenchars' => implode('', storage::FILENAME_FORBIDDEN_CHARACTERS),
-                ]
-            );
-        } else {
-            // TODO (MDL-0): Remove after deprecation of Moodle 4.1 (LTS) on 08-12-2025.
-            $this->_form->addHelpButton('archive_filename_pattern', 'archive_filename_pattern_moodle42', 'local_archiving');
-        }
+        $this->_form->addHelpButton(
+            'archive_filename_pattern',
+            'archive_filename_pattern',
+            'local_archiving',
+            '',
+            false,
+            [
+                'variables' => array_reduce(
+                    storage::ARCHIVE_FILENAME_PATTERN_VARIABLES,
+                    fn($res, $varname) => $res."<li>".
+                            "<code>\${".$varname."}</code>: ".
+                            get_string('archive_filename_pattern_variable_'.$varname, 'local_archiving').
+                        "</li>",
+                    ""
+                ),
+                'forbiddenchars' => implode('', storage::FILENAME_FORBIDDEN_CHARACTERS),
+            ]
+        );
         $this->_form->setType('archive_filename_pattern', PARAM_TEXT);
         $this->_form->setDefault('archive_filename_pattern', $this->config->core->job_preset_archive_filename_pattern);
         $this->_form->addRule('archive_filename_pattern', null, 'maxlength', 255, 'client');

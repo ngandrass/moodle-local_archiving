@@ -94,9 +94,6 @@ $string['job_create_form_header_typed'] = 'Create {$a} Archive';
 // Job settings: Filename pattern.
 $string['archive_filename_pattern'] = 'Archive name';
 $string['archive_filename_pattern_help'] = 'Name of the generated archive. Variables <b>must</b> follow the <code>${variablename}</code> pattern. The file extension will be added automatically.<br><br><b>Available variables</b>: <ul>{$a->variables}</ul><b>Forbidden characters</b>: <code>{$a->forbiddenchars}</code>';
-// TODO (MDL-0): Remove the following 2 lines after deprecation of Moodle 4.1 (LTS) on 08-12-2025.
-$string['archive_filename_pattern_moodle42'] = 'Archive name';
-$string['archive_filename_pattern_moodle42_help'] = 'Name of the generated archive. Variables <b>must</b> follow the <code>${variablename}</code> pattern. The file extension will be added automatically.<br><br><b>Available variables</b>: <ul><li><code>${courseid}</code>: Course ID</li><li><code>${coursename}</code>: Course name</li><li><code>${courseshortname}</code>: Course short name</li><li><code>${cmid}</code>: Activity ID</li><li><code>${cmtype}</code>: Activity type</li><li><code>${cmname}</code>: Activity name</li><li><code>${date}</code>: Current date <small>(YYYY-MM-DD)</small></li><li><code>${time}</code>: Current time <small>(HH-MM-SS)</small></li><li><code>${timestamp}</code>: Current unix timestamp</li></ul><b>Forbidden characters</b>: <code>\/.:;*?!"&lt;&gt;|</code>';
 $string['archive_filename_pattern_variable_courseid'] = 'Course ID';
 $string['archive_filename_pattern_variable_coursename'] = 'Course name';
 $string['archive_filename_pattern_variable_courseshortname'] = 'Course short name';

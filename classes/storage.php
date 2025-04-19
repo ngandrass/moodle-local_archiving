@@ -34,6 +34,18 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class storage {
 
+    /** @var int Number of characters a string variable will be cut off after expansion */
+    public const FILENAME_VARIABLE_MAX_LENGTH = 128;
+
+    /** @var int Number of characters after a single filename is trimmed */
+    public const FILENAME_MAX_LENGTH = 240;
+
+    /** @var string[] Characters that are forbidden in a folder name pattern */
+    public const FOLDERNAME_FORBIDDEN_CHARACTERS = ["\\", ".", ":", ";", "*", "?", "!", "\"", "<", ">", "|", "\0"];
+
+    /** @var string[] Characters that are forbidden in a filename pattern */
+    public const FILENAME_FORBIDDEN_CHARACTERS = self::FOLDERNAME_FORBIDDEN_CHARACTERS + ["/"];
+
     /** @var string[] Valid variables for archive filename patterns */
     public const ARCHIVE_FILENAME_PATTERN_VARIABLES = [
         'courseid',
@@ -47,18 +59,20 @@ class storage {
         'timestamp',
     ];
 
-    /** @var string[] Characters that are forbidden in a filename pattern */
-    public const FILENAME_FORBIDDEN_CHARACTERS = ["\\", "/", ".", ":", ";", "*", "?", "!", "\"", "<", ">", "|", "\0"];
-
     /**
      * Determines if the given filename pattern contains only allowed variables
      * and no orphaned dollar signs
      *
      * @param string $pattern Filename pattern to test
      * @param array $allowedvariables List of allowed variables
+     * @param array $forbiddenchars List of forbidden characters
      * @return bool True if the pattern is valid
      */
-    public static function is_valid_filename_pattern(string $pattern, array $allowedvariables): bool {
+    public static function is_valid_filename_pattern(
+        string $pattern,
+        array $allowedvariables,
+        array $forbiddenchars
+    ): bool {
         // Check for minimal length.
         if (strlen($pattern) < 1) {
             return false;
@@ -66,13 +80,13 @@ class storage {
 
         // Check for variables.
         $residue = preg_replace('/\$\{\s*('.implode('|', $allowedvariables).')\s*\}/m', '', $pattern);
-        if (strpos($residue, '$') !== false) {
+        if (str_contains($residue, '$')) {
             return false;
         }
 
         // Check for forbidden characters.
-        foreach (self::FILENAME_FORBIDDEN_CHARACTERS as $char) {
-            if (strpos($pattern, $char) !== false) {
+        foreach ($forbiddenchars as $char) {
+            if (str_contains($pattern, $char)) {
                 return false;
             }
         }
@@ -93,6 +107,27 @@ class storage {
         }
 
         return trim($res);
+    }
+
+    /**
+     * Sanitizes the given foldername by removing all forbidden characters as
+     * well as leading- and trailing slashes
+     *
+     * @param string $foldername Foldername to sanitize
+     * @return string Sanitized foldername
+     */
+    protected static function sanitize_foldername(string $foldername): string {
+        $res = $foldername;
+        foreach (self::FOLDERNAME_FORBIDDEN_CHARACTERS as $char) {
+            $res = str_replace($char, '', $res);
+        }
+
+        // Trim whole path and each segment / "file"name.
+        $res = trim($res, " \n\r\t\v\x00/\\");
+        $parts = explode('/', $res);
+        $trimmedparts = array_map(fn($part) => substr($part, 0, self::FILENAME_MAX_LENGTH), $parts);
+
+        return join('/', $trimmedparts);
     }
 
 }

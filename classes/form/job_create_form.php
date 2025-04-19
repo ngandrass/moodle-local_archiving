@@ -258,9 +258,10 @@ class job_create_form extends \moodleform {
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
 
-        if (!\local_archiving\storage::is_valid_filename_pattern(
+        if (!storage::is_valid_filename_pattern(
             $data['archive_filename_pattern'],
-            storage::ARCHIVE_FILENAME_PATTERN_VARIABLES
+            storage::ARCHIVE_FILENAME_PATTERN_VARIABLES,
+            storage::FILENAME_FORBIDDEN_CHARACTERS
         )) {
             $errors['archive_filename_pattern'] = get_string('error_invalid_archive_filename_pattern', 'local_archiving');
         }

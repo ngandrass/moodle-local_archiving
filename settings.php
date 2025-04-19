@@ -89,6 +89,7 @@ if ($hassiteconfig) {
             ]),
             'archive-${courseshortname}-${courseid}-${cmtype}-${cmname}-${cmid}_${date}-${time}',
             storage::ARCHIVE_FILENAME_PATTERN_VARIABLES,
+            storage::FILENAME_FORBIDDEN_CHARACTERS,
             PARAM_TEXT,
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);

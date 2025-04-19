@@ -51,11 +51,11 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
         $description,
         $defaultsetting,
         protected array $allowedvariables,
+        protected array $forbiddenchars,
         $paramtype = PARAM_RAW,
         $size = null
     ) {
         parent::__construct($name, $visiblename, $description, $defaultsetting, $paramtype, $size);
-        $this->allowedvariables = $allowedvariables;
     }
 
     /**
@@ -74,7 +74,7 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
         }
 
         // Validate filename pattern.
-        if (!storage::is_valid_filename_pattern($data, $this->allowedvariables)) {
+        if (!storage::is_valid_filename_pattern($data, $this->allowedvariables, $this->forbiddenchars)) {
             return get_string('error_invalid_filename_pattern', 'local_archiving');
         }
 

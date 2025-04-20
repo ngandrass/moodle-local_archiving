@@ -27,6 +27,7 @@ namespace local_archiving\driver\mod;
 use local_archiving\exception\yield_exception;
 use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\db_table;
+use local_archiving\type\filearea;
 use local_archiving\util\plugin_util;
 
 // @codingStandardsIgnoreLine
@@ -455,7 +456,7 @@ final class activity_archiving_task {
         return (object) [
             'contextid' => $this->context->get_course_context()->id,
             'component' => 'archivingmod_'.$this->archivingmod()::get_plugname(),
-            'filearea' => 'temp',
+            'filearea' => filearea::ARTIFACT->value,
             'itemid' => 0,
             'filepath' => "/job-{$this->jobid}/task-{$this->taskid}/",
             'filename' => $filename,

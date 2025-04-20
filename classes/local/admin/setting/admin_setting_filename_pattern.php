@@ -40,7 +40,7 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
      * @param string $visiblename localised
      * @param string $description long localised info
      * @param string $defaultsetting Default value
-     * @param array $allowedvariables Variable names to allow during validation
+     * @param string[] $allowedvariables Variable names to allow during validation
      * @param mixed $paramtype int means PARAM_XXX type, string is a allowed format in regex
      * @param int|null $size default field size
      */

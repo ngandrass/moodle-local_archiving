@@ -79,7 +79,7 @@ if ($hassiteconfig) {
             get_string('archive_filename_pattern', 'local_archiving'),
             get_string('archive_filename_pattern_help', 'local_archiving', [
                 'variables' => array_reduce(
-                    storage::ARCHIVE_FILENAME_PATTERN_VARIABLES,
+                    \local_archiving\type\archive_filename_variable::values(),
                     fn ($res, $varname) => $res."<li><code>\${".$varname."}</code>: ".
                         get_string('archive_filename_pattern_variable_'.$varname, 'local_archiving').
                         "</li>"
@@ -88,7 +88,7 @@ if ($hassiteconfig) {
                 'forbiddenchars' => implode('', storage::FILENAME_FORBIDDEN_CHARACTERS),
             ]),
             'archive-${courseshortname}-${courseid}-${cmtype}-${cmname}-${cmid}_${date}-${time}',
-            storage::ARCHIVE_FILENAME_PATTERN_VARIABLES,
+            \local_archiving\type\archive_filename_variable::values(),
             storage::FILENAME_FORBIDDEN_CHARACTERS,
             PARAM_TEXT,
         );

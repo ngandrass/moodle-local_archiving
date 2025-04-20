@@ -46,26 +46,13 @@ class storage {
     /** @var string[] Characters that are forbidden in a filename pattern */
     public const FILENAME_FORBIDDEN_CHARACTERS = self::FOLDERNAME_FORBIDDEN_CHARACTERS + ["/"];
 
-    /** @var string[] Valid variables for archive filename patterns */
-    public const ARCHIVE_FILENAME_PATTERN_VARIABLES = [
-        'courseid',
-        'coursename',
-        'courseshortname',
-        'cmid',
-        'cmtype',
-        'cmname',
-        'date',
-        'time',
-        'timestamp',
-    ];
-
     /**
      * Determines if the given filename pattern contains only allowed variables
      * and no orphaned dollar signs
      *
      * @param string $pattern Filename pattern to test
-     * @param array $allowedvariables List of allowed variables
-     * @param array $forbiddenchars List of forbidden characters
+     * @param string[] $allowedvariables List of allowed variables
+     * @param string[] $forbiddenchars List of forbidden characters
      * @return bool True if the pattern is valid
      */
     public static function is_valid_filename_pattern(

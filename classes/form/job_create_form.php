@@ -26,6 +26,7 @@
 namespace local_archiving\form;
 
 use local_archiving\storage;
+use local_archiving\type\archive_filename_variable;
 use local_archiving\util\time_util;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -169,7 +170,7 @@ class job_create_form extends \moodleform {
             false,
             [
                 'variables' => array_reduce(
-                    storage::ARCHIVE_FILENAME_PATTERN_VARIABLES,
+                    archive_filename_variable::values(),
                     fn($res, $varname) => $res."<li>".
                             "<code>\${".$varname."}</code>: ".
                             get_string('archive_filename_pattern_variable_'.$varname, 'local_archiving').
@@ -253,7 +254,7 @@ class job_create_form extends \moodleform {
 
         if (!storage::is_valid_filename_pattern(
             $data['archive_filename_pattern'],
-            storage::ARCHIVE_FILENAME_PATTERN_VARIABLES,
+            archive_filename_variable::values(),
             storage::FILENAME_FORBIDDEN_CHARACTERS
         )) {
             $errors['archive_filename_pattern'] = get_string('error_invalid_archive_filename_pattern', 'local_archiving');

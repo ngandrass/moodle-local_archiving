@@ -276,7 +276,7 @@ class job_create_form extends \moodleform {
 
         // Force locked fields to their preset values.
         foreach ($this->config->core as $key => $value) {
-            if (strpos($key, 'job_preset_') === 0 && strrpos($key, '_locked') === strlen($key) - 7) {
+            if (str_starts_with($key, 'job_preset_') && strrpos($key, '_locked') === strlen($key) - 7) {
                 if ($value) {
                     $data->{substr($key, 11, -7)} = $this->config->core->{substr($key, 0, -7)};
                 }

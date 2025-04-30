@@ -324,6 +324,84 @@ final class activity_archiving_task {
     }
 
     /**
+     * Retrieves the webservice token that is associated with this task, if one
+     * such exists
+     *
+     * @return string|null Webservice token or null if not set
+     * @throws \dml_exception
+     */
+    public function get_webservice_token(): ?string {
+        global $DB;
+
+        return $DB->get_field(
+            db_table::ACTIVITY_TASK->value,
+            'wstoken',
+            ['id' => $this->taskid],
+            IGNORE_MISSING
+        ) ?: null;
+    }
+
+    /**
+     * Creates a new token for the given webservice, user, and lifetime
+     *
+     * @param int $webserviceid ID of the webservice to create the token for
+     * @param int $userid ID of the user to associate to create the token for
+     * @param int $lifetimesec Lifetime of the webservice token in secons from now
+     * @return string Generated webservice token
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function create_webservice_token(int $webserviceid, int $userid, int $lifetimesec): string {
+        global $DB;
+
+        // Validate lifetime.
+        if ($lifetimesec <= 0) {
+            throw new \moodle_exception('invalid_wstoken_lifetime', 'local_archiving');
+        }
+
+        // Generate wstoken and store it in the database.
+        $wstoken = \core_external\util::generate_token(
+            EXTERNAL_TOKEN_PERMANENT,
+            \core_external\util::get_service_by_id($webserviceid),
+            $userid,
+            \context_system::instance(),
+            time() + $lifetimesec,
+            0
+        );
+        $DB->update_record(db_table::ACTIVITY_TASK->value, [
+            'id' => $this->taskid,
+            'wstoken' => $wstoken,
+        ]);
+
+        return $wstoken;
+    }
+
+    /**
+     * Deletes the webservice token that is associated with this task
+     *
+     * @return bool True, if a wstoken was deleted. False if no wstoken existed.
+     * @throws \dml_exception
+     */
+    public function delete_webservice_token(): bool {
+        global $DB;
+
+        // Check if we have an associated web service token.
+        $wstoken = $this->get_webservice_token();
+        if (!$wstoken) {
+            return false;
+        }
+
+        // Invalidate token and remove link to this task.
+        $DB->delete_records('external_tokens', ['token' => $wstoken, 'tokentype' => EXTERNAL_TOKEN_PERMANENT]);
+        $DB->update_record(db_table::ACTIVITY_TASK->value, [
+            'id' => $this->taskid,
+            'wstoken' => null,
+        ]);
+
+        return true;
+    }
+
+    /**
      * Determines if this task can further be processed of if it has reached a
      * final state.
      *

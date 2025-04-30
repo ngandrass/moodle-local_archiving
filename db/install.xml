@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-  <XMLDB PATH="local/archiving/db" VERSION="2025032400" COMMENT="XMLDB file for Moodle local/archiving">
+  <XMLDB PATH="local/archiving/db" VERSION="2025043000" COMMENT="XMLDB file for Moodle local/archiving">
     <TABLES>
       <TABLE NAME="local_archiving_job" COMMENT="Archive jobs">
         <FIELDS>
@@ -40,6 +40,7 @@
           <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user that initiated this task"/>
           <FIELD NAME="status" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Status of this job"/>
           <FIELD NAME="progress" TYPE="number" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Task progress in percent (0-100)"/>
+          <FIELD NAME="wstoken" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="Webservice token that is associated with this task"/>
           <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialized JSON object with optional task settings"/>
           <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was created"/>
           <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was updated"/>

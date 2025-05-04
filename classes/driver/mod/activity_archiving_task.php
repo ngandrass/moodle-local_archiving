@@ -186,6 +186,51 @@ final class activity_archiving_task {
     }
 
     /**
+     * Returns the ID of this task
+     *
+     * @return int ID of this task
+     */
+    public function get_id(): int {
+        return $this->taskid;
+    }
+
+    /**
+     * Returns the ID of the archive job this task is associated with
+     *
+     * @return int ID of the archive job this task is associated with
+     */
+    public function get_jobid(): int {
+        return $this->jobid;
+    }
+
+    /**
+     * Returns the ID of the user that owns this task
+     *
+     * @return int ID of the user that owns this task
+     */
+    public function get_userid(): int {
+        return $this->userid;
+    }
+
+    /**
+     * Returns the name of the activity archiving driver that handles this task
+     *
+     * @return string Name of the activity archiving driver that handles this task
+     */
+    public function get_archivingmodname(): string {
+        return $this->archivingmodname;
+    }
+
+    /**
+     * Returns the Moodle context this task is run in
+     *
+     * @return \context_module Moodle context this task is run in
+     */
+    public function get_context(): \context_module {
+        return $this->context;
+    }
+
+    /**
      * Executes this task via the associated activity archiving driver
      *
      * This is just a convenience wrapper.

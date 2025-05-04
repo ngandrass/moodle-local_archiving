@@ -88,7 +88,7 @@ final class activity_archiving_task {
         int $userid,
         string $archivingmodname,
         ?\stdClass $settings = null,
-        activity_archiving_task_status $status = activity_archiving_task_status::STATUS_UNINITIALIZED
+        activity_archiving_task_status $status = activity_archiving_task_status::UNINITIALIZED
     ): activity_archiving_task {
         global $DB;
 
@@ -303,7 +303,7 @@ final class activity_archiving_task {
                 $DB->get_field(db_table::ACTIVITY_TASK->value, 'status', ['id' => $this->taskid], MUST_EXIST)
             );
         } catch (\dml_exception $e) {
-            return activity_archiving_task_status::STATUS_UNKNOWN;
+            return activity_archiving_task_status::UNKNOWN;
         }
     }
 
@@ -409,10 +409,10 @@ final class activity_archiving_task {
      */
     public function is_completed(): bool {
         switch ($this->get_status()) {
-            case activity_archiving_task_status::STATUS_FINISHED:
-            case activity_archiving_task_status::STATUS_CANCELED:
-            case activity_archiving_task_status::STATUS_FAILED:
-            case activity_archiving_task_status::STATUS_TIMEOUT:
+            case activity_archiving_task_status::FINISHED:
+            case activity_archiving_task_status::CANCELED:
+            case activity_archiving_task_status::FAILED:
+            case activity_archiving_task_status::TIMEOUT:
                 return true;
             default:
                 return false;

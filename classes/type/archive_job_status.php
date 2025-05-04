@@ -34,49 +34,49 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 enum archive_job_status: int {
 
     /** @var int Job is uninitialized */
-    case STATUS_UNINITIALIZED = 0;
+    case UNINITIALIZED = 0;
 
     /** @var int Job is initialized and queued for processing */
-    case STATUS_QUEUED = 10;
+    case QUEUED = 10;
 
     /** @var int Job is currently being processed */
-    case STATUS_PROCESSING = 20;
+    case PROCESSING = 20;
 
     /** @var int Activity archiving currently takes place */
-    case STATUS_ACTIVITY_ARCHIVING = 30;
+    case ACTIVITY_ARCHIVING = 30;
 
     /** @var int Job data is being post-processed */
-    case STATUS_POST_PROCESSING = 40;
+    case POST_PROCESSING = 40;
 
     /** @var int Job data is being stored */
-    case STATUS_STORE = 50;
+    case STORE = 50;
 
     /** @var int Temporary job data is being cleaned up */
-    case STATUS_CLEANUP = 60;
+    case CLEANUP = 60;
 
     /** @var int Job is completed. This state is final until future deletion. */
-    case STATUS_COMPLETED = 100;
+    case COMPLETED = 100;
 
     /** @var int Job completed in the past and now the archive data is deleted. */
-    case STATUS_DELETED = 110;
+    case DELETED = 110;
 
     /** @var int An error occurred that yet needs to be triaged */
-    case STATUS_ERROR = 200;
+    case ERROR = 200;
 
     /** @var int An error occurred that can be recovered from */
-    case STATUS_RECOVERABLE_ERROR = 210;
+    case RECOVERABLE_ERROR = 210;
 
     /** @var int Internal error handling / post-processing is running */
-    case STATUS_ERROR_HANDLING = 220;
+    case ERROR_HANDLING = 220;
 
     /** @var int Job has exceeded its maximum processing time and was aborted. This state is final. */
-    case STATUS_TIMEOUT = 230;
+    case TIMEOUT = 230;
 
     /** @var int An error occurred that cannot be recovered from. This state is final. */
-    case STATUS_FAILURE = 240;
+    case FAILURE = 240;
 
     /** @var int Job status is unknown due to an internal data error */
-    case STATUS_UNKNOWN = 255;
+    case UNKNOWN = 255;
 
     /**
      * Returns the localized string representation of the given archive job
@@ -106,20 +106,20 @@ enum archive_job_status: int {
      */
     public function color(): string {
         return match($this) {
-            self::STATUS_PROCESSING,
-            self::STATUS_ACTIVITY_ARCHIVING,
-            self::STATUS_POST_PROCESSING
+            self::PROCESSING,
+            self::ACTIVITY_ARCHIVING,
+            self::POST_PROCESSING
                 => 'primary',
-            self::STATUS_STORE,
-            self::STATUS_CLEANUP
+            self::STORE,
+            self::CLEANUP
                 => 'info',
-            self::STATUS_COMPLETED
+            self::COMPLETED
                 => 'success',
-            self::STATUS_ERROR,
-            self::STATUS_RECOVERABLE_ERROR,
-            self::STATUS_ERROR_HANDLING,
-            self::STATUS_TIMEOUT,
-            self::STATUS_FAILURE
+            self::ERROR,
+            self::RECOVERABLE_ERROR,
+            self::ERROR_HANDLING,
+            self::TIMEOUT,
+            self::FAILURE
                 => 'danger',
             default
                 => 'secondary',

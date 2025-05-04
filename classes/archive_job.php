@@ -101,7 +101,7 @@ class archive_job {
         $id = $DB->insert_record(db_table::JOB->value, [
             'contextid' => $context->id,
             'userid' => $userid,
-            'status' => archive_job_status::STATUS_UNINITIALIZED->value,
+            'status' => archive_job_status::UNINITIALIZED->value,
             'settings' => json_encode($settings),
             'timecreated' => $now,
             'timemodified' => $now,
@@ -201,7 +201,7 @@ class archive_job {
 
         $task = \local_archiving\task\process_archive_job::create($this);
         \core\task\manager::queue_adhoc_task($task);
-        $this->set_status(archive_job_status::STATUS_QUEUED);
+        $this->set_status(archive_job_status::QUEUED);
     }
 
     /**
@@ -238,46 +238,46 @@ class archive_job {
          */
         try {
             // Do not process uninitialized jobs.
-            if ($status == archive_job_status::STATUS_UNINITIALIZED) {
+            if ($status == archive_job_status::UNINITIALIZED) {
                 throw new \moodle_exception('invalid_archive_job_state', 'local_archiving');
             }
 
             // Timeout if required.
             if ($this->is_overdue()) {
                 // TODO: Call cleanup logic.
-                $status = archive_job_status::STATUS_TIMEOUT;
+                $status = archive_job_status::TIMEOUT;
                 throw new \moodle_exception('archive_job_timed_out', 'local_archiving');
             }
 
             // Queued -> Processing.
-            if ($status == archive_job_status::STATUS_QUEUED) {
+            if ($status == archive_job_status::QUEUED) {
                 // TODO: Create activity archiving task.
-                $status = archive_job_status::STATUS_PROCESSING;
+                $status = archive_job_status::PROCESSING;
             }
 
             // Processing -> Activity archiving.
-            if ($status == archive_job_status::STATUS_PROCESSING) {
+            if ($status == archive_job_status::PROCESSING) {
                 $this->create_activity_archiving_task();
 
                 // Update job status early because task execution can take some time ...
-                $status = archive_job_status::STATUS_ACTIVITY_ARCHIVING;
+                $status = archive_job_status::ACTIVITY_ARCHIVING;
                 $this->set_status($status);
             }
 
             // Activity archiving -> Post processing.
-            if ($status == archive_job_status::STATUS_ACTIVITY_ARCHIVING) {
+            if ($status == archive_job_status::ACTIVITY_ARCHIVING) {
                 $driver = $this->activity_archiving_driver();
                 $driver->execute_all_tasks_for_job($this->get_id());
 
                 if ($driver->is_all_tasks_for_job_completed($this->get_id())) {
-                    $status = archive_job_status::STATUS_POST_PROCESSING;
+                    $status = archive_job_status::POST_PROCESSING;
                 } else {
                     throw new yield_exception();
                 }
             }
 
             // Post processing -> Store.
-            if ($status == archive_job_status::STATUS_POST_PROCESSING) {
+            if ($status == archive_job_status::POST_PROCESSING) {
                 // Check that we have artifacts artifacts.
                 $artifacts = [];
                 foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
@@ -285,18 +285,18 @@ class archive_job {
                 }
 
                 if (empty($artifacts)) {
-                    $status = archive_job_status::STATUS_FAILURE;
+                    $status = archive_job_status::FAILURE;
                     throw new \moodle_exception('no_activity_artifacts_found', 'local_archiving');
                 }
 
-                $status = archive_job_status::STATUS_STORE;
+                $status = archive_job_status::STORE;
 
                 // TODO: Should this be async or sync? Currently it is sync but it might change ... Yield for asynchronous archive store task to complete.
                 throw new yield_exception();
             }
 
             // Store -> Cleanup.
-            if ($status == archive_job_status::STATUS_STORE) {
+            if ($status == archive_job_status::STORE) {
                 // Store artifacts.
                 $driverclass = plugin_util::get_subplugin_by_name('archivingstore', 'localdir');
                 /** @var archivingstore $driver */
@@ -310,23 +310,23 @@ class archive_job {
                     }
                 }
 
-                $status = archive_job_status::STATUS_CLEANUP;
+                $status = archive_job_status::CLEANUP;
             }
 
             // Cleanup -> Completed.
-            if ($status == archive_job_status::STATUS_CLEANUP) {
+            if ($status == archive_job_status::CLEANUP) {
                 // Cleanup temporary settings objects from DB.
                 foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
                     $task->clear_settings();
                 }
                 $this->clear_settings(true);
 
-                $status = archive_job_status::STATUS_COMPLETED;
+                $status = archive_job_status::COMPLETED;
             }
         } catch (\Exception $e) {
             // Catch the yield silently and let everything else bubble up.
             if (!$e instanceof yield_exception) {
-                $status = archive_job_status::STATUS_FAILURE;
+                $status = archive_job_status::FAILURE;
                 throw $e;
             }
         } finally {
@@ -433,7 +433,7 @@ class archive_job {
         try {
             return archive_job_status::from($DB->get_field(db_table::JOB->value, 'status', ['id' => $this->id], MUST_EXIST));
         } catch (\dml_exception $e) {
-            return archive_job_status::STATUS_UNKNOWN;
+            return archive_job_status::UNKNOWN;
         }
     }
 
@@ -464,9 +464,9 @@ class archive_job {
      */
     public function is_completed(): bool {
         switch ($this->get_status()) {
-            case archive_job_status::STATUS_COMPLETED:
-            case archive_job_status::STATUS_TIMEOUT:
-            case archive_job_status::STATUS_FAILURE:
+            case archive_job_status::COMPLETED:
+            case archive_job_status::TIMEOUT:
+            case archive_job_status::FAILURE:
                 return true;
             default:
                 return false;
@@ -500,20 +500,20 @@ class archive_job {
      */
     public function get_progress(): ?int {
         switch ($this->get_status()) {
-            case archive_job_status::STATUS_QUEUED:
-            case archive_job_status::STATUS_PROCESSING:
+            case archive_job_status::QUEUED:
+            case archive_job_status::PROCESSING:
                 return 0;
-            case archive_job_status::STATUS_ACTIVITY_ARCHIVING:
+            case archive_job_status::ACTIVITY_ARCHIVING:
                 $tasks = activity_archiving_task::get_by_jobid($this->id);
                 $total = array_reduce($tasks, fn ($carry, $task) => $carry + $task->get_progress(), 0);
                 return 0.6 * ($total / count($tasks));
-            case archive_job_status::STATUS_POST_PROCESSING:
+            case archive_job_status::POST_PROCESSING:
                 return 60;
-            case archive_job_status::STATUS_STORE:
+            case archive_job_status::STORE:
                 return 60 + 20;  // TODO: Implement.
-            case archive_job_status::STATUS_CLEANUP:
+            case archive_job_status::CLEANUP:
                 return 99;
-            case archive_job_status::STATUS_COMPLETED:
+            case archive_job_status::COMPLETED:
                 return 100;
             default:
                 return null;

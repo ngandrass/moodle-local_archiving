@@ -34,33 +34,33 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 enum activity_archiving_task_status: int {
 
     /** @var int The task has not been initialized yet */
-    case STATUS_UNINITIALIZED = 0;
+    case UNINITIALIZED = 0;
 
     /** @var int The task was created and initialized */
-    case STATUS_CREATED = 20;
+    case CREATED = 20;
 
     /** @var int The task is scheduled for execution but currently pending */
-    case STATUS_AWAITING_PROCESSING = 40;
+    case AWAITING_PROCESSING = 40;
 
     /** @var int The task is currently being executed */
-    case STATUS_RUNNING = 100;
+    case RUNNING = 100;
 
     /** @var int The task is currently being finalized */
-    case STATUS_FINALIZING = 200;
+    case FINALIZING = 200;
 
     /** @var int The task was finished successfully */
-    case STATUS_FINISHED = 220;
+    case FINISHED = 220;
 
     /** @var int The task was gracefully aborted */
-    case STATUS_CANCELED = 240;
+    case CANCELED = 240;
 
     /** @var int The task failed before if could be completed */
-    case STATUS_FAILED = 250;
+    case FAILED = 250;
 
     /** @var int The task timed out and therefore could not be completed */
-    case STATUS_TIMEOUT = 251;
+    case TIMEOUT = 251;
 
     /** @var int The task status is unknown due to an internal data error */
-    case STATUS_UNKNOWN = 255;
+    case UNKNOWN = 255;
 
 }

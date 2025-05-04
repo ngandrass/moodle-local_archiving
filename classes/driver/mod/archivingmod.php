@@ -143,7 +143,7 @@ abstract class archivingmod {
      * @throws \dml_exception
      */
     public function cancel_task(activity_archiving_task $task): void {
-        $task->set_status(activity_archiving_task_status::STATUS_CANCELED);
+        $task->set_status(activity_archiving_task_status::CANCELED);
     }
 
     /**

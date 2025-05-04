@@ -103,7 +103,7 @@ class storage {
      * @param string $foldername Foldername to sanitize
      * @return string Sanitized foldername
      */
-    protected static function sanitize_foldername(string $foldername): string {
+    public static function sanitize_foldername(string $foldername): string {
         $res = $foldername;
         foreach (self::FOLDERNAME_FORBIDDEN_CHARACTERS as $char) {
             $res = str_replace($char, '', $res);

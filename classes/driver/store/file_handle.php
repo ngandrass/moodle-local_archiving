@@ -24,6 +24,7 @@
 
 namespace local_archiving\driver\store;
 
+use local_archiving\storage;
 use local_archiving\type\db_table;
 use local_archiving\util\plugin_util;
 
@@ -53,6 +54,7 @@ final class file_handle {
      * @param string $filename Name of the referenced file
      * @param string $filepath Path of the referenced file
      * @param int $filesize Filesize in bytes
+     * @param string $sha256sum SHA256 checksum of the file
      * @param string $filekey Optional unique key for identifying the file
      */
     protected function __construct(
@@ -62,6 +64,7 @@ final class file_handle {
         protected readonly string $filename,
         protected readonly string $filepath,
         protected readonly int $filesize,
+        protected readonly string $sha256sum,
         protected readonly string $filekey = ''
     ) {
 
@@ -75,6 +78,7 @@ final class file_handle {
      * @param string $filename Name of the referenced file
      * @param string $filepath Path of the referenced file
      * @param int $filesize Filesize in bytes
+     * @param string $sha256sum SHA256 checksum of the file
      * @param string $filekey Optional unique key for identifying the file
      * @return file_handle The created file handle
      * @throws \coding_exception
@@ -86,6 +90,7 @@ final class file_handle {
         string $filename,
         string $filepath,
         int $filesize,
+        string $sha256sum,
         string $filekey = ''
     ): file_handle {
         global $DB;
@@ -111,6 +116,10 @@ final class file_handle {
             throw new \coding_exception(get_string('invalid_filesize', 'local_archiving'));
         }
 
+        if (!storage::is_valid_sha256sum($sha256sum)) {
+            throw new \coding_exception(get_string('invalid_sha256sum', 'local_archiving'));
+        }
+
         // Insert into DB.
         $id = $DB->insert_record(db_table::FILE_HANDLE->value, [
             'jobid' => $jobid,
@@ -128,6 +137,7 @@ final class file_handle {
             $filename,
             $filepath,
             $filesize,
+            $sha256sum,
             $filekey
         );
     }
@@ -150,6 +160,7 @@ final class file_handle {
             $handle->filename,
             $handle->filepath,
             $handle->filesize,
+            $handle->sha256sum,
             $handle->filekey
         );
     }
@@ -173,6 +184,7 @@ final class file_handle {
             $handle->filename,
             $handle->filepath,
             $handle->filesize,
+            $handle->sha256sum,
             $handle->filekey
         ), $handles);
     }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-  <XMLDB PATH="local/archiving/db" VERSION="2025043000" COMMENT="XMLDB file for Moodle local/archiving">
+  <XMLDB PATH="local/archiving/db" VERSION="2025050500" COMMENT="XMLDB file for Moodle local/archiving">
     <TABLES>
       <TABLE NAME="local_archiving_job" COMMENT="Archive jobs">
         <FIELDS>
@@ -59,6 +59,7 @@
           <FIELD NAME="jobid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the archiving job this file is associated with"/>
           <FIELD NAME="taskid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Optional ID of the activity archiving task this file is associated with"/>
           <FIELD NAME="fileid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the file in the Moodle filestore"/>
+          <FIELD NAME="sha256sum" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="SHA256 hash of the file"/>
         </FIELDS>
         <KEYS>
           <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -77,6 +78,7 @@
           <FIELD NAME="filepath" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Path of the file inside the storage (if applicable)"/>
           <FIELD NAME="filekey" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Unique key identifying the file inside the storage (if applicable)"/>
           <FIELD NAME="filesize" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Size of the file in bytes"/>
+          <FIELD NAME="sha256sum" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="SHA256 hash of the file"/>
         </FIELDS>
         <KEYS>
           <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

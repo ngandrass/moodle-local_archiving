@@ -24,6 +24,8 @@
 
 namespace local_archiving;
 
+use stored_file;
+
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -115,6 +117,39 @@ class storage {
         $trimmedparts = array_map(fn($part) => substr($part, 0, self::FILENAME_MAX_LENGTH), $parts);
 
         return join('/', $trimmedparts);
+    }
+
+    /**
+     * Calculates the contenthash of a large file chunk-wise.
+     *
+     * @param stored_file $file File which contents should be hashed
+     * @param string $algo Hashing algorithm. Must be one of hash_algos()
+     * @return string|null Hexadecimal hash
+     */
+    public static function hash_file(stored_file $file, string $algo = 'sha256'): ?string {
+        // Validate requested hash algorithm.
+        if (!array_search($algo, hash_algos())) {
+            return null;
+        }
+
+        // Calculate file hash chunk-wise.
+        $fh = $file->get_content_file_handle(stored_file::FILE_HANDLE_FOPEN);
+        $hashctx = hash_init($algo);
+        while (!feof($fh)) {
+            hash_update($hashctx, fgets($fh, 4096));
+        }
+
+        return hash_final($hashctx);
+    }
+
+    /**
+     * Determines if the given string is a valid SHA256 checksum
+     *
+     * @param string $sha256sum SHA256 checksum to test
+     * @return bool True if the checksum is valid
+     */
+    public static function is_valid_sha256sum(string $sha256sum): bool {
+        return preg_match('/^[a-f0-9]{64}$/', $sha256sum) === 1;
     }
 
 }

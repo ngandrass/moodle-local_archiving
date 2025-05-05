@@ -25,6 +25,7 @@
 namespace local_archiving\driver\mod;
 
 use local_archiving\exception\yield_exception;
+use local_archiving\storage;
 use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\db_table;
 use local_archiving\type\filearea;
@@ -525,17 +526,40 @@ final class activity_archiving_task {
     /**
      * Links the given stored_file to this task.
      *
-     * @param \stored_file $artifactfile
+     * @param \stored_file $artifactfile The stored_file to link
+     * @param string|null $sha256sum The sha256sum of the file. Will be calculated if not given
+     * @param bool $takeownership If true, the file will be moved to the filearea of this task
      * @return void
      * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
      */
-    public function link_artifact(\stored_file $artifactfile): void {
+    public function link_artifact(\stored_file $artifactfile, ?string $sha256sum = null, bool $takeownership = false): void {
         global $DB;
 
+        // Take ownership of the file if requested.
+        if ($takeownership) {
+            $targetfile = get_file_storage()->create_file_from_storedfile(
+                filerecord: self::generate_artifact_fileinfo($artifactfile->get_filename()),
+                fileorid: $artifactfile
+            );
+            $artifactfile->delete();
+        } else {
+            $targetfile = $artifactfile;
+        }
+
+        // Calculate sha256sum if not given.
+        if (!$sha256sum || storage::is_valid_sha256sum($sha256sum)) {
+            $sha256sum = storage::hash_file($targetfile);
+        }
+
+        // Create link in database.
         $DB->insert_record(db_table::TEMPFILE->value, [
             'jobid' => $this->jobid,
             'taskid' => $this->taskid,
-            'fileid' => $artifactfile->get_id(),
+            'fileid' => $targetfile->get_id(),
+            'sha256sum' => $sha256sum,
         ]);
     }
 
@@ -551,12 +575,14 @@ final class activity_archiving_task {
     public function unlink_artifact(\stored_file $artifactfile, bool $delete = false): void {
         global $DB;
 
+        // Remove database link.
         $DB->delete_records(db_table::TEMPFILE->value, [
             'jobid' => $this->jobid,
             'taskid' => $this->taskid,
             'fileid' => $artifactfile->get_id(),
         ]);
 
+        // Delete file if requested.
         if ($delete) {
             $referencestoartifact = $DB->count_records(db_table::TEMPFILE->value, ['fileid' => $artifactfile->get_id()]);
 

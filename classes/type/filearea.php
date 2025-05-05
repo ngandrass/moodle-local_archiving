@@ -39,4 +39,7 @@ enum filearea: string {
     /** @var string Filearea for artifacts */
     case ARTIFACT = 'artifact';
 
+    /** @var string Filearea for draft files and uploads */
+    case DRAFT = 'draft';
+
 }

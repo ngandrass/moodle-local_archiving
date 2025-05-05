@@ -83,7 +83,7 @@ if ($form->is_submitted() && $form->is_validated()) {
 
     echo "<h1>Created archive job!</h1>";
     echo "<pre>";
-    print_r($jobsettings);
+    print_r($job->get_settings());
     echo "</pre>";
 } else {
     $form->display();

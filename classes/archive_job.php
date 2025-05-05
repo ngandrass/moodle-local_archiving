@@ -79,6 +79,8 @@ class archive_job {
      *
      * @param \context $context Context this job is run in
      * @param int $userid ID of the user that owns this job
+     * @param \stdClass $settings Job settings object
+     * @param bool $cleansettings If true, the settings object will be cleared from any mform stuff
      * @return archive_job Created archive job instance
      *
      * @throws \dml_exception
@@ -87,13 +89,23 @@ class archive_job {
     public static function create(
         \context $context,
         int $userid,
-        \stdClass $settings
+        \stdClass $settings,
+        bool $cleansettings = true
     ): archive_job {
         global $DB;
 
         // Check context.
         if (!($context instanceof \context_module)) {
             throw new \moodle_exception('invalid_context', 'local_archiving');
+        }
+
+        // Clean settings object.
+        if ($cleansettings) {
+            $settings = (object) array_filter(
+                (array) $settings,
+                fn ($key) => !str_starts_with($key, 'mform_') && $key !== 'submitbutton',
+                ARRAY_FILTER_USE_KEY
+            );
         }
 
         // Create object.

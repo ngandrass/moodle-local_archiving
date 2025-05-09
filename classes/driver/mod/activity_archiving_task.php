@@ -24,6 +24,7 @@
 
 namespace local_archiving\driver\mod;
 
+use local_archiving\archive_job;
 use local_archiving\exception\yield_exception;
 use local_archiving\storage;
 use local_archiving\type\activity_archiving_task_status;
@@ -40,6 +41,9 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * activity archiving task.
  */
 final class activity_archiving_task {
+
+    /** @var archive_job|null Instance of the associated archive_job (lazy-loaded) */
+    protected ?archive_job $archivejob;
 
     /** @var archivingmod|null Instance of the associated activity archiving driver (lazy-loaded) */
     protected ?archivingmod $archivingmod;
@@ -229,6 +233,20 @@ final class activity_archiving_task {
      */
     public function get_context(): \context_module {
         return $this->context;
+    }
+
+    /**
+     * Returns the archive job this task is associated with
+     *
+     * @return archive_job The archive job this task is associated with
+     * @throws \dml_exception
+     */
+    public function get_job(): archive_job {
+        if (!$this->archivejob instanceof archive_job) {
+            $this->archivejob = archive_job::get_by_id($this->jobid);
+        }
+
+        return $this->archivejob;
     }
 
     /**

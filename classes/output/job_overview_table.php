@@ -25,6 +25,7 @@
 namespace local_archiving\output;
 
 use local_archiving\archive_job;
+use local_archiving\driver\store\file_handle;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 
@@ -180,8 +181,19 @@ class job_overview_table extends \table_sql {
         global $PAGE;
         $html = '';
 
+        // Action: Download.
+        $files = file_handle::get_by_jobid($values->id);
+        if (count($files) > 0) {
+            // @codingStandardsIgnoreLine
+            $html .= '<a href="#" class="btn btn-success mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('download').'" alt="'.get_string('download').'"><i class="fa fa-download"></i></a>';
+        } else {
+            // @codingStandardsIgnoreLine
+            $html .= '<a href="#" class="btn btn-outline-success mx-1 disabled" role="button" alt="'.get_string('download').'" alt="'.get_string('download').'" disabled aria-disabled="true"><i class="fa fa-download"></i></a>';
+        }
+
         // Action: Show logs.
         $logurl = new \moodle_url('/local/archiving/logs.php', ['jobid' => $values->id]);
+        // @codingStandardsIgnoreLine
         $html .= '<a href="'.$logurl.'" class="btn btn-info mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('logs').'" alt="'.get_string('logs').'"><i class="fa fa-file-waveform"></i></a>';
 
         // Action: Delete.

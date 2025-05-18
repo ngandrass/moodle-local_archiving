@@ -36,6 +36,8 @@ if ($hassiteconfig) {
 
     // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
     if ($ADMIN->fulltree) {
+        // TODO (MDL-0): Add settings to configure logging levels and retention.
+
         // Header.
         $settings->add(new admin_setting_heading('local_archiving/header_docs',
             null,

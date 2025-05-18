@@ -399,6 +399,8 @@ final class activity_archiving_task {
             'id' => $this->taskid,
             'status' => $status->value,
         ]);
+
+        $this->get_logger()->info("Activity archiving task status updated: {$status->name} ({$status->value})");
     }
 
     /**

@@ -352,6 +352,7 @@ class archive_job {
             // Catch the yield silently and let everything else bubble up.
             if (!$e instanceof yield_exception) {
                 $status = archive_job_status::FAILURE;
+                $this->get_logger()->fatal($e->getMessage());
                 throw $e;
             }
         } finally {

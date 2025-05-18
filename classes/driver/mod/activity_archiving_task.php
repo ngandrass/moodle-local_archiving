@@ -26,6 +26,7 @@ namespace local_archiving\driver\mod;
 
 use local_archiving\archive_job;
 use local_archiving\exception\yield_exception;
+use local_archiving\logging\task_logger;
 use local_archiving\storage;
 use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\db_table;
@@ -69,8 +70,21 @@ final class activity_archiving_task {
         protected readonly int $userid,
         protected readonly string $archivingmodname,
     ) {
+        $this->archivejob = null;
         $this->archivingmod = null;
         $this->settings = null;
+    }
+
+    /**
+     * Creates a logger instance that is tied to this activity archiving task.
+     *
+     * All log entries created through this logger will automatically be linked
+     * to this task.
+     *
+     * @return task_logger Logger instance
+     */
+    public function get_logger(): task_logger {
+        return new task_logger($this->jobid, $this->taskid);
     }
 
     /**
@@ -515,7 +529,8 @@ final class activity_archiving_task {
             'id' => $this->taskid,
             'progress' => $progress,
         ]);
-        mtrace("Activity archiving task {$this->taskid} progress updated: {$progress}%");
+
+        $this->get_logger()->info("Activity archiving task {$this->taskid} progress updated: {$progress}%");
     }
 
     /**

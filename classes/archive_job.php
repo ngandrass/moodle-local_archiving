@@ -28,6 +28,7 @@ use local_archiving\driver\mod\archivingmod;
 use local_archiving\driver\mod\activity_archiving_task;
 use local_archiving\driver\store\archivingstore;
 use local_archiving\exception\yield_exception;
+use local_archiving\logging\job_logger;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 use local_archiving\util\mod_util;
@@ -71,6 +72,18 @@ class archive_job {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
         $this->settings = null;
+    }
+
+    /**
+     * Creates a logger instance that is tied to this job.
+     *
+     * All log entries created through this logger will automatically be linked
+     * to this archive job.
+     *
+     * @return job_logger Logger instance
+     */
+    public function get_logger(): job_logger {
+        return new job_logger($this->id);
     }
 
     /**
@@ -174,7 +187,7 @@ class archive_job {
             $timeoutsec,
             ($jobtimeoutmin ?: 6 * 60) * 60
         )) {
-            mtrace("Failed to acquire lock for '{$this->get_lock_resource()}' after {$timeoutsec} seconds.");
+            $this->get_logger()->warn("Failed to acquire lock for '{$this->get_lock_resource()}' after {$timeoutsec} seconds.");
             if ($timeouterror) {
                 throw new \moodle_exception('locktimeout');
             }
@@ -465,7 +478,8 @@ class archive_job {
             'status' => $status->value,
             'timemodified' => time(),
         ]);
-        mtrace("Job status updated: ".$status->name()." ({$status->value})");
+
+        $this->get_logger()->info("Job status updated: ".$status->name()." ({$status->value})");
     }
 
     /**

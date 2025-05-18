@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-  <XMLDB PATH="local/archiving/db" VERSION="2025050500" COMMENT="XMLDB file for Moodle local/archiving">
+  <XMLDB PATH="local/archiving/db" VERSION="2025051800" COMMENT="XMLDB file for Moodle local/archiving">
     <TABLES>
       <TABLE NAME="local_archiving_job" COMMENT="Archive jobs">
         <FIELDS>
           <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-          <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="ID of the context this job is run in"/>
+          <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the context this job is run in"/>
           <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user that initiated this job"/>
           <FIELD NAME="status" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Status of this job"/>
           <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialized JSON object with job settings"/>
@@ -35,8 +35,8 @@
         <FIELDS>
           <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
           <FIELD NAME="jobid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the archiving job this task is part of"/>
-          <FIELD NAME="archivingmod" TYPE="text" NOTNULL="true" COMMENT="Name of the activity archiving driver used for this task"/>
-          <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="ID of the context this task is run in"/>
+          <FIELD NAME="archivingmod" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the activity archiving driver used for this task"/>
+          <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the context this task is run in"/>
           <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user that initiated this task"/>
           <FIELD NAME="status" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Status of this job"/>
           <FIELD NAME="progress" TYPE="number" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Task progress in percent (0-100)"/>

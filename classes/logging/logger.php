@@ -73,7 +73,7 @@ class logger {
      *
      * This is the generic internal implementation.
      *
-     * @param log_level|null $level If set, only log entries with this level will be returned
+     * @param log_level|null $minlevel If set, only log entries with this level or higher will be returned
      * @param int|null $jobid If set, only log entries for this job will be returned
      * @param int|null $taskid If set, only log entries for this task will be returned
      * @param int $aftertime Return only logs created after this unix timestamp
@@ -84,7 +84,7 @@ class logger {
      * @throws \dml_exception
      */
     protected function get_log_entries_from_db(
-        ?log_level $level = null,
+        ?log_level $minlevel = null,
         ?int $jobid = null,
         ?int $taskid = null,
         int $aftertime = 0,
@@ -101,9 +101,9 @@ class logger {
             'beforetime' => $beforetime,
         ];
 
-        if ($level) {
-            $wheresql .= " AND level = :level";
-            $params['level'] = $level->value;
+        if ($minlevel) {
+            $wheresql .= " AND level >= :level";
+            $params['level'] = $minlevel->value;
         }
 
         if ($jobid) {
@@ -133,7 +133,7 @@ class logger {
      * Retrieves all log entries that are not linked to any job or task and
      * match the given criteria.
      *
-     * @param log_level|null $level If set, only log entries with this level will be returned
+     * @param log_level $minlevel Return only log entries with this level or higher
      * @param int $aftertime Return only logs created after this unix timestamp
      * @param int $beforetime Return only logs created before this unix timestamp
      * @param int $limitnum Maximum number of log entries to return
@@ -142,14 +142,14 @@ class logger {
      * @throws \dml_exception
      */
     public function get_logs(
-        ?log_level $level = null,
-        int $aftertime = 0,
-        int $beforetime = 9999999999,
-        int $limitnum = 100,
-        int $limitfrom = 0
+        log_level $minlevel = log_level::TRACE,
+        int       $aftertime = 0,
+        int       $beforetime = 9999999999,
+        int       $limitnum = 100,
+        int       $limitfrom = 0
     ): array {
         return $this->get_log_entries_from_db(
-            $level,
+            $minlevel,
             0,
             0,
             $aftertime,
@@ -212,7 +212,7 @@ class logger {
      * @throws \dml_exception
      */
     public function warn(string $message): void {
-        $this->write_log_entry_to_db(log_level::WARNING, $message);
+        $this->write_log_entry_to_db(log_level::WARN, $message);
     }
 
     /**
@@ -245,7 +245,7 @@ class logger {
      */
     public static function format_log_entry(\stdClass $logentry): string {
         return date('Y-m-d H:i:s', $logentry->timecreated).
-            ' ['.log_level::from($logentry->level)->name.'] '.
+            ' ['.str_pad(log_level::from($logentry->level)->name, 5, ' ').'] '.
             ($logentry->taskid ? ' -> ' : '').
             $logentry->message;
     }

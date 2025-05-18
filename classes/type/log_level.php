@@ -46,7 +46,7 @@ enum log_level: int {
     case INFO = 20;
 
     /** @var self Non-critical warning */
-    case WARNING = 30;
+    case WARN = 30;
 
     /** @var self Error occured */
     case ERROR = 40;

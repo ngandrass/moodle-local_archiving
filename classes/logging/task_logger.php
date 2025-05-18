@@ -44,7 +44,7 @@ class task_logger extends job_logger {
      * @param int $taskid ID of the task to log for
      */
     public function __construct(
-        protected readonly int $jobid,
+        int $jobid,
         protected readonly int $taskid
     ) {
         parent::__construct($jobid);
@@ -54,7 +54,7 @@ class task_logger extends job_logger {
      * Retrieves all log entries that are linked to the job this logger is tied
      * to and match the given criteria.
      *
-     * @param log_level|null $level Log level. If null, all log levels are returned.
+     * @param log_level $minlevel Return only log entries with this level or higher
      * @param int $aftertime Return only log entries that were created after this time
      * @param int $beforetime Return only log entries that were created before this time
      * @param int $limitnum Maximum number of log entries to return
@@ -64,14 +64,14 @@ class task_logger extends job_logger {
      */
     #[\Override]
     public function get_logs(
-        ?log_level $level = null,
-        int $aftertime = 0,
-        int $beforetime = 9999999999,
-        int $limitnum = 100,
-        int $limitfrom = 0
+        log_level $minlevel = log_level::TRACE,
+        int       $aftertime = 0,
+        int       $beforetime = 9999999999,
+        int       $limitnum = 100,
+        int       $limitfrom = 0
     ): array {
         return $this->get_log_entries_from_db(
-            $level,
+            $minlevel,
             $this->jobid,
             $this->taskid,
             $aftertime,
@@ -139,7 +139,7 @@ class task_logger extends job_logger {
      */
     #[\Override]
     public function warn(string $message): void {
-        $this->write_log_entry_to_db(log_level::WARNING, $message, $this->jobid, $this->taskid);
+        $this->write_log_entry_to_db(log_level::WARN, $message, $this->jobid, $this->taskid);
     }
 
     /**

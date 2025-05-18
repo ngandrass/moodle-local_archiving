@@ -127,6 +127,7 @@ final class file_handle {
             'filename' => $filename,
             'filepath' => $filepath,
             'filesize' => $filesize,
+            'sha256sum' => $sha256sum,
             'filekey' => $filekey,
         ]);
 

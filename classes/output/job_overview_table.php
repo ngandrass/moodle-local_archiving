@@ -180,6 +180,10 @@ class job_overview_table extends \table_sql {
         global $PAGE;
         $html = '';
 
+        // Action: Show logs.
+        $logurl = new \moodle_url('/local/archiving/logs.php', ['jobid' => $values->id]);
+        $html .= '<a href="'.$logurl.'" class="btn btn-info mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('logs').'" alt="'.get_string('logs').'"><i class="fa fa-file-waveform"></i></a>';
+
         // Action: Delete.
         $deleteurl = new \moodle_url('/local/archiving/manage.php', [
             'action' => 'jobdelete',

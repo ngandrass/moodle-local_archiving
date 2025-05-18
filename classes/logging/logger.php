@@ -24,7 +24,7 @@
 
 namespace local_archiving\logging;
 
-use local_archiving\type;
+use local_archiving\type\db_table;
 use local_archiving\type\log_level;
 
 // @codingStandardsIgnoreLine
@@ -37,7 +37,9 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 class logger {
 
     /**
-     * Crates a new log entry
+     * Crates a new log entry inside the database.
+     *
+     * This is the generic internal implementation.
      *
      * @param log_level $level Log level
      * @param string $message Log message
@@ -48,7 +50,7 @@ class logger {
      * @return void
      * @throws \dml_exception
      */
-    protected function create_log_entry(
+    protected function write_log_entry_to_db(
         log_level $level,
         string $message,
         ?int $jobid = null,
@@ -56,15 +58,105 @@ class logger {
     ): void {
         global $DB;
 
-        $logentry = [
+        $DB->insert_record(db_table::LOG->value, [
             'level' => $level->value,
             'message' => $message,
             'jobid' => $jobid,
             'taskid' => $taskid,
             'timecreated' => time(),
+        ]);
+    }
+
+    /**
+     * Retrieves log entries from the database, filtered according to the given
+     * arguments.
+     *
+     * This is the generic internal implementation.
+     *
+     * @param log_level|null $level If set, only log entries with this level will be returned
+     * @param int|null $jobid If set, only log entries for this job will be returned
+     * @param int|null $taskid If set, only log entries for this task will be returned
+     * @param int $aftertime Return only logs created after this unix timestamp
+     * @param int $beforetime Return only logs created before this unix timestamp
+     * @param int $limitnum Maximum number of log entries to return
+     * @param int $limitfrom Offset for the returned log entries
+     * @return array An array of log entries with level, message, jobid, taskid, and timecreated attributes
+     * @throws \dml_exception
+     */
+    protected function get_log_entries_from_db(
+        ?log_level $level = null,
+        ?int $jobid = null,
+        ?int $taskid = null,
+        int $aftertime = 0,
+        int $beforetime = 9999999999,
+        int $limitnum = 100,
+        int $limitfrom = 0
+    ): array {
+        global $DB;
+
+        // Build WHERE clause.
+        $wheresql = "timecreated BETWEEN :aftertime AND :beforetime";
+        $params = [
+            'aftertime' => $aftertime,
+            'beforetime' => $beforetime,
         ];
 
-        $DB->insert_record(type\db_table::LOG->value, (object) $logentry);
+        if ($level) {
+            $wheresql .= " AND level = :level";
+            $params['level'] = $level->value;
+        }
+
+        if ($jobid) {
+            $wheresql .= " AND jobid = :jobid";
+            $params['jobid'] = $jobid;
+        }
+
+        if ($taskid) {
+            $wheresql .= "taskid = :taskid";
+            $params['taskid'] = $taskid;
+        }
+
+        // Execute query.
+        return $DB->get_records_sql("
+                SELECT * FROM {".db_table::LOG->value."}
+                WHERE {$wheresql}
+                ORDER BY timecreated ASC
+            ",
+            $params,
+            $limitfrom,
+            $limitnum
+        );
+
+    }
+
+    /**
+     * Retrieves all log entries that are not linked to any job or task and
+     * match the given criteria.
+     *
+     * @param log_level|null $level If set, only log entries with this level will be returned
+     * @param int $aftertime Return only logs created after this unix timestamp
+     * @param int $beforetime Return only logs created before this unix timestamp
+     * @param int $limitnum Maximum number of log entries to return
+     * @param int $limitfrom Offset for the returned log entries
+     * @return array An array of log entries with level, message, jobid, taskid, and timecreated attributes
+     * @throws \dml_exception
+     */
+    public function get_logs(
+        ?log_level $level = null,
+        int $aftertime = 0,
+        int $beforetime = 9999999999,
+        int $limitnum = 100,
+        int $limitfrom = 0
+    ): array {
+        return $this->get_log_entries_from_db(
+            $level,
+            0,
+            0,
+            $aftertime,
+            $beforetime,
+            $limitnum,
+            $limitfrom
+        );
     }
 
     /**
@@ -76,7 +168,7 @@ class logger {
      * @throws \dml_exception
      */
     public function log(log_level $level, string $message): void {
-        $this->create_log_entry($level, $message);
+        $this->write_log_entry_to_db($level, $message);
     }
 
     /**
@@ -87,7 +179,7 @@ class logger {
      * @throws \dml_exception
      */
     public function trace(string $message): void {
-        $this->create_log_entry(log_level::TRACE, $message);
+        $this->write_log_entry_to_db(log_level::TRACE, $message);
     }
 
     /**
@@ -98,7 +190,7 @@ class logger {
      * @throws \dml_exception
      */
     public function debug(string $message): void {
-        $this->create_log_entry(log_level::DEBUG, $message);
+        $this->write_log_entry_to_db(log_level::DEBUG, $message);
     }
 
     /**
@@ -109,7 +201,7 @@ class logger {
      * @throws \dml_exception
      */
     public function info(string $message): void {
-        $this->create_log_entry(log_level::INFO, $message);
+        $this->write_log_entry_to_db(log_level::INFO, $message);
     }
 
     /**
@@ -120,7 +212,7 @@ class logger {
      * @throws \dml_exception
      */
     public function warn(string $message): void {
-        $this->create_log_entry(log_level::WARNING, $message);
+        $this->write_log_entry_to_db(log_level::WARNING, $message);
     }
 
     /**
@@ -131,7 +223,7 @@ class logger {
      * @throws \dml_exception
      */
     public function error(string $message): void {
-        $this->create_log_entry(log_level::ERROR, $message);
+        $this->write_log_entry_to_db(log_level::ERROR, $message);
     }
 
     /**
@@ -142,7 +234,20 @@ class logger {
      * @throws \dml_exception
      */
     public function fatal(string $message): void {
-        $this->create_log_entry(log_level::FATAL, $message);
+        $this->write_log_entry_to_db(log_level::FATAL, $message);
+    }
+
+    /**
+     * Formats a log entry for display.
+     *
+     * @param \stdClass $logentry Log entry object
+     * @return string Formatted log entry
+     */
+    public static function format_log_entry(\stdClass $logentry): string {
+        return date('Y-m-d H:i:s', $logentry->timecreated).
+            ' ['.log_level::from($logentry->level)->name.'] '.
+            ($logentry->taskid ? ' -> ' : '').
+            $logentry->message;
     }
 
 }

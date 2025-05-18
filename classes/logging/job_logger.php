@@ -48,6 +48,38 @@ class job_logger extends logger {
     }
 
     /**
+     * Retrieves all log entries that are linked to the job this logger is tied
+     * to and match the given criteria.
+     *
+     * @param log_level|null $level Log level. If null, all log levels are returned.
+     * @param int $aftertime Return only log entries that were created after this time
+     * @param int $beforetime Return only log entries that were created before this time
+     * @param int $limitnum Maximum number of log entries to return
+     * @param int $limitfrom Offset for the log entries to return
+     * @return array An array of log entries with level, message, jobid, taskid, and timecreated attributes
+     * @throws \dml_exception
+     */
+    #[\Override]
+    public function get_logs(
+        ?log_level $level = null,
+        int $aftertime = 0,
+        int $beforetime = 9999999999,
+        int $limitnum = 100,
+        int $limitfrom = 0
+    ): array {
+        return $this->get_log_entries_from_db(
+            $level,
+            $this->jobid,
+            null,
+            $aftertime,
+            $beforetime,
+            $limitnum,
+            $limitfrom
+        );
+    }
+
+
+    /**
      * Logs a message with the given log level
      *
      * @param log_level $level Log level
@@ -55,8 +87,9 @@ class job_logger extends logger {
      * @return void
      * @throws \dml_exception
      */
+    #[\Override]
     public function log(log_level $level, string $message): void {
-        $this->create_log_entry($level, $message, $this->jobid);
+        $this->write_log_entry_to_db($level, $message, $this->jobid);
     }
 
     /**
@@ -66,8 +99,9 @@ class job_logger extends logger {
      * @return void
      * @throws \dml_exception
      */
+    #[\Override]
     public function trace(string $message): void {
-        $this->create_log_entry(log_level::TRACE, $message, $this->jobid);
+        $this->write_log_entry_to_db(log_level::TRACE, $message, $this->jobid);
     }
 
     /**
@@ -77,8 +111,9 @@ class job_logger extends logger {
      * @return void
      * @throws \dml_exception
      */
+    #[\Override]
     public function debug(string $message): void {
-        $this->create_log_entry(log_level::DEBUG, $message, $this->jobid);
+        $this->write_log_entry_to_db(log_level::DEBUG, $message, $this->jobid);
     }
 
     /**
@@ -88,8 +123,9 @@ class job_logger extends logger {
      * @return void
      * @throws \dml_exception
      */
+    #[\Override]
     public function info(string $message): void {
-        $this->create_log_entry(log_level::INFO, $message, $this->jobid);
+        $this->write_log_entry_to_db(log_level::INFO, $message, $this->jobid);
     }
 
     /**
@@ -99,8 +135,9 @@ class job_logger extends logger {
      * @return void
      * @throws \dml_exception
      */
+    #[\Override]
     public function warn(string $message): void {
-        $this->create_log_entry(log_level::WARNING, $message, $this->jobid);
+        $this->write_log_entry_to_db(log_level::WARNING, $message, $this->jobid);
     }
 
     /**
@@ -110,8 +147,9 @@ class job_logger extends logger {
      * @return void
      * @throws \dml_exception
      */
+    #[\Override]
     public function error(string $message): void {
-        $this->create_log_entry(log_level::ERROR, $message, $this->jobid);
+        $this->write_log_entry_to_db(log_level::ERROR, $message, $this->jobid);
     }
 
     /**
@@ -121,8 +159,9 @@ class job_logger extends logger {
      * @return void
      * @throws \dml_exception
      */
+    #[\Override]
     public function fatal(string $message): void {
-        $this->create_log_entry(log_level::FATAL, $message, $this->jobid);
+        $this->write_log_entry_to_db(log_level::FATAL, $message, $this->jobid);
     }
 
 }

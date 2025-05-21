@@ -24,6 +24,7 @@
 
 namespace local_archiving\driver\mod;
 
+use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
 use local_archiving\exception\yield_exception;
 use local_archiving\form\job_create_form;

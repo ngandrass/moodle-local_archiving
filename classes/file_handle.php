@@ -22,9 +22,9 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_archiving\driver\store;
+namespace local_archiving;
 
-use local_archiving\storage;
+use local_archiving\driver\store\archivingstore;
 use local_archiving\type\db_table;
 use local_archiving\util\plugin_util;
 

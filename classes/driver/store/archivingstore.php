@@ -25,6 +25,7 @@
 namespace local_archiving\driver\store;
 
 use local_archiving\exception\storage_exception;
+use local_archiving\file_handle;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore

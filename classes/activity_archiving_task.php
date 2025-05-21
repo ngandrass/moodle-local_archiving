@@ -22,12 +22,11 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_archiving\driver\mod;
+namespace local_archiving;
 
-use local_archiving\archive_job;
+use local_archiving\driver\mod\archivingmod;
 use local_archiving\exception\yield_exception;
 use local_archiving\logging\task_logger;
-use local_archiving\storage;
 use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\db_table;
 use local_archiving\type\filearea;

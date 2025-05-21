@@ -25,7 +25,7 @@
 namespace local_archiving\output;
 
 use local_archiving\archive_job;
-use local_archiving\driver\store\file_handle;
+use local_archiving\file_handle;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 

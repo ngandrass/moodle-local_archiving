@@ -53,6 +53,14 @@ abstract class archivingstore {
     abstract public static function get_plugname(): string;
 
     /**
+     * Determines if this storage plugin supports retrieving previously stored
+     * files from the storage.
+     *
+     * @return bool True, if file retrieval is supported, false otherwise
+     */
+    abstract public static function supports_retrieve(): bool;
+
+    /**
      * Checks if this storage is available for use
      *
      * @return bool True if the storage is available, false otherwise

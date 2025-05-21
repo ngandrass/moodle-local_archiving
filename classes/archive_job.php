@@ -467,6 +467,26 @@ class archive_job {
     }
 
     /**
+     * Retrieves the unix timestamp this job was created
+     *
+     * @return int Unix timestamp of creation time
+     */
+    public function get_timecreated(): int {
+        return $this->timecreated;
+    }
+
+    /**
+     * Retrieves the unix timestamp this job was last modified
+     *
+     * @return int Unix timestamp of last modification time
+     * @throws \dml_exception
+     */
+    public function get_timemodified(): int {
+        global $DB;
+        return $DB->get_field(db_table::JOB->value, 'timemodified', ['id' => $this->id], MUST_EXIST);
+    }
+
+    /**
      * Retrieves the current job status
      *
      * @return archive_job_status Current job status

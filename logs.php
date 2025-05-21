@@ -24,6 +24,8 @@
  */
 
 use local_archiving\archive_job;
+use local_archiving\logging\logger;
+use local_archiving\type\archive_job_status;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -51,20 +53,21 @@ $PAGE->set_url(new moodle_url(
 // Render output.
 $renderer = $PAGE->get_renderer('local_archiving');
 echo $OUTPUT->header();
-
-// vvvvv DEBUG start vvvvv
-
-echo "<h2>Logs for job {$jobid} ({$job->get_status()->name()})</h2>";
-
-echo "<pre>";
-foreach ($job->get_logger()->get_logs() as $entry) {
-    echo \local_archiving\logging\logger::format_log_entry($entry)."\r\n";
-}
-echo "</pre>";
-
-$backurl = new moodle_url('/local/archiving/index.php', ['courseid' => $course->id]);
-echo "<a href=\"{$backurl}\">Go back to overview</a>";
-
-// ^^^^^ DEBUG end ^^^^^
-
+echo $renderer->render_from_template('local_archiving/job_logs', [
+    'job' => [
+        'id' => $job->get_id(),
+        'status' => $job->get_status()->status_display_args(),
+        'completed' => $job->is_completed(),
+        'timecreated' => $job->get_timecreated(),
+        'timemodified' => $job->get_timemodified(),
+        'logs' => array_reduce(
+            $job->get_logger()->get_logs(),
+            fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
+            ""
+        ),
+    ],
+    'urls' => [
+        'back' => new moodle_url('/local/archiving/index.php', ['courseid' => $course->id]),
+    ],
+]);
 echo $OUTPUT->footer();

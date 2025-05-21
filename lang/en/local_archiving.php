@@ -28,6 +28,7 @@ $string['pluginname'] = 'Archiving';
 
 // Common.
 $string['activitytype'] = 'Activity type';
+$string['back_to_overview'] = 'Back to overview';
 $string['create_archive'] = 'Create archive';
 $string['id'] = 'ID';
 $string['jobid'] = 'Job ID';
@@ -47,6 +48,7 @@ $string['archiving:create'] = 'Create new archives';
 $string['archiving:delete'] = 'Delete archives and metadata';
 
 // Job management.
+$string['archive_job_logs'] = 'Archive job logs';
 $string['delete_job'] = 'Delete archive job';
 $string['delete_job_warning'] = 'Are you sure that you want to delete this archive job <b>including all archived data?</b>';
 

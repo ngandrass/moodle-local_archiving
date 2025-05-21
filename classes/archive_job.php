@@ -291,7 +291,11 @@ class archive_job {
 
             // Processing -> Activity archiving.
             if ($status == archive_job_status::PROCESSING) {
+                // Create activity archiving task.
                 $this->create_activity_archiving_task();
+
+                $drivername = $this->activity_archiving_driver()->get_plugname();
+                $this->get_logger()->info('Created activity archiving task (driver: '.$drivername.')');
 
                 // Update job status early because task execution can take some time ...
                 $status = archive_job_status::ACTIVITY_ARCHIVING;
@@ -321,6 +325,8 @@ class archive_job {
                 if (empty($artifacts)) {
                     $status = archive_job_status::FAILURE;
                     throw new \moodle_exception('no_activity_artifacts_found', 'local_archiving');
+                } else {
+                    $this->get_logger()->info('Got '.count($artifacts).' artifacts to store.');
                 }
 
                 $status = archive_job_status::STORE;
@@ -339,7 +345,10 @@ class archive_job {
 
                 foreach ($tasks as $task) {
                     foreach ($task->get_linked_artifacts() as $artifact) {
-                        $driver->store($this->id, $artifact, "job-{$this->id}");
+                        $filehandle = $driver->store($this->id, $artifact, "job-{$this->id}");
+                        $this->get_logger()->info(
+                            "Stored artifact: {$filehandle->filename} (size: {$filehandle->filesize} bytes) (id: {$filehandle->id})"
+                        );
                         $task->unlink_artifact($artifact, true);
                     }
                 }

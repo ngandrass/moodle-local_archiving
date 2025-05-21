@@ -24,7 +24,7 @@
 
 namespace local_archiving;
 
-use local_archiving\driver\mod\archivingmod;
+use local_archiving\driver\archivingmod;
 use local_archiving\exception\yield_exception;
 use local_archiving\logging\task_logger;
 use local_archiving\type\activity_archiving_task_status;

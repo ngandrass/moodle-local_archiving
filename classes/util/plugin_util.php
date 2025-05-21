@@ -24,9 +24,9 @@
 
 namespace local_archiving\util;
 
-use local_archiving\driver\event\archivingevent;
-use local_archiving\driver\mod\archivingmod;
-use local_archiving\driver\store\archivingstore;
+use local_archiving\driver\archivingevent;
+use local_archiving\driver\archivingmod;
+use local_archiving\driver\archivingstore;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -74,7 +74,7 @@ class plugin_util {
                 'name' => $pluginclass::get_name(),
                 'activities' => $pluginclass::get_supported_activities(),
                 'basedir' => $basedir,
-                'class' => $pluginclass
+                'class' => $pluginclass,
             ];
         }
 
@@ -135,7 +135,7 @@ class plugin_util {
             $res[$pluginname] = [
                 'name' => $pluginclass::get_name(),
                 'basedir' => $basedir,
-                'class' => $pluginclass
+                'class' => $pluginclass,
             ];
         }
 
@@ -161,7 +161,7 @@ class plugin_util {
             $res[$pluginname] = [
                 'name' => $pluginclass::get_name(),
                 'basedir' => $basedir,
-                'class' => $pluginclass
+                'class' => $pluginclass,
             ];
         }
 

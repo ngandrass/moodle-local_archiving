@@ -22,7 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_archiving\driver\store;
+namespace local_archiving\driver;
 
 use local_archiving\exception\storage_exception;
 use local_archiving\file_handle;

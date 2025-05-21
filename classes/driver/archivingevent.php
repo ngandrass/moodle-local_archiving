@@ -22,7 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_archiving\driver\event;
+namespace local_archiving\driver;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore

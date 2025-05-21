@@ -22,7 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_archiving\driver\mod;
+namespace local_archiving\driver;
 
 use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;

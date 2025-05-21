@@ -51,6 +51,9 @@ final class activity_archiving_task {
     /** @var ?\stdClass Optional task specific settings (lazy-loaded) */
     protected ?\stdClass $settings;
 
+    /** @var task_logger|null Logger instanze (lazy-loaded) */
+    protected ?task_logger $logger;
+
     /**
      * Builds a new activity archiving task object. This does not create entries
      * in the database. For creating or loading tasks use the respective static
@@ -72,6 +75,7 @@ final class activity_archiving_task {
         $this->archivejob = null;
         $this->archivingmod = null;
         $this->settings = null;
+        $this->logger = null;
     }
 
     /**
@@ -83,7 +87,13 @@ final class activity_archiving_task {
      * @return task_logger Logger instance
      */
     public function get_logger(): task_logger {
-        return new task_logger($this->jobid, $this->taskid);
+        if ($this->logger instanceof task_logger) {
+            return $this->logger;
+        }
+
+        $this->logger = new task_logger($this->jobid, $this->taskid);
+
+        return $this->logger;
     }
 
     /**

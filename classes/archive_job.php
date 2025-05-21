@@ -52,6 +52,9 @@ class archive_job {
     /** @var \stdClass|null Job settings object (lazy-loaded) */
     protected ?\stdClass $settings;
 
+    /** @var job_logger|null Logger instance (lazy-loaded) */
+    protected ?job_logger $logger;
+
     /**
      * Constructs an archive job instance. This does not create the job in the
      * database. To create a new or retrieve an existing job use the respective
@@ -71,6 +74,7 @@ class archive_job {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
         $this->settings = null;
+        $this->logger = null;
     }
 
     /**
@@ -82,7 +86,13 @@ class archive_job {
      * @return job_logger Logger instance
      */
     public function get_logger(): job_logger {
-        return new job_logger($this->id);
+        if ($this->logger instanceof job_logger) {
+            return $this->logger;
+        }
+
+        $this->logger = new job_logger($this->id);
+
+        return $this->logger;
     }
 
     /**

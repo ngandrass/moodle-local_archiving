@@ -35,10 +35,13 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Handle for a file stored by storage drivers
  *
+ * @property-read int $id ID of the file handle
+ * @property-read int $jobid ID of the archiving job this file is associated with
  * @property-read string $archivingstore Name of the storage driver that works with this file handle
  * @property-read string $filename Name of the referenced file
  * @property-read string $filepath Path of the referenced file
  * @property-read int $filesize Filesize in bytes
+ * @property-read string $sha256sum SHA256 checksum of the file
  * @property-read string $filekey Optional unique key for identifying the file
  */
 final class file_handle {

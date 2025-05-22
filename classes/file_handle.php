@@ -216,11 +216,9 @@ final class file_handle {
      * Generates a complete fileinfo record that _MUST_ be used as a target when
      * retrieving the file for this file_handle.
      *
-     * Files are stored temporarily inside the filestore cache file area. The
-     * filepath begins with the unique ID of the file_handle, thereby allowing
-     * to quickly check if the file is already available locally. The ID is
-     * followed by the unix timestamp of retrieval, which is used to determine
-     * the file age during cache cleanup.
+     * Files are stored temporarily inside the filestore cache file area. As the
+     * ids of file handles are unique, those are used as itemid to easily
+     * identify cached versions of the file.
      *
      * @return \stdClass Fileinfo record for the file to be retrieved
      * @throws \dml_exception
@@ -232,8 +230,8 @@ final class file_handle {
             'contextid' => $job->get_context()->id,
             'component' => filearea::FILESTORE_CACHE->get_component(),
             'filearea' => filearea::FILESTORE_CACHE->value,
-            'itemid' => 0,
-            'filepath' => "/{$this->id}/".time().'/',
+            'itemid' => $this->id,
+            'filepath' => '/',
             'filename' => $this->filename,
         ];
     }
@@ -255,12 +253,12 @@ final class file_handle {
                     filename != '.' AND
                     component = :component AND
                     filearea = :filearea AND
-                    filepath LIKE :filehandleidpattern
+                    itemid = :itemid
             ",
             [
                 'component' => filearea::FILESTORE_CACHE->get_component(),
                 'filearea' => filearea::FILESTORE_CACHE->value,
-                'filehandleidpattern' => "/{$this->id}/%",
+                'itemid' => $this->id,
             ],
             IGNORE_MISSING
         );
@@ -269,17 +267,6 @@ final class file_handle {
         }
 
         return get_file_storage()->get_file_by_id($file->id);
-    }
-
-    /**
-     * Checks if the file referenced by this file handle is currently available
-     * in the local filestore cache
-     *
-     * @return bool True if the file is available locally, false otherwise
-     * @throws \dml_exception
-     */
-    public function is_available_locally(): bool {
-        return $this->get_local_file() != null;
     }
 
     /**

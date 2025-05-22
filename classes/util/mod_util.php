@@ -27,6 +27,8 @@ namespace local_archiving\util;
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+use local_archiving\type\archive_job_status;
+use local_archiving\type\db_table;
 
 /**
  * Utility functions for working with activities
@@ -42,14 +44,37 @@ class mod_util {
      * @throws \moodle_exception If the course does not exist
      */
     public static function get_cms_with_metadata(int $courseid): array {
+        global $DB;
+
+        // Get cms and supported activities.
         $modinfo = get_fast_modinfo($courseid);
         $supported = plugin_util::get_supported_activities();
 
+        if (empty($modinfo->cms)) {
+            return [];
+        }
+
+        // Get latest successfull archiving job for each cm.
+        $cmcontextids = array_map(fn ($cm) => $cm->context->id, $modinfo->cms);
+        $cmcontextidssql = implode(',', array_map('intval', $cmcontextids));
+        $lastarchivedcms = $DB->get_records_sql("
+                SELECT contextid, MAX(timecreated) AS lastarchived
+                FROM {".db_table::JOB->value."}
+                WHERE
+                    status = :status AND
+                    contextid IN ({$cmcontextidssql})
+                GROUP BY contextid
+            ",
+            ['status' => archive_job_status::COMPLETED->value]
+        );
+
+        // Build response.
         $res = [];
         foreach ($modinfo->cms as $cm) {
             $res[$cm->id] = (object) [
                 'cm' => $cm,
                 'supported' => array_key_exists($cm->modname, $supported),
+                'lastarchived' => ($lastarchivedcms[$cm->context->id] ?? null)?->lastarchived,
             ];
         }
 

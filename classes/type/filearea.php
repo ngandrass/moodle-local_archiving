@@ -33,11 +33,23 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 enum filearea: string {
 
+    /**
+     * Returns the component name for this filearea
+     *
+     * @return string The component name for this filearea
+     */
+    public function get_component(): string {
+        return 'local_archiving';
+    }
+
     /** @var string Filearea for temporary files */
     case TEMP = 'temp';
 
-    /** @var string Filearea for artifacts */
+    /** @var string Filearea for artifacts during job / task execution */
     case ARTIFACT = 'artifact';
+
+    /** @var string Filearea for caching previously stored artifacts for local access */
+    case FILESTORE_CACHE = 'filestorecache';
 
     /** @var string Filearea for draft files and uploads */
     case DRAFT = 'draft';

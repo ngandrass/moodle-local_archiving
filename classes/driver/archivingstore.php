@@ -56,7 +56,7 @@ abstract class archivingstore {
      * Determines if this storage plugin supports retrieving previously stored
      * files from the storage.
      *
-     * @return bool True, if file retrieval is supported, false otherwise
+     * @return bool True if file retrieval is supported, false otherwise
      */
     abstract public static function supports_retrieve(): bool;
 
@@ -77,6 +77,9 @@ abstract class archivingstore {
     /**
      * Transfers the given Moodle file to this storage under the given path
      *
+     * ATTENTION: Ownership of the source stored_file stays with the caller. The
+     * caller is responsible for cleaning it up once it is not required anymore!
+     *
      * @param int $jobid ID of the archive job this file is associated with
      * @param \stored_file $file The Moodle file to be stored
      * @param string $path The path to store the file under
@@ -86,19 +89,29 @@ abstract class archivingstore {
     abstract public function store(int $jobid, \stored_file $file, string $path): file_handle;
 
     /**
-     * Retrieves the file stored under the given path
+     * Retrieves the file stored for the given file handle
+     *
+     * This function retrieves a local copy of the referenced file and stores it
+     * inside the Moodle file storage for local access. It MUST the provided
+     * file info object when storing the file inside the Moodle file storage.
+     *
+     * ATTENTION: The caller takes ownership of the file and is responsible for
+     * cleaning it up once it is not required anymore!
      *
      * @param file_handle $handle Handle of the file to retrieve
+     * @param \stdClass $fileinfo The file info object to use for storing the file
      * @return \stored_file The retrieved file
      * @throws storage_exception
      */
-    abstract public function retrieve(file_handle $handle): \stored_file;
+    abstract public function retrieve(file_handle $handle, \stdClass $fileinfo): \stored_file;
 
     /**
      * Deletes the given file from storage if possible
      *
      * @param file_handle $handle Handle of the file to delete
-     * @param bool $strict If true, the file will be deleted even if it is not empty
+     * @param bool $strict If true, a storage_exception will be thrown if the
+     * file does not exist in the storage destination. If false, missing files
+     * will be silently ignored.
      * @throws storage_exception
      */
     abstract public function delete(file_handle $handle, bool $strict = false): void;

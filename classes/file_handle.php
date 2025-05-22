@@ -26,6 +26,7 @@ namespace local_archiving;
 
 use local_archiving\driver\archivingstore;
 use local_archiving\type\db_table;
+use local_archiving\type\filearea;
 use local_archiving\util\plugin_util;
 
 // @codingStandardsIgnoreLine
@@ -70,7 +71,7 @@ final class file_handle {
         protected readonly string $sha256sum,
         protected readonly string $filekey = ''
     ) {
-
+        $this->archivingstore = null;
     }
 
     /**
@@ -209,6 +210,76 @@ final class file_handle {
         if ($removefile) {
             $this->archivingstore()->delete($this);
         }
+    }
+
+    /**
+     * Generates a complete fileinfo record that _MUST_ be used as a target when
+     * retrieving the file for this file_handle.
+     *
+     * Files are stored temporarily inside the filestore cache file area. The
+     * filepath begins with the unique ID of the file_handle, thereby allowing
+     * to quickly check if the file is already available locally. The ID is
+     * followed by the unix timestamp of retrieval, which is used to determine
+     * the file age during cache cleanup.
+     *
+     * @return \stdClass Fileinfo record for the file to be retrieved
+     * @throws \dml_exception
+     */
+    public function generate_retrieval_fileinfo_record(): \stdClass {
+        $job = archive_job::get_by_id($this->jobid);
+
+        return (object) [
+            'contextid' => $job->get_context()->id,
+            'component' => filearea::FILESTORE_CACHE->get_component(),
+            'filearea' => filearea::FILESTORE_CACHE->value,
+            'itemid' => 0,
+            'filepath' => "/{$this->id}/".time().'/',
+            'filename' => $this->filename,
+        ];
+    }
+
+    /**
+     * Retrieves the local stored_file for this file handle if currently present
+     * in the filestore cache
+     *
+     * @return \stored_file|null The stored_file object or null if not found
+     * @throws \dml_exception
+     */
+    public function get_local_file(): ?\stored_file {
+        global $DB;
+
+        $file = $DB->get_record_sql("
+                SELECT id
+                FROM {files}
+                WHERE
+                    filename != '.' AND
+                    component = :component AND
+                    filearea = :filearea AND
+                    filepath LIKE :filehandleidpattern
+            ",
+            [
+                'component' => filearea::FILESTORE_CACHE->get_component(),
+                'filearea' => filearea::FILESTORE_CACHE->value,
+                'filehandleidpattern' => "/{$this->id}/%",
+            ],
+            IGNORE_MISSING
+        );
+        if (!$file) {
+            return null;
+        }
+
+        return get_file_storage()->get_file_by_id($file->id);
+    }
+
+    /**
+     * Checks if the file referenced by this file handle is currently available
+     * in the local filestore cache
+     *
+     * @return bool True if the file is available locally, false otherwise
+     * @throws \dml_exception
+     */
+    public function is_available_locally(): bool {
+        return $this->get_local_file() != null;
     }
 
     /**

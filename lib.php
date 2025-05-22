@@ -23,6 +23,8 @@
  */
 
 // @codingStandardsIgnoreLine
+use local_archiving\type\filearea;
+
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
@@ -66,7 +68,7 @@ function local_archiving_extend_settings_navigation(settings_navigation $setting
             // Construct new navigation node.
             $url = new moodle_url('/local/archiving/archive.php', [
                 'courseid' => $ctx->get_course_context()->instanceid,
-                'cmid' => $ctx->instanceid
+                'cmid' => $ctx->instanceid,
             ]);
             $node = navigation_node::create(
                 get_string('pluginname', 'local_archiving'),
@@ -84,4 +86,57 @@ function local_archiving_extend_settings_navigation(settings_navigation $setting
             }
         }
     }
+}
+
+/**
+ * Serve local_archiving files
+ *
+ * @param stdClass $course the course object
+ * @param stdClass $cm the course module object
+ * @param stdClass $context the context
+ * @param string $filearea the name of the file area
+ * @param array $args extra arguments (itemid, path)
+ * @param bool $forcedownload whether or not force download
+ * @param array $options additional options affecting the file serving
+ *
+ * @return bool false if the file not found, just send the file otherwise and do not return anything
+ *
+ * @throws coding_exception
+ * @throws required_capability_exception
+ * @throws moodle_exception
+ */
+function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+    // Validate filearea.
+    if ($filearea !== filearea::FILESTORE_CACHE->value) {
+        return false;
+    }
+
+    // Check permissions.
+    require_login($course, false, $cm);
+    if (!has_capability('local/archiving:view', $context)) {
+        return false;
+    }
+
+    // Get remaining file information from $args.
+    $itemid = array_shift($args);
+    $filename = array_pop($args);
+    $filepath = '/'.implode('/', $args).'/';
+
+    // Try to retrieve and serve file.
+    $fs = get_file_storage();
+    $file = $fs->get_file(
+        contextid: $context->id,
+        component: filearea::FILESTORE_CACHE->get_component(),
+        filearea: filearea::FILESTORE_CACHE->value,
+        itemid: $itemid,
+        filepath: $filepath,
+        filename: $filename
+    );
+
+    if (!$file || $file->is_directory()) {
+        send_file_not_found();
+    }
+
+    send_stored_file($file, 0, 0, $forcedownload, $options);
+    return true;
 }

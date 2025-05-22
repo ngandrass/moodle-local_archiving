@@ -46,7 +46,7 @@ class storage {
     public const FOLDERNAME_FORBIDDEN_CHARACTERS = ["\\", ".", ":", ";", "*", "?", "!", "\"", "<", ">", "|", "\0"];
 
     /** @var string[] Characters that are forbidden in a filename pattern */
-    public const FILENAME_FORBIDDEN_CHARACTERS = self::FOLDERNAME_FORBIDDEN_CHARACTERS + ["/"];
+    public const FILENAME_FORBIDDEN_CHARACTERS = ["\\", ".", ":", ";", "*", "?", "!", "\"", "<", ">", "|", "\0", "/"];
 
     /**
      * Determines if the given filename pattern contains only allowed variables

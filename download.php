@@ -74,6 +74,9 @@ if (count($filehandles) == 0) {
         );
     }
 
+    // Touch file to prevent it from being removed from the cache during download.
+    $localfile->set_timemodified(time());
+
     $downloadurl = moodle_url::make_pluginfile_url(
         $localfile->get_contextid(),
         $localfile->get_component(),

@@ -80,26 +80,6 @@ $jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$
 $jobtbl->define_baseurl($PAGE->url);
 $jobtbl->out(20, true);
 
-echo "<h3>Activity Archiving Drivers</h3>";
-echo "<pre>";
-print_r(plugin_util::get_activity_archiving_drivers());
-echo "</pre>";
-
-echo "<h5>Supported Activities</h5>";
-echo "<pre>";
-print_r(plugin_util::get_supported_activities());
-echo "</pre>";
-
-echo "<h3>Storage Drivers</h3>";
-echo "<pre>";
-print_r(plugin_util::get_storage_drivers());
-echo "</pre>";
-
-echo "<h3>Event Connectors</h3>";
-echo "<pre>";
-print_r(plugin_util::get_event_connectors());
-echo "</pre>";
-
 // DEBUG end
 
 echo $OUTPUT->footer();

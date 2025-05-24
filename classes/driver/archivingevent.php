@@ -33,8 +33,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Interface for external event connector (archivingevent) sub-plugins
  */
-abstract class archivingevent {
-
-    use subplugin_get_plugin_name;
+abstract class archivingevent extends base {
 
 }

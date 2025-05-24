@@ -28,7 +28,6 @@ use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
 use local_archiving\exception\yield_exception;
 use local_archiving\form\job_create_form;
-use local_archiving\trait\subplugin_get_plugin_name;
 use local_archiving\type\activity_archiving_task_status;
 
 // @codingStandardsIgnoreLine
@@ -38,9 +37,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Interface for activity archiving driver (archivingmod) sub-plugins
  */
-abstract class archivingmod {
-
-    use subplugin_get_plugin_name;
+abstract class archivingmod extends base {
 
     /** @var int ID of the course the targeted activity is part of */
     protected readonly int $courseid;

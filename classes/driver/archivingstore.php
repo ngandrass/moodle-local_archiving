@@ -26,7 +26,6 @@ namespace local_archiving\driver;
 
 use local_archiving\exception\storage_exception;
 use local_archiving\file_handle;
-use local_archiving\trait\subplugin_get_plugin_name;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -35,9 +34,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Interface for storage driver (archivingstore) sub-plugins
  */
-abstract class archivingstore {
-
-    use subplugin_get_plugin_name;
+abstract class archivingstore extends base {
 
     /**
      * Determines if this storage plugin supports retrieving previously stored

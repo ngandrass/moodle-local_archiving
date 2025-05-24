@@ -118,6 +118,7 @@ $string['archive_retention_time_help'] = 'The amount of time this archive should
 
 // Admin settings.
 $string['common_settings'] = 'Common settings';
+$string['setting_header_subplugins_desc'] = 'This page allows you to manage all sub-plugins of the archiving system. TODO TODO TODO';
 $string['setting_header_common_desc'] = 'TODO';
 $string['setting_header_job_presets'] = 'Archive Presets';
 $string['setting_header_job_presets_desc'] = 'System wide default settings for archive creation. These defaults can be overridden when creating a new archive. However, each individual setting can also be locked to prevent managers / teachers from changing it. This can be useful when enforcing organization wide archive policies.';
@@ -131,6 +132,7 @@ $string['setting_tsp_enable'] = 'Enable archive signing';
 $string['setting_tsp_enable_desc'] = 'Allow archives to be signed using the Time-Stamp Protocol (TSP). If this option is disabled, archives can neither be signed manually nor automatically.';
 $string['setting_tsp_server_url'] = 'TSP server URL';
 $string['setting_tsp_server_url_desc'] = 'URL of the Time-Stamp Protocol (TSP) server to use.<br/>Examples: <code>https://freetsa.org/tsr</code>, <code>https://zeitstempel.dfn.de</code>, <code>http://timestamp.digicert.com</code>';
+$string['subplugin_settings'] = 'Manage components';
 
 // Storage tiers.
 $string['storage_tier'] = 'Storage tier';

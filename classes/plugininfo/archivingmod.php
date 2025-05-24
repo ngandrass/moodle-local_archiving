@@ -24,10 +24,15 @@
 
 namespace local_archiving\plugininfo;
 
+use local_archiving\util\plugin_util;
+
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
+/**
+ * Subplugin info class for archivingmod
+ */
 class archivingmod extends \core\plugininfo\base {
 
     /**
@@ -49,8 +54,76 @@ class archivingmod extends \core\plugininfo\base {
      */
     #[\Override]
     public static function plugintype_supports_disabling(): bool {
-        // TODO: Add support for enabling / disabling
-        return parent::plugintype_supports_disabling();
+        return true;
+    }
+
+    /**
+     * Enable or disable a plugin.
+     * When possible, the change will be stored into the config_log table, to let admins check when/who has modified it.
+     *
+     * @param string $pluginname The plugin name to enable/disable.
+     * @param int $enabled Whether the pluginname should be enabled (1) or not (0). This is an integer because some plugins, such
+     * as filters or repositories, might support more statuses than just enabled/disabled.
+     *
+     * @return bool Whether $pluginname has been updated or not.
+     * @throws \dml_exception
+     */
+    #[\Override]
+    public static function enable_plugin(string $pluginname, int $enabled): bool {
+        $wasenabled = (get_config("archivingmod_{$pluginname}", 'enabled') == 1);
+
+        if ($enabled && !$wasenabled) {
+            set_config('enabled', 1, "archivingmod_{$pluginname}");
+            return true;
+        } else if (!$enabled && $wasenabled) {
+            set_config('enabled', 0, "archivingmod_{$pluginname}");
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the information about plugin availability
+     *
+     * True means that the plugin is enabled. False means that the plugin is
+     * disabled. Null means that the information is not available, or the
+     * plugin does not support configurable availability or the availability
+     * can not be changed.
+     *
+     * @return null|bool
+     * @throws \dml_exception
+     */
+    #[\Override]
+    public function is_enabled() {
+        if (!$this->rootdir) {
+            // Plugin missing.
+            return false;
+        }
+
+        if (get_config("archivingmod_{$this->name}", 'enabled') == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Finds all enabled plugins, the result may include missing plugins.
+     *
+     * @return array|null of enabled plugins $pluginname=>$pluginname, null means unknown
+     */
+    #[\Override]
+    public static function get_enabled_plugins() {
+        $enabledplugins = [];
+
+        foreach (plugin_util::get_activity_archiving_drivers() as $name => $metadata) {
+            if ($metadata['enabled']) {
+                $enabledplugins[$name] = $name;
+            }
+        }
+
+        return $enabledplugins;
     }
 
 }

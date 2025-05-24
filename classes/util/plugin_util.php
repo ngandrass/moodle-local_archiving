@@ -40,12 +40,12 @@ class plugin_util {
     /**
      * Retrieves the given subplugin class name for the given driver type and modname
      *
-     * @param string $modtype Type of the subplugin to look for (e.g., 'archivingmod')
-     * @param string $modname Name of the subplugin to look for (e.g., 'quiz')
+     * @param string $plugintype Type of the subplugin to look for (e.g., 'archivingmod')
+     * @param string $pluginname Name of the subplugin to look for (e.g., 'quiz')
      * @return string|null Fully-quallified class name of the subplugin class if found, null otherwise
      */
-    public static function get_subplugin_by_name(string $modtype, string $modname): ?string {
-        $archivingmod = "\\{$modtype}_{$modname}\\{$modtype}";
+    public static function get_subplugin_by_name(string $plugintype, string $pluginname): ?string {
+        $archivingmod = "\\{$plugintype}_{$pluginname}\\{$plugintype}";
 
         if (!class_exists($archivingmod)) {
             return null;
@@ -62,19 +62,25 @@ class plugin_util {
      */
     public static function get_activity_archiving_drivers(): array {
         // Retrieve list of installed archivingmod plugins.
-        $plugins = \core_component::get_plugin_list('archivingmod');
+        $plugins = \core_plugin_manager::instance()->get_plugins_of_type('archivingmod');
         $res = [];
 
         // Iterate over all plugins and collect their metadata.
-        foreach ($plugins as $pluginname => $basedir) {
-            /** @var archivingmod $pluginclass */
-            $pluginclass = self::get_subplugin_by_name('archivingmod', $pluginname);
+        foreach ($plugins as $plugin) {
+            if (!$plugin->rootdir) {
+                // Skip plugins with missing sources.
+                continue;
+            }
 
-            $res[$pluginname] = [
-                'name' => $pluginclass::get_name(),
-                'activities' => $pluginclass::get_supported_activities(),
-                'basedir' => $basedir,
+            /** @var archivingmod $pluginclass */
+            $pluginclass = self::get_subplugin_by_name('archivingmod', $plugin->name);
+
+            $res[$plugin->name] = [
+                'displayname' => $plugin->displayname,
+                'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
+                'activities' => $pluginclass::get_supported_activities(),
+                'enabled' => $plugin->is_enabled() ?? false,
             ];
         }
 
@@ -108,7 +114,7 @@ class plugin_util {
      */
     public static function get_archiving_driver_for_cm(string $modname): ?string {
         foreach (self::get_activity_archiving_drivers() as $driver) {
-            if (array_search($modname, $driver['activities']) !== false) {
+            if (in_array($modname, $driver['activities'])) {
                 return $driver['class'];
             }
         }
@@ -124,18 +130,24 @@ class plugin_util {
      */
     public static function get_storage_drivers(): array {
         // Retrieve list of installed archivingstore plugins.
-        $plugins = \core_component::get_plugin_list('archivingstore');
+        $plugins = \core_plugin_manager::instance()->get_plugins_of_type('archivingstore');
         $res = [];
 
         // Iterate over all plugins and collect their metadata.
-        foreach ($plugins as $pluginname => $basedir) {
-            /** @var archivingstore $pluginclass */
-            $pluginclass = self::get_subplugin_by_name('archivingstore', $pluginname);
+        foreach ($plugins as $plugin) {
+            if (!$plugin->rootdir) {
+                // Skip plugins with missing sources.
+                continue;
+            }
 
-            $res[$pluginname] = [
-                'name' => $pluginclass::get_name(),
-                'basedir' => $basedir,
+            /** @var archivingstore $pluginclass */
+            $pluginclass = self::get_subplugin_by_name('archivingstore', $plugin->name);
+
+            $res[$plugin->name] = [
+                'displayname' => $plugin->displayname,
+                'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
+                'enabled' => $plugin->is_enabled() ?? false,
             ];
         }
 
@@ -150,18 +162,24 @@ class plugin_util {
      */
     public static function get_event_connectors(): array {
         // Retrieve list of installed archivingevent plugins.
-        $plugins = \core_component::get_plugin_list('archivingevent');
+        $plugins = \core_plugin_manager::instance()->get_plugins_of_type('archivingevent');
         $res = [];
 
         // Iterate over all plugins and collect their metadata.
-        foreach ($plugins as $pluginname => $basedir) {
-            /** @var archivingevent $pluginclass */
-            $pluginclass = self::get_subplugin_by_name('archivingevent', $pluginname);
+        foreach ($plugins as $plugin) {
+            if (!$plugin->rootdir) {
+                // Skip plugins with missing sources.
+                continue;
+            }
 
-            $res[$pluginname] = [
-                'name' => $pluginclass::get_name(),
-                'basedir' => $basedir,
+            /** @var archivingevent $pluginclass */
+            $pluginclass = self::get_subplugin_by_name('archivingevent', $plugin->name);
+
+            $res[$plugin->name] = [
+                'displayname' => $plugin->displayname,
+                'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
+                'enabled' => $plugin->is_enabled() ?? false,
             ];
         }
 

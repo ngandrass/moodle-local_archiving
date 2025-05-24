@@ -26,6 +26,7 @@ namespace local_archiving\driver;
 
 use local_archiving\exception\storage_exception;
 use local_archiving\file_handle;
+use local_archiving\trait\subplugin_get_plugin_name;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -36,21 +37,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 abstract class archivingstore {
 
-    /**
-     * Returns the localized name of this driver
-     *
-     * @return string Localized name of the driver
-     */
-    abstract public static function get_name(): string;
-
-    /**
-     * Returns the internal identifier for this driver. This function should
-     * return the last part of the frankenstyle plugin name (e.g., 'localdir'
-     * for 'archivingstore_localdir').
-     *
-     * @return string Internal identifier of this driver
-     */
-    abstract public static function get_plugname(): string;
+    use subplugin_get_plugin_name;
 
     /**
      * Determines if this storage plugin supports retrieving previously stored

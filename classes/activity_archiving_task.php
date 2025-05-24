@@ -648,7 +648,7 @@ final class activity_archiving_task {
     public function generate_artifact_fileinfo(string $filename): \stdClass {
         return (object) [
             'contextid' => $this->context->get_course_context()->id,
-            'component' => 'archivingmod_'.$this->archivingmod()::get_plugname(),
+            'component' => 'archivingmod_'.$this->archivingmod()->get_plugin_name(),
             'filearea' => filearea::ARTIFACT->value,
             'itemid' => 0,
             'filepath' => "/job-{$this->jobid}/task-{$this->taskid}/",

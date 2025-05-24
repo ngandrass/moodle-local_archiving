@@ -24,6 +24,8 @@
 
 namespace local_archiving\driver;
 
+use local_archiving\trait\subplugin_get_plugin_name;
+
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -33,20 +35,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 abstract class archivingevent {
 
-    /**
-     * Returns the name of this external event connector
-     *
-     * @return string Name of the external event connector
-     */
-    abstract public static function get_name(): string;
-
-    /**
-     * Returns the internal identifier for this external event connector. This
-     * function should return the last part of the frankenstyle plugin name
-     * (e.g., 'cms' for 'archivingevent_cms').
-     *
-     * @return string Internal identifier of external event connector
-     */
-    abstract public static function get_plugname(): string;
+    use subplugin_get_plugin_name;
 
 }

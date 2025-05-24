@@ -294,7 +294,7 @@ class archive_job {
                 // Create activity archiving task.
                 $this->create_activity_archiving_task();
 
-                $drivername = $this->activity_archiving_driver()->get_plugname();
+                $drivername = $this->activity_archiving_driver()->get_plugin_name();
                 $this->get_logger()->info('Created activity archiving task (driver: '.$drivername.')');
 
                 // Update job status early because task execution can take some time ...

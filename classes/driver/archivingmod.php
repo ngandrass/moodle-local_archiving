@@ -28,6 +28,7 @@ use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
 use local_archiving\exception\yield_exception;
 use local_archiving\form\job_create_form;
+use local_archiving\trait\subplugin_get_plugin_name;
 use local_archiving\type\activity_archiving_task_status;
 
 // @codingStandardsIgnoreLine
@@ -38,6 +39,8 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Interface for activity archiving driver (archivingmod) sub-plugins
  */
 abstract class archivingmod {
+
+    use subplugin_get_plugin_name;
 
     /** @var int ID of the course the targeted activity is part of */
     protected readonly int $courseid;
@@ -54,22 +57,6 @@ abstract class archivingmod {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
     }
-
-    /**
-     * Returns the localized name of this driver
-     *
-     * @return string Localized name of the driver
-     */
-    abstract public static function get_name(): string;
-
-    /**
-     * Returns the internal identifier for this driver. This function should
-     * return the last part of the frankenstyle plugin name (e.g., 'quiz' for
-     * 'archivingmod_quiz').
-     *
-     * @return string Internal identifier of this driver
-     */
-    abstract public static function get_plugname(): string;
 
     /**
      * Returns a list of supported Moodle activities by this driver as a list of
@@ -129,7 +116,7 @@ abstract class archivingmod {
             $job->get_id(),
             $this->context,
             $job->get_userid(),
-            $this->get_plugname(),
+            $this->get_plugin_name(),
             $tasksettings,
         );
     }

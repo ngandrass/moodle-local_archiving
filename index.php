@@ -58,20 +58,30 @@ echo $renderer->index();
 echo "<h1>Activities</h1>";
 echo "<pre>";
 foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
+    if ($obj->supported) {
+        if ($obj->enabled) {
+            $enablehtml = '<span class="badge badge-success px-2">Enabled</span>';
+        } else {
+            $enablehtml = '<span class="badge badge-warning px-2">Disabled</span>';
+        }
+    } else {
+        $enablehtml = '<span class="badge badge-danger px-2">Not supported</span>';
+    }
+
     if ($obj->lastarchived) {
         $lastarchivedhtml = '<span class="badge badge-success px-2">Archived on '.date('Y-m-d H:i:s', $obj->lastarchived).'</span>';
     } else {
         $lastarchivedhtml = '<span class="badge badge-warning px-2">Never archived</span>';
     }
 
-    if ($obj->supported) {
+    if ($obj->supported && $obj->enabled) {
         $url = new moodle_url('/local/archiving/archive.php', [
             'courseid' => $courseid,
             'cmid' => $obj->cm->id,
         ]);
-        echo "<a href=\"{$url}\">[{$obj->cm->modname}]: {$obj->cm->name} {$lastarchivedhtml}</a><br>";
+        echo "<a href=\"{$url}\">[{$obj->cm->modname}]: {$obj->cm->name} {$enablehtml} {$lastarchivedhtml}</a><br>";
     } else {
-        echo "[{$obj->cm->modname}]: {$obj->cm->name} {$lastarchivedhtml}<br>";
+        echo "[{$obj->cm->modname}]: {$obj->cm->name} {$enablehtml} {$lastarchivedhtml}<br>";
     }
 }
 echo "</pre>";

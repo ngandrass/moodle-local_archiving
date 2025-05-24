@@ -406,6 +406,11 @@ class archive_job {
      */
     protected function create_activity_archiving_task(): ?activity_archiving_task {
         $driver = $this->activity_archiving_driver();
+
+        if (!$driver->is_enabled()) {
+            throw new \moodle_exception('activity_archiving_driver_not_enabled', 'local_archiving');
+        }
+
         if (!$driver->can_be_archived()) {
             // Handle this as a hard fail for now but maybe we want to try again here?
             throw new \moodle_exception('activity_not_ready_for_archiving', 'local_archiving');

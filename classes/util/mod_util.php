@@ -48,7 +48,8 @@ class mod_util {
 
         // Get cms and supported activities.
         $modinfo = get_fast_modinfo($courseid);
-        $supported = plugin_util::get_supported_activities();
+        $drivers = plugin_util::get_activity_archiving_drivers();
+        $supported = array_reduce($drivers, fn ($res, $driver) => array_merge($res, $driver['activities']), []);
 
         if (empty($modinfo->cms)) {
             return [];
@@ -73,7 +74,8 @@ class mod_util {
         foreach ($modinfo->cms as $cm) {
             $res[$cm->id] = (object) [
                 'cm' => $cm,
-                'supported' => array_key_exists($cm->modname, $supported),
+                'supported' => in_array($cm->modname, $supported),
+                'enabled' => $drivers[$cm->modname]['enabled'] ?? false,
                 'lastarchived' => ($lastarchivedcms[$cm->context->id] ?? null)?->lastarchived,
             ];
         }

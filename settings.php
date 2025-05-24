@@ -22,6 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_archiving\local\admin\setting\admin_setting_managecomponents;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
 use local_archiving\storage;
 
@@ -31,12 +32,14 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 global $DB;
 
 if ($hassiteconfig) {
-    $ADMIN->add('localplugins', new admin_category('local_archiving_settings', new lang_string('pluginname', 'local_archiving')));
-    $settings = new admin_settingpage('local_archiving_settings_common', new lang_string('common_settings', 'local_archiving'));
+    $ADMIN->add('localplugins', new admin_category('local_archiving', new lang_string('pluginname', 'local_archiving')));
+    $settings = new admin_settingpage('local_archiving_common', new lang_string('common_settings', 'local_archiving'));
 
     // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
     if ($ADMIN->fulltree) {
         // TODO (MDL-0): Add settings to configure logging levels and retention.
+
+        $settings->add(new admin_setting_managecomponents('local_archiving/managecomponents'));
 
         // Header.
         $settings->add(new admin_setting_heading('local_archiving/header_docs',
@@ -147,7 +150,7 @@ if ($hassiteconfig) {
     }
 
     // Add common settings page.
-    $ADMIN->add('local_archiving_settings', $settings);
+    $ADMIN->add('local_archiving', $settings);
 
     // Load settings from subplugins.
     foreach (array_keys(\core_component::get_subplugins('local_archiving')) as $subplugintype) {
@@ -157,7 +160,7 @@ if ($hassiteconfig) {
             include($settingsfile);
             if (!empty($settings)) {
                 $settings->visiblename = "[$subplugintype] $settings->visiblename";
-                $ADMIN->add('local_archiving_settings', $settings);
+                $ADMIN->add('local_archiving', $settings);
             }
         }
     }

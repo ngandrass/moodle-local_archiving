@@ -76,11 +76,14 @@ class plugin_util {
             $pluginclass = self::get_subplugin_by_name('archivingmod', $plugin->name);
 
             $res[$plugin->name] = [
+                'component' => $plugin->component,
                 'displayname' => $plugin->displayname,
                 'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
                 'activities' => $pluginclass::get_supported_activities(),
                 'enabled' => $plugin->is_enabled() ?? false,
+                'version' => $plugin->versiondb,
+                'release' => $plugin->release,
             ];
         }
 
@@ -144,10 +147,13 @@ class plugin_util {
             $pluginclass = self::get_subplugin_by_name('archivingstore', $plugin->name);
 
             $res[$plugin->name] = [
+                'component' => $plugin->component,
                 'displayname' => $plugin->displayname,
                 'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
                 'enabled' => $plugin->is_enabled() ?? false,
+                'version' => $plugin->versiondb,
+                'release' => $plugin->release,
             ];
         }
 
@@ -176,10 +182,13 @@ class plugin_util {
             $pluginclass = self::get_subplugin_by_name('archivingevent', $plugin->name);
 
             $res[$plugin->name] = [
+                'component' => $plugin->component,
                 'displayname' => $plugin->displayname,
                 'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
                 'enabled' => $plugin->is_enabled() ?? false,
+                'version' => $plugin->versiondb,
+                'release' => $plugin->release,
             ];
         }
 

@@ -131,3 +131,12 @@ $string['setting_tsp_enable'] = 'Enable archive signing';
 $string['setting_tsp_enable_desc'] = 'Allow archives to be signed using the Time-Stamp Protocol (TSP). If this option is disabled, archives can neither be signed manually nor automatically.';
 $string['setting_tsp_server_url'] = 'TSP server URL';
 $string['setting_tsp_server_url_desc'] = 'URL of the Time-Stamp Protocol (TSP) server to use.<br/>Examples: <code>https://freetsa.org/tsr</code>, <code>https://zeitstempel.dfn.de</code>, <code>http://timestamp.digicert.com</code>';
+
+// Storage tiers.
+$string['storage_tier'] = 'Storage tier';
+$string['storage_tier_LOCAL'] = 'Local';
+$string['storage_tier_LOCAL_help'] = 'Data is stored locally on the server or is accessible very fast.';
+$string['storage_tier_REMOTE_fast'] = 'Remote (fast)';
+$string['storage_tier_REMOTE_fast_help'] = 'Data is stored on a fast remote server but needs to be fetched before use.';
+$string['storage_tier_REMOTE_slow'] = 'Remote (slow)';
+$string['storage_tier_REMOTE_slow_help'] = 'Data is stored on a slow remote server but needs to be fetched before use.';

@@ -151,6 +151,7 @@ class plugin_util {
                 'displayname' => $plugin->displayname,
                 'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
+                'tier' => $pluginclass::get_storage_tier(),
                 'enabled' => $plugin->is_enabled() ?? false,
                 'version' => $plugin->versiondb,
                 'release' => $plugin->release,

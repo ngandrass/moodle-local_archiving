@@ -157,6 +157,12 @@ class admin_setting_managecomponents extends \admin_setting {
                 $enableicon = $OUTPUT->pix_icon('t/show', get_string('enable'));
             }
 
+            // Activity pills.
+            $badgecolor = $archivingdriver['enabled'] ? 'primary' : 'secondary';
+            $activitieshtml = array_reduce($archivingdriver['activities'],
+                fn ($res, $activity) => $res.'<span class="badge badge-'.$badgecolor.'">'.$activity.'</span>'
+            , '');
+
             // Settings link.
             $settingsurl = new \moodle_url('/admin/settings.php', ['section' => $archivingdriver['component']]);
 
@@ -165,7 +171,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 $archivingdriver['displayname'],
                 "{$archivingdriver['release']} <span class=\"text-muted\">({$archivingdriver['version']})</span>",
                 \html_writer::link($enableurl, $enableicon),
-                implode(', ', $archivingdriver['activities']),
+                $activitieshtml,
                 \html_writer::link($settingsurl, get_string('settings')),
             ]);
             if (!$archivingdriver['enabled']) {
@@ -195,6 +201,7 @@ class admin_setting_managecomponents extends \admin_setting {
             get_string('name'),
             get_string('version'),
             get_string('enable'),
+            get_string('storage_tier', 'local_archiving'),
             get_string('settings'),
         ];
         $table->colclasses = ['leftalign', 'leftalign', 'centeralign', 'leftalign'];
@@ -214,6 +221,15 @@ class admin_setting_managecomponents extends \admin_setting {
                 $enableicon = $OUTPUT->pix_icon('t/show', get_string('enable'));
             }
 
+            // Storage tier.
+            $badgecolor = $storagedriver['enabled'] ? $storagedriver['tier']->color() : 'secondary';
+            $tierhtml = "
+                <span class=\"badge badge-{$badgecolor}\"
+                      data-toggle=\"tooltip\" data-placement=\"top\"
+                      title=\"{$storagedriver['tier']->help()}\"
+                >{$storagedriver['tier']->name()}</span>
+            ";
+
             // Settings link.
             $settingsurl = new \moodle_url('/admin/settings.php', ['section' => $storagedriver['component']]);
 
@@ -222,6 +238,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 $storagedriver['displayname'],
                 "{$storagedriver['release']} <span class=\"text-muted\">({$storagedriver['version']})</span>",
                 \html_writer::link($enableurl, $enableicon),
+                $tierhtml,
                 \html_writer::link($settingsurl, get_string('settings')),
             ]);
             if (!$storagedriver['enabled']) {

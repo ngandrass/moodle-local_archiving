@@ -26,6 +26,7 @@ namespace local_archiving\driver;
 
 use local_archiving\exception\storage_exception;
 use local_archiving\file_handle;
+use local_archiving\type\storage_tier;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -35,6 +36,16 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Interface for storage driver (archivingstore) sub-plugins
  */
 abstract class archivingstore extends base {
+
+    /**
+     * Returns the storage tier of this storage plugin.
+     *
+     * This is used to classify the storage plugin based on the way stored data
+     * is accessed and retrieved. See storage_tier type for more details.
+     *
+     * @return storage_tier Storage tier for this storage plugin
+     */
+    abstract public static function get_storage_tier(): storage_tier;
 
     /**
      * Determines if this storage plugin supports retrieving previously stored

@@ -32,31 +32,23 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 global $DB;
 
 if ($hassiteconfig) {
-    $ADMIN->add('localplugins', new admin_category('local_archiving', new lang_string('pluginname', 'local_archiving')));
-    $subplugins = new admin_settingpage('local_archiving_plugins', new lang_string('subplugin_settings', 'local_archiving'));
-    $common = new admin_settingpage('local_archiving_common', new lang_string('common_settings', 'local_archiving'));
+    $settingsroot = new admin_category('local_archiving', new lang_string('pluginname', 'local_archiving'));
+    $ADMIN->add('localplugins', $settingsroot);
 
+    // Settings page: Common.
+    $commonpage = new admin_settingpage('local_archiving_common', new lang_string('common_settings', 'local_archiving'));
     // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
     if ($ADMIN->fulltree) {
         // TODO (MDL-0): Add settings to configure logging levels and retention.
 
-        // Subplugins: Header.
-        $subplugins->add(new admin_setting_heading('local_archiving/header_subplugins',
-            null,
-            get_string('setting_header_subplugins_desc', 'local_archiving')
-        ));
-
-        // Subplugins: Manage components.
-        $subplugins->add(new admin_setting_managecomponents('local_archiving/managecomponents'));
-
         // Common: Header.
-        $common->add(new admin_setting_heading('local_archiving/header_common',
+        $commonpage->add(new admin_setting_heading('local_archiving/header_common',
             null,
             get_string('setting_header_common_desc', 'local_archiving')
         ));
 
         // Common: Job timeout.
-        $common->add(new admin_setting_configtext('local_archiving/job_timeout_min',
+        $commonpage->add(new admin_setting_configtext('local_archiving/job_timeout_min',
             get_string('setting_job_timeout_min', 'local_archiving'),
             get_string('setting_job_timeout_min_desc', 'local_archiving'),
             '120',
@@ -64,7 +56,7 @@ if ($hassiteconfig) {
         ));
 
         // Common: Job Presets.
-        $common->add(new admin_setting_heading('local_archiving/header_job_presets',
+        $commonpage->add(new admin_setting_heading('local_archiving/header_job_presets',
             get_string('setting_header_job_presets', 'local_archiving'),
             get_string('setting_header_job_presets_desc', 'local_archiving'),
         ));
@@ -76,7 +68,7 @@ if ($hassiteconfig) {
             '1',
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
-        $common->add($set);
+        $commonpage->add($set);
 
         // Common - Job Preset: Export Course Backup.
         $set = new admin_setting_configcheckbox('local_archiving/job_preset_export_course_backup',
@@ -85,7 +77,7 @@ if ($hassiteconfig) {
             '0',
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
-        $common->add($set);
+        $commonpage->add($set);
 
         // Common - Job Preset: Archive filename pattern.
         $set = new admin_setting_filename_pattern('local_archiving/job_preset_archive_filename_pattern',
@@ -106,7 +98,7 @@ if ($hassiteconfig) {
             PARAM_TEXT,
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
-        $common->add($set);
+        $commonpage->add($set);
 
         // Common - Job Preset: Archive autodelete.
         $set = new admin_setting_configcheckbox('local_archiving/job_preset_archive_autodelete',
@@ -115,7 +107,7 @@ if ($hassiteconfig) {
             '0',
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, true);
-        $common->add($set);
+        $commonpage->add($set);
 
         // Common - Job Preset: Archive autodelete retention time.
         $set = new admin_setting_configduration('local_archiving/job_preset_archive_retention_time',
@@ -126,30 +118,30 @@ if ($hassiteconfig) {
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, true);
         $set->add_dependent_on('local_archiving/job_preset_archive_autodelete');
-        $common->add($set);
+        $commonpage->add($set);
 
         // Common: Time-Stamp Protocol settings.
-        $common->add(new admin_setting_heading('quit_archiver/header_tsp',
+        $commonpage->add(new admin_setting_heading('quit_archiver/header_tsp',
             get_string('setting_header_tsp', 'local_archiving'),
             get_string('setting_header_tsp_desc', 'local_archiving')
         ));
 
         // Common - TSP: Enable.
-        $common->add(new admin_setting_configcheckbox('local_archiving/tsp_enable',
+        $commonpage->add(new admin_setting_configcheckbox('local_archiving/tsp_enable',
             get_string('setting_tsp_enable', 'local_archiving'),
             get_string('setting_tsp_enable_desc', 'local_archiving'),
             '0'
         ));
 
         // Common - TSP: Automatic signing.
-        $common->add(new admin_setting_configcheckbox('local_archiving/tsp_automatic_signing',
+        $commonpage->add(new admin_setting_configcheckbox('local_archiving/tsp_automatic_signing',
             get_string('setting_tsp_automatic_signing', 'local_archiving'),
             get_string('setting_tsp_automatic_signing_desc', 'local_archiving'),
             '1'
         ));
 
         // Common - TSP: Server URL.
-        $common->add(new admin_setting_configtext('local_archiving/tsp_server_url',
+        $commonpage->add(new admin_setting_configtext('local_archiving/tsp_server_url',
             get_string('setting_tsp_server_url', 'local_archiving'),
             get_string('setting_tsp_server_url_desc', 'local_archiving'),
             'https://freetsa.org/tsr',
@@ -157,24 +149,44 @@ if ($hassiteconfig) {
         ));
     }
 
-    // Add core settings pages.
-    $ADMIN->add('local_archiving', $subplugins);
-    $ADMIN->add('local_archiving', $common);
+    // Settings category: Components.
+    $managecomponentspage = new admin_settingpage('local_archiving_components_manage', new lang_string('manage_components', 'local_archiving'));
+    if ($ADMIN->fulltree) {
+        // Manage components: Header.
+        $managecomponentspage->add(new admin_setting_heading('local_archiving/header_managecomponents',
+            null,
+            get_string('setting_header_managecomponents_desc', 'local_archiving')
+        ));
 
-    /*
+        // Manage components: Manage components.
+        $managecomponentspage->add(new admin_setting_managecomponents('local_archiving/managecomponents'));
+    }
+
+    // Add core settings pages.
+    $ADMIN->add($settingsroot->name, $managecomponentspage);
+    $ADMIN->add($settingsroot->name, $commonpage);
+
     // Load settings from subplugins.
     foreach (array_keys(\core_component::get_subplugins('local_archiving')) as $subplugintype) {
-        foreach (\core_component::get_plugin_list_with_file($subplugintype, 'settings.php') as $settingsfile) {
+        // Only add settings category for current sub-plugin-type if at least one plugin
+        // with settings of this type is installed.
+        $subpluginswithsettings = \core_component::get_plugin_list_with_file($subplugintype, 'settings.php');
+        if (empty($subpluginswithsettings)) {
+            continue;
+        }
+
+        // Create a category for sub-plugins of this type and add their setting pages.
+        $subplugincategory = new admin_category($subplugintype, new lang_string("subplugintype_{$subplugintype}_plural", 'local_archiving'));
+        $ADMIN->add($settingsroot->name, $subplugincategory);
+        foreach ($subpluginswithsettings as $settingsfile) {
             $settings = null;
             include($settingsfile);
             if (!empty($settings)) {
-                $settings->visiblename = "[$subplugintype] $settings->visiblename";
-                $ADMIN->add('local_archivings', $settings);
+                $ADMIN->add($subplugincategory->name, $settings);
             }
         }
 
         $settings = null;
     }
-    */
 
 }

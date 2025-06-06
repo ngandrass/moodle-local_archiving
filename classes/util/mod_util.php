@@ -76,6 +76,7 @@ class mod_util {
                 'cm' => $cm,
                 'supported' => in_array($cm->modname, $supported),
                 'enabled' => $drivers[$cm->modname]['enabled'] ?? false,
+                'ready' => $drivers[$cm->modname]['ready'] ?? false,
                 'lastarchived' => ($lastarchivedcms[$cm->context->id] ?? null)?->lastarchived,
             ];
         }

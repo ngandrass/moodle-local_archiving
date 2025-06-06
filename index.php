@@ -74,7 +74,7 @@ foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
         $lastarchivedhtml = '<span class="badge badge-warning px-2">Never archived</span>';
     }
 
-    if ($obj->supported && $obj->enabled) {
+    if ($obj->supported && $obj->enabled && $obj->ready) {
         $url = new moodle_url('/local/archiving/archive.php', [
             'courseid' => $courseid,
             'cmid' => $obj->cm->id,

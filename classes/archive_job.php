@@ -411,6 +411,10 @@ class archive_job {
             throw new \moodle_exception('activity_archiving_driver_not_enabled', 'local_archiving');
         }
 
+        if (!$driver::is_ready()) {
+            throw new \moodle_exception('component_not_ready', 'local_archiving');
+        }
+
         if (!$driver->can_be_archived()) {
             // Handle this as a hard fail for now but maybe we want to try again here?
             throw new \moodle_exception('activity_not_ready_for_archiving', 'local_archiving');

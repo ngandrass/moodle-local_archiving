@@ -106,4 +106,16 @@ abstract class base {
         }
     }
 
+    /**
+     * Determines if this sub-plugin is fully configured and ready to operate.
+     *
+     * This can be overridden, if your sub-plugin requires an initial setup / configuration
+     * step prior to first operation.
+     *
+     * @return bool True, if this sub-plugin is fully configured and ready
+     */
+    public static function is_ready(): bool {
+        return true;
+    }
+
 }

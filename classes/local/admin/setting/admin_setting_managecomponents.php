@@ -19,6 +19,7 @@ namespace local_archiving\local\admin\setting;
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+use core\exception\moodle_exception;
 use local_archiving\util\plugin_util;
 
 
@@ -93,6 +94,8 @@ class admin_setting_managecomponents extends \admin_setting {
      * @param mixed $data array or string depending on setting
      * @param string $query
      * @return string
+     * @throws \coding_exception
+     * @throws moodle_exception
      */
     #[\Override]
     public function output_html($data, $query = '') {
@@ -123,6 +126,7 @@ class admin_setting_managecomponents extends \admin_setting {
      *
      * @return string HTML for the activity archiving drivers table
      * @throws \coding_exception
+     * @throws moodle_exception
      */
     protected function define_activity_archiving_drivers_table() {
         global $OUTPUT, $PAGE;
@@ -137,10 +141,11 @@ class admin_setting_managecomponents extends \admin_setting {
             get_string('name'),
             get_string('version'),
             get_string('enable'),
+            get_string('status'),
             get_string('activities'),
             get_string('settings'),
         ];
-        $table->colclasses = ['leftalign', 'leftalign', 'centeralign', 'leftalign', 'centeralign'];
+        $table->colclasses = ['leftalign', 'leftalign', 'centeralign', 'centeralign', 'leftalign', 'centeralign'];
         $table->data = [];
 
         // Add rows to the table.
@@ -157,6 +162,17 @@ class admin_setting_managecomponents extends \admin_setting {
                 $enableicon = $OUTPUT->pix_icon('t/show', get_string('enable'));
             }
 
+            // Status pill.
+            if ($archivingdriver['enabled']) {
+                if ($archivingdriver['ready']) {
+                    $statushtml = '<span class="badge badge-success">'.get_string('ready', 'local_archiving').'</span>';
+                } else {
+                    $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
+                }
+            } else {
+                $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
+            }
+
             // Activity pills.
             $badgecolor = $archivingdriver['enabled'] ? 'primary' : 'secondary';
             $activitieshtml = array_reduce($archivingdriver['activities'],
@@ -171,6 +187,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 $archivingdriver['displayname'],
                 "{$archivingdriver['release']} <span class=\"text-muted\">({$archivingdriver['version']})</span>",
                 \html_writer::link($enableurl, $enableicon),
+                $statushtml,
                 $activitieshtml,
                 \html_writer::link($settingsurl, get_string('settings')),
             ]);
@@ -187,6 +204,8 @@ class admin_setting_managecomponents extends \admin_setting {
      * Defines the storage drivers table
      *
      * @return string HTML for the storage drivers table
+     * @throws \coding_exception
+     * @throws moodle_exception
      */
     protected function define_storage_drivers_table() {
         global $OUTPUT, $PAGE;
@@ -201,10 +220,11 @@ class admin_setting_managecomponents extends \admin_setting {
             get_string('name'),
             get_string('version'),
             get_string('enable'),
+            get_string('status'),
             get_string('storage_tier', 'local_archiving'),
             get_string('settings'),
         ];
-        $table->colclasses = ['leftalign', 'leftalign', 'centeralign', 'leftalign'];
+        $table->colclasses = ['leftalign', 'leftalign', 'centeralign', 'centeralign', 'leftalign'];
         $table->data = [];
 
         // Add rows to the table.
@@ -219,6 +239,17 @@ class admin_setting_managecomponents extends \admin_setting {
                 $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));
             } else {
                 $enableicon = $OUTPUT->pix_icon('t/show', get_string('enable'));
+            }
+
+            // Status pill.
+            if ($storagedriver['enabled']) {
+                if ($storagedriver['ready']) {
+                    $statushtml = '<span class="badge badge-success">'.get_string('ready', 'local_archiving').'</span>';
+                } else {
+                    $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
+                }
+            } else {
+                $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
             }
 
             // Storage tier.
@@ -238,6 +269,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 $storagedriver['displayname'],
                 "{$storagedriver['release']} <span class=\"text-muted\">({$storagedriver['version']})</span>",
                 \html_writer::link($enableurl, $enableicon),
+                $statushtml,
                 $tierhtml,
                 \html_writer::link($settingsurl, get_string('settings')),
             ]);
@@ -254,6 +286,8 @@ class admin_setting_managecomponents extends \admin_setting {
      * Defines the event connectors table
      *
      * @return string HTML for the event connectors table
+     * @throws \coding_exception
+     * @throws moodle_exception
      */
     protected function define_event_connectors_table() {
         global $OUTPUT, $PAGE;
@@ -268,9 +302,10 @@ class admin_setting_managecomponents extends \admin_setting {
             get_string('name'),
             get_string('version'),
             get_string('enable'),
+            get_string('status'),
             get_string('settings'),
         ];
-        $table->colclasses = ['leftalign', 'leftalign', 'centeralign', 'leftalign'];
+        $table->colclasses = ['leftalign', 'leftalign', 'centeralign', 'centeralign', 'leftalign'];
         $table->data = [];
 
         // Add rows to the table.
@@ -287,6 +322,17 @@ class admin_setting_managecomponents extends \admin_setting {
                 $enableicon = $OUTPUT->pix_icon('t/show', get_string('enable'));
             }
 
+            // Status pill.
+            if ($eventconnector['enabled']) {
+                if ($eventconnector['ready']) {
+                    $statushtml = '<span class="badge badge-success">'.get_string('ready', 'local_archiving').'</span>';
+                } else {
+                    $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
+                }
+            } else {
+                $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
+            }
+
             // Settings link.
             $settingsurl = new \moodle_url('/admin/settings.php', ['section' => $eventconnector['component']]);
 
@@ -295,6 +341,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 $eventconnector['displayname'],
                 "{$eventconnector['release']} <span class=\"text-muted\">({$eventconnector['version']})</span>",
                 \html_writer::link($enableurl, $enableicon),
+                $statushtml,
                 \html_writer::link($settingsurl, get_string('settings')),
             ]);
             if (!$eventconnector['enabled']) {

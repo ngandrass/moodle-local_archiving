@@ -82,6 +82,7 @@ class plugin_util {
                 'class' => $pluginclass,
                 'activities' => $pluginclass::get_supported_activities(),
                 'enabled' => $plugin->is_enabled() ?? false,
+                'ready' => $pluginclass::is_ready() ?? false,
                 'version' => $plugin->versiondb,
                 'release' => $plugin->release,
             ];
@@ -153,6 +154,7 @@ class plugin_util {
                 'class' => $pluginclass,
                 'tier' => $pluginclass::get_storage_tier(),
                 'enabled' => $plugin->is_enabled() ?? false,
+                'ready' => $pluginclass::is_ready() ?? false,
                 'version' => $plugin->versiondb,
                 'release' => $plugin->release,
             ];
@@ -188,6 +190,7 @@ class plugin_util {
                 'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
                 'enabled' => $plugin->is_enabled() ?? false,
+                'ready' => $pluginclass::is_ready() ?? false,
                 'version' => $plugin->versiondb,
                 'release' => $plugin->release,
             ];

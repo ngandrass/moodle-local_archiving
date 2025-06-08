@@ -182,8 +182,9 @@ class job_overview_table extends \table_sql {
         $html = '';
 
         // Action: Download.
+        $job = archive_job::get_by_id($values->id);
         $files = file_handle::get_by_jobid($values->id);
-        if (count($files) > 0) {
+        if ($job->is_completed() && count($files) > 0) {
             $downloadurl = new \moodle_url('/local/archiving/download.php', ['jobid' => $values->id]);
             // @codingStandardsIgnoreLine
             $html .= '<a href="'.$downloadurl.'" target="_blank" class="btn btn-success mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('download').'" alt="'.get_string('download').'"><i class="fa fa-download"></i></a>';

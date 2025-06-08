@@ -58,6 +58,7 @@ if (count($filehandles) == 0) {
     $notifications .= $OUTPUT->notification(get_string('no_files_found', 'local_archiving'), 'error');
 } else if (count($filehandles) > 1) {
     $notifications .= $OUTPUT->notification(get_string('multiple_job_artifacts_not_supported', 'local_archiving'), 'error');
+    // TODO: Implement!
 } else {
     // Exactly one file found. Try to serve it directly.
     $filehandle = array_shift($filehandles);

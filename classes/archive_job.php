@@ -618,6 +618,29 @@ class archive_job {
     }
 
     /**
+     * Retrieves a job setting by its key
+     *
+     * @param string $key Key of the setting
+     * @param bool $strict If true, an exception will be thrown if the setting does not exist
+     * @return mixed Setting value or null if not found
+     * @throws \coding_exception Invalid setting key
+     * @throws \dml_exception
+     */
+    public function get_setting(string $key, bool $strict = false) {
+        $settings = $this->get_settings();
+
+        if (property_exists($settings, $key)) {
+            return $settings->{$key};
+        } else {
+            if ($strict) {
+                throw new \coding_exception('invalid_job_setting_requested', 'local_archiving');
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Clears this jobs settings inside the database. This option is irreversible.
      *
      * @param bool $force If true, force clear job settings even if the job is not completed yet
@@ -637,6 +660,91 @@ class archive_job {
             'settings' => null,
         ]);
         $this->settings = new \stdClass();
+    }
+
+    /**
+     * Sets a metadata entry for this job. If the entry already exists, it will be updated.
+     *
+     * @param string $key Key of the metadata entry
+     * @param mixed $value Value of the metadata entry. Will be JSON-encoded before storing.
+     * @return void
+     * @throws \dml_exception
+     */
+    public function set_metadata_entry(string $key, mixed $value): void {
+        global $DB;
+
+        // Check if metadata entry already exists.
+        $recordid = $DB->get_field(db_table::METADATA->value, 'id', [
+            'jobid' => $this->id,
+            'datakey' => $key,
+        ], IGNORE_MISSING);
+
+        // Update or create record.
+        if ($recordid) {
+            // Update existing entry.
+            $DB->update_record(db_table::METADATA->value, [
+                'id' => $recordid,
+                'datavalue' => json_encode($value),
+            ]);
+        } else {
+            // Insert new entry.
+            $DB->insert_record(db_table::METADATA->value, [
+                'jobid' => $this->id,
+                'datakey' => $key,
+                'datavalue' => json_encode($value),
+            ]);
+        }
+    }
+
+    /**
+     * Retrieves a metadata entry by its key. If the entry does not exist,
+     * null will be returned. If $strict is true, an exception will be thrown
+     * if the entry does not exist.
+     *
+     * @param string $key Key of the metadata entry to retrieve
+     * @param bool $strict If true, an exception will be thrown if the entry does not exist
+     * @return mixed Metadata value or null if not found
+     * @throws \coding_exception No metadata entry with the given key exists
+     * @throws \dml_exception
+     */
+    public function get_metadata_entry(string $key, bool $strict = false): mixed {
+        global $DB;
+
+        // Check if metadata entry exists.
+        $record = $DB->get_record(db_table::METADATA->value, [
+            'jobid' => $this->id,
+            'datakey' => $key,
+        ], 'datavalue', IGNORE_MISSING);
+
+        // Return value.
+        if ($record) {
+            return json_decode($record->datavalue);
+        } else {
+            if ($strict) {
+                throw new \coding_exception('invalid_job_metadata_requested', 'local_archiving');
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves all metadata entries for this job
+     *
+     * @return array All metadata entries stored for this job
+     * @throws \dml_exception
+     */
+    public function get_metedata_entries(): array {
+        global $DB;
+
+        // Retrieve all metadata entries for this job.
+        $entries = $DB->get_records(db_table::METADATA->value, ['jobid' => $this->id], '', 'datakey, datavalue');
+        $result = [];
+        foreach ($entries as $entry) {
+            $result[$entry->datakey] = json_decode($entry->datavalue);
+        }
+
+        return $result;
     }
 
 }

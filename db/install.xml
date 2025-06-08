@@ -22,7 +22,7 @@
         <FIELDS>
           <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
           <FIELD NAME="jobid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the archiving job this entry is associated with"/>
-          <FIELD NAME="datakey" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Key of the entry"/>
+          <FIELD NAME="datakey" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Key of the entry"/>
           <FIELD NAME="datavalue" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Value of the entry"/>
         </FIELDS>
         <KEYS>

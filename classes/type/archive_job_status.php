@@ -111,6 +111,7 @@ enum archive_job_status: int {
         return match($this) {
             self::PROCESSING,
             self::ACTIVITY_ARCHIVING,
+            self::BACKUP_COLLECTION,
             self::POST_PROCESSING
                 => 'primary',
             self::STORE,

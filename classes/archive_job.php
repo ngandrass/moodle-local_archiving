@@ -64,12 +64,14 @@ class archive_job {
      * @param \context_module $context Moodle context this archive job is run in
      * @param int $userid ID of the user that owns this job
      * @param int $timecreated Unix timestamp of creation time
+     * @param archive_job_status $status Current job status
      */
     protected function __construct(
         protected readonly int $id,
         protected readonly \context_module $context,
         protected readonly int $userid,
-        protected readonly int $timecreated
+        protected readonly int $timecreated,
+        protected archive_job_status $status,
     ) {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
@@ -132,16 +134,17 @@ class archive_job {
 
         // Create object.
         $now = time();
+        $jobstatus = archive_job_status::UNINITIALIZED;
         $id = $DB->insert_record(db_table::JOB->value, [
             'contextid' => $context->id,
             'userid' => $userid,
-            'status' => archive_job_status::UNINITIALIZED->value,
+            'status' => $jobstatus->value,
             'settings' => json_encode($settings),
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
 
-        return new self($id, $context, $userid, $now);
+        return new self($id, $context, $userid, $now, $jobstatus);
     }
 
     /**
@@ -162,7 +165,7 @@ class archive_job {
             throw new \moodle_exception('invalid_context', 'local_archiving');
         }
 
-        return new self($job->id, $context, $job->userid, $job->timecreated);
+        return new self($job->id, $context, $job->userid, $job->timecreated, archive_job_status::from($job->status));
     }
 
     /**
@@ -574,16 +577,28 @@ class archive_job {
     /**
      * Retrieves the current job status
      *
+     * @param bool $usecached If true, the cached status will be used instead of querying the database
+     *
      * @return archive_job_status Current job status
      */
-    public function get_status(): archive_job_status {
+    public function get_status(bool $usecached = false): archive_job_status {
         global $DB;
 
-        try {
-            return archive_job_status::from($DB->get_field(db_table::JOB->value, 'status', ['id' => $this->id], MUST_EXIST));
-        } catch (\dml_exception $e) {
-            return archive_job_status::UNKNOWN;
+        // If we only want the cached status, return it immediately.
+        if ($usecached) {
+            return $this->status;
         }
+
+        // Update local status value from database.
+        try {
+            $this->status = archive_job_status::from(
+                $DB->get_field(db_table::JOB->value, 'status', ['id' => $this->id], MUST_EXIST)
+            );
+        } catch (\dml_exception $e) {
+            $this->status = archive_job_status::UNKNOWN;
+        }
+
+        return $this->status;
     }
 
     /**
@@ -603,7 +618,13 @@ class archive_job {
             'timemodified' => time(),
         ]);
 
-        $this->get_logger()->info("Job status updated: ".$status->name()." ({$status->value})");
+        // Update local status copy and log.
+        if ($this->status != $status) {
+            $this->status = $status;
+            $this->get_logger()->info(
+                "Job status: ".$status->name()." ({$status->value})"
+            );
+        }
     }
 
     /**

@@ -245,7 +245,7 @@ class logger {
      */
     public static function format_log_entry(\stdClass $logentry): string {
         return date('Y-m-d H:i:s', $logentry->timecreated).
-            ' ['.str_pad(log_level::from($logentry->level)->name, 5, ' ').'] '.
+            ' ['.str_pad(log_level::from($logentry->level)->name, 5, ' ', STR_PAD_LEFT).'] '.
             ($logentry->taskid ? ' -> ' : '').
             $logentry->message;
     }

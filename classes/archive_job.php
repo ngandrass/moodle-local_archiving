@@ -264,36 +264,34 @@ class archive_job {
             return;
         }
 
-        $status = $this->get_status();
-
         /*
-         * We are sequentially processing through all job stages here. We work
-         * on a local copy $status that is persisted once the try-catch block is
-         * either completed or one part of the code threw a yield_exception,
-         * hereby persisting the current status, releasing the lock and giving
-         * back control to the task scheduler.
+         * We are sequentially processing through all job stages here.
+         * Stages are either completed or a yield_exception was thrown, hereby
+         * releasing the lock and giving the control back to the task scheduler.
          */
         try {
+            $starttime = time();
+            $this->get_logger()->debug("v---------- Starting execution cycle {$starttime} ----------v");
+
             // Do not process uninitialized jobs.
-            if ($status == archive_job_status::UNINITIALIZED) {
+            if ($this->get_status(usecached: true) == archive_job_status::UNINITIALIZED) {
                 throw new \moodle_exception('invalid_archive_job_state', 'local_archiving');
             }
 
             // Timeout if required.
             if ($this->is_overdue()) {
                 // TODO: Call cleanup logic.
-                $status = archive_job_status::TIMEOUT;
+                $this->set_status(archive_job_status::TIMEOUT);
                 throw new \moodle_exception('archive_job_timed_out', 'local_archiving');
             }
 
             // Queued -> Processing.
-            if ($status == archive_job_status::QUEUED) {
-                // TODO: Create activity archiving task.
-                $status = archive_job_status::PROCESSING;
+            if ($this->get_status(usecached: true) == archive_job_status::QUEUED) {
+                $this->set_status(archive_job_status::PROCESSING);
             }
 
             // Processing -> Activity archiving.
-            if ($status == archive_job_status::PROCESSING) {
+            if ($this->get_status(usecached: true) == archive_job_status::PROCESSING) {
                 // Create activity archiving task.
                 $this->create_activity_archiving_task();
 
@@ -307,36 +305,34 @@ class archive_job {
                     $this->set_metadata_entry('course_backup_id', $backup->backupid);
                     $this->set_metadata_entry('course_backup_id', $backup->backupid);
                     $this->get_logger()->info(
-                        "Triggered creation of a Moodle course backup (#{$backup->backupid}): {$backup->filename}"
+                        "Requested a Moodle course backup (#{$backup->backupid}): {$backup->filename}"
                     );
                 }
                 if ($this->get_setting('export_cm_backup')) {
                     $backup = backup_manager::initiate_activity_backup($this->cmid, $this->userid);
                     $this->set_metadata_entry('cm_backup_id', $backup->backupid);
                     $this->get_logger()->info(
-                        'Triggered creation of a Moodle activity backup (#'.$backup->backupid.'): '.$backup->filename
+                        'Requested a Moodle activity backup (#'.$backup->backupid.'): '.$backup->filename
                     );
                 }
 
-                // Update job status early because task execution can take some time ...
-                $status = archive_job_status::ACTIVITY_ARCHIVING;
-                $this->set_status($status);
+                $this->set_status(archive_job_status::ACTIVITY_ARCHIVING);
             }
 
             // Activity archiving -> Backup collection.
-            if ($status == archive_job_status::ACTIVITY_ARCHIVING) {
+            if ($this->get_status(usecached: true) == archive_job_status::ACTIVITY_ARCHIVING) {
                 $driver = $this->activity_archiving_driver();
                 $driver->execute_all_tasks_for_job($this->get_id());
 
                 if ($driver->is_all_tasks_for_job_completed($this->get_id())) {
-                    $status = archive_job_status::BACKUP_COLLECTION;
+                    $this->set_status(archive_job_status::BACKUP_COLLECTION);
                 } else {
                     throw new yield_exception();
                 }
             }
 
             // Backup collection -> Post processing.
-            if ($status == archive_job_status::BACKUP_COLLECTION) {
+            if ($this->get_status(usecached: true) == archive_job_status::BACKUP_COLLECTION) {
                 // Check if we have any backups to collect.
                 $backupids = [];
                 if ($this->get_setting('export_course_backup')) {
@@ -361,7 +357,7 @@ class archive_job {
                 }
 
                 if ($allbackupsready) {
-                    $status = archive_job_status::POST_PROCESSING;
+                    $this->set_status(archive_job_status::POST_PROCESSING);
                 } else {
                     // Not all backups ready yet, yield and wait for them to finish.
                     throw new yield_exception();
@@ -369,7 +365,7 @@ class archive_job {
             }
 
             // Post processing -> Store.
-            if ($status == archive_job_status::POST_PROCESSING) {
+            if ($this->get_status(usecached: true) == archive_job_status::POST_PROCESSING) {
                 // Check that we have artifacts artifacts.
                 $artifacts = [];
                 foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
@@ -377,17 +373,17 @@ class archive_job {
                 }
 
                 if (empty($artifacts)) {
-                    $status = archive_job_status::FAILURE;
+                    $this->set_status(archive_job_status::FAILURE);
                     throw new \moodle_exception('no_activity_artifacts_found', 'local_archiving');
                 } else {
-                    $this->get_logger()->info('Got '.count($artifacts).' artifacts to store.');
+                    $this->get_logger()->info('Got '.count($artifacts).' artifact(s) from the activity.');
                 }
 
-                $status = archive_job_status::STORE;
+                $this->set_status(archive_job_status::STORE);
             }
 
             // Store -> Cleanup.
-            if ($status == archive_job_status::STORE) {
+            if ($this->get_status(usecached: true) == archive_job_status::STORE) {
                 // Store artifacts.
                 $driverclass = plugin_util::get_subplugin_by_name('archivingstore', 'localdir');
                 /** @var archivingstore $driver */
@@ -400,7 +396,7 @@ class archive_job {
                     foreach ($task->get_linked_artifacts() as $artifact) {
                         $filehandle = $driver->store($this->id, $artifact, $storagepath);
                         $this->get_logger()->info(
-                            "Stored artifact: {$filehandle->filename} (size: {$filehandle->filesize} bytes) (id: {$filehandle->id})"
+                            "Stored activity artifact: {$filehandle->filename} (size: ".display_size($filehandle->filesize).") (id: {$filehandle->id})"
                         );
                         $task->unlink_artifact($artifact, true);
                     }
@@ -424,7 +420,7 @@ class archive_job {
 
                         $filehandle = $driver->store($this->id, $backupfile, $storagepath);
                         $this->get_logger()->info(
-                            "Stored backup: {$filehandle->filename} (size: {$filehandle->filesize} bytes) (id: {$filehandle->id})"
+                            "Stored backup: {$filehandle->filename} (size: ".display_size($filehandle->filesize).") (id: {$filehandle->id})"
                         );
                         $bm->cleanup();
                     } else {
@@ -432,28 +428,28 @@ class archive_job {
                     }
                 }
 
-                $status = archive_job_status::CLEANUP;
+                $this->set_status(archive_job_status::CLEANUP);
             }
 
             // Cleanup -> Completed.
-            if ($status == archive_job_status::CLEANUP) {
+            if ($this->get_status(usecached: true) == archive_job_status::CLEANUP) {
                 // Cleanup temporary settings objects from DB.
                 foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
                     $task->clear_settings();
                 }
                 $this->clear_settings(true);
 
-                $status = archive_job_status::COMPLETED;
+                $this->set_status(archive_job_status::COMPLETED);
             }
         } catch (\Exception $e) {
             // Catch the yield silently and let everything else bubble up.
             if (!$e instanceof yield_exception) {
-                $status = archive_job_status::FAILURE;
+                $this->set_status(archive_job_status::FAILURE);
                 $this->get_logger()->fatal($e->getMessage());
                 throw $e;
             }
         } finally {
-            $this->set_status($status);
+            $this->get_logger()->debug("^---------- Finished execution cycle {$starttime} ----------^");
             $lock->release();
         }
     }

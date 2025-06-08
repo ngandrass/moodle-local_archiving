@@ -45,14 +45,17 @@ enum archive_job_status: int {
     /** @var int Activity archiving currently takes place */
     case ACTIVITY_ARCHIVING = 30;
 
+    /** @var int Waiting for pending Moodle backups */
+    case BACKUP_COLLECTION = 40;
+
     /** @var int Job data is being post-processed */
-    case POST_PROCESSING = 40;
+    case POST_PROCESSING = 50;
 
     /** @var int Job data is being stored */
-    case STORE = 50;
+    case STORE = 60;
 
     /** @var int Temporary job data is being cleaned up */
-    case CLEANUP = 60;
+    case CLEANUP = 70;
 
     /** @var int Job is completed. This state is final until future deletion. */
     case COMPLETED = 100;

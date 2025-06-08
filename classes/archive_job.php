@@ -297,19 +297,70 @@ class archive_job {
                 $drivername = $this->activity_archiving_driver()->get_plugin_name();
                 $this->get_logger()->info('Created activity archiving task (driver: '.$drivername.')');
 
+                // Create backup tasks if requested.
+                if ($this->get_setting('export_course_backup')) {
+                    $backup = backup_manager::initiate_course_backup($this->courseid, $this->userid);
+                    $this->set_metadata_entry('course_backup_id', $backup->backupid);
+                    $this->set_metadata_entry('course_backup_id', $backup->backupid);
+                    $this->set_metadata_entry('course_backup_id', $backup->backupid);
+                    $this->get_logger()->info(
+                        "Triggered creation of a Moodle course backup (#{$backup->backupid}): {$backup->filename}"
+                    );
+                }
+                if ($this->get_setting('export_cm_backup')) {
+                    $backup = backup_manager::initiate_activity_backup($this->cmid, $this->userid);
+                    $this->set_metadata_entry('cm_backup_id', $backup->backupid);
+                    $this->get_logger()->info(
+                        'Triggered creation of a Moodle activity backup (#'.$backup->backupid.'): '.$backup->filename
+                    );
+                }
+
                 // Update job status early because task execution can take some time ...
                 $status = archive_job_status::ACTIVITY_ARCHIVING;
                 $this->set_status($status);
             }
 
-            // Activity archiving -> Post processing.
+            // Activity archiving -> Backup collection.
             if ($status == archive_job_status::ACTIVITY_ARCHIVING) {
                 $driver = $this->activity_archiving_driver();
                 $driver->execute_all_tasks_for_job($this->get_id());
 
                 if ($driver->is_all_tasks_for_job_completed($this->get_id())) {
+                    $status = archive_job_status::BACKUP_COLLECTION;
+                } else {
+                    throw new yield_exception();
+                }
+            }
+
+            // Backup collection -> Post processing.
+            if ($status == archive_job_status::BACKUP_COLLECTION) {
+                // Check if we have any backups to collect.
+                $backupids = [];
+                if ($this->get_setting('export_course_backup')) {
+                    $backupids[] = $this->get_metadata_entry('course_backup_id', strict: true);
+                }
+                if ($this->get_setting('export_cm_backup')) {
+                    $backupids[] = $this->get_metadata_entry('cm_backup_id', strict: true);
+                }
+
+                // Check backup status.
+                $allbackupsready = true;
+                foreach ($backupids as $backupid) {
+                    $bm = new backup_manager($backupid);
+
+                    if ($bm->is_failed()) {
+                        throw new \moodle_exception('backup_failed_id','local_archiving', a: $backupid);
+                    }
+                    if (!$bm->is_finished_successfully()) {
+                        $allbackupsready = false;
+                        $this->get_logger()->info("Backup #{$backupid} is not finished yet. Waiting ...");
+                    }
+                }
+
+                if ($allbackupsready) {
                     $status = archive_job_status::POST_PROCESSING;
                 } else {
+                    // Not all backups ready yet, yield and wait for them to finish.
                     throw new yield_exception();
                 }
             }
@@ -330,9 +381,6 @@ class archive_job {
                 }
 
                 $status = archive_job_status::STORE;
-
-                // TODO: Should this be async or sync? Currently it is sync but it might change ... Yield for asynchronous archive store task to complete.
-                throw new yield_exception();
             }
 
             // Store -> Cleanup.
@@ -342,14 +390,42 @@ class archive_job {
                 /** @var archivingstore $driver */
                 $driver = new $driverclass();
                 $tasks = activity_archiving_task::get_by_jobid($this->id);
+                $storagepath = "job-{$this->id}";
 
+                // Activity archiving tasks.
                 foreach ($tasks as $task) {
                     foreach ($task->get_linked_artifacts() as $artifact) {
-                        $filehandle = $driver->store($this->id, $artifact, "job-{$this->id}");
+                        $filehandle = $driver->store($this->id, $artifact, $storagepath);
                         $this->get_logger()->info(
                             "Stored artifact: {$filehandle->filename} (size: {$filehandle->filesize} bytes) (id: {$filehandle->id})"
                         );
                         $task->unlink_artifact($artifact, true);
+                    }
+                }
+
+                // Backups.
+                $backupidkeys = ['course_backup_id', 'cm_backup_id'];
+                foreach ($backupidkeys as $backupidkey) {
+                    $backupid = $this->get_metadata_entry($backupidkey, strict: false);
+                    if ($backupid) {
+                        $bm = new backup_manager($backupid);
+                        $backupfile = $bm->get_backupfile();
+
+                        if (!$backupfile) {
+                            throw new \moodle_exception(
+                                'backup_artifact_file_not_found_filename',
+                                'local_archiving',
+                                a: $bm->get_filename()
+                            );
+                        }
+
+                        $filehandle = $driver->store($this->id, $backupfile, $storagepath);
+                        $this->get_logger()->info(
+                            "Stored backup: {$filehandle->filename} (size: {$filehandle->filesize} bytes) (id: {$filehandle->id})"
+                        );
+                        $bm->cleanup();
+                    } else {
+                        $this->get_logger()->debug("No {$backupidkey} found.");
                     }
                 }
 

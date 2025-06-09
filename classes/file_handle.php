@@ -25,6 +25,7 @@
 namespace local_archiving;
 
 use local_archiving\driver\archivingstore;
+use local_archiving\exception\storage_exception;
 use local_archiving\type\db_table;
 use local_archiving\type\filearea;
 use local_archiving\util\plugin_util;
@@ -267,6 +268,41 @@ final class file_handle {
         }
 
         return get_file_storage()->get_file_by_id($file->id);
+    }
+
+    /**
+     * Retrieves the file associated with this file handle. If the file is not
+     * already present in the filestore cache, it will be retrieved from the
+     * storage driver and stored in the local filestore cache.
+     *
+     * Note: The retrieval process currently is a synchronous operation and
+     * may take some time, depending on the size of the file and the storage
+     * tier.
+     *
+     * @return \stored_file The stored_file object
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws storage_exception
+     */
+    public function retrieve_file(): \stored_file {
+        // Check if the file is already present in the local filestore cache.
+        $localfile = $this->get_local_file();
+        if ($localfile) {
+            // Touch file to extend its cache lifetime.
+            $localfile->set_timemodified(time());
+
+            return $localfile;
+        }
+
+        // File not found in the local filestore cache, retrieve it from the storage driver.
+        // This is handled fully synchronously right now. When having storage
+        // drivers that write to external storage this will most likely need to
+        // be handled asynchronously. But lets focus on the more important parts
+        // first and do not drown into premature optimizations..
+        return $this->archivingstore()->retrieve(
+            $this,
+            $this->generate_retrieval_fileinfo_record()
+        );
     }
 
     /**

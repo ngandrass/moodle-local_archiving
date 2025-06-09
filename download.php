@@ -62,22 +62,7 @@ if (count($filehandles) == 0) {
 } else {
     // Exactly one file found. Try to serve it directly.
     $filehandle = array_shift($filehandles);
-    $localfile = $filehandle->get_local_file();
-    if (!$localfile) {
-        // This is handled fully synchronously right now. When having storage
-        // drivers that write to external storage this will most likely need to
-        // be handled asynchronously. But lets focus on the more important parts
-        // first and do not drown into premature optimizations...
-
-        $localfile = $filehandle->archivingstore()->retrieve(
-            $filehandle,
-            $filehandle->generate_retrieval_fileinfo_record()
-        );
-    }
-
-    // Touch file to prevent it from being removed from the cache during download.
-    $localfile->set_timemodified(time());
-
+    $localfile = $filehandle->retrieve_file();
     $downloadurl = moodle_url::make_pluginfile_url(
         $localfile->get_contextid(),
         $localfile->get_component(),

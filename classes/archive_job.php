@@ -608,6 +608,7 @@ class archive_job {
     public function set_status(archive_job_status $status): void {
         global $DB;
 
+        // Update status value in the database.
         $DB->update_record(db_table::JOB->value, [
             'id' => $this->id,
             'status' => $status->value,

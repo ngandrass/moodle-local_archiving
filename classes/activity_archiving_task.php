@@ -64,6 +64,7 @@ final class activity_archiving_task {
      * @param \context_module $context Moodle context this task is run in
      * @param int $userid ID of the user that owns this task
      * @param string $archivingmodname Name of the activity archiving driver that handles this task
+     * @param activity_archiving_task_status $status Status of this task
      */
     protected function __construct(
         protected readonly int $taskid,
@@ -71,6 +72,7 @@ final class activity_archiving_task {
         protected readonly \context_module $context,
         protected readonly int $userid,
         protected readonly string $archivingmodname,
+        protected activity_archiving_task_status $status
     ) {
         $this->archivejob = null;
         $this->archivingmod = null;
@@ -139,7 +141,7 @@ final class activity_archiving_task {
             'timemodified' => $now,
         ]);
 
-        return new self($taskid, $jobid, $context, $userid, $archivingmodname);
+        return new self($taskid, $jobid, $context, $userid, $archivingmodname, $status);
     }
 
     /**
@@ -161,7 +163,14 @@ final class activity_archiving_task {
             throw new \moodle_exception('invalidcontext', 'local_archiving');
         }
 
-        return new self($task->id, $task->jobid, $context, $task->userid, $task->archivingmod);
+        return new self(
+            $task->id,
+            $task->jobid,
+            $context,
+            $task->userid,
+            $task->archivingmod,
+            activity_archiving_task_status::from($task->status)
+        );
     }
 
     /**
@@ -186,7 +195,14 @@ final class activity_archiving_task {
                 throw new \moodle_exception('invalidcontext', 'local_archiving');
             }
 
-            $result[] = new self($task->id, $task->jobid, $context, $task->userid, $task->archivingmod);
+            $result[] = new self(
+                $task->id,
+                $task->jobid,
+                $context,
+                $task->userid,
+                $task->archivingmod,
+                activity_archiving_task_status::from($task->status)
+            );
         }
 
         return $result;
@@ -380,18 +396,28 @@ final class activity_archiving_task {
     /**
      * Retrieves the current status of this task
      *
+     * @param bool $usecached If true, the cached status will be used instead of querying the database
+     *
      * @return activity_archiving_task_status Task status
      */
-    public function get_status(): activity_archiving_task_status {
+    public function get_status(bool $usecached = false): activity_archiving_task_status {
         global $DB;
 
+        // If we only want the cached status, return it directly.
+        if ($usecached) {
+            return $this->status;
+        }
+
+        // Update local status value from database.
         try {
-            return activity_archiving_task_status::from(
+            $this->status = activity_archiving_task_status::from(
                 $DB->get_field(db_table::ACTIVITY_TASK->value, 'status', ['id' => $this->taskid], MUST_EXIST)
             );
         } catch (\dml_exception $e) {
-            return activity_archiving_task_status::UNKNOWN;
+            $this->status = activity_archiving_task_status::UNKNOWN;
         }
+
+        return $this->status;
     }
 
     /**
@@ -404,12 +430,19 @@ final class activity_archiving_task {
     public function set_status(activity_archiving_task_status $status): void {
         global $DB;
 
+        // Update status value in the database.
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
             'status' => $status->value,
         ]);
 
-        $this->get_logger()->info("Activity archiving task status updated: {$status->name} ({$status->value})");
+        // Update local status copy and log.
+        if ($this->status != $status) {
+            $this->status = $status;
+            $this->get_logger()->info(
+                "Activity archiving task status: ".$status->name." ({$status->value})"
+            );
+        }
     }
 
     /**

@@ -1,0 +1,122 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_archiving/download_job_artifacts
+
+    Displays a list of job artifact files that can be downloaded.
+
+    Example context (json):
+    {
+        "files": [
+            {
+                "filename": "file1.txt",
+                "filesize": "13.37 MiB",
+                "filetype": "text/plain",
+                "timecreated": 1700000000,
+                "storagedriver": "archivingstore_local",
+                "downloadurl": "https://foo.bar.baz/file1.txt"
+            },
+            {
+                "filename": "file2.txt",
+                "filesize": "42.00 KiB",
+                "filetype": "text/plain",
+                "timecreated": 1700000001,
+                "storagedriver": "archivingstore_local",
+                "downloadurl": "https://foo.bar.baz/file2.txt"
+            }
+        ],
+        "urls": {
+            "back": "https://foo.bar.baz"
+        }
+    }
+}}
+
+
+<h2>{{#str}} download_files, local_archiving {{/str}}</h2>
+<p>{{#str}} download_job_artifacts_desc, local_archiving {{/str}}</p>
+
+<div>
+    <table class="table" style="max-width: 600px;">
+        <tr>
+            <td>{{#str}} archive_job, local_archiving {{/str}}</td>
+            <td>
+                <a href="{{{ urls.back }}}">
+                    #{{ job.id }} ({{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}})
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>{{#str}} activity {{/str}}</td>
+            <td><a href="{{{ job.cm.url }}}">{{{ job.cm.name }}}</a></td>
+        </tr>
+    </table>
+</div>
+
+<div class="row">
+    {{#files}}
+        <div class="col-12 col-lg-6 col-xl-4 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fa-regular fa-file"></i>&nbsp;
+                    <strong>{{filename}}</strong>
+                </div>
+
+                <div class="card-body p-2">
+                    <ul class="list-group p-0 list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fa-regular fa-file-lines"></i>&nbsp;
+                           <strong>{{#str}} type, local_archiving {{/str}}:</strong>
+                            {{filetype}}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa-regular fa-floppy-disk"></i>&nbsp;
+                            <strong>{{#str}} size {{/str}}:</strong>
+                            {{filesize}}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa-regular fa-calendar"></i>&nbsp;
+                            <strong>{{#str}} timecreated {{/str}}:</strong>
+                            {{#userdate}} {{timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-database"></i>&nbsp;
+                            <strong>{{#str}} subplugintype_archivingstore, local_archiving {{/str}}:</strong>
+                            {{storagedriver}}
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-footer">
+                    <a href="{{downloadurl}}" class="btn btn-success">
+                        <i class="fa fa-download"></i>&nbsp;
+                        {{#str}} download {{/str}}
+                    </a>
+                </div>
+            </div>
+        </div>
+    {{/files}}
+
+    {{^files}}
+        <div class="col-sm-12">
+            <p>{{#str}} no_files_available, local_archiving {{/str}}</p>
+        </div>
+    {{/files}}
+</div>
+
+<div class="mt-3">
+    <a href="{{{urls.back}}}" class="btn btn-secondary">{{#str}} back_to_overview, local_archiving {{/str}}</a>
+</div>

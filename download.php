@@ -49,16 +49,55 @@ $PAGE->set_url(new moodle_url(
     '/local/archiving/download.php',
     ['jobid' => $jobid]
 ));
+$renderer = $PAGE->get_renderer('local_archiving');
 
-$notifications = "";
+$html = "";
 
 // Get or retrieve a local copy of the file.
 $filehandles = file_handle::get_by_jobid($job->get_id());
 if (count($filehandles) == 0) {
-    $notifications .= $OUTPUT->notification(get_string('no_files_found', 'local_archiving'), 'error');
+    $html .= $OUTPUT->notification(get_string('no_files_found', 'local_archiving'), 'error');
 } else if (count($filehandles) > 1) {
-    $notifications .= $OUTPUT->notification(get_string('multiple_job_artifacts_not_supported', 'local_archiving'), 'error');
-    // TODO: Implement!
+    $tplctx = [
+        "job" => [
+            "id" => $job->get_id(),
+            "timecreated" => $job->get_timecreated(),
+            "cm" => [
+                "id" => $cm->id,
+                "name" => $cm->name,
+                "url" => $cm->url,
+            ],
+        ],
+        "urls" => [
+            "back" => new moodle_url('/local/archiving/index.php', ['courseid' => $course->id]),
+        ],
+        "files" => [],
+    ];
+
+    foreach ($filehandles as $filehandle) {
+        $localfile = $filehandle->retrieve_file();
+
+        $downloadurl = moodle_url::make_pluginfile_url(
+            $localfile->get_contextid(),
+            $localfile->get_component(),
+            $localfile->get_filearea(),
+            $localfile->get_itemid(),
+            $localfile->get_filepath(),
+            $localfile->get_filename(),
+            forcedownload: true
+        );
+
+        $tplctx['files'][] = [
+            'filename' => $localfile->get_filename(),
+            'filesize' => display_size($localfile->get_filesize()),
+            'filetype' => $localfile->get_mimetype(),
+            'timecreated' => $job->get_timemodified(),
+            'storagedriver' => get_string('pluginname', "archivingstore_{$filehandle->archivingstorename}"),
+            'downloadurl' => $downloadurl->out(false),
+        ];
+    }
+
+    $html .= $renderer->render_from_template('local_archiving/download_job_artifacts', $tplctx);
 } else {
     // Exactly one file found. Try to serve it directly.
     $filehandle = array_shift($filehandles);
@@ -77,7 +116,6 @@ if (count($filehandles) == 0) {
 }
 
 // If not redirected, render output.
-$renderer = $PAGE->get_renderer('local_archiving');
 echo $OUTPUT->header();
-echo $notifications;
+echo $html;
 echo $OUTPUT->footer();

@@ -32,10 +32,13 @@ $string['back_to_overview'] = 'Back to overview';
 $string['cleanup_filestore_cache'] = 'Cleanup filestore cache';
 $string['components'] = 'Components';
 $string['create_archive'] = 'Create archive';
+$string['download_files'] = 'Download files';
+$string['filetype'] = 'File type';
 $string['id'] = 'ID';
 $string['jobid'] = 'Job ID';
 $string['progress'] = 'Progress';
 $string['ready'] = 'Ready';
+$string['type'] = 'Type';
 $string['unconfigured'] = 'Unconfigured';
 
 // Sub-plugins.
@@ -52,9 +55,11 @@ $string['archiving:create'] = 'Create new archives';
 $string['archiving:delete'] = 'Delete archives and metadata';
 
 // Job management.
+$string['archive_job'] = 'Archive job';
 $string['archive_job_logs'] = 'Archive job logs';
 $string['delete_job'] = 'Delete archive job';
 $string['delete_job_warning'] = 'Are you sure that you want to delete this archive job <b>including all archived data?</b>';
+$string['download_job_artifacts_desc'] = 'This archive job has more than one archived file associated with it. You can find a list of all archived files below. You can download each file by clicking on the download button for the specific file.';
 
 // Job status.
 $string['job_status_0'] = 'Uninitialized';

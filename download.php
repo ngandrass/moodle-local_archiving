@@ -91,7 +91,7 @@ if (count($filehandles) == 0) {
             'filename' => $localfile->get_filename(),
             'filesize' => display_size($localfile->get_filesize()),
             'filetype' => $localfile->get_mimetype(),
-            'timecreated' => $job->get_timemodified(),
+            'timecreated' => $filehandle->timecreated,
             'sha256sum' => $filehandle->sha256sum,
             'storagedriver' => get_string('pluginname', "archivingstore_{$filehandle->archivingstorename}"),
             'downloadurl' => $downloadurl->out(false),

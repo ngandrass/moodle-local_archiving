@@ -44,6 +44,8 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @property-read string $filepath Path of the referenced file
  * @property-read int $filesize Filesize in bytes
  * @property-read string $sha256sum SHA256 checksum of the file
+ * @property-read int $timecreated Timestamp when the file handle was created
+ * @property-read int $timemodified Timestamp when the file handle was last modified
  * @property-read string $filekey Optional unique key for identifying the file
  */
 final class file_handle {
@@ -70,6 +72,8 @@ final class file_handle {
         protected readonly string $filepath,
         protected readonly int $filesize,
         protected readonly string $sha256sum,
+        protected readonly int $timecreated,
+        protected readonly int $timemodified,
         protected readonly string $filekey = ''
     ) {
         $this->archivingstore = null;
@@ -126,6 +130,7 @@ final class file_handle {
         }
 
         // Insert into DB.
+        $now = time();
         $id = $DB->insert_record(db_table::FILE_HANDLE->value, [
             'jobid' => $jobid,
             'archivingstore' => $archivingstorename,
@@ -134,6 +139,8 @@ final class file_handle {
             'filesize' => $filesize,
             'sha256sum' => $sha256sum,
             'filekey' => $filekey,
+            'timecreated' => $now,
+            'timemodified' => $now,
         ]);
 
         return new self(
@@ -144,6 +151,8 @@ final class file_handle {
             $filepath,
             $filesize,
             $sha256sum,
+            $now,
+            $now,
             $filekey
         );
     }
@@ -167,7 +176,9 @@ final class file_handle {
             $handle->filepath,
             $handle->filesize,
             $handle->sha256sum,
-            $handle->filekey
+            $handle->timecreated,
+            $handle->timemodified,
+            $handle->filekey,
         );
     }
 
@@ -191,6 +202,8 @@ final class file_handle {
             $handle->filepath,
             $handle->filesize,
             $handle->sha256sum,
+            $handle->timecreated,
+            $handle->timemodified,
             $handle->filekey
         ), $handles);
     }

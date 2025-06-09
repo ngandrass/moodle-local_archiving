@@ -79,6 +79,8 @@
           <FIELD NAME="filekey" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Unique key identifying the file inside the storage (if applicable)"/>
           <FIELD NAME="filesize" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Size of the file in bytes"/>
           <FIELD NAME="sha256sum" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="SHA256 hash of the file"/>
+          <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this file handle was created"/>
+          <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this file handle was updated"/>
         </FIELDS>
         <KEYS>
           <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

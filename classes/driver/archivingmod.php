@@ -145,7 +145,11 @@ abstract class archivingmod extends base {
     }
 
     /**
-     * Executes all tasks that are associated with the given jobid
+     * Executes all tasks that are associated with the given jobid.
+     *
+     * This method also handles yielding if a task is waiting for an
+     * asynchronous operation to complete. It will also mark tasks as failed
+     * that throw any other exception during execution.
      *
      * @param int $jobid ID of the job to execute tasks for
      * @return void
@@ -155,17 +159,24 @@ abstract class archivingmod extends base {
      * @throws yield_exception
      */
     public function execute_all_tasks_for_job(int $jobid): void {
+        $shouldyield = false;
+
         foreach (activity_archiving_task::get_by_jobid($jobid) as $task) {
-            $shouldyield = false;
             try {
                 $this->execute_task($task);
             } catch (yield_exception $e) {
+                // If the task is waiting for an asynchronous operation to complete,
+                // we need to yield and let the worker continue later.
                 $shouldyield = true;
-            } finally {
-                if ($shouldyield) {
-                    throw new yield_exception();
-                }
+            } catch (\Exception $e) {
+                // If any other exception occurs, we cancel the task.
+                $task->set_status(activity_archiving_task_status::FAILED);
+                $task->get_logger()->error($e->getMessage());
             }
+        }
+
+        if ($shouldyield) {
+            throw new yield_exception();
         }
     }
 

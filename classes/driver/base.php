@@ -97,13 +97,14 @@ abstract class base {
      */
     public function is_enabled(): bool {
         $frankenstyle = $this->get_frankenstyle_name();
-        $enabledplugins = \core_plugin_manager::instance()->get_enabled_plugins($frankenstyle->type);
+        $plugininfo = \core_plugin_manager::instance()->get_plugin_info("{$frankenstyle->type}_{$frankenstyle->name}");
 
-        if (in_array($frankenstyle->name, $enabledplugins)) {
-            return true;
-        } else {
+        if (!$plugininfo) {
+            // Plugin not found.
             return false;
         }
+
+        return $plugininfo->is_enabled();
     }
 
     /**

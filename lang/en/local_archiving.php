@@ -29,6 +29,7 @@ $string['pluginname'] = 'Archiving';
 // Common.
 $string['activitytype'] = 'Activity type';
 $string['back_to_overview'] = 'Back to overview';
+$string['checksum'] = 'Checksum';
 $string['cleanup_filestore_cache'] = 'Cleanup filestore cache';
 $string['components'] = 'Components';
 $string['create_archive'] = 'Create archive';

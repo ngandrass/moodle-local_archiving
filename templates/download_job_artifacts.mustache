@@ -21,12 +21,22 @@
 
     Example context (json):
     {
+        "job": {
+            "id": 123,
+            "timecreated": 1700000000,
+            "cm": {
+                "id": 456,
+                "name": "Example Activity",
+                "url": "https://foo.bar.baz/mod/example/view.php?id=456"
+            },
+        },
         "files": [
             {
                 "filename": "file1.txt",
                 "filesize": "13.37 MiB",
                 "filetype": "text/plain",
                 "timecreated": 1700000000,
+                "sha256sum": "abc123def456...",
                 "storagedriver": "archivingstore_local",
                 "downloadurl": "https://foo.bar.baz/file1.txt"
             },
@@ -35,6 +45,7 @@
                 "filesize": "42.00 KiB",
                 "filetype": "text/plain",
                 "timecreated": 1700000001,
+                "sha256sum": "abc789def012...",
                 "storagedriver": "archivingstore_local",
                 "downloadurl": "https://foo.bar.baz/file2.txt"
             }
@@ -96,6 +107,11 @@
                             <i class="fa fa-database"></i>&nbsp;
                             <strong>{{#str}} subplugintype_archivingstore, local_archiving {{/str}}:</strong>
                             {{storagedriver}}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-hashtag"></i>&nbsp;
+                            <strong>{{#str}} checksum, local_archiving {{/str}} (SHA256):</strong>
+                            <code class="text-body">{{sha256sum}}</code>
                         </li>
                     </ul>
                 </div>

@@ -50,14 +50,20 @@ $PAGE->set_url(new moodle_url(
     ['jobid' => $jobid]
 ));
 $renderer = $PAGE->get_renderer('local_archiving');
-
 $html = "";
 
-// Get or retrieve a local copy of the file.
+// Only allow successfully finished jobs.
+if (!$job->get_status() == archive_job_status::COMPLETED) {
+    throw new \moodle_exception('job_not_completed', 'local_archiving');
+}
+
+// Get file handles for this job.
 $filehandles = file_handle::get_by_jobid($job->get_id());
 if (count($filehandles) == 0) {
+    // No file handles found, display error message.
     $html .= $OUTPUT->notification(get_string('no_files_found', 'local_archiving'), 'error');
-} else if (count($filehandles) > 1) {
+} else {
+    // Files found, prepare template context.
     $tplctx = [
         "job" => [
             "id" => $job->get_id(),
@@ -74,6 +80,7 @@ if (count($filehandles) == 0) {
         "files" => [],
     ];
 
+    // Add all job files to template context and render the template.
     foreach ($filehandles as $filehandle) {
         $localfile = $filehandle->retrieve_file();
 
@@ -99,21 +106,6 @@ if (count($filehandles) == 0) {
     }
 
     $html .= $renderer->render_from_template('local_archiving/download_job_artifacts', $tplctx);
-} else {
-    // Exactly one file found. Try to serve it directly.
-    $filehandle = array_shift($filehandles);
-    $localfile = $filehandle->retrieve_file();
-    $downloadurl = moodle_url::make_pluginfile_url(
-        $localfile->get_contextid(),
-        $localfile->get_component(),
-        $localfile->get_filearea(),
-        $localfile->get_itemid(),
-        $localfile->get_filepath(),
-        $localfile->get_filename(),
-        forcedownload: true
-    );
-
-    redirect($downloadurl);
 }
 
 // If not redirected, render output.

@@ -39,7 +39,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  *
  * @property-read int $id ID of the file handle
  * @property-read int $jobid ID of the archiving job this file is associated with
- * @property-read string $archivingstore Name of the storage driver that works with this file handle
+ * @property-read string $archivingstorename Name of the storage driver that works with this file handle
  * @property-read string $filename Name of the referenced file
  * @property-read string $filepath Path of the referenced file
  * @property-read int $filesize Filesize in bytes

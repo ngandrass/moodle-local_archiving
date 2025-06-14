@@ -54,8 +54,11 @@ enum archive_job_status: int {
     /** @var int Job data is being stored */
     case STORE = 60;
 
+    /** @var int Job artifacts are being signed */
+    case SIGN = 70;
+
     /** @var int Temporary job data is being cleaned up */
-    case CLEANUP = 70;
+    case CLEANUP = 90;
 
     /** @var int Job is completed. This state is final until future deletion. */
     case COMPLETED = 100;
@@ -115,6 +118,7 @@ enum archive_job_status: int {
             self::POST_PROCESSING
                 => 'primary',
             self::STORE,
+            self::SIGN,
             self::CLEANUP
                 => 'info',
             self::COMPLETED

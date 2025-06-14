@@ -382,7 +382,7 @@ class archive_job {
                 $this->set_status(archive_job_status::STORE);
             }
 
-            // Store -> Cleanup.
+            // Store -> Sign.
             if ($this->get_status(usecached: true) == archive_job_status::STORE) {
                 // Store artifacts.
                 $driverclass = plugin_util::get_subplugin_by_name('archivingstore', 'localdir');
@@ -425,6 +425,32 @@ class archive_job {
                         $bm->cleanup();
                     } else {
                         $this->get_logger()->debug("No {$backupidkey} found.");
+                    }
+                }
+
+                $this->set_status(archive_job_status::SIGN);
+            }
+
+            // Sign -> Cleanup.
+            if ($this->get_status(usecached: true) == archive_job_status::SIGN) {
+                if (!tsp_manager::is_automatic_tsp_signing_enabled()) {
+                    $this->get_logger()->info("Automatic TSP signing of job artifacts is disabled, skipping signing step.");
+                } else {
+                    // Sign all stored files with TSP.
+                    $filehandles = file_handle::get_by_jobid($this->id);
+
+                    foreach ($filehandles as $filehandle) {
+                        $tspmanager = new tsp_manager($filehandle);
+                        if ($tspmanager->wants_tsp_timestamp()) {
+                            $tspmanager->timestamp();
+                            $this->get_logger()->info(
+                                "Created TSP signature for file: {$filehandle->filename} (id: {$filehandle->id})"
+                            );
+                        } else {
+                            $this->get_logger()->warn(
+                                "No TSP timestamp requested for file: {$filehandle->filename} (id: {$filehandle->id})"
+                            );
+                        }
                     }
                 }
 

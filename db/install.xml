@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-  <XMLDB PATH="local/archiving/db" VERSION="2025052200" COMMENT="XMLDB file for Moodle local/archiving">
+  <XMLDB PATH="local/archiving/db" VERSION="2025061400" COMMENT="XMLDB file for Moodle local/archiving">
     <TABLES>
       <TABLE NAME="local_archiving_job" COMMENT="Archive jobs">
         <FIELDS>
@@ -85,6 +85,21 @@
         <KEYS>
           <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
           <KEY NAME="jobid" TYPE="foreign" FIELDS="jobid" REFTABLE="local_archiving_job" REFFIELDS="id"/>
+        </KEYS>
+      </TABLE>
+
+      <TABLE NAME="local_archiving_tsp" COMMENT="RFC 3161 Time-Stamp Protocol data for archived files">
+        <FIELDS>
+          <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+          <FIELD NAME="filehandleid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the file handle this TSP data is for"/>
+          <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this TSP data was stored"/>
+          <FIELD NAME="server" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="URL of the RFC 3161 TSP server used for this request"/>
+          <FIELD NAME="timestampquery" TYPE="binary" NOTNULL="true" SEQUENCE="false" COMMENT="DER encoded binary TSP query"/>
+          <FIELD NAME="timestampreply" TYPE="binary" NOTNULL="true" SEQUENCE="false" COMMENT="DER encoded binary TSP reply"/>
+        </FIELDS>
+        <KEYS>
+          <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+          <KEY NAME="filehandleid" TYPE="foreign" FIELDS="filehandleid" REFTABLE="local_archiving_file" REFFIELDS="id"/>
         </KEYS>
       </TABLE>
 

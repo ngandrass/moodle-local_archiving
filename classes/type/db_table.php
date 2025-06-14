@@ -48,6 +48,9 @@ enum db_table: string {
     /** @var string Name of the table that holds persistent file handles */
     case FILE_HANDLE = 'local_archiving_file';
 
+    /** @var string Name of the table that stores Timestamp-Protocol data */
+    case TSP = 'local_archiving_tsp';
+
     /** @var string Name of the table used for job logging */
     case LOG = 'local_archiving_log';
 

@@ -37,6 +37,7 @@
                 "filetype": "text/plain",
                 "timecreated": 1700000000,
                 "sha256sum": "abc123def456...",
+                "tsp": null,
                 "storagedriver": "archivingstore_local",
                 "downloadurl": "https://foo.bar.baz/file1.txt"
             },
@@ -46,6 +47,12 @@
                 "filetype": "text/plain",
                 "timecreated": 1700000001,
                 "sha256sum": "abc789def012...",
+                "tsp": {
+                    "timecreated": 1700000001,
+                    "server": https://tsp.example.com,
+                    "querydownloadurl": "https://foo.bar.baz/get-tsp?type=query",
+                    "replydownloadurl": "https://foo.bar.baz/get-tsp?type=reply"
+                },
                 "storagedriver": "archivingstore_local",
                 "downloadurl": "https://foo.bar.baz/file2.txt"
             }
@@ -80,7 +87,7 @@
 <div class="row">
     {{#files}}
         <div class="col-12 col-lg-6 col-xl-4 mb-3">
-            <div class="card">
+            <div class="card h-100">
                 <div class="card-header">
                     <i class="fa-regular fa-file"></i>&nbsp;
                     <strong>{{filename}}</strong>
@@ -111,7 +118,29 @@
                         <li class="list-group-item">
                             <i class="fa fa-hashtag"></i>&nbsp;
                             <strong>{{#str}} checksum, local_archiving {{/str}} (SHA256):</strong>
-                            <code class="text-body">{{sha256sum}}</code>
+                            <code class="text-body" style="word-break: break-all;">{{sha256sum}}</code>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa-solid fa-file-contract"></i>&nbsp;
+                            <strong>{{#str}} signature, local_archiving {{/str}} (TSP):</strong>
+                            {{#tsp}}
+                                {{#str}} signed_on, local_archiving {{/str}}
+                                <code class="text-body">{{#userdate}} {{tsp.timecreated}}, {{#str}} strftimedatetimeaccurate, core_langconfig {{/str}} {{/userdate}}</code>
+                                {{#str}} signed_by, local_archiving {{/str}}
+                                <code class="text-body">{{tsp.server}}</code>
+                                <br>
+                                {{#str}} download {{/str}}:
+                                <a href="{{tsp.querydownloadurl}}" target="_blank">
+                                    {{#pix}} a/download_all, core, {{#str}} downloadfile {{/str}} {{/pix}}{{#str}} tsp_query_filename, local_archiving {{/str}}
+                                </a>
+                                &nbsp;&ndash;&nbsp;
+                                <a href="{{tsp.replydownloadurl}}" target="_blank">
+                                    {{#pix}} a/download_all, core, {{#str}} downloadfile {{/str}} {{/pix}}{{#str}} tsp_reply_filename, local_archiving {{/str}}
+                                </a>
+                            {{/tsp}}
+                            {{^tsp}}
+                                <i>{{#str}} not_signed, local_archiving {{/str}}</i>
+                            {{/tsp}}
                         </li>
                     </ul>
                 </div>

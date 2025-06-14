@@ -25,6 +25,7 @@
 use local_archiving\archive_job;
 use local_archiving\file_handle;
 use local_archiving\logging\logger;
+use local_archiving\tsp_manager;
 use local_archiving\type\archive_job_status;
 
 require_once(__DIR__ . '/../../config.php');
@@ -82,8 +83,10 @@ if (count($filehandles) == 0) {
 
     // Add all job files to template context and render the template.
     foreach ($filehandles as $filehandle) {
+        // Cache file locally.
         $localfile = $filehandle->retrieve_file();
 
+        // Generate download URL.
         $downloadurl = moodle_url::make_pluginfile_url(
             $localfile->get_contextid(),
             $localfile->get_component(),
@@ -94,12 +97,26 @@ if (count($filehandles) == 0) {
             forcedownload: true
         );
 
+        // Get TSP data if available.
+        $tspmanager = new tsp_manager($filehandle);
+        $tspdata = $tspmanager->get_tsp_data();
+        if ($tspdata) {
+            $tspdata = [
+                'timecreated' => $tspdata->timecreated,
+                'server' => $tspdata->server,
+                'querydownloadurl' => new moodle_url("/"), // TODO!
+                'replydownloadurl' => new moodle_url("/"), // TODO!
+            ];
+        }
+
+        // Add file data to template context.
         $tplctx['files'][] = [
             'filename' => $localfile->get_filename(),
             'filesize' => display_size($localfile->get_filesize()),
             'filetype' => $localfile->get_mimetype(),
             'timecreated' => $filehandle->timecreated,
             'sha256sum' => $filehandle->sha256sum,
+            'tsp' => $tspdata,
             'storagedriver' => get_string('pluginname', "archivingstore_{$filehandle->archivingstorename}"),
             'downloadurl' => $downloadurl->out(false),
         ];

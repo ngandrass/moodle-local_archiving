@@ -33,15 +33,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 enum filearea: string {
 
-    /**
-     * Returns the component name for this filearea
-     *
-     * @return string The component name for this filearea
-     */
-    public function get_component(): string {
-        return 'local_archiving';
-    }
-
     /** @var string Filearea for temporary files */
     case TEMP = 'temp';
 
@@ -53,5 +44,30 @@ enum filearea: string {
 
     /** @var string Filearea for draft files and uploads */
     case DRAFT = 'draft';
+
+    /** @var string Virtual filearea for TSP data */
+    case TSP = 'tsp';
+
+    /**
+     * Returns the component name for this filearea
+     *
+     * @return string The component name for this filearea
+     */
+    public function get_component(): string {
+        return 'local_archiving';
+    }
+
+    /**
+     * Determines whether this filearea is virtual or not.
+     *
+     * Virtual fileareas do not contain actulal files but serve content that is
+     * either stored in the database or generated on-the-fly. Therefore, "files"
+     * within virtual fileareas are never to be found on the local filesystem.
+     *
+     * @return bool True, if this filearea is virtual, false otherwise
+     */
+    public function is_virtual(): bool {
+        return $this === self::TSP;
+    }
 
 }

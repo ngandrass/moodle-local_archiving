@@ -72,22 +72,24 @@ class job_overview_table extends \table_sql {
 
         // Setup table.
         $this->define_columns([
+            'timecreated',
             'id',
             'contextid',
-            'timecreated',
             'user',
             'status',
             'actions',
         ]);
 
         $this->define_headers([
+            get_string('task_starttime', 'admin'),
             get_string('id', 'local_archiving'),
             get_string('activity'),
-            get_string('task_starttime', 'admin'),
             get_string('user'),
             get_string('status'),
             '',
         ]);
+
+        $this->column_class('actions', 'text-center');
 
         $this->set_sql(
             'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, u.username',
@@ -100,7 +102,7 @@ class job_overview_table extends \table_sql {
             ]
         );
 
-        $this->sortable(true, 'id', SORT_DESC);
+        $this->sortable(true, 'timecreated', SORT_DESC);
         $this->no_sorting('actions');
         $this->collapsible(false);
     }

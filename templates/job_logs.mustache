@@ -39,17 +39,23 @@
     }
 }}
 
-<h1>{{#str}} archive_job_logs, local_archiving {{/str}}</h1>
-
-<div style="max-width: 600px;">
-    <table class="table">
-        <tr>
-            <td>{{#str}} jobid, local_archiving {{/str}}</td>
-            <td>{{job.id}}</td>
-        </tr>
-        <tr>
-            <td>{{#str}} status {{/str}}</td>
-            <td>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>{{#str}} archive_job_logs, local_archiving {{/str}}</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div style="max-width: 600px;">
+                <table class="table">
+                    <tr>
+                        <td>{{#str}} jobid, local_archiving {{/str}}</td>
+                        <td>{{job.id}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{#str}} status {{/str}}</td>
+                        <td>
                 <span class="badge badge-{{job.status.color}}"
                       data-toggle="tooltip"
                       data-placement="top"
@@ -57,27 +63,35 @@
                 >
                     {{job.status.text}}
                 </span>
-            </td>
-        </tr>
-        <tr>
-            <td>{{#str}} timecreated {{/str}}</td>
-            <td>
-                {{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
-            </td>
-        </tr>
-        <tr>
-            <td>{{#str}} lastmodified {{/str}}</td>
-            <td>
-                {{#userdate}} {{job.timemodified}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
-            </td>
-        </tr>
-    </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{#str}} timecreated {{/str}}</td>
+                        <td>
+                            {{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{#str}} lastmodified {{/str}}</td>
+                        <td>
+                            {{#userdate}} {{job.timemodified}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h3>{{#str}} logs {{/str}}</h3>
+            <!-- This must be formatted exactly like this abomination so that whitespaces and linebreaks don't mess with the pre-formatted content ! -->
+            <pre style="background-color: #efefef;" class="p-2">{{#job.logs}}{{{.}}}{{/job.logs}}{{^job.completed}}
+                ...{{/job.completed}}</pre>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <a href="{{{urls.back}}}">{{#str}} back_to_overview, local_archiving {{/str}}</a>
+        </div>
+    </div>
 </div>
-
-
-<h3>{{#str}} logs {{/str}}</h3>
-<!-- This must be formatted exactly like this abomination so that whitespaces and linebreaks don't mess with the pre-formatted content ! -->
-<pre style="background-color: #efefef;" class="p-2">{{#job.logs}}{{{.}}}{{/job.logs}}{{^job.completed}}
-...{{/job.completed}}</pre>
-
-<a href="{{{urls.back}}}">{{#str}} back_to_overview, local_archiving {{/str}}</a>

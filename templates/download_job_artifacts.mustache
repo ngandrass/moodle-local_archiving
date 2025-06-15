@@ -64,107 +64,115 @@
 }}
 
 
-<h2>{{#str}} download_job_artifacts, local_archiving {{/str}}</h2>
-<p>{{#str}} download_job_artifacts_desc, local_archiving {{/str}}</p>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2>{{#str}} download_job_artifacts, local_archiving {{/str}}</h2>
+            <p>{{#str}} download_job_artifacts_desc, local_archiving {{/str}}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <table class="table" style="max-width: 600px;">
+                <tr>
+                    <td>{{#str}} archive_job, local_archiving {{/str}}</td>
+                    <td>
+                        <a href="{{{ urls.back }}}">
+                            #{{ job.id }} ({{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}})
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>{{#str}} activity {{/str}}</td>
+                    <td><a href="{{{ job.cm.url }}}">{{{ job.cm.name }}}</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        {{#files}}
+            <div class="col-12 col-lg-6 p-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="fa-regular fa-file"></i>&nbsp;
+                        <strong>{{filename}}</strong>
+                    </div>
 
-<div>
-    <table class="table" style="max-width: 600px;">
-        <tr>
-            <td>{{#str}} archive_job, local_archiving {{/str}}</td>
-            <td>
-                <a href="{{{ urls.back }}}">
-                    #{{ job.id }} ({{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}})
-                </a>
-            </td>
-        </tr>
-        <tr>
-            <td>{{#str}} activity {{/str}}</td>
-            <td><a href="{{{ job.cm.url }}}">{{{ job.cm.name }}}</a></td>
-        </tr>
-    </table>
-</div>
+                    <div class="card-body p-2">
+                        <ul class="list-group p-0 list-group-flush">
+                            <li class="list-group-item">
+                                <i class="fa-regular fa-file-lines"></i>&nbsp;
+                                <strong>{{#str}} type, local_archiving {{/str}}:</strong>
+                                {{filetype}}
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fa-regular fa-floppy-disk"></i>&nbsp;
+                                <strong>{{#str}} size {{/str}}:</strong>
+                                {{filesize}}
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fa-regular fa-calendar"></i>&nbsp;
+                                <strong>{{#str}} timecreated {{/str}}:</strong>
+                                {{#userdate}} {{timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fa fa-database"></i>&nbsp;
+                                <strong>{{#str}} subplugintype_archivingstore, local_archiving {{/str}}:</strong>
+                                {{storagedriver}}
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fa fa-hashtag"></i>&nbsp;
+                                <strong>{{#str}} checksum, local_archiving {{/str}} (SHA256):</strong>
+                                <code class="text-body" style="word-break: break-all;">{{sha256sum}}</code>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fa-solid fa-file-contract"></i>&nbsp;
+                                <strong>{{#str}} signature, local_archiving {{/str}} (TSP):</strong>
+                                {{#tsp}}
+                                    {{#str}} signed_on, local_archiving {{/str}}
+                                    <code class="text-body">{{#userdate}} {{tsp.timecreated}}, {{#str}} strftimedatetimeaccurate, core_langconfig {{/str}} {{/userdate}}</code>
+                                    {{#str}} signed_by, local_archiving {{/str}}
+                                    <code class="text-body">{{tsp.server}}</code>
+                                    <br>
+                                    <a href="{{tsp.querydownloadurl}}" target="_blank">
+                                        {{#pix}} a/download_all, core, {{#str}} downloadfile {{/str}} {{/pix}}{{#str}} tsp_query_filename, local_archiving {{/str}}
+                                    </a>
+                                    &nbsp;&ndash;&nbsp;
+                                    <a href="{{tsp.replydownloadurl}}" target="_blank">
+                                        {{#pix}} a/download_all, core, {{#str}} downloadfile {{/str}} {{/pix}}{{#str}} tsp_reply_filename, local_archiving {{/str}}
+                                    </a>
+                                {{/tsp}}
+                                {{^tsp}}
+                                    <i>{{#str}} not_signed, local_archiving {{/str}}</i>
+                                {{/tsp}}
+                            </li>
+                        </ul>
+                    </div>
 
-<div class="row">
-    {{#files}}
-        <div class="col-12 col-lg-6 col-xl-4 mb-3">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fa-regular fa-file"></i>&nbsp;
-                    <strong>{{filename}}</strong>
-                </div>
-
-                <div class="card-body p-2">
-                    <ul class="list-group p-0 list-group-flush">
-                        <li class="list-group-item">
-                            <i class="fa-regular fa-file-lines"></i>&nbsp;
-                           <strong>{{#str}} type, local_archiving {{/str}}:</strong>
-                            {{filetype}}
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa-regular fa-floppy-disk"></i>&nbsp;
-                            <strong>{{#str}} size {{/str}}:</strong>
-                            {{filesize}}
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa-regular fa-calendar"></i>&nbsp;
-                            <strong>{{#str}} timecreated {{/str}}:</strong>
-                            {{#userdate}} {{timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-database"></i>&nbsp;
-                            <strong>{{#str}} subplugintype_archivingstore, local_archiving {{/str}}:</strong>
-                            {{storagedriver}}
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-hashtag"></i>&nbsp;
-                            <strong>{{#str}} checksum, local_archiving {{/str}} (SHA256):</strong>
-                            <code class="text-body" style="word-break: break-all;">{{sha256sum}}</code>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa-solid fa-file-contract"></i>&nbsp;
-                            <strong>{{#str}} signature, local_archiving {{/str}} (TSP):</strong>
-                            {{#tsp}}
-                                {{#str}} signed_on, local_archiving {{/str}}
-                                <code class="text-body">{{#userdate}} {{tsp.timecreated}}, {{#str}} strftimedatetimeaccurate, core_langconfig {{/str}} {{/userdate}}</code>
-                                {{#str}} signed_by, local_archiving {{/str}}
-                                <code class="text-body">{{tsp.server}}</code>
-                                <br>
-                                <a href="{{tsp.querydownloadurl}}" target="_blank">
-                                    {{#pix}} a/download_all, core, {{#str}} downloadfile {{/str}} {{/pix}}{{#str}} tsp_query_filename, local_archiving {{/str}}
-                                </a>
-                                &nbsp;&ndash;&nbsp;
-                                <a href="{{tsp.replydownloadurl}}" target="_blank">
-                                    {{#pix}} a/download_all, core, {{#str}} downloadfile {{/str}} {{/pix}}{{#str}} tsp_reply_filename, local_archiving {{/str}}
-                                </a>
-                            {{/tsp}}
-                            {{^tsp}}
-                                <i>{{#str}} not_signed, local_archiving {{/str}}</i>
-                            {{/tsp}}
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="card-footer text-center">
-                    <a href="{{downloadurl}}" class="btn btn-success mx-1" role="button">
-                        <i class="fa fa-download"></i>&nbsp;
-                        {{#str}} download {{/str}}
-                    </a>
-                    <a href="#" class="btn btn-outline-danger disabled mx-1" role="button" aria-disabled="true">
-                        <i class="fa fa-trash"></i>&nbsp;
-                        {{#str}} delete {{/str}}
-                    </a>
+                    <div class="card-footer text-center">
+                        <a href="{{downloadurl}}" class="btn btn-success mx-1" role="button">
+                            <i class="fa fa-download"></i>&nbsp;
+                            {{#str}} download {{/str}}
+                        </a>
+                        <a href="#" class="btn btn-outline-danger disabled mx-1" role="button" aria-disabled="true">
+                            <i class="fa fa-trash"></i>&nbsp;
+                            {{#str}} delete {{/str}}
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    {{/files}}
+        {{/files}}
 
-    {{^files}}
-        <div class="col-sm-12">
-            <p>{{#str}} no_files_available, local_archiving {{/str}}</p>
+        {{^files}}
+            <div class="col-sm-12">
+                <p>{{#str}} no_files_available, local_archiving {{/str}}</p>
+            </div>
+        {{/files}}
+    </div>
+    <div class="row">
+        <div class="col-12 mt-3">
+            <a href="{{{urls.back}}}" class="btn btn-secondary">{{#str}} back_to_overview, local_archiving {{/str}}</a>
         </div>
-    {{/files}}
+    </div>
 </div>
 
-<div class="mt-3">
-    <a href="{{{urls.back}}}" class="btn btn-secondary">{{#str}} back_to_overview, local_archiving {{/str}}</a>
-</div>

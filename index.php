@@ -54,7 +54,10 @@ foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
         'modname' => $obj->cm->modname,
         'modpurpose' => plugin_supports('mod', $obj->cm->modname, FEATURE_MOD_PURPOSE, MOD_PURPOSE_OTHER) ?: '',
         'name' => $obj->cm->name,
-        'url' => $obj->cm->url,
+        'archiveurl' => new \moodle_url("/local/archiving/archive.php", [
+            'courseid' => $courseid,
+            'cmid' => $obj->cm->id,
+        ]),
         'iconurl' => $obj->cm->get_icon_url(),
         'supported' => $obj->supported,
         'enabled' => $obj->enabled,

@@ -129,7 +129,6 @@
                                 {{#str}} signed_by, local_archiving {{/str}}
                                 <code class="text-body">{{tsp.server}}</code>
                                 <br>
-                                {{#str}} download {{/str}}:
                                 <a href="{{tsp.querydownloadurl}}" target="_blank">
                                     {{#pix}} a/download_all, core, {{#str}} downloadfile {{/str}} {{/pix}}{{#str}} tsp_query_filename, local_archiving {{/str}}
                                 </a>
@@ -145,10 +144,14 @@
                     </ul>
                 </div>
 
-                <div class="card-footer">
-                    <a href="{{downloadurl}}" class="btn btn-success">
+                <div class="card-footer text-center">
+                    <a href="{{downloadurl}}" class="btn btn-success mx-1" role="button">
                         <i class="fa fa-download"></i>&nbsp;
                         {{#str}} download {{/str}}
+                    </a>
+                    <a href="#" class="btn btn-outline-danger disabled mx-1" role="button" aria-disabled="true">
+                        <i class="fa fa-trash"></i>&nbsp;
+                        {{#str}} delete {{/str}}
                     </a>
                 </div>
             </div>

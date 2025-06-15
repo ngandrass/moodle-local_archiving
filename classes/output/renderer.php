@@ -27,10 +27,10 @@ namespace local_archiving\output;
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-class renderer extends \plugin_renderer_base {
 
-    public function index(): string {
-        return '<h1>Hello, world!</h1>';
-    }
+/**
+ * Renderer class for the local_archiving plugin.
+ */
+class renderer extends \plugin_renderer_base {
 
 }

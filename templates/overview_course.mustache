@@ -1,0 +1,134 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_archiving/overview_course
+
+    Archiving overview for a specific course.
+
+    Example context (json):
+    {
+        "TODO": "TODO"
+    }
+}}
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>{{#str}} archiving, local_archiving {{/str}}</h1>
+            <p>
+                {{#str}} archiving_course_overview_desc, local_archiving {{/str}}
+            </p>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-12">
+            <h3>{{#str}} activities {{/str}}</h3>
+            <p>
+                {{#str}} activity_archiving_list_desc, local_archiving {{/str}}
+            </p>
+            <ul class="list-group">
+                {{#cms}}
+                    <a
+                        href="{{{url}}}"
+                        class="
+                            list-group-item
+                            list-group-item-action
+                            {{#canbearchived}}text-primary{{/canbearchived}}
+                            {{^canbearchived}}text-muted disabled{{/canbearchived}}
+                        "
+                        {{^canbearchived}}aria-disabled="true" style="font-style: normal;"{{/canbearchived}}
+                    >
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="d-inline activity-icon activityiconcontainer {{modpurpose}} pl-0">
+                                    <img src="{{{iconurl}}}" class="activityicon mr-1" alt=""/>
+                                </div>
+                                <div class="d-inline">
+                                    {{name}}
+                                </div>
+                            </div>
+                            <div>
+                                {{#canbearchived}}
+                                    {{#lastarchived}}
+                                        <span class="badge badge-success pb-1 px-2">
+                                            <i class="fa-solid fa-check"></i>
+                                            {{#str}} archived, local_archiving {{/str}}:
+                                            {{#userdate}} {{lastarchived}}, {{#str}} strftimedatetimeshort, core_langconfig {{/str}} {{/userdate}}
+                                        </span>
+                                    {{/lastarchived}}
+                                    {{^lastarchived}}
+                                        <span class="badge badge-warning pb-1 px-2">
+                                            <i class="fa-solid fa-exclamation-triangle"></i>
+                                            {{#str}} never_archived, local_archiving {{/str}}
+                                        </span>
+                                    {{/lastarchived}}
+                                {{/canbearchived}}
+                                {{^canbearchived}}
+                                    {{^supported}}
+                                        <span class="badge badge-muted pb-1 px-2">
+                                            <i class="fa-solid fa-bolt"></i>
+                                            {{#str}} unsupported, local_archiving {{/str}}
+                                        </span>
+                                    {{/supported}}
+                                    {{#supported}}
+                                        {{^enabled}}
+                                            <span class="badge badge-muted pb-1 px-2">
+                                                <i class="fa-regular fa-eye-slash"></i>
+                                                {{#str}} disabled, local_archiving {{/str}}
+                                            </span>
+                                        {{/enabled}}
+                                        {{#enabled}}
+                                            {{^ready}}
+                                                <span class="badge badge-danger pb-1 px-2">
+                                                    <i class="fa-solid fa-pause"></i>
+                                                    {{#str}} not_ready, local_archiving {{/str}}
+                                                </span>
+                                            {{/ready}}
+                                            {{#ready}}
+                                                <span class="badge badge-danger pb-1 px-2">
+                                                <i class="fa-solid fa-bolt"></i>
+                                                    {{#str}} cannot_be_archived, local_archiving {{/str}}
+                                                </span>
+                                            {{/ready}}
+                                        {{/enabled}}
+                                    {{/supported}}
+                                {{/canbearchived}}
+                            </div>
+                        </div>
+                    </a>
+                {{/cms}}
+                {{^cms}}
+                    <li class="list-group-item">
+                        Nothing to show... TODO
+                    </li>
+                {{/cms}}
+            </ul>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-12">
+            <h3>{{#str}} archive_jobs, local_archiving {{/str}}</h3>
+            <p>
+                {{#str}} archive_jobs_course_table_desc, local_archiving {{/str}}
+            </p>
+            <div>
+                {{{jobtablehtml}}}
+            </div>
+        </div>
+    </div>
+</div>

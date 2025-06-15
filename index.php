@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -24,7 +23,6 @@
  */
 
 use local_archiving\util\mod_util;
-use local_archiving\util\plugin_util;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -46,50 +44,35 @@ $PAGE->set_url(new moodle_url(
     '/local/archiving/index.php',
     ['courseid' => $courseid]
 ));
-//$PAGE->set_pagelayout('incourse');
+$PAGE->set_pagelayout('incourse');
 
+// Build context for page template.
+$tplctx = [];
+foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
+    $tplctx['cms'][] = [
+        'id' => $obj->cm->id,
+        'modname' => $obj->cm->modname,
+        'modpurpose' => plugin_supports('mod', $obj->cm->modname, FEATURE_MOD_PURPOSE, MOD_PURPOSE_OTHER) ?: '',
+        'name' => $obj->cm->name,
+        'url' => $obj->cm->url,
+        'iconurl' => $obj->cm->get_icon_url(),
+        'supported' => $obj->supported,
+        'enabled' => $obj->enabled,
+        'ready' => $obj->ready,
+        'canbearchived' => $obj->supported && $obj->enabled && $obj->ready,
+        'lastarchived' => $obj->lastarchived ?: null,
+    ];
+}
+
+$jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
+$jobtbl->define_baseurl($PAGE->url);
+ob_start();
+$jobtbl->out(20, true);
+$tplctx['jobtablehtml'] = ob_get_contents();
+ob_end_clean();
 
 // Render output.
 $renderer = $PAGE->get_renderer('local_archiving');
 echo $OUTPUT->header();
-echo $renderer->index();
-
-// DEBUG start
-echo "<h1>Activities</h1>";
-echo "<pre>";
-foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
-    if ($obj->supported) {
-        if ($obj->enabled) {
-            $enablehtml = '<span class="badge badge-success px-2">Enabled</span>';
-        } else {
-            $enablehtml = '<span class="badge badge-warning px-2">Disabled</span>';
-        }
-    } else {
-        $enablehtml = '<span class="badge badge-danger px-2">Not supported</span>';
-    }
-
-    if ($obj->lastarchived) {
-        $lastarchivedhtml = '<span class="badge badge-success px-2">Archived on '.date('Y-m-d H:i:s', $obj->lastarchived).'</span>';
-    } else {
-        $lastarchivedhtml = '<span class="badge badge-warning px-2">Never archived</span>';
-    }
-
-    if ($obj->supported && $obj->enabled && $obj->ready) {
-        $url = new moodle_url('/local/archiving/archive.php', [
-            'courseid' => $courseid,
-            'cmid' => $obj->cm->id,
-        ]);
-        echo "<a href=\"{$url}\">[{$obj->cm->modname}]: {$obj->cm->name} {$enablehtml} {$lastarchivedhtml}</a><br>";
-    } else {
-        echo "[{$obj->cm->modname}]: {$obj->cm->name} {$enablehtml} {$lastarchivedhtml}<br>";
-    }
-}
-echo "</pre>";
-
-$jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
-$jobtbl->define_baseurl($PAGE->url);
-$jobtbl->out(20, true);
-
-// DEBUG end
-
+echo $renderer->render_from_template('local_archiving/overview_course', $tplctx);
 echo $OUTPUT->footer();

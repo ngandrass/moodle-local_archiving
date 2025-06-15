@@ -23,6 +23,7 @@
  */
 
 // @codingStandardsIgnoreLine
+use local_archiving\tsp_manager;
 use local_archiving\type\filearea;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -107,8 +108,13 @@ function local_archiving_extend_settings_navigation(settings_navigation $setting
  */
 function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     // Validate filearea.
-    if ($filearea !== filearea::FILESTORE_CACHE->value) {
-        return false;
+    $filearea = filearea::tryFrom($filearea);
+    switch ($filearea) {
+        case filearea::FILESTORE_CACHE:
+        case filearea::TSP:
+            break;
+        default:
+            return false;
     }
 
     // Check permissions.
@@ -122,12 +128,22 @@ function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $f
     $filename = array_pop($args);
     $filepath = '/'.implode('/', $args).'/';
 
+    // Catch virtual files.
+    if ($filearea == filearea::TSP) {
+        try {
+            tsp_manager::send_virtual_tsp_file($filepath, $filename);
+        } catch (Exception $e) {
+            send_header_404();
+            throw $e;
+        }
+    }
+
     // Try to retrieve and serve file.
     $fs = get_file_storage();
     $file = $fs->get_file(
         contextid: $context->id,
-        component: filearea::FILESTORE_CACHE->get_component(),
-        filearea: filearea::FILESTORE_CACHE->value,
+        component: $filearea->get_component(),
+        filearea: $filearea->value,
         itemid: $itemid,
         filepath: $filepath,
         filename: $filename

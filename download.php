@@ -104,8 +104,8 @@ if (count($filehandles) == 0) {
             $tspdata = [
                 'timecreated' => $tspdata->timecreated,
                 'server' => $tspdata->server,
-                'querydownloadurl' => new moodle_url("/"), // TODO!
-                'replydownloadurl' => new moodle_url("/"), // TODO!
+                'querydownloadurl' => $tspmanager->get_query_download_url(),
+                'replydownloadurl' => $tspmanager->get_reply_download_url(),
             ];
         }
 

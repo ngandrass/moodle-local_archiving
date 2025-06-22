@@ -159,8 +159,11 @@ class job_create_form extends \moodleform {
             'select',
             'storage_driver',
             get_string('storage_location', 'local_archiving'),
-            $storagedriverselects
+            $storagedriverselects,
+            $this->config->core->job_preset_storage_driver_locked ? 'disabled' : null
         );
+        $this->_form->addHelpButton('storage_driver', 'storage_location', 'local_archiving');
+        $this->_form->setDefault('storage_driver', $this->config->core->job_preset_storage_driver);
     }
 
     /**

@@ -25,6 +25,7 @@
 use local_archiving\local\admin\setting\admin_setting_managecomponents;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
 use local_archiving\storage;
+use local_archiving\util\plugin_util;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -77,6 +78,28 @@ if ($hassiteconfig) {
             '0',
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $commonpage->add($set);
+
+        // Common - Job Preset: Storage driver.
+        $storagedriverselects = [];
+        foreach (plugin_util::get_storage_drivers() as $name => $driver) {
+            if ($driver['enabled']) {
+                $storagedriverselects[$name] = $driver['displayname'];
+            }
+        }
+        if (empty($storagedriverselects)) {
+            // No storage drivers available, add a dummy option.
+            $storagedriverselects['null'] = '';
+        }
+        $set = new admin_setting_configselect_with_lock('local_archiving/job_preset_storage_driver',
+            get_string('storage_location', 'local_archiving'),
+            get_string('storage_location_help', 'local_archiving'),
+            [
+                'value' => 'localdir',
+                'locked' => false,
+            ],
+            $storagedriverselects
+        );
         $commonpage->add($set);
 
         // Common - Job Preset: Archive filename pattern.
@@ -150,7 +173,10 @@ if ($hassiteconfig) {
     }
 
     // Settings category: Components.
-    $managecomponentspage = new admin_settingpage('local_archiving_components_manage', new lang_string('manage_components', 'local_archiving'));
+    $managecomponentspage = new admin_settingpage(
+        'local_archiving_components_manage',
+        new lang_string('manage_components', 'local_archiving')
+    );
     if ($ADMIN->fulltree) {
         // Manage components: Header.
         $managecomponentspage->add(new admin_setting_heading('local_archiving/header_managecomponents',
@@ -176,7 +202,10 @@ if ($hassiteconfig) {
         }
 
         // Create a category for sub-plugins of this type and add their setting pages.
-        $subplugincategory = new admin_category($subplugintype, new lang_string("subplugintype_{$subplugintype}_plural", 'local_archiving'));
+        $subplugincategory = new admin_category(
+            $subplugintype,
+            new lang_string("subplugintype_{$subplugintype}_plural", 'local_archiving')
+        );
         $ADMIN->add($settingsroot->name, $subplugincategory);
         foreach ($subpluginswithsettings as $settingsfile) {
             $settings = null;

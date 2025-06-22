@@ -64,9 +64,11 @@ $string['activity_archiving_list_desc'] = 'Below you can find a list of all acti
 $string['archive_jobs_course_table_desc'] = 'This table lists all archive jobs that have been created for any of the activities in this course.';
 
 // Job management.
+$string['a_archive_jobs'] = '{$a} archive jobs';
 $string['archive_job'] = 'Archive job';
 $string['archive_jobs'] = 'Archive jobs';
 $string['archive_job_logs'] = 'Archive job logs';
+$string['archive_jobs_cm_table_desc'] = 'The table below lists all archive jobs that have been created for this activity. To list all archive jobs in this course, please go to the course archiving overview page.';
 $string['archived'] = 'Archived';
 $string['delete_job'] = 'Delete archive job';
 $string['delete_job_warning'] = 'Are you sure that you want to delete this archive job <b>including all archived data?</b>';

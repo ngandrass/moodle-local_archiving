@@ -52,14 +52,11 @@ $PAGE->set_url(new moodle_url(
         'cmid' => $cmid,
     ]
 ));
-//$PAGE->set_pagelayout('incourse');
+$PAGE->set_pagelayout('incourse');
 
-// Render output.
-$renderer = $PAGE->get_renderer('local_archiving');
-echo $OUTPUT->header();
+$html = '';
 
-// vvvvv DEBUG start vvvvv
-
+// Get job create form for this activity.
 $driverclass = plugin_util::get_archiving_driver_for_cm($cm->modname);
 if (!$driverclass) {
     throw new \moodle_exception('supported_archive_driver_not_found', 'local_archiving');
@@ -68,9 +65,9 @@ if (!$driverclass) {
 /** @var \local_archiving\driver\archivingmod $driver */
 $driver = new $driverclass($ctx);
 
-
 $form = $driver->get_job_create_form($cm->modname, $cm);
 
+// Handle form submission.
 if ($form->is_submitted() && $form->is_validated()) {
     require_capability('local/archiving:create', $ctx);
 
@@ -81,24 +78,34 @@ if ($form->is_submitted() && $form->is_validated()) {
     $job = \local_archiving\archive_job::create($ctx, $USER->id, $jobsettings);
     $job->enqueue();
 
-    echo "<h1>Created archive job!</h1>";
-    echo "<pre>";
+    $html .= "<h1>Created archive job!</h1>";
+    $html .= "<pre>";
+    ob_start();
     print_r($job->get_settings());
-    echo "</pre>";
+    $html .= ob_get_contents();
+    ob_end_clean();
+    $html .= "</pre>";
 } else {
-    $form->display();
-    if (!$driver->can_be_archived()) {
-        echo "<b>ATTENTION: Activity is not ready to be archived.</b><br>";
-    }
-
     $jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
     $jobtbl->define_baseurl($PAGE->url);
+    ob_start();
     $jobtbl->out(20, true);
+    $jobtablehtml = ob_get_contents();
+    ob_end_clean();
+
+    $tplctx = [
+        'jobcreateformhtml' => $form->render(),
+        'jobtablehtml' => $jobtablehtml,
+        'modfullname' => $cm->modfullname,
+        'urls' => [
+            'back' => new \moodle_url('/local/archiving/index.php', ['courseid' => $courseid]),
+        ],
+    ];
+    $html .= $OUTPUT->render_from_template('local_archiving/archive', $tplctx);
 }
 
-$backurl = new moodle_url('/local/archiving/index.php', array('courseid' => $courseid));
-echo "<a href=\"{$backurl}\">Go back to overview</a>";
-
-// ^^^^^ DEBUG end ^^^^^
-
+// Render output.
+$renderer = $PAGE->get_renderer('local_archiving');
+echo $OUTPUT->header();
+echo $html;
 echo $OUTPUT->footer();

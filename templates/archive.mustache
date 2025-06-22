@@ -1,0 +1,55 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_archiving/archive
+
+    Activity archiving page.
+
+    Example context (json):
+    {
+        "TODO": "TODO"
+    }
+}}
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            {{{jobcreateformhtml}}}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h3>{{#str}} a_archive_jobs, local_archiving, {{modfullname}} {{/str}}</h3>
+            <p>
+                {{#str}} archive_jobs_cm_table_desc, local_archiving {{/str}}
+            </p>
+            <div>
+                {{{jobtablehtml}}}
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <a href="{{{urls.back}}}" class="btn btn-secondary">
+                {{#str}} back_to_overview, local_archiving {{/str}}
+            </a>
+        </div>
+    </div>
+</div>

@@ -29,6 +29,7 @@ require_once(__DIR__ . '/../../config.php');
 global $OUTPUT, $PAGE;
 
 $courseid = required_param('courseid', PARAM_INT);
+$excludedisabledcms = optional_param('edc', false, PARAM_BOOL);
 $ctx = context_course::instance($courseid);
 $course = get_course($courseid);
 
@@ -40,15 +41,22 @@ require_capability('local/archiving:view', $ctx);
 $PAGE->set_context($ctx);
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($course->fullname);
-$PAGE->set_url(new moodle_url(
+$PAGE->set_url(new \moodle_url(
     '/local/archiving/index.php',
     ['courseid' => $courseid]
 ));
 $PAGE->set_pagelayout('incourse');
 
 // Build context for page template.
-$tplctx = [];
-foreach (mod_util::get_cms_with_metadata($courseid) as $obj) {
+$tplctx = [
+    'hidedisabledcms' => $excludedisabledcms,
+    'hidedisabledcmsurl' => new \moodle_url('/local/archiving/index.php', [
+        'courseid' => $courseid,
+        'edc' => (int) !$excludedisabledcms,
+    ]),
+];
+
+foreach (mod_util::get_cms_with_metadata($courseid, $excludedisabledcms) as $obj) {
     $tplctx['cms'][] = [
         'id' => $obj->cm->id,
         'modname' => $obj->cm->modname,

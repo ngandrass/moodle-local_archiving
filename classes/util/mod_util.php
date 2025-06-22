@@ -40,23 +40,31 @@ class mod_util {
      * metadata of this plugin
      *
      * @param int $courseid The course id
+     * @param bool $excludedisabled Whether to exclude unsupported and disabled activities
      * @return array An array of course modules with metadata
      * @throws \moodle_exception If the course does not exist
      */
-    public static function get_cms_with_metadata(int $courseid): array {
+    public static function get_cms_with_metadata(int $courseid, bool $excludedisabled = false): array {
         global $DB;
 
         // Get cms and supported activities.
-        $modinfo = get_fast_modinfo($courseid);
+        $cms = get_fast_modinfo($courseid)->cms;
         $drivers = plugin_util::get_activity_archiving_drivers();
         $supported = array_reduce($drivers, fn ($res, $driver) => array_merge($res, $driver['activities']), []);
 
-        if (empty($modinfo->cms)) {
+        if (empty($cms)) {
             return [];
         }
 
+        // Exclude unsupported and disabled activities if requested before we query the database.
+        if ($excludedisabled) {
+            $cms = array_filter($cms, function ($cm) use ($supported, $drivers) {
+                return in_array($cm->modname, $supported) && ($drivers[$cm->modname]['enabled'] ?? false);
+            });
+        }
+
         // Get latest successfull archiving job for each cm.
-        $cmcontextids = array_map(fn ($cm) => $cm->context->id, $modinfo->cms);
+        $cmcontextids = array_map(fn ($cm) => $cm->context->id, $cms);
         $cmcontextidssql = implode(',', array_map('intval', $cmcontextids));
         $lastarchivedcms = $DB->get_records_sql("
                 SELECT contextid, MAX(timecreated) AS lastarchived
@@ -71,7 +79,7 @@ class mod_util {
 
         // Build response.
         $res = [];
-        foreach ($modinfo->cms as $cm) {
+        foreach ($cms as $cm) {
             $res[$cm->id] = (object) [
                 'cm' => $cm,
                 'supported' => in_array($cm->modname, $supported),

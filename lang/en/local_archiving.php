@@ -62,6 +62,8 @@ $string['archiving:delete'] = 'Delete archives and metadata';
 $string['archiving_course_overview_desc'] = 'This page is allows to create and access archives for all supported activities in this course.';
 $string['activity_archiving_list_desc'] = 'Below you can find a list of all activities in this course. Supported activities can be archived by clicking the respective entry in the list. If an activity is not supported, it will be disabled.';
 $string['archive_jobs_course_table_desc'] = 'This table lists all archive jobs that have been created for any of the activities in this course.';
+$string['show_all_activities'] = 'Show all activities';
+$string['hide_unsupported_activities'] = 'Hide unsupported activities';
 
 // Job management.
 $string['a_archive_jobs'] = '{$a} archive jobs';

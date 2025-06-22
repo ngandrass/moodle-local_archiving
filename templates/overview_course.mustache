@@ -54,7 +54,7 @@
             <p>
                 {{#str}} activity_archiving_list_desc, local_archiving {{/str}}
             </p>
-            <ul class="list-group">
+            <ul class="list-group" style="border-bottom-right-radius: 0;">
                 {{#cms}}
                     <a
                         href="{{{archiveurl}}}"
@@ -131,6 +131,22 @@
                     </li>
                 {{/cms}}
             </ul>
+            <div class="text-right">
+                <a
+                    href="{{{hidedisabledcmsurl}}}"
+                    class="btn btn-sm {{#hidedisabledcms}}btn-primary{{/hidedisabledcms}}{{^hidedisabledcms}}btn-secondary{{/hidedisabledcms}}"
+                    style="border-top-left-radius: 0; border-top-right-radius: 0;"
+                >
+                    {{#hidedisabledcms}}
+                        {{#pix}} t/show {{/pix}}
+                        {{#str}} show_all_activities, local_archiving {{/str}}
+                    {{/hidedisabledcms}}
+                    {{^hidedisabledcms}}
+                        {{#pix}} t/hide {{/pix}}
+                        {{#str}} hide_unsupported_activities, local_archiving {{/str}}
+                    {{/hidedisabledcms}}
+                </a>
+            </div>
         </div>
     </div>
     <div class="row mt-3">

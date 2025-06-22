@@ -80,6 +80,7 @@ $string['not_signed'] = 'Not signed';
 $string['signature'] = 'Signature';
 $string['signed_on'] = 'Signed on';
 $string['signed_by'] = 'by';
+$string['target_activity'] = 'Target activity';
 $string['tsp_query_filename'] = 'query.tsq';
 $string['tsp_reply_filename'] = 'reply.tsr';
 

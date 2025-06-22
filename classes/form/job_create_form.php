@@ -103,18 +103,19 @@ class job_create_form extends \moodleform {
         ).'</h1>');
         $this->_form->addElement('html', '<p>'.get_string('job_create_form_header_desc', 'local_archiving').'</p>');
 
-        $this->_form->addElement(
-            'static',
-            'cm_modname',
-            get_string('activitytype', 'local_archiving'),
-            get_string('pluginname', "mod_{$this->cminfo->modname}")
-        );
-        $this->_form->addElement(
-            'static',
-            'cm_name',
-            get_string('name'),
-            "<p class=\"mb-5\">{$this->cminfo->name}</p>"
-        );
+        $modpurpose = plugin_supports('mod', $this->cminfo->modname, FEATURE_MOD_PURPOSE, MOD_PURPOSE_OTHER) ?: '';
+        $activityhtml = '<div class="mb-4">
+            <h6>'.get_string('target_activity', 'local_archiving').'</h6>
+            <ul class="list-group" style="max-width: 600px;">
+                <a href="#" class="list-group-item list-group-item-action text-primary">
+                    <div class="d-inline activity-icon activityiconcontainer ' . $modpurpose . ' pl-0">
+                        <img src="' . $this->cminfo->get_icon_url() . '" class="activityicon mr-1" alt=""/>
+                    </div>
+                    <div class="d-inline">' . $this->cminfo->name . '</div>
+                </a>
+            </ul>
+        </div>';
+        $this->_form->addElement('html', $activityhtml);
     }
 
     /**

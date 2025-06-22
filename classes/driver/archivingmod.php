@@ -172,6 +172,10 @@ abstract class archivingmod extends base {
                 // If any other exception occurs, we cancel the task.
                 $task->set_status(activity_archiving_task_status::FAILED);
                 $task->get_logger()->error($e->getMessage());
+                throw new \moodle_exception(
+                    'activity_archiving_task_failed',
+                    'local_archiving',
+                );
             }
         }
 

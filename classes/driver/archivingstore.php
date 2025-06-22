@@ -65,9 +65,10 @@ abstract class archivingstore extends base {
     /**
      * Returns the amount of free space available in this storage in bytes
      *
-     * @return int Available space in bytes
+     * @return int|null Available space in bytes or null if the storage does not
+     * support this operation
      */
-    abstract public function get_free_bytes(): int;
+    abstract public function get_free_bytes(): ?int;
 
     /**
      * Transfers the given Moodle file to this storage under the given path

@@ -386,7 +386,7 @@ class archive_job {
             // Store -> Sign.
             if ($this->get_status(usecached: true) == archive_job_status::STORE) {
                 // Store artifacts.
-                $drivername = $this->get_setting('storage_driver');
+                $drivername = $this->get_setting('storage_driver') ?? 'null';
                 $driverclass = plugin_util::get_subplugin_by_name('archivingstore', $drivername);
                 if (!$driverclass) {
                     $this->get_logger()->fatal("Interface class for archivingstore_{$drivername} not found.");

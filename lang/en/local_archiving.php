@@ -174,6 +174,9 @@ $string['setting_tsp_server_url'] = 'TSP server URL';
 $string['setting_tsp_server_url_desc'] = 'URL of the Time-Stamp Protocol (TSP) server to use.<br/>Examples: <code>https://freetsa.org/tsr</code>, <code>https://zeitstempel.dfn.de</code>, <code>http://timestamp.digicert.com</code>';
 $string['manage'] = 'Manage';
 $string['manage_components'] = 'Manage components';
+$string['error_localpath_must_be_absolute'] = 'Must be an absolute path.';
+$string['error_localpath_cloud_not_be_created'] = 'Could not create directory. Please make sure that the parent directory exists and is writable by the web server user.';
+$string['error_localpath_must_be_directory'] = 'A file with the given name already exists but a directory is expected.';
 
 // Storage tiers.
 $string['storage_tier'] = 'Storage tier';

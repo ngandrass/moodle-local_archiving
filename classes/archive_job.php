@@ -327,6 +327,7 @@ class archive_job {
                 if ($driver->is_all_tasks_for_job_completed($this->get_id())) {
                     $this->set_status(archive_job_status::BACKUP_COLLECTION);
                 } else {
+                    $this->get_logger()->info('Not all activity archiving tasks are finished yet. Waiting ...');
                     throw new yield_exception();
                 }
             }

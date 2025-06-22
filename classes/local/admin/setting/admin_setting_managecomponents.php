@@ -248,6 +248,19 @@ class admin_setting_managecomponents extends \admin_setting {
                 } else {
                     $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
                 }
+
+                // Add storage status information.
+                /** @var \local_archiving\driver\archivingstore $driver */
+                $driver = new $storagedriver['class']();
+                $freebytes = $driver->get_free_bytes();
+                $statushtml .= '<br><span class="text-muted">';
+                if (is_numeric($freebytes)) {
+                    $statushtml .= display_size($driver->get_free_bytes()).' ';
+                    $statushtml .= strtolower(get_string('available', 'local_archiving'));
+                } else {
+                    $statushtml .= get_string('free_space_unknown', 'local_archiving');
+                }
+                $statushtml .= '</span>';
             } else {
                 $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
             }

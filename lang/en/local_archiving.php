@@ -29,6 +29,7 @@ $string['pluginname'] = 'Archiving';
 // Common.
 $string['activitytype'] = 'Activity type';
 $string['archiving'] = 'Archiving';
+$string['available'] = 'Available';
 $string['back_to_overview'] = 'Back to overview';
 $string['checksum'] = 'Checksum';
 $string['cleanup_filestore_cache'] = 'Cleanup filestore cache';
@@ -37,6 +38,7 @@ $string['create_archive'] = 'Create archive';
 $string['disabled'] = 'Disabled';
 $string['download_files'] = 'Download files';
 $string['filetype'] = 'File type';
+$string['free_space_unknown'] = 'Free space unknown';
 $string['id'] = 'ID';
 $string['jobid'] = 'Job ID';
 $string['progress'] = 'Progress';

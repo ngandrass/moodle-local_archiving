@@ -67,6 +67,7 @@ $string['hide_unsupported_activities'] = 'Hide unsupported activities';
 
 // Job management.
 $string['a_archive_jobs'] = '{$a} archive jobs';
+$string['activity_archiving_task_failed'] = 'Activity archiving task failed';
 $string['archive_job'] = 'Archive job';
 $string['archive_jobs'] = 'Archive jobs';
 $string['archive_job_logs'] = 'Archive job logs';
@@ -130,6 +131,8 @@ $string['export_cm_backup_help'] = 'This will export a Moodle backup (.mbz) of t
 $string['job_create_form_header'] = 'Create Archive';
 $string['job_create_form_header_desc'] = 'This form triggers the creation of a new archive. Jobs are processed asynchronously in the background and take some time to complete. You can always check the current status on the overview page.';
 $string['job_create_form_header_typed'] = 'Create {$a} Archive';
+$string['storage_location'] = 'Storage location';
+$string['storage_location_help'] = 'Select where the archived data should be stored.';
 
 // Job settings: Filename pattern.
 $string['archive_filename_pattern'] = 'Archive name';

@@ -386,11 +386,27 @@ class archive_job {
             // Store -> Sign.
             if ($this->get_status(usecached: true) == archive_job_status::STORE) {
                 // Store artifacts.
-                $driverclass = plugin_util::get_subplugin_by_name('archivingstore', 'localdir');
+                $drivername = $this->get_setting('storage_driver');
+                $driverclass = plugin_util::get_subplugin_by_name('archivingstore', $drivername);
+                if (!$driverclass) {
+                    $this->get_logger()->fatal("Interface class for archivingstore_{$drivername} not found.");
+                    throw new \moodle_exception('artifact_storing_failed', 'local_archiving');
+                }
+
                 /** @var archivingstore $driver */
                 $driver = new $driverclass();
                 $tasks = activity_archiving_task::get_by_jobid($this->id);
                 $storagepath = "job-{$this->id}";
+
+                if (!$driver->is_enabled()) {
+                    $this->get_logger()->fatal("Artifact storage driver {$drivername} is not enabled.");
+                    throw new \moodle_exception('artifact_storing_failed', 'local_archiving');
+                }
+
+                if (!$driver::is_ready()) {
+                    $this->get_logger()->fatal("Artifact storage driver {$drivername} is not ready.");
+                    throw new \moodle_exception('artifact_storing_failed', 'local_archiving');
+                }
 
                 // Activity archiving tasks.
                 foreach ($tasks as $task) {

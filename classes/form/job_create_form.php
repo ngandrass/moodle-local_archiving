@@ -27,6 +27,7 @@ namespace local_archiving\form;
 
 use local_archiving\storage;
 use local_archiving\type\archive_filename_variable;
+use local_archiving\util\plugin_util;
 use local_archiving\util\time_util;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -146,6 +147,20 @@ class job_create_form extends \moodleform {
         );
         $this->_form->addHelpButton('export_course_backup', 'export_course_backup', 'local_archiving');
         $this->_form->setDefault('export_course_backup', $this->config->core->job_preset_export_course_backup);
+
+        // Storage location.
+        $storagedriverselects = [];
+        foreach (plugin_util::get_storage_drivers() as $name => $driver) {
+            if ($driver['enabled']) {
+                $storagedriverselects[$name] = $driver['displayname'];
+            }
+        }
+        $this->_form->addElement(
+            'select',
+            'storage_driver',
+            get_string('storage_location', 'local_archiving'),
+            $storagedriverselects
+        );
     }
 
     /**

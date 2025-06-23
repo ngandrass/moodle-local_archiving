@@ -24,6 +24,7 @@
 
 namespace local_archiving;
 
+use local_archiving\type\db_table;
 use stored_file;
 
 // @codingStandardsIgnoreLine
@@ -150,6 +151,32 @@ class storage {
      */
     public static function is_valid_sha256sum(string $sha256sum): bool {
         return preg_match('/^[a-f0-9]{64}$/', $sha256sum) === 1;
+    }
+
+    /**
+     * Calculates usage statistics for the given archiving store based on existing file handles.
+     *
+     * @param string $archivingstorename Name of the archiving store to calculate stats for
+     * @return \stdClass Object containing usage bytes, file count, and job count
+     */
+    public static function calculate_archivingstore_stats(string $archivingstorename): \stdClass {
+        global $DB;
+
+        // Calculate stats in the database.
+        $res = $DB->get_record_sql('
+                SELECT SUM(filesize) AS usagebytes, COUNT(*) AS filecount, COUNT(DISTINCT jobid) AS jobcount
+                FROM {' . db_table::FILE_HANDLE->value . '}
+                WHERE archivingstore = :archivingstore;
+            ',
+            ['archivingstore' => $archivingstorename]
+        );
+
+        // Build response.
+        return (object) [
+            'usagebytes' => $res->usagebytes ?? 0,
+            'filecount' => $res->filecount ?? 0,
+            'jobcount' => $res->jobcount ?? 0,
+        ];
     }
 
 }

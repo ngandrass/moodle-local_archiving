@@ -158,6 +158,7 @@ class storage {
      *
      * @param string $archivingstorename Name of the archiving store to calculate stats for
      * @return \stdClass Object containing usage bytes, file count, and job count
+     * @throws \dml_exception
      */
     public static function calculate_archivingstore_stats(string $archivingstorename): \stdClass {
         global $DB;
@@ -177,6 +178,36 @@ class storage {
             'filecount' => $res->filecount ?? 0,
             'jobcount' => $res->jobcount ?? 0,
         ];
+    }
+
+    /**
+     * Checks if the given directory is empty.
+     *
+     * @param string $dir Directory path to check
+     * @return bool True if the directory exists and is empty, false otherwise
+     */
+    public static function is_dir_empty(string $dir): bool {
+        // Check if the directory exists.
+        if (!is_dir($dir)) {
+            return false;
+        }
+
+        // Scan the directory for files and folders.
+        $files = scandir($dir);
+        if ($files === false) {
+            return false;
+        }
+
+        // Rule out the obvious case of a non empty directory.
+        if (count($files) > 2) {
+            return false;
+        }
+
+        // Filter out '.' and '..' entries.
+        $files = array_diff($files, ['.', '..']);
+
+        // If there are no files or folders left, the directory is empty.
+        return empty($files);
     }
 
 }

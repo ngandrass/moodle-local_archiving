@@ -558,7 +558,17 @@ class archive_job {
             $task->delete();
         }
 
-        // TODO: Free files and potentially other stuff.
+        // Delete job artifacts.
+        $files = file_handle::get_by_jobid($this->id);
+        foreach ($files as $filehandle) {
+            // Remove local cache copy if present.
+            if ($cachedfile = $filehandle->get_local_file()) {
+                $cachedfile->delete();
+            }
+
+            // Remove original file from the storage.
+            $filehandle->destroy(removefile: true);
+        }
 
         // Delete records from the database.
         $DB->delete_records(db_table::METADATA->value, ['jobid' => $this->id]);

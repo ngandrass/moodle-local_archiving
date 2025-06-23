@@ -20,6 +20,7 @@ namespace local_archiving\local\admin\setting;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 use core\exception\moodle_exception;
+use local_archiving\storage;
 use local_archiving\util\plugin_util;
 
 
@@ -221,6 +222,7 @@ class admin_setting_managecomponents extends \admin_setting {
             get_string('version'),
             get_string('enable'),
             get_string('status'),
+            get_string('storage_usage', 'local_archiving'),
             get_string('storage_tier', 'local_archiving'),
             get_string('settings'),
         ];
@@ -228,7 +230,7 @@ class admin_setting_managecomponents extends \admin_setting {
         $table->data = [];
 
         // Add rows to the table.
-        foreach ($storagedrivers as $storagedriver) {
+        foreach ($storagedrivers as $storagedrivername => $storagedriver) {
             // Enable / disable column.
             $enableurl = new \moodle_url('/local/archiving/admin/manage.php', [
                 'action' => $storagedriver['enabled'] ? 'plugindisable' : 'pluginenable',
@@ -248,21 +250,41 @@ class admin_setting_managecomponents extends \admin_setting {
                 } else {
                     $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
                 }
-
-                // Add storage status information.
-                /** @var \local_archiving\driver\archivingstore $driver */
-                $driver = new $storagedriver['class']();
-                $freebytes = $driver->get_free_bytes();
-                $statushtml .= '<br><span class="text-muted">';
-                if (is_numeric($freebytes)) {
-                    $statushtml .= display_size($driver->get_free_bytes()).' ';
-                    $statushtml .= strtolower(get_string('available', 'local_archiving'));
-                } else {
-                    $statushtml .= get_string('free_space_unknown', 'local_archiving');
-                }
-                $statushtml .= '</span>';
             } else {
                 $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
+            }
+
+            // Usage.
+            $usagehtml = '';
+            if ($storagedriver['enabled']) {
+                // Create storage driver instance.
+                /** @var \local_archiving\driver\archivingstore $driver */
+                $driver = new $storagedriver['class']();
+
+                // Calculate usage.
+                $usage = storage::calculate_archivingstore_stats($storagedrivername);
+                $usagehtml .= '<div><i class="fa-regular fa-file-zipper text-center" style="min-width: 24px;"></i>';
+                $usagehtml .= $usage->jobcount.'&nbsp;'.strtolower(get_string('archive_jobs', 'local_archiving')).'</div>';
+
+                $usagehtml .= '<div><i class="fa-regular fa-file text-center" style="min-width: 24px;"></i>';
+                $usagehtml .= $usage->filecount.'&nbsp;'.strtolower(get_string('files', 'local_archiving')).'</div>';
+
+                $usagehtml .= '<div><i class="fa-regular fa-hard-drive text-center" style="min-width: 24px;"></i>';
+                $usagehtml .= display_size($usage->usagebytes).'&nbsp;'.strtolower(get_string('used', 'local_archiving')).'</div>';
+
+                // Calculate free space.
+                $freebytes = $driver->get_free_bytes();
+                $usagehtml .= '<div><i class="fa-solid fa-database text-center" style="min-width: 24px;"></i>';
+                if (is_numeric($freebytes)) {
+                    $usagehtml .= display_size($driver->get_free_bytes()).'&nbsp;';
+                    $usagehtml .= strtolower(get_string('available', 'local_archiving'));
+                } else {
+                    $usagehtml .= '<span class="text-muted font-italic">';
+                    $usagehtml .= get_string('free_space_unknown', 'local_archiving').'</span>';
+                }
+                $usagehtml .= '</div>';
+            } else {
+                $usagehtml .= '<div class="text-muted">'.get_string('disabled', 'admin').'</div>';
             }
 
             // Storage tier.
@@ -283,6 +305,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 "{$storagedriver['release']} <span class=\"text-muted\">({$storagedriver['version']})</span>",
                 \html_writer::link($enableurl, $enableicon),
                 $statushtml,
+                $usagehtml,
                 $tierhtml,
                 \html_writer::link($settingsurl, get_string('settings')),
             ]);

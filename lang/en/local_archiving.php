@@ -37,6 +37,8 @@ $string['components'] = 'Components';
 $string['create_archive'] = 'Create archive';
 $string['disabled'] = 'Disabled';
 $string['download_files'] = 'Download files';
+$string['file'] = 'File';
+$string['files'] = 'Files';
 $string['filetype'] = 'File type';
 $string['free_space_unknown'] = 'Free space unknown';
 $string['id'] = 'ID';
@@ -45,6 +47,7 @@ $string['progress'] = 'Progress';
 $string['ready'] = 'Ready';
 $string['type'] = 'Type';
 $string['unconfigured'] = 'Unconfigured';
+$string['used'] = 'Used';
 $string['unsupported'] = 'Unsupported';
 
 // Sub-plugins.
@@ -180,7 +183,7 @@ $string['error_localpath_must_be_absolute'] = 'Must be an absolute path.';
 $string['error_localpath_cloud_not_be_created'] = 'Could not create directory. Please make sure that the parent directory exists and is writable by the web server user.';
 $string['error_localpath_must_be_directory'] = 'A file with the given name already exists but a directory is expected.';
 
-// Storage tiers.
+// Storage.
 $string['storage_tier'] = 'Storage tier';
 $string['storage_tier_LOCAL'] = 'Local';
 $string['storage_tier_LOCAL_help'] = 'Data is stored locally on the server or is accessible very fast.';
@@ -188,3 +191,4 @@ $string['storage_tier_REMOTE_fast'] = 'Remote (fast)';
 $string['storage_tier_REMOTE_fast_help'] = 'Data is stored on a fast remote server but needs to be fetched before use.';
 $string['storage_tier_REMOTE_slow'] = 'Remote (slow)';
 $string['storage_tier_REMOTE_slow_help'] = 'Data is stored on a slow remote server but needs to be fetched before use.';
+$string['storage_usage'] = 'Usage';

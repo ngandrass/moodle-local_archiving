@@ -78,6 +78,11 @@ class admin_setting_localabspath extends \admin_setting_configtext {
             return get_string('error_localpath_must_be_absolute', 'local_archiving');
         }
 
+        // Skip further path checks during installation / upgrades.
+        if (CLI_UPGRADE_RUNNING) {
+            return true;
+        }
+
         // Ensure that the path is an existing (or parent-writable) local directory.
         if (!is_dir($data)) {
             // Check if the path is actually a file without an extension.

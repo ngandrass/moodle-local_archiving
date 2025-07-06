@@ -302,8 +302,6 @@ class archive_job {
                 if ($this->get_setting('export_course_backup')) {
                     $backup = backup_manager::initiate_course_backup($this->courseid, $this->userid);
                     $this->set_metadata_entry('course_backup_id', $backup->backupid);
-                    $this->set_metadata_entry('course_backup_id', $backup->backupid);
-                    $this->set_metadata_entry('course_backup_id', $backup->backupid);
                     $this->get_logger()->info(
                         "Requested a Moodle course backup (#{$backup->backupid}): {$backup->filename}"
                     );
@@ -878,10 +876,10 @@ class archive_job {
     /**
      * Retrieves all metadata entries for this job
      *
-     * @return array All metadata entries stored for this job
+     * @return array All metadata entries stored for this job as key-value pairs
      * @throws \dml_exception
      */
-    public function get_metedata_entries(): array {
+    public function get_metadata_entries(): array {
         global $DB;
 
         // Retrieve all metadata entries for this job.

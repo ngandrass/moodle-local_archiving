@@ -46,7 +46,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-12">
+        <div class="col-6">
             <div style="max-width: 600px;">
                 <table class="table">
                     <tr>
@@ -79,6 +79,17 @@
                     </tr>
                 </table>
             </div>
+        </div>
+        <div class="col-6">
+            <h5>TEMP: Job Metadata (This will be moved to another page!)</h5>
+            <ul class="list-group small">
+                {{#job.metadata}}
+                    <li class="list-group-item">
+                        {{key}}
+                        <span class="badge badge-secondary">{{value}}</span>
+                    </li>
+                {{/job.metadata}}
+            </ul>
         </div>
     </div>
     <div class="row">

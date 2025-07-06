@@ -51,6 +51,7 @@ $PAGE->set_url(new moodle_url(
 ));
 
 // Render output.
+$jobmeta = $job->get_metadata_entries();
 $renderer = $PAGE->get_renderer('local_archiving');
 echo $OUTPUT->header();
 echo $renderer->render_from_template('local_archiving/job_logs', [
@@ -64,6 +65,12 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
             $job->get_logger()->get_logs(),
             fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
             ""
+        ),
+        // TODO: Move this to a separate archive inspection page.
+        "metadata" => array_map(
+            fn($key, $value): array => ['key' => $key, 'value' => $value],
+            array_keys($jobmeta),
+            array_values($jobmeta)
         ),
     ],
     'urls' => [

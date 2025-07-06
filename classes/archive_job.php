@@ -287,6 +287,10 @@ class archive_job {
 
             // Queued -> Processing.
             if ($this->get_status(usecached: true) == archive_job_status::QUEUED) {
+                $this->get_logger()->trace(
+                    "Initialized new archive job. Settings: \r\n".json_encode($this->get_settings(), JSON_PRETTY_PRINT)
+                );
+
                 $this->set_status(archive_job_status::PROCESSING);
             }
 
@@ -297,6 +301,7 @@ class archive_job {
 
                 $drivername = $this->activity_archiving_driver()->get_plugin_name();
                 $this->get_logger()->info('Created activity archiving task (driver: '.$drivername.')');
+                $this->set_metadata_entry('activity_archiving_driver', $drivername);
 
                 // Create backup tasks if requested.
                 if ($this->get_setting('export_course_backup')) {
@@ -390,6 +395,7 @@ class archive_job {
                     $this->get_logger()->fatal("Interface class for archivingstore_{$drivername} not found.");
                     throw new \moodle_exception('artifact_storing_failed', 'local_archiving');
                 }
+                $this->set_metadata_entry('storage_driver', $drivername);
 
                 /** @var archivingstore $driver */
                 $driver = new $driverclass();

@@ -78,31 +78,32 @@ if ($form->is_submitted() && $form->is_validated()) {
     $job = \local_archiving\archive_job::create($ctx, $USER->id, $jobsettings);
     $job->enqueue();
 
-    $html .= "<h1>Created archive job!</h1>";
-    $html .= "<pre>";
-    ob_start();
-    print_r($job->get_settings());
-    $html .= ob_get_contents();
-    ob_end_clean();
-    $html .= "</pre>";
-} else {
-    $jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
-    $jobtbl->define_baseurl($PAGE->url);
-    ob_start();
-    $jobtbl->out(20, true);
-    $jobtablehtml = ob_get_contents();
-    ob_end_clean();
-
-    $tplctx = [
-        'jobcreateformhtml' => $form->render(),
-        'jobtablehtml' => $jobtablehtml,
-        'modfullname' => $cm->modfullname,
-        'urls' => [
-            'back' => new \moodle_url('/local/archiving/index.php', ['courseid' => $courseid]),
-        ],
-    ];
-    $html .= $OUTPUT->render_from_template('local_archiving/archive', $tplctx);
+    $html .= $OUTPUT->notification(
+        get_string('archive_job_created_details', 'local_archiving', [
+            'jobid' => $job->get_id(),
+            'cmname' => $cm->name,
+        ]),
+        'success'
+    );
 }
+
+// Prepare template context for page.
+$jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
+$jobtbl->define_baseurl($PAGE->url);
+ob_start();
+$jobtbl->out(20, true);
+$jobtablehtml = ob_get_contents();
+ob_end_clean();
+
+$tplctx = [
+    'jobcreateformhtml' => $form->render(),
+    'jobtablehtml' => $jobtablehtml,
+    'modfullname' => $cm->modfullname,
+    'urls' => [
+        'back' => new \moodle_url('/local/archiving/index.php', ['courseid' => $courseid]),
+    ],
+];
+$html .= $OUTPUT->render_from_template('local_archiving/archive', $tplctx);
 
 // Render output.
 $renderer = $PAGE->get_renderer('local_archiving');

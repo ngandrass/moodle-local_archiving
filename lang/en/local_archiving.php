@@ -75,6 +75,7 @@ $string['a_archive_jobs'] = '{$a} archive jobs';
 $string['activity_archiving_task_failed'] = 'Activity archiving task failed';
 $string['archive_job'] = 'Archive job';
 $string['archive_jobs'] = 'Archive jobs';
+$string['archive_job_created_details'] = 'A new archive job (<code>#{$a->jobid}</code>) for the activity "<code>{$a->cmname}</code>" has been created successfully.';
 $string['archive_job_logs'] = 'Archive job logs';
 $string['archive_jobs_cm_table_desc'] = 'The table below lists all archive jobs that have been created for this activity. To list all archive jobs in this course, please go to the course archiving overview page.';
 $string['archived'] = 'Archived';

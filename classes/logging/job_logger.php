@@ -45,6 +45,7 @@ class job_logger extends logger {
     public function __construct(
         protected readonly int $jobid,
     ) {
+        parent::__construct();
     }
 
     /**

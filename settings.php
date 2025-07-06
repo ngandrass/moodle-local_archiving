@@ -25,6 +25,7 @@
 use local_archiving\local\admin\setting\admin_setting_managecomponents;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
 use local_archiving\storage;
+use local_archiving\type\log_level;
 use local_archiving\util\plugin_util;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -40,8 +41,6 @@ if ($hassiteconfig) {
     $commonpage = new admin_settingpage('local_archiving_common', new lang_string('common_settings', 'local_archiving'));
     // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
     if ($ADMIN->fulltree) {
-        // TODO (MDL-0): Add settings to configure logging levels and retention.
-
         // Common: Header.
         $commonpage->add(new admin_setting_heading('local_archiving/header_common',
             null,
@@ -54,6 +53,14 @@ if ($hassiteconfig) {
             get_string('setting_job_timeout_min_desc', 'local_archiving'),
             '120',
             PARAM_INT
+        ));
+
+        // Common: Log level.
+        $commonpage->add(new admin_setting_configselect('local_archiving/log_level',
+            get_string('setting_log_level', 'local_archiving'),
+            get_string('setting_log_level_desc', 'local_archiving'),
+            log_level::INFO->value,
+            array_combine(log_level::values(), log_level::keys())
         ));
 
         // Common: Job Presets.

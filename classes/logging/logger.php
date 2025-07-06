@@ -36,6 +36,18 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class logger {
 
+    /** @var log_level The minimum level a new log entry must have to be actually logged */
+    public readonly log_level $loglevel;
+
+    /**
+     * Constructor
+     *
+     * @throws \dml_exception
+     */
+    public function __construct() {
+        $this->loglevel = log_level::tryFrom(get_config('local_archiving', 'log_level')) ?? log_level::INFO;
+    }
+
     /**
      * Crates a new log entry inside the database.
      *
@@ -58,6 +70,12 @@ class logger {
     ): void {
         global $DB;
 
+        // Do not log entries with a lower level than the configured minimum.
+        if ($level->value < $this->loglevel->value) {
+            return;
+        }
+
+        // Write log entry to the database.
         $DB->insert_record(db_table::LOG->value, [
             'level' => $level->value,
             'message' => $message,

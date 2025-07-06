@@ -27,6 +27,8 @@ namespace local_archiving\type;
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+use local_archiving\trait\enum_listable;
+
 
 /**
  * Supported log levels
@@ -35,6 +37,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * 0 to 99.
  */
 enum log_level: int {
+    use enum_listable;
 
     /** @var self Information for tracing code */
     case TRACE = 0;

@@ -173,6 +173,8 @@ $string['setting_header_tsp'] = 'Archive Signing';
 $string['setting_header_tsp_desc'] = 'Archives and their creation date can be digitally signed by a trusted authority using the <a href="https://en.wikipedia.org/wiki/Time_stamp_protocol" target="_blank">Time-Stamp Protocol (TSP)</a> according to <a href="https://www.ietf.org/rfc/rfc3161.txt" target="_blank">RFC 3161</a>. This can be used to cryptographically prove the integrity and creation date of the archive at a later point in time. Archives can be signed automatically at creation or manually later on.';
 $string['setting_job_timeout_min'] = 'Job timeout (minutes)';
 $string['setting_job_timeout_min_desc'] = 'The number of minutes a single archive job is allowed to run before it is aborted by Moodle. Job web service access tokens become invalid after this timeout.<br/>Note: Additional timeouts can be present in sub-plugins and archive worker services. The shorter timeout always takes precedence.';
+$string['setting_log_level'] = 'Log level';
+$string['setting_log_level_desc'] = 'The minimum level of events to be logged by the archiving system. All log entries with a lower level are ignored. This setting can be used to increase or reduce the amount of logged events. This only affects internal task logging and does not affect the produced archives in any way.';
 $string['setting_tsp_automatic_signing'] = 'Automatically sign archives';
 $string['setting_tsp_automatic_signing_desc'] = 'Automatically sign archives when they are created.';
 $string['setting_tsp_enable'] = 'Enable archive signing';

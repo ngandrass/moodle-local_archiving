@@ -84,14 +84,19 @@
     <div class="row">
         <div class="col-12">
             <h3>{{#str}} logs {{/str}}</h3>
+            {{#job.logs}}
 <!-- This must be formatted exactly like this abomination so that whitespaces and linebreaks don't mess with the pre-formatted content ! -->
 <pre style="background-color: #efefef;" class="p-2">{{#job.logs}}{{{.}}}{{/job.logs}}{{^job.completed}}
 ...{{/job.completed}}</pre>
+            {{/job.logs}}
+            {{^job.logs}}
+                <p>{{#str}} no_logs_available_desc, local_archiving {{/str}}</p>
+            {{/job.logs}}
         </div>
     </div>
     <div class="row">
         <div class="col-12">
-            <a href="{{{urls.back}}}">{{#str}} back_to_overview, local_archiving {{/str}}</a>
+            <a href="{{{urls.back}}}" class="btn btn-secondary">{{#str}} back_to_overview, local_archiving {{/str}}</a>
         </div>
     </div>
 </div>

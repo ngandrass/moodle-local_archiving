@@ -108,7 +108,7 @@ class job_create_form extends \moodleform {
         $activityhtml = '<div class="mb-4">
             <h6>'.get_string('target_activity', 'local_archiving').'</h6>
             <ul class="list-group" style="max-width: 600px;">
-                <a href="#" class="list-group-item list-group-item-action text-primary">
+                <a href="' . $this->cminfo->get_url() . '" class="list-group-item list-group-item-action text-primary">
                     <div class="d-inline activity-icon activityiconcontainer ' . $modpurpose . ' pl-0">
                         <img src="' . $this->cminfo->get_icon_url() . '" class="activityicon mr-1" alt=""/>
                     </div>

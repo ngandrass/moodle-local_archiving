@@ -68,6 +68,10 @@ $driver = new $driverclass($ctx);
 $form = $driver->get_job_create_form($cm->modname, $cm);
 
 // Handle form submission.
+if ($form->is_cancelled()) {
+    redirect(new \moodle_url('/local/archiving/index.php', ['courseid' => $courseid]));
+}
+
 if ($form->is_submitted() && $form->is_validated()) {
     require_capability('local/archiving:create', $ctx);
 

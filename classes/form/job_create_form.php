@@ -255,8 +255,14 @@ class job_create_form extends \moodleform {
      * @throws \coding_exception
      */
     protected function definition_footer(): void {
-        $this->_form->closeHeaderBefore('submitbutton');
-        $this->_form->addElement('submit', 'submitbutton', get_string('create_archive', 'local_archiving'));
+        // Submit button.
+        //$this->_form->closeHeaderBefore('submitbutton');
+        //$this->_form->addElement('submit', 'submitbutton', get_string('create_archive', 'local_archiving'));
+
+        $this->add_action_buttons(
+            cancel: true,
+            submitlabel: get_string('create_archive', 'local_archiving'),
+        );
     }
 
     /**

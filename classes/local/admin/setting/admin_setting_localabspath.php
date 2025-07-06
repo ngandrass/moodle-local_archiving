@@ -61,6 +61,8 @@ class admin_setting_localabspath extends \admin_setting_configtext {
      */
     #[\Override]
     public function validate($data) {
+        global $CFG;
+
         // Basic data validation.
         $parentvalidation = parent::validate($data);
         if ($parentvalidation !== true) {
@@ -79,7 +81,11 @@ class admin_setting_localabspath extends \admin_setting_configtext {
         }
 
         // Skip further path checks during installation / upgrades.
-        if (CLI_UPGRADE_RUNNING) {
+        if (defined('CLI_UPGRADE_RUNNING') || !empty($CFG->upgraderunning)) {
+            return true;
+        } else if ($data === $this->defaultsetting) {
+            // If the default setting is used, we need to skip extended validation to allow default settings to be applied
+            // automatically during installation or upgrades.
             return true;
         }
 
@@ -91,7 +97,7 @@ class admin_setting_localabspath extends \admin_setting_configtext {
             }
 
             // If the directory does not exist, try to create it.
-            if (!mkdir($data)) {
+            if (!@mkdir($data)) {
                 return get_string('error_localpath_cloud_not_be_created', 'local_archiving');
             }
         }

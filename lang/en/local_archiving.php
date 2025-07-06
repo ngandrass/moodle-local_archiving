@@ -33,6 +33,7 @@ $string['available'] = 'Available';
 $string['back_to_overview'] = 'Back to overview';
 $string['checksum'] = 'Checksum';
 $string['cleanup_filestore_cache'] = 'Cleanup filestore cache';
+$string['cleanup_orphaned_backups'] = 'Cleanup orphaned backups';
 $string['components'] = 'Components';
 $string['create_archive'] = 'Create archive';
 $string['disabled'] = 'Disabled';

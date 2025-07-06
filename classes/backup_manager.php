@@ -361,4 +361,49 @@ class backup_manager {
         return self::initiate_backup(backup::TYPE_1COURSE, $courseid, $userid);
     }
 
+    /**
+     * Searches for backup files that were created by this plugin but were never cleaned up
+     *
+     * This can happen, if an archiving job requested a backup but failed before
+     * the asynchronous backup creation task finished.
+     *
+     * @param int $agethresholdsec Number of seconds after which a backup file is considered orphaned
+     * @return \stored_file[] Array of stored_file instances representing orphaned backup files
+     * @throws \dml_exception On database errors
+     * @throws \moodle_exception If the age threshold is not greater than zero
+     */
+    public static function get_orphaned_backup_files(int $agethresholdsec = DAYSECS): array {
+        global $DB;
+
+        // Validate given threshold.
+        if ($agethresholdsec <= 0) {
+            throw new \moodle_exception('Age threshold must be greater than zero.');
+        }
+
+        // Find all backup files that are older than the given threshold.
+        $orphanedfilerecords = $DB->get_records_select(
+            'files',
+            "timemodified < :threshold AND
+            component = 'backup' AND
+            mimetype = 'application/vnd.moodle.backup' AND
+            (
+                (filename LIKE 'local_archiving-course-backup-%' AND filearea = 'course') OR
+                (filename LIKE 'local_archiving-activity-backup-%' AND filearea = 'activity')
+            )",
+            ['threshold' => time() - $agethresholdsec],
+        );
+
+        // Return stored_file instances for each record.
+        $fs = get_file_storage();
+        $orphanedfiles = [];
+        foreach ($orphanedfilerecords as $record) {
+            $file = $fs->get_file_instance($record);
+            if ($file) {
+                $orphanedfiles[] = $file;
+            }
+        }
+
+        return $orphanedfiles;
+    }
+
 }

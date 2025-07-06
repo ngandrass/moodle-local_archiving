@@ -36,4 +36,13 @@ $tasks = [
         'month' => '*',
         'dayofweek' => '*',
     ],
+    [
+        'classname' => 'local_archiving\task\cleanup_orphaned_backups',
+        'blocking' => 0,
+        'minute' => '10',
+        'hour' => '2',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
 ];

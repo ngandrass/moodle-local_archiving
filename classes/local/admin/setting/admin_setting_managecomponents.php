@@ -105,17 +105,20 @@ class admin_setting_managecomponents extends \admin_setting {
         $html = '';
 
         $html .= $OUTPUT->box_start('generalbox');
-        $html .= $OUTPUT->heading(get_string('subplugintype_archivingmod_plural', 'local_archiving'), 3, 'border-0');
+        $html .= $OUTPUT->heading(get_string('subplugintype_archivingmod_plural', 'local_archiving'), 3, 'border-0 mb-n2');
+        $html .= $OUTPUT->paragraph(get_string('manage_components_archivingmod_desc', 'local_archiving'));
         $html .= $this->define_activity_archiving_drivers_table();
         $html .= $OUTPUT->box_end();
 
         $html .= $OUTPUT->box_start('generalbox');
-        $html .= $OUTPUT->heading(get_string('subplugintype_archivingstore_plural', 'local_archiving'), 3, 'border-0');
+        $html .= $OUTPUT->heading(get_string('subplugintype_archivingstore_plural', 'local_archiving'), 3, 'border-0 mb-n2');
+        $html .= $OUTPUT->paragraph(get_string('manage_components_archivingstore_desc', 'local_archiving'));
         $html .= $this->define_storage_drivers_table();
         $html .= $OUTPUT->box_end();
 
         $html .= $OUTPUT->box_start('generalbox');
-        $html .= $OUTPUT->heading(get_string('subplugintype_archivingevent_plural', 'local_archiving'), 3, 'border-0');
+        $html .= $OUTPUT->heading(get_string('subplugintype_archivingevent_plural', 'local_archiving'), 3, 'border-0 mb-n2');
+        $html .= $OUTPUT->paragraph(get_string('manage_components_archivingevent_desc', 'local_archiving'));
         $html .= $this->define_event_connectors_table();
         $html .= $OUTPUT->box_end();
 

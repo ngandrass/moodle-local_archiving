@@ -44,7 +44,11 @@ if ($hassiteconfig) {
         // Common: Header.
         $commonpage->add(new admin_setting_heading('local_archiving/header_common',
             null,
-            get_string('setting_header_common_desc', 'local_archiving')
+            get_string(
+                'setting_header_common_desc',
+                'local_archiving',
+                new \moodle_url('/admin/settings.php', ['section' => 'local_archiving_components_manage'])
+            )
         ));
 
         // Common: Job timeout.
@@ -188,7 +192,11 @@ if ($hassiteconfig) {
         // Manage components: Header.
         $managecomponentspage->add(new admin_setting_heading('local_archiving/header_managecomponents',
             null,
-            get_string('setting_header_managecomponents_desc', 'local_archiving')
+            get_string(
+                'setting_header_managecomponents_desc',
+                'local_archiving',
+                new \moodle_url('/admin/settings.php', ['section' => 'local_archiving_common'])
+            )
         ));
 
         // Manage components: Manage components.

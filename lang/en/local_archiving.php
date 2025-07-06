@@ -166,8 +166,8 @@ $string['archive_retention_time_help'] = 'The amount of time this archive should
 
 // Admin settings.
 $string['common_settings'] = 'Common settings';
-$string['setting_header_managecomponents_desc'] = 'This page allows you to manage all sub-plugins of the archiving system. TODO TODO TODO';
-$string['setting_header_common_desc'] = 'TODO';
+$string['setting_header_managecomponents_desc'] = 'This page allows you to manage all sub-plugins of the archiving system. You can enable or disable sub-plugins individually, according to your needs. You can also configure each sub-plugin individually by clicking on its respective settings link. To configure global settings of the archiving system, please navigate to the <a href="{$a}">common settings</a> page.';
+$string['setting_header_common_desc'] = 'This section contains common settings that apply globally to all components of the archiving system. To configure individual components, please navigate to their respective configuration pages, as found on the <a href="{$a}">manage components</a> page.';
 $string['setting_header_job_presets'] = 'Archive Presets';
 $string['setting_header_job_presets_desc'] = 'System wide default settings for archive creation. These defaults can be overridden when creating a new archive. However, each individual setting can also be locked to prevent managers / teachers from changing it. This can be useful when enforcing organization wide archive policies.';
 $string['setting_header_tsp'] = 'Archive Signing';
@@ -184,6 +184,9 @@ $string['setting_tsp_server_url'] = 'TSP server URL';
 $string['setting_tsp_server_url_desc'] = 'URL of the Time-Stamp Protocol (TSP) server to use.<br/>Examples: <code>https://freetsa.org/tsr</code>, <code>https://zeitstempel.dfn.de</code>, <code>http://timestamp.digicert.com</code>';
 $string['manage'] = 'Manage';
 $string['manage_components'] = 'Manage components';
+$string['manage_components_archivingmod_desc'] = 'The activity archiving drivers are responsible for the actual archiving process of a specific Moodle activity. One such driver exists for every Moodle activity that is supported by the archiving system.';
+$string['manage_components_archivingstore_desc'] = 'Storage drivers are responsible for taking a freshly create archive and transferring it to a specific storage location designated for long-term storage or post-processing.';
+$string['manage_components_archivingevent_desc'] = 'External event connectors allow forwarding of specific events within the archiving system to external services, such as campus management systems. This can be used to trigger specific actions in external systems, such as storing the path to an archived exam file for a given student inside a student record.';
 $string['error_localpath_must_be_absolute'] = 'Must be an absolute path.';
 $string['error_localpath_cloud_not_be_created'] = 'Could not create directory. Please make sure that the parent directory exists and is writable by the web server user.';
 $string['error_localpath_must_be_directory'] = 'A file with the given name already exists but a directory is expected.';

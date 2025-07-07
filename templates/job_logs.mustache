@@ -89,6 +89,11 @@
                         <span class="badge badge-secondary">{{value}}</span>
                     </li>
                 {{/job.metadata}}
+                {{^job.metadata}}
+                    <li class="list-group-item">
+                        <span class="text-muted">Nothing to show yet ...</span>
+                    </li>
+                {{/job.metadata}}
             </ul>
         </div>
     </div>

@@ -204,6 +204,7 @@ class job_create_form extends \moodleform {
         $this->_form->addRule('archive_filename_pattern', null, 'maxlength', 255, 'client');
 
         // Autodelete: Enable.
+        // TODO (MDL-0): Implement automatic deletion.
         $this->_form->addElement(
             'advcheckbox',
             'archive_autodelete',
@@ -255,10 +256,6 @@ class job_create_form extends \moodleform {
      * @throws \coding_exception
      */
     protected function definition_footer(): void {
-        // Submit button.
-        //$this->_form->closeHeaderBefore('submitbutton');
-        //$this->_form->addElement('submit', 'submitbutton', get_string('create_archive', 'local_archiving'));
-
         $this->add_action_buttons(
             cancel: true,
             submitlabel: get_string('create_archive', 'local_archiving'),

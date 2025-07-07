@@ -280,8 +280,16 @@ class archive_job {
 
             // Timeout if required.
             if ($this->is_overdue()) {
-                // TODO: Call cleanup logic.
+                // Update task status.
                 $this->set_status(archive_job_status::TIMEOUT);
+
+                // Stop all running tasks.
+                foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
+                    $task->cancel();
+                }
+
+                // Perform cleanup and die.
+                $this->cleanup();
                 throw new \moodle_exception('archive_job_timed_out', 'local_archiving');
             }
 
@@ -416,9 +424,8 @@ class archive_job {
                 foreach ($tasks as $task) {
                     foreach ($task->get_linked_artifacts() as $artifact) {
                         $filehandle = $driver->store($this->id, $artifact, $storagepath);
-                        $this->get_logger()->info(
-                            "Stored activity artifact: {$filehandle->filename} (size: ".display_size($filehandle->filesize).") (id: {$filehandle->id})"
-                        );
+                        $this->get_logger()->info('Stored activity artifact: '.
+                            "{$filehandle->filename} (size: ".display_size($filehandle->filesize).") (id: {$filehandle->id})");
                         $task->unlink_artifact($artifact, true);
                     }
                 }
@@ -440,9 +447,8 @@ class archive_job {
                         }
 
                         $filehandle = $driver->store($this->id, $backupfile, $storagepath);
-                        $this->get_logger()->info(
-                            "Stored backup: {$filehandle->filename} (size: ".display_size($filehandle->filesize).") (id: {$filehandle->id})"
-                        );
+                        $this->get_logger()->info('Stored backup: '.
+                            "{$filehandle->filename} (size: ".display_size($filehandle->filesize).") (id: {$filehandle->id})");
                         $bm->cleanup();
                     } else {
                         $this->get_logger()->debug("No {$backupidkey} found.");
@@ -480,12 +486,7 @@ class archive_job {
 
             // Cleanup -> Completed.
             if ($this->get_status(usecached: true) == archive_job_status::CLEANUP) {
-                // Cleanup temporary settings objects from DB.
-                foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
-                    $task->clear_settings();
-                }
-                $this->clear_settings(true);
-
+                $this->cleanup();
                 $this->set_status(archive_job_status::COMPLETED);
             }
         } catch (\Exception $e) {
@@ -499,6 +500,23 @@ class archive_job {
             $this->get_logger()->debug("^---------- Finished execution cycle {$starttime} ----------^");
             $lock->release();
         }
+    }
+
+    /**
+     * Cleans up anything that can be deleted once a job reached a final state.
+     *
+     * This method should not be called arbitrarily, but only once we are sure
+     * that the job is completed and will never require further processing.
+     *
+     * @return void
+     */
+    protected function cleanup(): void {
+        // Cleanup temporary settings objects from DB.
+        foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
+            $task->clear_settings(force: true);
+        }
+
+        $this->clear_settings(force: true);
     }
 
     /**
@@ -735,7 +753,7 @@ class archive_job {
             case archive_job_status::POST_PROCESSING:
                 return 60;
             case archive_job_status::STORE:
-                return 60 + 20;  // TODO: Implement.
+                return 60 + 20;  // TODO (MDL-0): Implement proper status reporting for storing step.
             case archive_job_status::CLEANUP:
                 return 99;
             case archive_job_status::COMPLETED:

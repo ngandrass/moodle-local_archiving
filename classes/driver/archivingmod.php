@@ -29,6 +29,7 @@ use local_archiving\archive_job;
 use local_archiving\exception\yield_exception;
 use local_archiving\form\job_create_form;
 use local_archiving\type\activity_archiving_task_status;
+use local_archiving\type\task_content_metadata;
 
 // @codingStandardsIgnoreLine
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -82,6 +83,18 @@ abstract class archivingmod extends base {
      * operation to completed or event to occur.
      */
     abstract public function execute_task(activity_archiving_task $task): void;
+
+    /**
+     * Returns a list of metadata for each piece of data that is part of the
+     * given activity archiving task (e.g., quiz attempt, assignment submission, etc.).
+     *
+     * One such metadata instance must be created for each piece of data that is
+     * exported by a single activity archiving task. This metadata is used to
+     * track the contents of generated archives.
+     *
+     * @return task_content_metadata[] List of metadata for each piece of data
+     */
+    abstract public function get_task_content_metadata(activity_archiving_task $task): array;
 
     /**
      * Provides access to the Moodle form that holds all settings for creating a

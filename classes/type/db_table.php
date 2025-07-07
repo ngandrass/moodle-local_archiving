@@ -54,4 +54,7 @@ enum db_table: string {
     /** @var string Name of the table used for job logging */
     case LOG = 'local_archiving_log';
 
+    /** @var string Name of the table that stores metadata about data that was archived by activity archiving tasks */
+    case CONTENT = 'local_archiving_content';
+
 }

@@ -28,6 +28,7 @@ use local_archiving\driver\archivingmod;
 use local_archiving\driver\archivingstore;
 use local_archiving\exception\yield_exception;
 use local_archiving\logging\job_logger;
+use local_archiving\type\archive_filename_variable;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 use local_archiving\util\mod_util;
@@ -914,6 +915,62 @@ class archive_job {
         }
 
         return $result;
+    }
+
+    /**
+     * Generates the archive name prefix for this job.
+     *
+     * In the simple case of having a single artifact file from the activitty
+     * archiving stage, the prefix can diretcly be used as a file name. If
+     * multiple artifact files are created, please add an apropriate suffix to
+     * the prefix to make it unique.
+     *
+     * Note: File extensions are excluded and must be added by the caller in
+     * order to generate a final file name!
+     *
+     * @return string Archive name prefix for this job
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \moodle_exception
+     */
+    public function generate_archive_name_prefix(): string {
+        // Validate pattern.
+        $pattern = $this->get_setting('archive_filename_pattern', strict: true);
+        if (!storage::is_valid_filename_pattern(
+            $pattern,
+            archive_filename_variable::values(),
+            storage::FILENAME_FORBIDDEN_CHARACTERS
+        )) {
+            throw new \invalid_parameter_exception(get_string('error_invalid_filename_pattern', 'local_archiving'));
+        }
+
+        // Prepare data.
+        $course = get_course($this->courseid);
+        $cm = mod_util::get_cm_info($this->get_context());
+        $data = [
+            'courseid' => $course->id ?: 0,
+            'coursename' => $course->fullname ?: 'null',
+            'courseshortname' => $course->shortname ?: 'null',
+            'cmid' => $cm->id ?: 0,
+            'cmtype' => $cm->modname ?: 'null',
+            'cmname' => $cm->name ?: 'null',
+            'date' => date('Y-m-d'),
+            'time' => date('H-i-s'),
+            'timestamp' => time(),
+        ];
+
+        // Substitute variables.
+        $filename = $pattern;
+        foreach ($data as $key => $value) {
+            $filename = preg_replace(
+                '/\$\{\s*'.$key.'\s*\}/m',
+                substr($value, 0, storage::FILENAME_VARIABLE_MAX_LENGTH),
+                $filename
+            );
+        }
+
+        return storage::sanitize_filename($filename);
     }
 
 }

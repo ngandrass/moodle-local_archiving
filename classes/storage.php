@@ -96,7 +96,7 @@ class storage {
             $res = str_replace($char, '', $res);
         }
 
-        return trim($res);
+        return substr(trim($res), 0, self::FILENAME_MAX_LENGTH);
     }
 
     /**

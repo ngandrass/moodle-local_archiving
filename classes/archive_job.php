@@ -31,6 +31,8 @@ use local_archiving\logging\job_logger;
 use local_archiving\type\archive_filename_variable;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
+use local_archiving\type\log_level;
+use local_archiving\type\task_content_metadata;
 use local_archiving\util\mod_util;
 use local_archiving\util\plugin_util;
 
@@ -306,7 +308,11 @@ class archive_job {
             // Processing -> Activity archiving.
             if ($this->get_status(usecached: true) == archive_job_status::PROCESSING) {
                 // Create activity archiving task.
-                $this->create_activity_archiving_task();
+                $task = $this->create_activity_archiving_task();
+                if (!$task) {
+                    $this->get_logger()->fatal('Failed to create activity archiving task.');
+                    throw new \moodle_exception('activity_archiving_task_creation_failed', 'local_archiving');
+                }
 
                 $drivername = $this->activity_archiving_driver()->get_plugin_name();
                 $this->get_logger()->info('Created activity archiving task (driver: '.$drivername.')');
@@ -326,6 +332,18 @@ class archive_job {
                     $this->get_logger()->info(
                         'Requested a Moodle activity backup (#'.$backup->backupid.'): '.$backup->filename
                     );
+                }
+
+                // Gather and save archive task contents metadata.
+                $taskcontent = $this->activity_archiving_driver()->get_task_content_metadata($task);
+                if (count($taskcontent) > 0) {
+                    $task->store_task_content_metadata($taskcontent);
+                    $this->get_logger()->info('Stored '.count($taskcontent).' task content metadata entries.');
+                    if ($this->get_logger()->loglevel <= log_level::TRACE) {
+                        $this->get_logger()->trace("Task content metadata:\r\n".json_encode($taskcontent, JSON_PRETTY_PRINT));
+                    }
+                } else {
+                    $this->get_logger()->warn('No task content metadata provided by the archiving driver!');
                 }
 
                 $this->set_status(archive_job_status::ACTIVITY_ARCHIVING);
@@ -510,6 +528,9 @@ class archive_job {
      * that the job is completed and will never require further processing.
      *
      * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     protected function cleanup(): void {
         // Cleanup temporary settings objects from DB.
@@ -578,6 +599,8 @@ class archive_job {
         $archivingtasks = activity_archiving_task::get_by_jobid($this->id);
         foreach ($archivingtasks as $task) {
             $task->cancel();
+
+            $DB->delete_records(db_table::CONTENT->value, ['taskid' => $task->get_id()]);
             $task->delete();
         }
 

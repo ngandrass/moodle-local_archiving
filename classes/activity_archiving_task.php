@@ -30,6 +30,7 @@ use local_archiving\logging\task_logger;
 use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\db_table;
 use local_archiving\type\filearea;
+use local_archiving\type\task_content_metadata;
 use local_archiving\util\plugin_util;
 
 // @codingStandardsIgnoreLine
@@ -447,6 +448,52 @@ final class activity_archiving_task {
                 "Activity archiving task status: ".$status->name." ({$status->value})"
             );
         }
+    }
+
+    /**
+     * Stores the given list of task content metadata entries
+     *
+     * ATTENTION: Calling this method twice will result in duplicate entries!
+     *
+     * @param task_content_metadata[] $taskcontentmetadata List of task content metadata entries to store
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function store_task_content_metadata(array $taskcontentmetadata): void {
+        global $DB;
+
+        // Validate input.
+        foreach ($taskcontentmetadata as $entry) {
+            if (!($entry instanceof task_content_metadata)) {
+                throw new \coding_exception('invalid_task_content_metadata_entry', 'local_archiving');
+            }
+        }
+
+        // Store task content metadata in database.
+        $DB->insert_records(db_table::CONTENT->value, $taskcontentmetadata);
+    }
+
+    /**
+     * Retrieves all task content metadata entries that are associated with this task
+     *
+     * @return task_content_metadata[] List of task content metadata entries
+     * @throws \dml_exception
+     */
+    public function get_task_content_metadata(): array {
+        global $DB;
+
+        // Fetch raw records from the database.
+        $rawrecords = $DB->get_records(db_table::CONTENT->value, ['taskid' => $this->taskid]);
+
+        // Convert raw records to task_content_metadata objects.
+        return array_map(fn($row): task_content_metadata => new task_content_metadata(
+            taskid: $row->taskid,
+            userid: $row->userid,
+            reftable: $row->reftable,
+            refid: $row->refid,
+            summary: $row->summary
+        ), $rawrecords);
     }
 
     /**

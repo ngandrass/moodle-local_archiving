@@ -57,7 +57,6 @@
       <INDEXES>
         <INDEX NAME="jobid" UNIQUE="false" FIELDS="jobid"/>
         <INDEX NAME="contextid" UNIQUE="false" FIELDS="contextid"/>
-        <INDEX NAME="archivingmod" UNIQUE="false" FIELDS="archivingmod"/>
       </INDEXES>
     </TABLE>
 
@@ -100,7 +99,6 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="jobid" UNIQUE="false" FIELDS="jobid"/>
-        <INDEX NAME="archivingstore" UNIQUE="false" FIELDS="archivingstore"/>
       </INDEXES>
     </TABLE>
 

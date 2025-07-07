@@ -114,14 +114,21 @@
                     <i class="fa fa-rotate-right"></i>
                 </a>
             </h3>
-            {{#job.logs}}
-<!-- This must be formatted exactly like this abomination so that whitespaces and linebreaks don't mess with the pre-formatted content ! -->
-<pre style="background-color: #efefef;" class="p-2">{{#job.logs}}{{{.}}}{{/job.logs}}{{^job.completed}}
-...{{/job.completed}}</pre>
-            {{/job.logs}}
-            {{^job.logs}}
-                <p>{{#str}} no_logs_available_desc, local_archiving {{/str}}</p>
-            {{/job.logs}}
+            <div class="p-2 mb-2" style="background-color: #efefef; overflow: auto;">
+                {{#job.logs}}
+                    <pre class="m-0" style="overflow: unset;">{{#job.logs}}{{{.}}}{{/job.logs}}</pre>
+                {{/job.logs}}
+                {{^job.logs}}
+                    <p>{{#str}} no_logs_available_desc, local_archiving {{/str}}</p>
+                {{/job.logs}}
+                {{^job.completed}}
+                    <div class="d-flex py-2 pl-1 text-black-50">
+                        <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
+                        <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
+                        <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
+                    </div>
+                {{/job.completed}}
+            </div>
         </div>
     </div>
     <div class="row">

@@ -81,11 +81,34 @@ class admin_setting_managecomponents extends \admin_setting {
      *
      * @param string $query
      * @return bool
+     * @throws \coding_exception
      */
     #[\Override]
     public function is_related($query) {
-        // TODO: Do we need to implement more logic here?
-        return parent::is_related($query);
+        // If parent already matches, return early.
+        if (parent::is_related($query)) {
+            return true;
+        }
+
+        // Check for own keywords.
+        $keywords = [
+            'archiving',
+            'archivingmod',
+            'archivingstore',
+            'archivingevent',
+            get_string('subplugintype_archivingmod_plural', 'local_archiving'),
+            get_string('subplugintype_archivingstore_plural', 'local_archiving'),
+            get_string('subplugintype_archivingevent_plural', 'local_archiving'),
+        ];
+
+        foreach ($keywords as $keyword) {
+            if (stripos($query, $keyword) !== false) {
+                return true;
+            }
+        }
+
+        // No match found.
+        return false;
     }
 
     /**

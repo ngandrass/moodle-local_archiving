@@ -340,11 +340,15 @@ final class activity_archiving_task {
     public function delete_from_db(): void {
         global $DB;
 
-        // TODO: Free temporary files, stop other async stuff, and cleanup potentially other stuff.
+        // Invalidate web service tokens if present.
+        $this->delete_webservice_token();
+
+        // Remove all linked artifact files from the filesystem.
         foreach ($this->get_linked_artifacts() as $artifact) {
             $this->unlink_artifact($artifact, true);
         }
 
+        // Finally delete the task from the database.
         $DB->delete_records(db_table::ACTIVITY_TASK->value, ['id' => $this->taskid]);
     }
 

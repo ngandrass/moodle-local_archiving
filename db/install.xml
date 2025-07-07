@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-  <XMLDB PATH="local/archiving/db" VERSION="2025061400" COMMENT="XMLDB file for Moodle local/archiving">
+  <XMLDB PATH="local/archiving/db" VERSION="2025070700" COMMENT="XMLDB file for Moodle local/archiving">
     <TABLES>
       <TABLE NAME="local_archiving_job" COMMENT="Archive jobs">
         <FIELDS>
@@ -116,6 +116,22 @@
           <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
           <KEY NAME="jobid" TYPE="foreign" FIELDS="jobid" REFTABLE="local_archiving_job" REFFIELDS="id"/>
           <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="local_archiving_activity_task" REFFIELDS="id"/>
+        </KEYS>
+      </TABLE>
+
+      <TABLE NAME="local_archiving_content" COMMENT="Holds metadata about data exported by activity archiving tasks">
+        <FIELDS>
+          <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+          <FIELD NAME="taskid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the activity archiving task this content was archived by"/>
+          <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user that created the original data"/>
+          <FIELD NAME="summary" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Descriptive summary / label of the archived data"/>
+          <FIELD NAME="reftable" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the table that stores the referenced original data"/>
+          <FIELD NAME="refid" TYPE="int" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the original data inside the reftable"/>
+        </FIELDS>
+        <KEYS>
+          <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+          <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="local_archiving_activity_task" REFFIELDS="id"/>
+          <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
         </KEYS>
       </TABLE>
     </TABLES>

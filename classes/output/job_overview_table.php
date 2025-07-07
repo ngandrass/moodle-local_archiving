@@ -60,6 +60,8 @@ class job_overview_table extends \table_sql {
      */
     #[\Override]
     public function __construct(string $uniqueid, \context $ctx) {
+        global $OUTPUT;
+
         parent::__construct($uniqueid);
 
         // Validate context and pre-cache modinfo.
@@ -69,6 +71,11 @@ class job_overview_table extends \table_sql {
 
         $this->coursectx = $ctx->get_course_context();
         $this->coursemodinfo = get_fast_modinfo($this->coursectx->instanceid);
+
+        $refreshhtml = $OUTPUT->render_from_template('local_archiving/components/refresh_button', [
+            'lastupdated' => time(),
+            'refreshurl' => $this->baseurl,
+        ]);
 
         // Setup table.
         $this->define_columns([
@@ -86,7 +93,7 @@ class job_overview_table extends \table_sql {
             get_string('activity'),
             get_string('user'),
             get_string('status'),
-            '',
+            $refreshhtml,
         ]);
 
         $this->column_class('actions', 'text-center');

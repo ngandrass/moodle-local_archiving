@@ -35,6 +35,7 @@
         },
         "urls": {
             "back": "https://foo.bar.baz"
+            "refresh": "https://foo.bar.baz/whatever.php"
         }
     }
 }}
@@ -99,7 +100,20 @@
     </div>
     <div class="row">
         <div class="col-12">
-            <h3>{{#str}} logs {{/str}}</h3>
+            <h3>
+                {{#str}} logs {{/str}}
+                <a
+                    href="{{{urls.refresh}}}"
+                    class="h4 mx-1"
+                    title="{{#str}} refresh, moodle {{/str}}"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                >
+                    <i class="fa fa-rotate-right"></i>
+                </a>
+            </h3>
             {{#job.logs}}
 <!-- This must be formatted exactly like this abomination so that whitespaces and linebreaks don't mess with the pre-formatted content ! -->
 <pre style="background-color: #efefef;" class="p-2">{{#job.logs}}{{{.}}}{{/job.logs}}{{^job.completed}}

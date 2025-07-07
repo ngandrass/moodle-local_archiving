@@ -44,6 +44,7 @@ $string['filetype'] = 'File type';
 $string['free_space_unknown'] = 'Free space unknown';
 $string['id'] = 'ID';
 $string['jobid'] = 'Job ID';
+$string['last_updated'] = 'Last updated';
 $string['progress'] = 'Progress';
 $string['ready'] = 'Ready';
 $string['type'] = 'Type';

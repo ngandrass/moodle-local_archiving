@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Form for deleting archive jobs
+ * Form for deleting single archiving job artifact files
  *
  * @package    local_archiving
  * @copyright  2025 Niels Gandraß <niels@gandrass.de>
@@ -25,7 +25,7 @@
 namespace local_archiving\form;
 
 use local_archiving\archive_job;
-use local_archiving\type\archive_job_status;
+use local_archiving\file_handle;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -33,9 +33,12 @@ require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
 
 
 /**
- * Form to delete an archiving job
+ * Form to delete a single artifact file that's part of an archive job
  */
-class job_delete_form extends \moodleform {
+class file_delete_form extends \moodleform {
+
+    /** @var file_handle The file handle to delete the referenced file from */
+    protected file_handle $filehandle;
 
     /** @var archive_job Archive job this form is associated with */
     protected archive_job $job;
@@ -44,7 +47,7 @@ class job_delete_form extends \moodleform {
      * Creates a new form instance
      *
      * @param int $contextid ID of the context this form is associated with
-     * @param int $jobid ID of the archive job this form is associated with
+     * @param int $filehandleid ID of the file handle to delete the referenced file from
      * @param string $wantsurl Desired redirect URL
      * @throws \dml_exception
      * @throws \moodle_exception
@@ -52,13 +55,14 @@ class job_delete_form extends \moodleform {
     #[\Override]
     public function __construct(
         protected int $contextid,
-        int $jobid,
+        int $filehandleid,
         protected string $wantsurl
     ) {
         global $PAGE;
 
-        // Get and validate job.
-        $this->job = archive_job::get_by_id($jobid);
+        // Get and validate file handle.
+        $this->filehandle = file_handle::get_by_id($filehandleid);
+        $this->job = archive_job::get_by_id($this->filehandle->jobid);
         if ($this->job->get_context()->id != $contextid) {
             throw new \moodle_exception('invalidcontext', 'local_archiving');
         }
@@ -78,25 +82,26 @@ class job_delete_form extends \moodleform {
 
         // Print delete warning.
         $this->_form->addElement('html', $OUTPUT->notification(
-            '<h4>'.get_string('delete_job', 'local_archiving').'</h4>'.
-            '<p>'.get_string('delete_job_warning', 'local_archiving').'</p>'.
+            '<h4>'.get_string('delete_job_artifact_file', 'local_archiving').'</h4>'.
+            '<p>'.get_string('delete_job_artifact_file_warning', 'local_archiving').'</p>'.
             '<code>'.
-                get_string('jobid', 'local_archiving').': '.$this->job->get_id().'<br>'.
-                get_string('status').': '.$this->job->get_status()->name.
+                get_string('filename', 'backup').': '.$this->filehandle->filename.'<br>'.
+                get_string('size').': '.display_size($this->filehandle->filesize).'<br>'.
+                get_string('timecreated').': '.userdate($this->filehandle->timecreated).
             '</code>',
             \core\output\notification::NOTIFY_WARNING,
             false
         ));
 
         // Form data.
-        $this->_form->addElement('hidden', 'action', 'jobdelete');
+        $this->_form->addElement('hidden', 'action', 'filedelete');
         $this->_form->setType('action', PARAM_TEXT);
 
         $this->_form->addElement('hidden', 'contextid', $this->contextid);
         $this->_form->setType('contextid', PARAM_INT);
 
-        $this->_form->addElement('hidden', 'jobid', $this->job->get_id());
-        $this->_form->setType('jobid', PARAM_INT);
+        $this->_form->addElement('hidden', 'filehandleid', $this->filehandle->id);
+        $this->_form->setType('filehandleid', PARAM_INT);
 
         $this->_form->addElement('hidden', 'wantsurl', $this->wantsurl);
         $this->_form->setType('wantsurl', PARAM_URL);

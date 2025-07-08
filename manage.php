@@ -24,6 +24,8 @@
  */
 
 use local_archiving\archive_job;
+use local_archiving\file_handle;
+use local_archiving\form\file_delete_form;
 use local_archiving\form\job_delete_form;
 use local_archiving\util\plugin_util;
 
@@ -33,7 +35,6 @@ global $OUTPUT, $PAGE;
 
 // Parse expected params.
 $contextid = required_param('contextid', PARAM_INT);
-$jobid = required_param('jobid', PARAM_INT);
 $action = required_param('action', PARAM_TEXT);
 $wantsurl = optional_param('wantsurl', '', PARAM_URL);
 
@@ -53,19 +54,21 @@ require_capability('local/archiving:view', $ctx);
 $PAGE->set_context($ctx->get_course_context());
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($course->fullname);
-$PAGE->set_url(new moodle_url(
-    '/local/archiving/manage.php',
-    [
-        'contextid' => $contextid,
-        'jobid' => $jobid,
-        'action' => $action,
-        'wantsurl' => $wantsurl,
-    ]
-));
 
 // Handle POSTed data.
 $outhtml = '';
 if ($action === 'jobdelete') {
+    $jobid = required_param('jobid', PARAM_INT);
+    $PAGE->set_url(new moodle_url(
+        '/local/archiving/manage.php',
+        [
+            'contextid' => $contextid,
+            'jobid' => $jobid,
+            'action' => $action,
+            'wantsurl' => $wantsurl,
+        ]
+    ));
+
     $form = new job_delete_form($contextid, $jobid, $wantsurl);
 
     if ($form->is_cancelled()) {
@@ -81,6 +84,35 @@ if ($action === 'jobdelete') {
     } else {
         $outhtml .= $form->render();
     }
+} else if ($action === 'filedelete') {
+    $filehandleid = required_param('filehandleid', PARAM_INT);
+    $PAGE->set_url(new moodle_url(
+        '/local/archiving/manage.php',
+        [
+            'contextid' => $contextid,
+            'filehandleid' => $filehandleid,
+            'action' => $action,
+            'wantsurl' => $wantsurl,
+        ]
+    ));
+
+    $form = new file_delete_form($contextid, $filehandleid, $wantsurl);
+
+    if ($form->is_cancelled()) {
+        redirect($wantsurl);
+    } else if ($form->is_submitted() && $form->is_validated()) {
+        require_capability('local/archiving:delete', $ctx);
+
+        // Perform deletion.
+        $filehandle = file_handle::get_by_id($filehandleid);
+        $filehandle->archivingstore()->delete($filehandle);
+        $filehandle->mark_as_deleted();
+
+        redirect($wantsurl);
+    } else {
+        $outhtml .= $form->render();
+    }
+
 } else {
     throw new \coding_exception('invalidaction', 'local_archiving');
 }

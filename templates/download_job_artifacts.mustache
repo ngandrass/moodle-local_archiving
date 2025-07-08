@@ -55,6 +55,7 @@
                 },
                 "storagedriver": "archivingstore_local",
                 "downloadurl": "https://foo.bar.baz/file2.txt"
+                "deleteurl": "https://foo.bar.baz/action/delete.php"
             }
         ],
         "urls": {
@@ -134,11 +135,11 @@
                                     {{#str}} signed_by, local_archiving {{/str}}
                                     <code class="text-body">{{tsp.server}}</code>
                                     <br>
-                                    <a href="{{tsp.querydownloadurl}}" target="_blank">
+                                    <a href="{{{tsp.querydownloadurl}}}" target="_blank">
                                         {{#pix}} a/download_all, core, {{#str}} downloadfile {{/str}} {{/pix}}{{#str}} tsp_query_filename, local_archiving {{/str}}
                                     </a>
                                     &nbsp;&ndash;&nbsp;
-                                    <a href="{{tsp.replydownloadurl}}" target="_blank">
+                                    <a href="{{{tsp.replydownloadurl}}}" target="_blank">
                                         {{#pix}} a/download_all, core, {{#str}} downloadfile {{/str}} {{/pix}}{{#str}} tsp_reply_filename, local_archiving {{/str}}
                                     </a>
                                 {{/tsp}}
@@ -150,11 +151,16 @@
                     </div>
 
                     <div class="card-footer text-center">
-                        <a href="{{downloadurl}}" class="btn btn-success mx-1" role="button">
+                        <a href="{{{downloadurl}}}" class="btn btn-success mx-1" role="button">
                             <i class="fa fa-download"></i>&nbsp;
                             {{#str}} download {{/str}}
                         </a>
-                        <a href="#" class="btn btn-outline-danger disabled mx-1" role="button" aria-disabled="true">
+                        {{#deleteurl}}
+                            <a href="{{{deleteurl}}}" class="btn btn-danger mx-1" role="button">
+                        {{/deleteurl}}
+                        {{^deleteurl}}
+                            <a href="#" class="btn btn-outline-danger mx-1 disabled" role="button" aria-disabled="true">
+                        {{/deleteurl}}
                             <i class="fa fa-trash"></i>&nbsp;
                             {{#str}} delete {{/str}}
                         </a>

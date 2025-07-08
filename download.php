@@ -86,7 +86,7 @@ if (count($filehandles) == 0) {
         // Cache file locally.
         $localfile = $filehandle->retrieve_file();
 
-        // Generate download URL.
+        // Generate URLs.
         $downloadurl = moodle_url::make_pluginfile_url(
             $localfile->get_contextid(),
             $localfile->get_component(),
@@ -96,6 +96,16 @@ if (count($filehandles) == 0) {
             $localfile->get_filename(),
             forcedownload: true
         );
+
+        $deleteurl = null;
+        if (has_capability('local/archiving:delete', $ctx->get_course_context())) {
+            $deleteurl = new \moodle_url('/local/archiving/manage.php', [
+                'action' => 'deletefile',
+                'jobid' => $job->get_id(),
+                'contextid' => $ctx->id,
+                'wantsurl' => $PAGE->url->out(false),
+            ]);
+        }
 
         // Get TSP data if available.
         $tspmanager = new tsp_manager($filehandle);
@@ -119,6 +129,7 @@ if (count($filehandles) == 0) {
             'tsp' => $tspdata,
             'storagedriver' => get_string('pluginname', "archivingstore_{$filehandle->archivingstorename}"),
             'downloadurl' => $downloadurl->out(false),
+            'deleteurl' => $deleteurl,
         ];
     }
 

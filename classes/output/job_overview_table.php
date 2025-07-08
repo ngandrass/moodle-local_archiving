@@ -60,7 +60,7 @@ class job_overview_table extends \table_sql {
      */
     #[\Override]
     public function __construct(string $uniqueid, \context $ctx) {
-        global $OUTPUT;
+        global $OUTPUT, $PAGE;
 
         parent::__construct($uniqueid);
 
@@ -74,7 +74,7 @@ class job_overview_table extends \table_sql {
 
         $refreshhtml = $OUTPUT->render_from_template('local_archiving/components/refresh_button', [
             'lastupdated' => time(),
-            'refreshurl' => $this->baseurl,
+            'refreshurl' => $PAGE->url,
         ]);
 
         // Setup table.

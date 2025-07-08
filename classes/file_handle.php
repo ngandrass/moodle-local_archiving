@@ -40,10 +40,12 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @property-read int $id ID of the file handle
  * @property-read int $jobid ID of the archiving job this file is associated with
  * @property-read string $archivingstorename Name of the storage driver that works with this file handle
+ * @property-read bool $deleted True, if the file was previously deleted from the storage (only metadata remains)
  * @property-read string $filename Name of the referenced file
  * @property-read string $filepath Path of the referenced file
  * @property-read int $filesize Filesize in bytes
  * @property-read string $sha256sum SHA256 checksum of the file
+ * @property-read string $mimetype MIME type of the file
  * @property-read int $timecreated Timestamp when the file handle was created
  * @property-read int $timemodified Timestamp when the file handle was last modified
  * @property-read string $filekey Optional unique key for identifying the file
@@ -58,20 +60,24 @@ final class file_handle {
      *
      * @param int $jobid ID of the archiving job this file is associated with
      * @param string $archivingstorename Name of the storage driver that works with this file handle
+     * @param bool $deleted True, if the file was previously deleted from the storage (only metadata remains)
      * @param string $filename Name of the referenced file
      * @param string $filepath Path of the referenced file
      * @param int $filesize Filesize in bytes
      * @param string $sha256sum SHA256 checksum of the file
+     * @param string $mimetype MIME type of the file
      * @param string $filekey Optional unique key for identifying the file
      */
     protected function __construct(
         protected readonly int $id,
         protected readonly int $jobid,
         protected readonly string $archivingstorename,
+        protected bool $deleted,
         protected readonly string $filename,
         protected readonly string $filepath,
         protected readonly int $filesize,
         protected readonly string $sha256sum,
+        protected readonly string $mimetype,
         protected readonly int $timecreated,
         protected readonly int $timemodified,
         protected readonly string $filekey = ''
@@ -100,6 +106,7 @@ final class file_handle {
         string $filepath,
         int $filesize,
         string $sha256sum,
+        string $mimetype,
         string $filekey = ''
     ): file_handle {
         global $DB;
@@ -134,10 +141,12 @@ final class file_handle {
         $id = $DB->insert_record(db_table::FILE_HANDLE->value, [
             'jobid' => $jobid,
             'archivingstore' => $archivingstorename,
+            'deleted' => false,
             'filename' => $filename,
             'filepath' => $filepath,
             'filesize' => $filesize,
             'sha256sum' => $sha256sum,
+            'mimetype' => $mimetype,
             'filekey' => $filekey,
             'timecreated' => $now,
             'timemodified' => $now,
@@ -147,10 +156,12 @@ final class file_handle {
             $id,
             $jobid,
             $archivingstorename,
+            false,
             $filename,
             $filepath,
             $filesize,
             $sha256sum,
+            $mimetype,
             $now,
             $now,
             $filekey
@@ -172,10 +183,12 @@ final class file_handle {
             $handle->id,
             $handle->jobid,
             $handle->archivingstore,
+            $handle->deleted,
             $handle->filename,
             $handle->filepath,
             $handle->filesize,
             $handle->sha256sum,
+            $handle->mimetype,
             $handle->timecreated,
             $handle->timemodified,
             $handle->filekey,
@@ -198,10 +211,12 @@ final class file_handle {
             $handle->id,
             $handle->jobid,
             $handle->archivingstore,
+            $handle->deleted,
             $handle->filename,
             $handle->filepath,
             $handle->filesize,
             $handle->sha256sum,
+            $handle->mimetype,
             $handle->timecreated,
             $handle->timemodified,
             $handle->filekey
@@ -220,10 +235,15 @@ final class file_handle {
     public function destroy(bool $removefile = false): void {
         global $DB;
 
-        $DB->delete_records(db_table::FILE_HANDLE->value, ['id' => $this->id]);
+        // Try to remove the file first because if this fails we do not loose the file handle metadata.
         if ($removefile) {
-            $this->archivingstore()->delete($this);
+            if (!$this->deleted) {
+                $this->archivingstore()->delete($this);
+            }
         }
+
+        // Remove the file handle from the database.
+        $DB->delete_records(db_table::FILE_HANDLE->value, ['id' => $this->id]);
     }
 
     /**
@@ -298,6 +318,11 @@ final class file_handle {
      * @throws storage_exception
      */
     public function retrieve_file(): \stored_file {
+        // Do not retrieve deleted if deleted previously.
+        if ($this->deleted) {
+            throw new storage_exception('deleted_file_can_not_be_retrieved.', 'local_archiving');
+        }
+
         // Check if the file is already present in the local filestore cache.
         $localfile = $this->get_local_file();
         if ($localfile) {
@@ -349,7 +374,31 @@ final class file_handle {
         if (property_exists($this, $name)) {
             return $this->$name;
         }
+
         throw new \coding_exception('Invalid property: ' . $name);
+    }
+
+    /**
+     * Marks the file referenced by this file handle as deleted.
+     *
+     * Once a referenced file is marked as deleted, it will not be accessible
+     * anymore via the retrieve_file() method. However, the metadata stored in
+     * the file handle will still be available until the file handle is removed
+     * via destroy().
+     *
+     * @return void
+     * @throws \dml_exception
+     */
+    public function mark_as_deleted(): void {
+        global $DB;
+
+        $DB->update_record(db_table::FILE_HANDLE->value, [
+            'id' => $this->id,
+            'deleted' => true,
+            'timemodified' => time(),
+        ]);
+
+        $this->deleted = true;
     }
 
 }

@@ -81,30 +81,39 @@ if (count($filehandles) == 0) {
         "files" => [],
     ];
 
+    // Sort file handles. Display existing files first, sorted by their name. Then display deleted files, sorted by their name.
+    usort($filehandles, fn($a, $b) => $a->deleted <=> $b->deleted ?: $a->filename <=> $b->filename);
+
     // Add all job files to template context and render the template.
     foreach ($filehandles as $filehandle) {
-        // Cache file locally.
-        $localfile = $filehandle->retrieve_file();
-
-        // Generate URLs.
-        $downloadurl = moodle_url::make_pluginfile_url(
-            $localfile->get_contextid(),
-            $localfile->get_component(),
-            $localfile->get_filearea(),
-            $localfile->get_itemid(),
-            $localfile->get_filepath(),
-            $localfile->get_filename(),
-            forcedownload: true
-        );
-
+        // Prepare default values.
+        $downloadurl = null;
         $deleteurl = null;
-        if (has_capability('local/archiving:delete', $ctx->get_course_context())) {
-            $deleteurl = new \moodle_url('/local/archiving/manage.php', [
-                'action' => 'deletefile',
-                'jobid' => $job->get_id(),
-                'contextid' => $ctx->id,
-                'wantsurl' => $PAGE->url->out(false),
-            ]);
+
+        // Retrieve non-deleted files.
+        if (!$filehandle->deleted) {
+            // Cache file locally.
+            $localfile = $filehandle->retrieve_file();
+
+            // Generate URLs.
+            $downloadurl = moodle_url::make_pluginfile_url(
+                $localfile->get_contextid(),
+                $localfile->get_component(),
+                $localfile->get_filearea(),
+                $localfile->get_itemid(),
+                $localfile->get_filepath(),
+                $localfile->get_filename(),
+                forcedownload: true
+            )->out(false);
+
+            if (has_capability('local/archiving:delete', $ctx->get_course_context())) {
+                $deleteurl = new \moodle_url('/local/archiving/manage.php', [
+                    'action' => 'filedelete',
+                    'filehandleid' => $filehandle->id,
+                    'contextid' => $ctx->id,
+                    'wantsurl' => $PAGE->url->out(false),
+                ]);
+            }
         }
 
         // Get TSP data if available.
@@ -121,14 +130,16 @@ if (count($filehandles) == 0) {
 
         // Add file data to template context.
         $tplctx['files'][] = [
-            'filename' => $localfile->get_filename(),
-            'filesize' => display_size($localfile->get_filesize()),
-            'filetype' => $localfile->get_mimetype(),
+            'deleted' => $filehandle->deleted,
+            'filename' => $filehandle->filename,
+            'filesize' => display_size($filehandle->filesize),
+            'filetype' => $filehandle->mimetype,
             'timecreated' => $filehandle->timecreated,
+            'timemodified' => $filehandle->timemodified,
             'sha256sum' => $filehandle->sha256sum,
             'tsp' => $tspdata,
             'storagedriver' => get_string('pluginname', "archivingstore_{$filehandle->archivingstorename}"),
-            'downloadurl' => $downloadurl->out(false),
+            'downloadurl' => $downloadurl,
             'deleteurl' => $deleteurl,
         ];
     }

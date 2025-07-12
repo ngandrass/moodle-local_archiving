@@ -1,0 +1,151 @@
+<mxfile host="Electron" modified="2023-11-13T13:49:19.611Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.3 Chrome/114.0.5735.289 Electron/25.8.4 Safari/537.36" etag="k89Ms0zXVu3gl3Iiugp6" version="22.0.3" type="device">
+  <diagram name="Page-1" id="xDDxMRZyU10aY9d_Mr3f">
+    <mxGraphModel dx="1177" dy="686" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-22" value="&amp;nbsp;7: Upload quiz archive&amp;nbsp;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="660" y="663" as="sourcePoint" />
+            <mxPoint x="320" y="663" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-7" value="Teacher /&lt;br&gt;Administrator" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.users.tenant_admin;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="228" y="870" width="56" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-20" value="5: Calculate&lt;br&gt;checksums" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;horizontal=1;" edge="1" parent="1">
+          <mxGeometry x="0.0126" y="35" relative="1" as="geometry">
+            <mxPoint x="753" y="594" as="sourcePoint" />
+            <mxPoint x="753" y="614" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="771" y="593.72" />
+              <mxPoint x="771" y="613.72" />
+              <mxPoint x="758" y="613.72" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-21" value="6: Create&lt;br&gt;archive" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;horizontal=1;" edge="1" parent="1">
+          <mxGeometry x="0.0435" y="34" relative="1" as="geometry">
+            <mxPoint x="753" y="630" as="sourcePoint" />
+            <mxPoint x="753" y="650" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="771" y="630" />
+              <mxPoint x="771" y="650" />
+              <mxPoint x="758" y="650" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-45" value="" style="group;fontStyle=1" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="190" y="550" width="120" height="165.5" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-43" value="Moodle LMS" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.servers.scom;fontStyle=1" vertex="1" parent="70Q1BQCOpofvYXx9ZO_P-45">
+          <mxGeometry width="120" height="165.5" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-44" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://blog.hwr-berlin.de/elerner/wp-content/uploads_elerner/2018/05/moodle-logo-39b36ce704607472-512x512.png;" vertex="1" parent="70Q1BQCOpofvYXx9ZO_P-45">
+          <mxGeometry x="32.75" y="92.5" width="54.5" height="54.5" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-48" value="1: Request quiz&lt;br&gt;archiving" style="endArrow=classic;html=1;rounded=0;horizontal=0;fontStyle=0" edge="1" parent="1">
+          <mxGeometry x="-0.0364" y="18" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="244" y="860" as="sourcePoint" />
+            <mxPoint x="244" y="750" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-49" value="11: Download quiz&lt;br&gt;archive" style="endArrow=classic;html=1;rounded=0;horizontal=0;dashed=1;dashPattern=8 8;strokeColor=#424242;fontColor=#424242;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.0545" y="19" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="257" y="750" as="sourcePoint" />
+            <mxPoint x="257" y="860" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-50" value="&amp;nbsp;3: Enqueue archive job&amp;nbsp;" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="320" y="590" as="sourcePoint" />
+            <mxPoint x="660" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-52" value="" style="endArrow=classic;html=1;rounded=0;startArrow=none;startFill=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="604" as="sourcePoint" />
+            <mxPoint x="320" y="634" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-53" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;dashPattern=8 8;strokeColor=#424242;fontColor=#424242;endFill=1;startArrow=none;startFill=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="619" as="sourcePoint" />
+            <mxPoint x="320" y="649" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-55" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;&amp;nbsp;4.1: Request quiz attempt data&amp;nbsp;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;rotation=-4.9;labelBackgroundColor=default;labelBorderColor=none;" vertex="1" parent="1">
+          <mxGeometry x="360.02" y="612.72" width="269.93" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-57" value="&amp;nbsp;4.2: Request Moodle course/quiz backups (.mbz)&amp;nbsp;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#424242;rotation=-4.9;labelBackgroundColor=default;labelBorderColor=none;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="362.02" y="627.72" width="269.93" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-58" value="2: Prepare&lt;br&gt;archive job" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;horizontal=1;" edge="1" parent="1">
+          <mxGeometry x="-0.0561" y="-34" relative="1" as="geometry">
+            <mxPoint x="180" y="592.4399999999999" as="sourcePoint" />
+            <mxPoint x="180" y="612.4399999999999" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="160" y="592.7199999999999" />
+              <mxPoint x="160" y="612.7199999999999" />
+              <mxPoint x="180" y="612.7199999999999" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-59" value="8: Validate &amp;amp;&lt;br&gt;store archive" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;horizontal=1;" edge="1" parent="1">
+          <mxGeometry y="-37" relative="1" as="geometry">
+            <mxPoint x="180" y="630.01" as="sourcePoint" />
+            <mxPoint x="180" y="650.01" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="160" y="630" />
+              <mxPoint x="160" y="650" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-60" value="" style="endArrow=classic;html=1;rounded=0;fontColor=#424242;dashed=1;dashPattern=8 8;strokeColor=#424242;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="320" y="690" as="sourcePoint" />
+            <mxPoint x="670" y="750" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-62" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;&amp;nbsp;9: Request TSP signature&amp;nbsp;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#424242;rotation=9.9;labelBackgroundColor=default;labelBorderColor=none;" vertex="1" parent="1">
+          <mxGeometry x="356.02" y="715.25" width="283" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-46" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=data:image/png,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;container=0;" vertex="1" parent="1">
+          <mxGeometry x="711.0710382513661" y="626.4" width="24.35690560377155" height="24.35690560377155" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-2" value="&lt;b&gt;Quiz Archive&lt;br&gt;Worker&lt;/b&gt;" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.services.central_management_service;container=0;" vertex="1" parent="1">
+          <mxGeometry x="671.1" y="580" width="73.32999999999997" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-65" value="" style="endArrow=none;html=1;rounded=0;fontColor=#424242;dashed=1;dashPattern=8 8;startArrow=classic;startFill=1;endFill=0;strokeColor=#424242;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="320" y="705" as="sourcePoint" />
+            <mxPoint x="670" y="766" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-1" value="Time-Stamp&lt;br&gt;Authority&lt;br&gt;&lt;font size=&quot;1&quot; style=&quot;&quot;&gt;&lt;span style=&quot;font-weight: normal; font-size: 9px;&quot;&gt;(External)&lt;/span&gt;&lt;/font&gt;" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.servers.certificate_authority;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="686.3100000000001" y="736.25" width="42.91" height="56.94" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-64" value="&amp;nbsp;10: Cryptographically attest archive timestamp &amp;amp; checksum&amp;nbsp;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#424242;rotation=9.9;labelBackgroundColor=default;labelBorderColor=none;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="348.02" y="731.25" width="303" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="70Q1BQCOpofvYXx9ZO_P-69" value="4.3: Render quiz attempts (PDF/HTML)" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry x="0.0563" y="12" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="687.31" y="574" as="sourcePoint" />
+            <mxPoint x="707.31" y="574" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="687.31" y="554" />
+              <mxPoint x="707.31" y="554" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

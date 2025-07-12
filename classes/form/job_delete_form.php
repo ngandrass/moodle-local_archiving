@@ -53,7 +53,6 @@ class job_delete_form extends \moodleform {
     public function __construct(
         /** @var int $contextid ID of the context this form is associated with */
         protected int $contextid,
-        /** @var int $jobid ID of the archive job this form is associated with */
         int $jobid,
         /** @var string $wantsurl Desired redirect URL */
         protected string $wantsurl

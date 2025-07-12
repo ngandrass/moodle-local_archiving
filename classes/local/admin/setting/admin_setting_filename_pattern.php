@@ -64,7 +64,7 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
         array $allowedvariables,
         array $forbiddenchars,
         mixed $paramtype = PARAM_RAW,
-        int $size = null
+        ?int $size = null
     ) {
         parent::__construct($name, $visiblename, $description, $defaultsetting, $paramtype, $size);
 

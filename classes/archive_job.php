@@ -93,6 +93,7 @@ class archive_job {
      * to this archive job.
      *
      * @return job_logger Logger instance
+     * @throws \dml_exception
      */
     public function get_logger(): job_logger {
         if ($this->logger instanceof job_logger) {
@@ -383,7 +384,7 @@ class archive_job {
                     $bm = new backup_manager($backupid);
 
                     if ($bm->is_failed()) {
-                        throw new \moodle_exception('backup_failed_id','local_archiving', a: $backupid);
+                        throw new \moodle_exception('backup_failed_id', 'local_archiving', a: $backupid);
                     }
                     if (!$bm->is_finished_successfully()) {
                         $allbackupsready = false;

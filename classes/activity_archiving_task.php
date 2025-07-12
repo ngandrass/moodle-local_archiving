@@ -68,11 +68,17 @@ final class activity_archiving_task {
      * @param activity_archiving_task_status $status Status of this task
      */
     protected function __construct(
+        /** @var int $taskid ID of this activity archiving task */
         protected readonly int $taskid,
+        /** @var int $jobid ID of the archiving job this task is associated with */
         protected readonly int $jobid,
+        /** @var \context_module Moodle context this task is run in */
         protected readonly \context_module $context,
+        /** @var int $userid ID of the user that owns this task */
         protected readonly int $userid,
+        /** @var string $archivingmodname Name of the activity archiving driver that handles this task */
         protected readonly string $archivingmodname,
+        /** @var activity_archiving_task_status Status of this task */
         protected activity_archiving_task_status $status
     ) {
         $this->archivejob = null;

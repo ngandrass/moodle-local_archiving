@@ -54,8 +54,11 @@ class file_delete_form extends \moodleform {
      */
     #[\Override]
     public function __construct(
+        /** @var int $contextid ID of the context this form is associated with */
         protected int $contextid,
+        /** @var int $filehandleid ID of the file handle to delete the referenced file from */
         int $filehandleid,
+        /** @var string $wantsurl Desired redirect URL */
         protected string $wantsurl
     ) {
         global $PAGE;

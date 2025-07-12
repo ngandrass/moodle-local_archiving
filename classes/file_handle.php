@@ -66,20 +66,34 @@ final class file_handle {
      * @param int $filesize Filesize in bytes
      * @param string $sha256sum SHA256 checksum of the file
      * @param string $mimetype MIME type of the file
+     * @param int $timecreated Timestamp when the file handle was created
+     * @param int $timemodified Timestamp when the file handle was last modified
      * @param string $filekey Optional unique key for identifying the file
      */
     protected function __construct(
+        /** @var int $id ID of this file handle */
         protected readonly int $id,
+        /** @var int $jobid ID of the archiving job this file is associated with */
         protected readonly int $jobid,
+        /** @var string $archivingstorename Name of the storage driver that works with this file handle */
         protected readonly string $archivingstorename,
+        /** @var bool $deleted True, if the file was previously deleted from the storage (only metadata remains) */
         protected bool $deleted,
+        /** @var string $filename Name of the referenced file */
         protected readonly string $filename,
+        /** @var string $filepath Path of the referenced file */
         protected readonly string $filepath,
+        /** @var int $filesize Filesize in bytes */
         protected readonly int $filesize,
+        /** @var string $sha256sum SHA256 checksum of the file */
         protected readonly string $sha256sum,
+        /** @var string $mimetype MIME type of the file */
         protected readonly string $mimetype,
+        /** @var int $timecreated Timestamp when the file handle was created */
         protected readonly int $timecreated,
+        /** @var int $timemodified Timestamp when the file handle was last modified */
         protected readonly int $timemodified,
+        /** @var string $filekey Optional unique key for identifying the file */
         protected readonly string $filekey = ''
     ) {
         $this->archivingstore = null;

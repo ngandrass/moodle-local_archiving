@@ -41,8 +41,10 @@ class job_logger extends logger {
      * Create a new logger instance that is tied to the given job
      *
      * @param int $jobid ID of the job to log for
+     * @throws \dml_exception
      */
     public function __construct(
+        /** @var int $jobid ID of the archiving job this logger is associated with */
         protected readonly int $jobid,
     ) {
         parent::__construct();

@@ -32,7 +32,6 @@ use local_archiving\type\archive_filename_variable;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 use local_archiving\type\log_level;
-use local_archiving\type\task_content_metadata;
 use local_archiving\util\mod_util;
 use local_archiving\util\plugin_util;
 
@@ -66,14 +65,19 @@ class archive_job {
      * @param int $id ID of this archive job
      * @param \context_module $context Moodle context this archive job is run in
      * @param int $userid ID of the user that owns this job
-     * @param int $timecreated Unix timestamp of creation time
+     * @param int $timecreated Unix timestamp of creation
      * @param archive_job_status $status Current job status
      */
     protected function __construct(
+        /** @var int ID of this archive job */
         protected readonly int $id,
+        /** @var \context_module Moodle context this archive job is run in */
         protected readonly \context_module $context,
+        /** @var int $userid ID of the user that owns this job */
         protected readonly int $userid,
+        /** @var int $timecreated Unix timestamp of creation */
         protected readonly int $timecreated,
+        /** @var archive_job_status $status Current job status */
         protected archive_job_status $status,
     ) {
         $this->courseid = $context->get_course_context()->instanceid;

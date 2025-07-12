@@ -42,9 +42,11 @@ class task_logger extends job_logger {
      *
      * @param int $jobid ID of the job to log for
      * @param int $taskid ID of the task to log for
+     * @throws \dml_exception
      */
     public function __construct(
         int $jobid,
+        /** @var int $taskid ID of the activity archiving task this logger is associated with */
         protected readonly int $taskid
     ) {
         parent::__construct($jobid);

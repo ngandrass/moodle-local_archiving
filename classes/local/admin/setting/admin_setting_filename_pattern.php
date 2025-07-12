@@ -34,6 +34,16 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 class admin_setting_filename_pattern extends \admin_setting_configtext {
 
     /**
+     * @var string[] $allowedvariables Allowed variable names in the filename pattern
+     */
+    protected array $allowedvariables;
+
+    /**
+     * @var string[] $forbiddenchars Forbidden characters in the filename pattern
+     */
+    protected array $forbiddenchars;
+
+    /**
      * Creates a new instance of this setting
      *
      * @param string $name unique ascii name for setting
@@ -41,21 +51,25 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
      * @param string $description long localised info
      * @param string $defaultsetting Default value
      * @param string[] $allowedvariables Variable names to allow during validation
+     * @param string[] $forbiddenchars Characters to forbid during validation
      * @param mixed $paramtype int means PARAM_XXX type, string is a allowed format in regex
      * @param int|null $size default field size
      */
     #[\Override]
     public function __construct(
-        $name,
-        $visiblename,
-        $description,
-        $defaultsetting,
-        protected array $allowedvariables,
-        protected array $forbiddenchars,
-        $paramtype = PARAM_RAW,
-        $size = null
+        string $name,
+        string $visiblename,
+        string $description,
+        string $defaultsetting,
+        array $allowedvariables,
+        array $forbiddenchars,
+        mixed $paramtype = PARAM_RAW,
+        int $size = null
     ) {
         parent::__construct($name, $visiblename, $description, $defaultsetting, $paramtype, $size);
+
+        $this->allowedvariables = $allowedvariables;
+        $this->forbiddenchars = $forbiddenchars;
     }
 
     /**

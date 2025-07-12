@@ -49,9 +49,12 @@ abstract class archivingmod extends base {
     /**
      * Create a new activity archiving driver instance
      *
-     * @param \context_module $context Moodle context this driver instance is for
+     * @param \context_module $context Moodle context this driver instance is associated with
      */
-    public function __construct(protected readonly \context_module $context) {
+    public function __construct(
+        /** @var \context_module Moodle context this driver instance is associated with */
+        protected readonly \context_module $context
+    ) {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
     }

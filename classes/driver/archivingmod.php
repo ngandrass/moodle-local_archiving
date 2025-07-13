@@ -95,6 +95,7 @@ abstract class archivingmod extends base {
      * exported by a single activity archiving task. This metadata is used to
      * track the contents of generated archives.
      *
+     * @param activity_archiving_task $task The task to get metadata for
      * @return task_content_metadata[] List of metadata for each piece of data
      */
     abstract public function get_task_content_metadata(activity_archiving_task $task): array;

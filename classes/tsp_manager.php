@@ -51,6 +51,7 @@ class tsp_manager {
     /**
      * Creates a new tsp_manager instance.
      *
+     * @param file_handle $filehandle The file handle this TSP manager operates on
      * @throws \dml_exception If the plugin config could not be loaded
      */
     public function __construct(file_handle $filehandle) {

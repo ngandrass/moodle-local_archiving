@@ -58,6 +58,7 @@ final class file_handle {
     /**
      * Constructor
      *
+     * @param int $id ID of this file handle
      * @param int $jobid ID of the archiving job this file is associated with
      * @param string $archivingstorename Name of the storage driver that works with this file handle
      * @param bool $deleted True, if the file was previously deleted from the storage (only metadata remains)
@@ -108,6 +109,7 @@ final class file_handle {
      * @param string $filepath Path of the referenced file
      * @param int $filesize Filesize in bytes
      * @param string $sha256sum SHA256 checksum of the file
+     * @param string $mimetype MIME type of the file
      * @param string $filekey Optional unique key for identifying the file
      * @return file_handle The created file handle
      * @throws \coding_exception
@@ -381,10 +383,11 @@ final class file_handle {
     /**
      * Allows read-only access to object properties
      *
+     * @param string $name Name of the property to access
      * @return mixed Value of the requested property
      * @throws \coding_exception
      */
-    public function __get($name) {
+    public function __get(string $name): mixed {
         if (property_exists($this, $name)) {
             return $this->$name;
         }

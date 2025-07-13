@@ -58,7 +58,7 @@ class process_archive_job extends \core\task\adhoc_task {
             'jobid' => $job->get_id(),
         ]);
         $task->set_userid($job->get_userid());
-        $task->set_attempts_available(1); // FIXME: Lowered for development. Set back to sensible value before production use.
+        $task->set_attempts_available(3);
 
         return $task;
     }

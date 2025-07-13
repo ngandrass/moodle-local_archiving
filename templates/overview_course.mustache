@@ -54,7 +54,7 @@
             <p>
                 {{#str}} activity_archiving_list_desc, local_archiving {{/str}}
             </p>
-            <ul class="list-group" style="border-bottom-right-radius: 0;">
+            <div class="list-group" style="border-bottom-right-radius: 0;">
                 {{#cms}}
                     <a
                         href="{{{archiveurl}}}"
@@ -69,7 +69,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <div class="d-inline activity-icon activityiconcontainer {{modpurpose}} pl-0">
-                                    <img src="{{{iconurl}}}" class="activityicon mr-1" alt=""/>
+                                    <img src="{{{iconurl}}}" class="activityicon mr-1" alt="">
                                 </div>
                                 <div class="d-inline">
                                     {{name}}
@@ -130,7 +130,7 @@
                         Nothing to show... TODO
                     </li>
                 {{/cms}}
-            </ul>
+            </div>
             <div class="text-right">
                 <a
                     href="{{{hidedisabledcmsurl}}}"

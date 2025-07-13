@@ -26,7 +26,7 @@ namespace local_archiving\driver;
 
 use local_archiving\trait\subplugin_get_plugin_name;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

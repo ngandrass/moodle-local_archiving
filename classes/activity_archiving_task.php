@@ -33,7 +33,7 @@ use local_archiving\type\filearea;
 use local_archiving\type\task_content_metadata;
 use local_archiving\util\plugin_util;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

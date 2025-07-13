@@ -24,7 +24,7 @@
 
 namespace local_archiving\trait;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

@@ -16,7 +16,7 @@
 
 namespace local_archiving\local\admin\setting;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

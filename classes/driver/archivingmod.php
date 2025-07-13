@@ -31,7 +31,7 @@ use local_archiving\form\job_create_form;
 use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\task_content_metadata;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

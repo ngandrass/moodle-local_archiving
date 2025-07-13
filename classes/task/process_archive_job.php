@@ -26,7 +26,7 @@ namespace local_archiving\task;
 
 use local_archiving\archive_job;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
@@ -92,7 +92,7 @@ class process_archive_job extends \core\task\adhoc_task {
      */
     #[\Override]
     public function get_archive_job(): archive_job {
-        // TODO: Maybe cache this inside self, if performance becomes an issue.
+        // TODO (MDL-0): Maybe cache this inside self, if performance becomes an issue.
         return archive_job::get_by_id(
             $this->get_custom_data()->jobid
         );
@@ -115,9 +115,6 @@ class process_archive_job extends \core\task\adhoc_task {
     #[\Override]
     public function execute(): void {
         $job = $this->get_archive_job();
-
-        // TODO: Check and handle timeout.
-
         $job->execute();
 
         if (!$job->is_completed()) {

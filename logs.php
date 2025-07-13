@@ -65,7 +65,7 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
             fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
             ""
         ),
-        // TODO: Move this to a separate archive inspection page.
+        // TODO (MDL-0): Move this to a separate archive inspection page.
         "metadata" => array_map(
             fn($key, $value): array => ['key' => $key, 'value' => $value],
             array_keys($jobmeta),

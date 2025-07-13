@@ -28,7 +28,7 @@ use local_archiving\exception\storage_exception;
 use local_archiving\file_handle;
 use local_archiving\type\storage_tier;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

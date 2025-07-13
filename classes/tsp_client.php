@@ -26,7 +26,7 @@ namespace local_archiving;
 
 use curl;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

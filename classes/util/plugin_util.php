@@ -28,7 +28,7 @@ use local_archiving\driver\archivingevent;
 use local_archiving\driver\archivingmod;
 use local_archiving\driver\archivingstore;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

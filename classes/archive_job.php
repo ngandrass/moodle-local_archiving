@@ -35,7 +35,7 @@ use local_archiving\type\log_level;
 use local_archiving\util\mod_util;
 use local_archiving\util\plugin_util;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

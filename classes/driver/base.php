@@ -24,7 +24,7 @@
 
 namespace local_archiving\driver;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

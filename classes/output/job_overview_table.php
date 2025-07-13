@@ -29,7 +29,7 @@ use local_archiving\file_handle;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 // @codeCoverageIgnoreStart
@@ -167,7 +167,7 @@ class job_overview_table extends \table_sql {
 
         $progress = $job->get_progress();
         if ($progress !== null && $progress < 100) {
-            // @codingStandardsIgnoreLine
+            // phpcs:ignore
             $html .= '<span title="'.get_string('progress', 'local_archiving').' alt="'.get_string('progress', 'local_archiving').'" data-toggle="tooltip" data-placement="top">';
             $html .= '<i class="fa fa-spinner"></i>&nbsp;'.$progress.'%';
             $html .= '</span><br/>';
@@ -195,16 +195,16 @@ class job_overview_table extends \table_sql {
         $files = file_handle::get_by_jobid($values->id);
         if ($job->is_completed() && count($files) > 0) {
             $downloadurl = new \moodle_url('/local/archiving/download.php', ['jobid' => $values->id]);
-            // @codingStandardsIgnoreLine
+            // phpcs:ignore
             $html .= '<a href="'.$downloadurl.'" class="btn btn-success mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('download').'" alt="'.get_string('download').'"><i class="fa fa-download"></i></a>';
         } else {
-            // @codingStandardsIgnoreLine
+            // phpcs:ignore
             $html .= '<a href="#" class="btn btn-outline-success mx-1 disabled" role="button" alt="'.get_string('download').'" alt="'.get_string('download').'" disabled aria-disabled="true"><i class="fa fa-download"></i></a>';
         }
 
         // Action: Show logs.
         $logurl = new \moodle_url('/local/archiving/logs.php', ['jobid' => $values->id]);
-        // @codingStandardsIgnoreLine
+        // phpcs:ignore
         $html .= '<a href="'.$logurl.'" class="btn btn-info mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('logs').'" alt="'.get_string('logs').'"><i class="fa fa-file-waveform"></i></a>';
 
         // Action: Delete.
@@ -214,7 +214,7 @@ class job_overview_table extends \table_sql {
             'jobid' => $values->id,
             'wantsurl' => $PAGE->url->out(true),
         ]);
-        // @codingStandardsIgnoreLine
+        // phpcs:ignore
         $html .= '<a href="'.$deleteurl.'" class="btn btn-danger mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('delete').'" alt="'.get_string('delete').'"><i class="fa fa-trash"></i></a>';
 
         return $html;

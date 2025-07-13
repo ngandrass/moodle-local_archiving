@@ -28,7 +28,7 @@ namespace local_archiving\type;
 
 use local_archiving\trait\enum_listable;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

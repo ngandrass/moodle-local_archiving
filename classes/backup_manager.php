@@ -29,7 +29,7 @@ use backup_controller;
 use context_course;
 use context_module;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

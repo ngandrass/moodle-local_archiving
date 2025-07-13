@@ -25,7 +25,7 @@
 
 namespace local_archiving\exception;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

@@ -26,7 +26,7 @@ namespace local_archiving\plugininfo;
 
 use local_archiving\util\plugin_util;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

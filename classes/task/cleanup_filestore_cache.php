@@ -24,7 +24,7 @@
 
 namespace local_archiving\task;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 use local_archiving\type\filearea;

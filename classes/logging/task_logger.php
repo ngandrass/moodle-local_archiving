@@ -26,7 +26,7 @@ namespace local_archiving\logging;
 
 use local_archiving\type\log_level;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

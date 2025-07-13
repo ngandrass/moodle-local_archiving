@@ -27,7 +27,7 @@ namespace local_archiving;
 use local_archiving\type\db_table;
 use stored_file;
 
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 

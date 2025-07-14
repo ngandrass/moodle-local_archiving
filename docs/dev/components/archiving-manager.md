@@ -1,9 +1,13 @@
 # Archiving Manager
 
-The archiving manager is the central entry point for archiving tasks.
+The archiving manager is the central entry point for archiving tasks. It is implemented as the `local_archiving` Moodle
+plugin and gets extended by various sub-plugins, such as [activity archiving drivers](activity-archiving-drivers.md).
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
+Supported sub-plugin types are:
+
+- [Activity Archiving Drivers (`archivingmod`)](activity-archiving-drivers.md)
+- [Storage Drivers (`archivingstore`)](storage-drivers.md)
+- [External Event Connectors (`archivingevent`)](external-event-connectors.md)
 
 
 ## Tasks and Responsibilities
@@ -103,6 +107,8 @@ sequenceDiagram
     Storage Driver --) Archiving Manager: Storage confirmation
     deactivate Storage Driver
     activate Archiving Manager
+    Archiving Manager ->> Archiving Manager: Post-processing
+    Archiving Manager ->> Archiving Manager: Cleanup
     deactivate Archiving Manager
 ```
 

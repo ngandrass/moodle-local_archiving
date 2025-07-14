@@ -34,7 +34,9 @@ plugins:
   - drawio
   - glightbox:
       shadow: true
-  - macros
+  - macros:
+      module_name: mkdocs-macros
+      on_error_fail: true
   - offline:
       enabled: !ENV [OFFLINE, false]
   - panzoom:

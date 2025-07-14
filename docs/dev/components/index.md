@@ -63,37 +63,3 @@ solely deliver information to external systems. This allows decoupling file stor
 target institutions.
 
 [:fontawesome-solid-cubes: Component Details](external-event-connectors.md){ .md-button }
-
-
-# Findings
-
-This sections lists various findings and implications that have been discovered during the design phase of the
-system architecture. Please consider this as a work-in-progress note section.
-
-- Not all Moodle activities offer sub-plugin structures in which additional archiving plugins can be integrated.
-    - `mod_quiz` offers an applicable sub-plugin structure (quiz report plugins), but `mod_assign` does not.
-    - This means, that archiving plugins must be implemented as a `local` plugins. In theory, a `coursereport` or
-      `report` would suffice for now, but might limit the flexibility of the archiving system in the future.
-    - A `local` plugin could inject appropriate sub-sites directly into different parts of the Moodle navigation. This
-      would allow for a more seamless integration of the archiving system into the Moodle user interface (e.g., one
-      overview page per course but also a global system-wide overview / status page).
-- Defining an own sub-plugin infrastructure for the central archiving plugin is the most clean and maintainable
-  solution. It would be extended by plugins for archiving specific activities or transferring archived data to external
-  systems.
-    - Sub-plugins should be implemented as proper Moodle plugins, as described in the
-      [Moodle Subplugins Documentation](https://docs.moodle.org/dev/Subplugins)
-    - A basic set of sub-plugins will be distributed with the base plugin. It is then possible to add additional
-      sub-plugins (e.g., storage drivers) via the Moodle plugin repository.
-    - Each (sub-)system could communicate via the [Moodle Events API](https://docs.moodle.org/dev/Events_API) if found
-      useful.
-- The [Moodle Events API](https://docs.moodle.org/dev/Events_API) ...
-    - Allows components to dispatch events that other components can listen to, if desired.
-    - Enable a decoupled architecture, where different components are only loosely connected, hence allow for easier
-      maintenance and extension.
-    - Allows both, communication between components within a single plugin, and with other plugins.
-    - Allows to be handled by individual observers or by a central manager.
-    - Can contain arbitrary data
-    - Can contain snapshots of database data at a given point in time
-    - Follow a strict and useful naming convention
-    - Are fully supported by all targeted Moodle versions
-

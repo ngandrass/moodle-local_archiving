@@ -37,7 +37,7 @@ tasks from the Moodle server and enable the archiving system to perform complex 
 - [Activity Archiving Drivers](activity-archiving-drivers.md)
 
 
-## Implementations
+## Implementation
 
 Worker service implementations do not have to follow strict rules and can be tailored to the respective [activity
 archiving drivers](activity-archiving-drivers.md) that use them. However, they all should:
@@ -47,6 +47,8 @@ archiving drivers](activity-archiving-drivers.md) that use them. However, they a
 3. Grant privileges only for the exact time an activity archiving task is processed
 4. Be easy to deploy and configure
 
+
+## Examples
 
 ### Quiz Archive Worker
 

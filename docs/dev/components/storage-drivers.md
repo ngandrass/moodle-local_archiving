@@ -43,7 +43,7 @@ reads. Changes of data that was once written is prohibited.
 - [Archiving Manager](archiving-manager.md)
 
 
-## Implementations
+## Implementation
 
 Each storage driver must implement the {{ source_file('classes/driver/archivingstore.php', '\\local_archiving\\driver\\archivingstore') }}
 interface with a class, placed at the following location: `/local/archiving/driver/mod/<pluginname>/classes/archivingmod.php`,
@@ -55,6 +55,8 @@ storage and create {{ source_file('classes/file_handle.php', '\\local_archiving\
 that has been stored. File handles keep track of stored files and contain various metadata that allows to retrieve the
 referenced files from the external storage system at a later point in time.
 
+
+## Examples
 
 ### Moodledata Storage
 

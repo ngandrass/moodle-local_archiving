@@ -45,6 +45,8 @@ Each activity archiving driver must implement the {{ source_file('classes/driver
 at the following location: `/local/archiving/driver/mod/<pluginname>/classes/archivingmod.php`, where `<pluginname>` is
 the name of the activity archiving driver (e.g., `quiz`, `assign`, ...).
 
+[:material-file-code-outline: Activity Archiving Driver API](../api/activity-archiving-drivers.md){ .md-button }
+
 Once an archive job reached the activity archiving phase, the [archiving manager](archiving-manager.md) will create an
 activity archiving task for the specific activity type and call the responsible activity archiving driver. The activity
 archiving driver will then extract the required information, create one or more artifact files, and returns them to the

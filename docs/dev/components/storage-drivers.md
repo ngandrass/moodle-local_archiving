@@ -49,6 +49,8 @@ Each storage driver must implement the {{ source_file('classes/driver/archivings
 interface with a class, placed at the following location: `/local/archiving/driver/store/<pluginname>/classes/archivingstore.php`,
 where `<pluginname>` is the name of the storage driver (e.g., `localdir`, `moodle`, ...).
 
+[:material-file-code-outline: Storage Driver API](../api/storage-drivers.md){ .md-button }
+
 Once all data for a single archive job is collected, the [archiving manager](archiving-manager.md) will call the storage
 driver that is responsible for the respective task. The storage driver will then write all data to the associated
 storage and create {{ source_file('classes/file_handle.php', '\\local_archiving\\file_handle') }} objects for each file

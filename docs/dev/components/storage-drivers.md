@@ -1,9 +1,11 @@
 # Storage Drivers
 
-Storage drivers are responsible for safely transferring a finished archive to a specific storage location.
+Storage drivers are responsible for safely transferring a finished archive to a specific storage location. When creating
+archives for legal reasons, storing the archives in an external WORM[^1] storage is strongly advised.
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
+
+[^1]: WORM: _"write once, read many"_ - A storage solution that allows to write data only once and only allow subsequent
+reads. Changes of data that was once written is prohibited.
 
 
 ## Tasks and Responsibilities
@@ -42,6 +44,17 @@ Storage drivers are responsible for safely transferring a finished archive to a 
 
 
 ## Implementations
+
+Each storage driver must implement the {{ source_file('classes/driver/archivingstore.php', '\\local_archiving\\driver\\archivingstore') }}
+interface with a class, placed at the following location: `/local/archiving/driver/mod/<pluginname>/classes/archivingmod.php`,
+where `<pluginname>` is the name of the activity archiving driver (e.g., `localdir`, `moodle`, ...).
+
+Once all data for a single archive job is collected, the [archiving manager](archiving-manager.md) will call the storage
+driver that is responsible for the respective task. The storage driver will then write all data to the associated
+storage and create {{ source_file('classes/file_handle.php', '\\local_archiving\\file_handle') }} objects for each file
+that has been stored. File handles keep track of stored files and contain various metadata that allows to retrieve the
+referenced files from the external storage system at a later point in time.
+
 
 ### Moodledata Storage
 

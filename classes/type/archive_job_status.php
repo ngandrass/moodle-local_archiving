@@ -41,8 +41,8 @@ enum archive_job_status: int {
     /** @var int Job is initialized and queued for processing */
     case QUEUED = 10;
 
-    /** @var int Job is currently being processed */
-    case PROCESSING = 20;
+    /** @var int Job has just been picked to run and is currently pre-processing */
+    case PRE_PROCESSING = 20;
 
     /** @var int Activity archiving currently takes place */
     case ACTIVITY_ARCHIVING = 30;
@@ -114,7 +114,7 @@ enum archive_job_status: int {
      */
     public function color(): string {
         return match($this) {
-            self::PROCESSING,
+            self::PRE_PROCESSING,
             self::ACTIVITY_ARCHIVING,
             self::BACKUP_COLLECTION,
             self::POST_PROCESSING

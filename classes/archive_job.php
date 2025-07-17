@@ -301,17 +301,17 @@ class archive_job {
                 throw new \moodle_exception('archive_job_timed_out', 'local_archiving');
             }
 
-            // Queued -> Processing.
+            // Queued -> Pre-Processing.
             if ($this->get_status(usecached: true) == archive_job_status::QUEUED) {
                 $this->get_logger()->trace(
                     "Initialized new archive job. Settings: \r\n".json_encode($this->get_settings(), JSON_PRETTY_PRINT)
                 );
 
-                $this->set_status(archive_job_status::PROCESSING);
+                $this->set_status(archive_job_status::PRE_PROCESSING);
             }
 
-            // Processing -> Activity archiving.
-            if ($this->get_status(usecached: true) == archive_job_status::PROCESSING) {
+            // Pre-Processing -> Activity archiving.
+            if ($this->get_status(usecached: true) == archive_job_status::PRE_PROCESSING) {
                 // Create activity archiving task.
                 $task = $this->create_activity_archiving_task();
                 if (!$task) {
@@ -773,7 +773,7 @@ class archive_job {
     public function get_progress(): ?int {
         switch ($this->get_status()) {
             case archive_job_status::QUEUED:
-            case archive_job_status::PROCESSING:
+            case archive_job_status::PRE_PROCESSING:
                 return 0;
             case archive_job_status::ACTIVITY_ARCHIVING:
                 $tasks = activity_archiving_task::get_by_jobid($this->id);

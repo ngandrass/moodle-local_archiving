@@ -3,9 +3,6 @@
 The activity archiving drivers are responsible for the actual archiving process of a specific Moodle activity. One such
 driver exists for every Moodle activity that is supported by the archiving system.
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
-
 
 ## Tasks and Responsibilities
 
@@ -42,7 +39,19 @@ driver exists for every Moodle activity that is supported by the archiving syste
 - [Worker Services](worker-services.md) (Optional)
 
 
-## Implementations
+## Implementation
+
+Each activity archiving driver must implement the {{ source_file('classes/driver/archivingmod.php', '\\local_archiving\\driver\\archivingmod') }} interface with a class, placed
+at the following location: `/local/archiving/driver/mod/<pluginname>/classes/archivingmod.php`, where `<pluginname>` is
+the name of the activity archiving driver (e.g., `quiz`, `assign`, ...).
+
+Once an archive job reached the activity archiving phase, the [archiving manager](archiving-manager.md) will create an
+activity archiving task for the specific activity type and call the responsible activity archiving driver. The activity
+archiving driver will then extract the required information, create one or more artifact files, and returns them to the
+[archiving manager](archiving-manager.md). All further processing is done by other components.
+
+
+## Examples
 
 ### Quiz (mod_quiz)
 

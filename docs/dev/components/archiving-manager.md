@@ -65,6 +65,12 @@ Supported sub-plugin types are:
 
 ## Details
 
+Archiving is done using archive jobs. One such archive job is created every time archiving of a single activity is
+requested. Each archive job goes through [several stages](../api/archive-job-states.md) and is processed asynchronously
+by the Moodle cron worker as a set of ad-hoc tasks. Once an archiving job is finished, its artifacts can be downloaded
+via the web interface of the archiving subsystem.
+
+
 ### Archive Job Flow
 
 The following sequence diagram illustrated the basic information flow of a successful archiving job.
@@ -161,6 +167,4 @@ sequenceDiagram
         Archiving Manager ->> Archiving Manager: Handle Error
         deactivate Archiving Manager
     end
-
-
 ```

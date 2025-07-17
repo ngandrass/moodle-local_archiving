@@ -1,10 +1,7 @@
 # Worker Services
 
 Worker services can be used by [activity archiving drivers](activity-archiving-drivers.md) to offload heavy processing
-tasks from the Moodle system and enable the archiving system to perform complex transformations.
-
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
+tasks from the Moodle server and enable the archiving system to perform complex transformations (e.g., PDF exports).
 
 
 ## Tasks and Responsibilities
@@ -42,6 +39,21 @@ tasks from the Moodle system and enable the archiving system to perform complex 
 
 ## Implementations
 
+Worker service implementations do not have to follow strict rules and can be tailored to the respective [activity
+archiving drivers](activity-archiving-drivers.md) that use them. However, they all should:
+
+1. Use the Moodle web services / external API
+2. Grant as least privileges as possible
+3. Grant privileges only for the exact time an activity archiving task is processed
+4. Be easy to deploy and configure
+
+
 ### Quiz Archive Worker
+
+An example of one such worker service is the [Quiz Archive Worker Service](https://github.com/ngandrass/moodle-quiz-archive-worker)
+that is used in conjunction with the [Moodle Quiz Archiver Plugin](https://moodle.org/plugins/quiz_archiver).
+
+The following diagram depicts the general architecture and information flow of the Moodle plugin and the corresponding
+worker service:
 
 ![](../quiz-archiver-architecture.drawio)

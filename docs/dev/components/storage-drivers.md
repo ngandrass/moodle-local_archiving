@@ -46,8 +46,8 @@ reads. Changes of data that was once written is prohibited.
 ## Implementation
 
 Each storage driver must implement the {{ source_file('classes/driver/archivingstore.php', '\\local_archiving\\driver\\archivingstore') }}
-interface with a class, placed at the following location: `/local/archiving/driver/mod/<pluginname>/classes/archivingmod.php`,
-where `<pluginname>` is the name of the activity archiving driver (e.g., `localdir`, `moodle`, ...).
+interface with a class, placed at the following location: `/local/archiving/driver/store/<pluginname>/classes/archivingstore.php`,
+where `<pluginname>` is the name of the storage driver (e.g., `localdir`, `moodle`, ...).
 
 Once all data for a single archive job is collected, the [archiving manager](archiving-manager.md) will call the storage
 driver that is responsible for the respective task. The storage driver will then write all data to the associated

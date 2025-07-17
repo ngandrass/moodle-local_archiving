@@ -28,7 +28,14 @@ an archived exam file for a given student inside a student record.
 - [Archiving Manager](archiving-manager.md)
 
 
-## Implementations
+## Implementation
+
+Each external event connector must implement the {{ source_file('classes/driver/archivingevent.php', '\\local_archiving\\driver\\archivingevent') }}
+interface with a class, placed at the following location: `/local/archiving/driver/event/<pluginname>/classes/archivingevent.php`,
+where `<pluginname>` is the name of the external event connector (e.g., `mycms`, `externalapi`, ...).
+
+
+## Examples
 
 !!! warning "Needs further analysis"
     An analysis of the currently used campus management solutions and the specific business processes of the target

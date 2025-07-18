@@ -3,85 +3,147 @@
 This document defines the interface that [activity archiving driver](../../components/activity-archiving-drivers.md)
 implementations must adhere to.
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
-
 
 ## Overview
 
+The abstract driver base class for activity archiving drivers is {{ source_file('classes/driver/archivingmod.php',
+'\\local_archiving\\driver\\archivingmod') }}.
+
+!!! notice "Overview reduced for bravery"
+    For bravery, the following overview diagram is reduced to the most important classes and members. Therefore, some 
+    details like methods, parameters, or members are omitted. Please refer to the {{ source_file('', 'plugin source code') }}
+    for a complete reference.
+    
+
 ```mermaid
 classDiagram
-    class ActivityArchivingDriver {
-        <<interface>>
-        
-        # tasks: ActivityArchivingTask[]
-        # availableTaskSettings: SettingsDefinition[]
-        
-        + getTaskSettingsDefinition() SettingsDefinition[]
-            
-        + createTask(activityMetadata, taskSettings) ActivityArchivingTask
-        + executeTask(taskId) bool
-        + abortTask(taskId) bool
-        
-        + getTask(taskId) AcvitityArchivingTask
-        + getTaskStatus(taskId) ActivityArchivingTaskStatus
-        + getActiveTasks() ActivityArchivingTask[]
+    direction TB
+
+    class archivingmod {
+        <<abstract>>
+        #context: context_module
+        #cmid: int
+        #courseid: int
+
+        +get_supported_activities()$ string[]
+        +can_be_archived() bool
+        +execute_task(task: activity_archiving_task) void
+        +get_task_content_metadata(task: activity_archiving_task) task_content_metadata[]
+        +get_job_create_form(handler: string, cminfo: cm_info) job_create_form
     }
     
-    %% Stub consumers
-    ActivityArchivingDriver <|-- QuizArchiver
-    ActivityArchivingDriver <|-- AssessmentArchiver
-    ActivityArchivingDriver <|-- AnotherArchiver
+    class base {
+        <<abstract>>
+        +ALLOWED_PLUGIN_TYPES: const string[]
+            
+        +get_frankenstyle_name() stdClass
+        +get_plugin_type() string
+        +get_plugin_name() string
+        +is_ready()$ bool
+        +is_enabled() bool
+    }
+    
+    class archivingmod_quiz {
+    }
+
+    class archivingmod_assign {
+    }
+
+    class archivingmod_other {
+    }
+    
+    class activity_archiving_task {
+        #taskid: int
+        #archivejob: archive_job
+        #archivingmod: archivingmod
+        #context: context_module
+        #userid: int
+        #status: activity_archiving_task_status
+        #settings: stdClass
+        #metadata: task_content_metadata[]
+        
+        +create() activity_archiving_task
+        +get(id: int) activity_archiving_task
+        +get_progesss() int
+        +link_artifact(artifactfile: stored_file) void
+        +generate_artifactfile_info(filename: string) stdClass
+    }
+    
+    class task_content_metadata {
+        +taskid: int
+        +userid: int
+        +reftable: string|null
+        +refid: int|null
+        +summary: string|null
+    }
+    
+    class archive_job {
+        #id: int
+        #context: context_module
+        #courseid: int
+        #cmid: int
+        #userid: int
+        #status: archive_job_status
+        #settings: stdClass
+        
+        +create() archive_job
+        +get(id: int) archive_job
+        +delete() void
+        +enqueue() void
+        +execute() void
+    }
+    
+    class activity_archiving_task_status {
+        <<enumeration>>
+        UNINITIALIZED
+        CREATED
+        AWAITING_PROCESSING
+        RUNNING
+        FINALIZING
+        FINISHED
+        CANCELED
+        FAILED
+        TIMEOUT
+        UNKNOWN
+    }
+
+    %% Relationships
+    base  <|--  archivingmod
+    archivingmod <|-- archivingmod_quiz
+    archivingmod <|-- archivingmod_assign
+    archivingmod <|-- archivingmod_other
+    activity_archiving_task -- archivingmod
+    task_content_metadata -- archivingmod
+    archive_job -- activity_archiving_task
+    activity_archiving_task_status -- activity_archiving_task
+    
+    %% style
+    style archive_job fill:#dedede,stroke:#666666
+    style activity_archiving_task fill:#dedede,stroke:#666666
+    style task_content_metadata fill:#dedede,stroke:#666666
+    style activity_archiving_task_status fill:#dedede,stroke:#666666
 ```
 
-## Attributes
 
-### `tasks: ActivityArchivingTask[]`
+## Implementation
 
-Holds a list of all tasks known to the activity archiving driver. This should be stored in the database.
+Each activity archiving driver must implement the {{ source_file('classes/driver/archivingmod.php',
+'\\local_archiving\\driver\\archivingmod') }} interface with a class, placed at the following location:
+`/local/archiving/driver/mod/<pluginname>/classes/archivingmod.php`, where `<pluginname>` is the name of the activity
+archiving driver (e.g., `quiz`, `assign`, ...).
 
-### `availableTaskSettings: SettingsDefinition[]`
+Each activity archiving driver specifies the mod types that it supports via the `get_supported_activities()` method.
+During creation, each activity archiving driver instance is bound to a specific activity instance by its respective
+module context (`\context_module`). The method `can_be_archived()` is then used to determine whether the
+targeted activity is ready to be archived or not.
 
-Holds a list of all settings and configuration arguments that this activity archiving driver supports. These include,
-but are not limited to:
+When creating a new archive job, the method `get_job_create_form()` returns the Moodle form that is presented to the
+user upon archive job creation, containing all necessary options for the activity archiving task of the targeted activity.
+All form data will be stored inside the created archive job and can be accessed via the job settings API.
 
-- Scope selectors (e.g., quiz attempt IDs)
-- Export data customizations (e.g., including example solutions)
-- File format settings
-- File naming patterns
-- Paper size settings
-
-
-## Methods
-
-This section contains descriptions for the methods defined in the interface above.
-
-### `getTaskSettingsDefinition()`
-
-Returns the `availableTaskSettings` attribute. This is used by an initiator to build the config object for a specific
-activity archiving task.
-
-### `createTask(activityMetadata, taskSettings)`
-
-Creates a new activity archiving task, targeting the activity specified in `activityMetadata` with the respective
-`taskSettings`.
-
-### `executeTask(taskId)`
-
-Schedules a prior-created task for execution.
-
-### `abortTask(taskId)`
-
-Gracefully aborts a task that is currently being executed.
-
-### `getTask(taskId)`
-
-Returns the task object for a given task ID.
-
-### `getTaskStatus(taskId)`
-
-Returns the current status of a task.
-
-### `getActiveTasks()`
-
-Returns a list of all tasks that are currently are scheduled for execution or are currently executed.
+After creation and once scheduled for execution, the archiving manager will call the `execute_task()` method of the
+activity archiving driver with the activity archiving task that should be processed. If an task executor yields before
+the job is finished, it will be re-executed periodically until it is either finished or canceled. Lastly, at any point
+in time, the `get_task_content_metadata()` method can be used to retrieve metadata about the data that is being targeted
+by a specific activity archiving task. This metadata will be processed by the archiving manager and stored inside the
+archive jobs metadata record.

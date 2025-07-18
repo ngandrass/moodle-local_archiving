@@ -116,10 +116,11 @@ nav:
       - dev/components/worker-services.md
       - dev/components/storage-drivers.md
       - dev/components/external-event-connectors.md
-
     - "Interfaces (APIs) and Signals":
       - dev/api/index.md
       - dev/api/archive-job-states.md
       - dev/api/events.md
       - dev/api/activity-archiving-drivers.md
       - dev/api/storage-drivers.md
+    - "Testing":
+      - dev/testing/index.md

@@ -4,6 +4,8 @@ External event connectors allow forwarding of specific events within the archivi
 campus management systems. This can be used to trigger specific actions in external systems, such as storing the path to
 an archived exam file for a given student inside a student record.
 
+[:material-file-code-outline: External Event Connector API](../api/external-event-connectors.md){ .md-button }
+
 !!! warning "Work in Progress (WIP)"
     This section is still under active development. Information and specifications can still be changed in the future.
 
@@ -26,13 +28,6 @@ an archived exam file for a given student inside a student record.
 ## Interfaced Components
 
 - [Archiving Manager](archiving-manager.md)
-
-
-## Implementation
-
-Each external event connector must implement the {{ source_file('classes/driver/archivingevent.php', '\\local_archiving\\driver\\archivingevent') }}
-interface with a class, placed at the following location: `/local/archiving/driver/event/<pluginname>/classes/archivingevent.php`,
-where `<pluginname>` is the name of the external event connector (e.g., `mycms`, `externalapi`, ...).
 
 
 ## Examples

@@ -132,5 +132,6 @@ nav:
       - dev/api/events.md
       - dev/api/activity-archiving-drivers.md
       - dev/api/storage-drivers.md
+      - dev/api/external-event-connectors.md
     - "Testing":
       - dev/testing/index.md

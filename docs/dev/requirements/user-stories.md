@@ -4,6 +4,27 @@ This section contains user stories that were identified during a stakeholder wor
 e-learning personal and IT administrators of various universities from Germany, Austria, and Switzerland as well as from
 multiple personal interviews.
 
+!!! notice "Stakeholder Workshop Results (German)"
+    <div style="text-align: center;">
+        <figure markdown="span" style="max-width: 340px; display: inline-block;">
+            ![Keyword Clustering (German)](../../assets/artifacts/2024/20241127_Moodle_Archiving_Workshop_Stichwort_Cluster.svg){ loading=lazy }
+            <figcaption>
+                Keyword Clustering (German)<br>
+                <a href="../../../assets/artifacts/2024/20241127_Moodle_Archiving_Workshop_Stichwort_Cluster.pdf" target="_blank">[Download as PDF]</a>
+            </figcaption>
+        </figure>
+        &nbsp;&nbsp;&nbsp;
+        <figure markdown="span" style="max-width: 284px; display: inline-block;">
+            ![Identified Use Cases (German)](../../assets/artifacts/2024/20241127_Moodle_Archiving_Workshop_Use_Cases.svg){ loading=lazy }
+            <figcaption>
+                Identified Use Cases (German)<br>
+                <a href="../../../assets/artifacts/2024/20241127_Moodle_Archiving_Workshop_Use_Cases.pdf" target="_blank">[Download as PDF]</a>
+            </figcaption> 
+        </figure>
+        <br>
+        _Perceived demand is indicated by the amount of dots on each card_
+    </div>
+
 Together with the [generic base requirements](base-requirements.md), they form the base for formulating concrete feature
 requests for and to establish the technical architecture drafts of the aspired archiving solution on.
 

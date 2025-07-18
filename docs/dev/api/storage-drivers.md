@@ -3,109 +3,115 @@
 This document defines the interface that [storage driver](../../components/storage-drivers.md) implementations must adhere
 to.
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
-
 
 ## Overview
+
+The abstract driver base class for storage drivers is {{ source_file('classes/driver/archivingstore.php',
+'\\local_archiving\\driver\\archvingstore') }}.
+
+!!! notice "Overview reduced for bravery"
+    For bravery, the following overview diagram is reduced to the most important classes and members. Therefore, some
+    details like methods, parameters, or members are omitted. Please refer to the {{ source_file('', 'plugin source code') }}
+    for a complete reference.
+
 ```mermaid
-classDiagram 
-    namespace ArchivingLogic{
-        class ArchivingManager {
-            +manageArchive(task: StorageTask): void
-        }
-        class StorageTask {
-            +data: any
-            +operation: str
-        }   
+classDiagram
+    direction TB
+
+    class archivingstore {
+        <<abstract>>
+        
+        +get_storage_tier()$ storage_tier
+        +supports_retrieve()$ bool
+        +is_available() bool
+        +get_free_bytes() int|null
+        +store(jobid: int, file: stored_file, path: string) file_handle
+        +retrieve(handle: file_handle, fileinfo: stdClass) stored_file
+        +delete(handle: file_handle, strict: bool) void
     }
-    namespace Supporting{
-        class LoggingMechanism {
-            +logRequest(source: str, action: str, data: any): void
-            +logActivity(source: str, message: str): void
-        }
-            class NotificationService {
-            +notifySuccess(message: str): void
-            +notifyFailure(message: str): void
-        }
-
-        class ErrorHandler {
-            +handleError(error: Exception): void
-            +retryOperation(operation: Callable): void
-            +switchToAlternative(driver: StorageDriver): void
-            +restartWorker(): void
-        }
+    
+    class base {
+        <<abstract>>
+        +ALLOWED_PLUGIN_TYPES: const string[]
+            
+        +get_frankenstyle_name() stdClass
+        +get_plugin_type() string
+        +get_plugin_name() string
+        +is_ready()$ bool
+        +is_enabled() bool
     }
-    namespace Storing{
-        class StorageAPI {
-            +getStorageDriver(driver_type: str): StorageDriver
-        }
-
-        class StorageDriver {
-            <<interface>>
-            +store(data: any): void
-            +retrieve(key: str): any
-            +delete(key: str): void
-        }
-
-        class LocalFileStorageDriver {
-            +store(data: any): void
-            +retrieve(key: str): any
-            +delete(key: str): void
-        }
-
-        class S3StorageDriver {
-            +store(data: any): void
-            +retrieve(key: str): any
-            +delete(key: str): void
-        }
-
-        class NoSQLStorageDriver {
-            +store(data: any): void
-            +retrieve(key: str): any
-            +delete(key: str): void
-        }
-
-        class StorageDriverFactory {
-            +get_storage_driver(driver_type: str): StorageDriver
-        }
-
-        class AsyncTask {
-            +processTask(task: StorageTask): void
-        }
+    
+    class archivingstore_localdir {
     }
 
-    ArchivingManager --> StorageAPI : "requests driver"
-    ArchivingManager --> ErrorHandler : "reports erros"
-    ArchivingManager --> LoggingMechanism : "logs activities"
-    NotificationService --> ArchivingManager : "listens for notifications"
-    StorageAPI --> StorageDriverFactory : "uses"
-    StorageDriverFactory --> StorageDriver : "creates"
-    AsyncTask --> StorageDriver : "uses"
-    AsyncTask --> ErrorHandler : "reports errors"
-    ErrorHandler --> NotificationService : "sends notifications"
-    StorageAPI --> LoggingMechanism : "logs requests"
-    StorageDriverFactory --> LoggingMechanism : "logs activities"
-    StorageDriver --> LoggingMechanism : "logs actions"
+    class archivingstore_moodle {
+    }
 
-    StorageDriver <|.. LocalFileStorageDriver
-    StorageDriver <|.. S3StorageDriver
-    StorageDriver <|.. NoSQLStorageDriver
+    class archivingstore_other {
+    }
+    
+    class storage_tier {
+        <<enumeration>>
+        LOCAL
+        REMOTE_FAST
+        REMOTE_SLOW
+    }
+    
+    class file_handle {
+        +id: int
+        +jobid: int
+        +archivingstorename: string 
+        +deleted: bool
+        +filename: string
+        +filepath: string
+        +filesize: int
+        +sha256sum: string
+        +mimetype: string
+        +timecreated: int
+        +timemodified: int
+        +filekey: string
+        
+        +create()$ file_handle
+        +destroy(removefile: bool) void
+    }
+
+    %% Relationships
+    base  <|--  archivingstore
+    archivingstore <|-- archivingstore_localdir
+    archivingstore <|-- archivingstore_moodle
+    archivingstore <|-- archivingstore_other
+    storage_tier -- archivingstore
+    file_handle -- archivingstore
+    
+    %% style
+    style storage_tier fill:#dedede,stroke:#666666
+    style file_handle fill:#dedede,stroke:#666666
 ```
 
-## Implemented Concepts
 
-1. **Encapsulation of Storage Drivers through an API**  
-   The StorageDriver implementations are abstracted behind an API that serves as a central entry point. This provides a
-   clear separation between the logic for selecting drivers and their actual usage, enhancing maintainability and
-   scalability.
-2. **Asynchronous Communication and Callback Mechanism**  
-   An asynchronous communication mechanism ensures efficient processing without blocking delays. Callback mechanisms
-   allow receiving notifications, such as errors or successes, and facilitate exception handling.
-3. **Extension Point via Strategy Pattern**  
-   Using the Strategy Pattern enables the flexible integration of different storage solutions. New StorageDrivers can be
-   added without modifying the existing application, simply by providing a new implementation.
-4. **Logging / Notification Mechanism**  
-   A logging mechanism records detailed information about what data was stored, when, and where. These logs support
-   traceability of operations and assist in error analysis. Defines log and error levels and is responsible for managing
-   the error status.
+## Implementation
+
+Each storage driver must implement the {{ source_file('classes/driver/archivingstore.php',
+'\\local_archiving\\driver\\archivingstore') }} interface with a class, placed at the following location:
+`/local/archiving/driver/store/<pluginname>/classes/archivingstore.php`, where `<pluginname>` is the name of the storage
+driver (e.g., `localdir`, `moodle`, ...).
+
+Storage is classified into different tiers ({{ source_file('classes/type/storage_tier.php', '\\local_archiving\\type\\storage_tier') }}),
+which differentiate between local storage that is directly accessible and remote storage that is either fast or slow. If
+a storage type does only support writing data but not retrieving it, a storage driver can indicate this via the
+`supports_retrieve()` method.
+
+Once a storage driver is initiated, it reports whether it is currently available for use via the `is_available()` method.
+If supported, the number of free bytes within the storage are reported by the `get_free_bytes()` method.
+
+Storing a new file via the `store()` method, requires the source file to be present within the Moodledata storage as an
+instance of `\stored_file`. For every file, a {{ source_file('classes/file_handle.php', '\\local_archiving\\file_handle') }}
+object is created that holds all relevant metadata to identify the referenced file in the target storage system. To
+retrieve a previously stored file, the `retrieve()` method takes the information from the `file_handle` and tries to
+load a copy of the referenced file into the Moodledata storage, according to the given `$fileinfo` record. This standard
+Moodledata file record will be generated by the [archiving manager](../components/archiving-manager.md) and simply passed
+to the storage driver. Never must a storage driver generate its own file record. 
+
+If supported, existing files can be remove from the storage system via the `delete()` method. If working with previously
+stored files, make sure to also destroy the corresponding `file_handle` object. It is recommended to access referenced
+conveniently via the `file_handle` API instead of interfacing the underlaying storage driver directly.

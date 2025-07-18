@@ -3,6 +3,13 @@
 The activity archiving drivers are responsible for the actual archiving process of a specific Moodle activity. One such
 driver exists for every Moodle activity that is supported by the archiving system.
 
+Once an archive job reached the activity archiving phase, the [archiving manager](archiving-manager.md) will create an
+activity archiving task for the specific activity type and call the responsible activity archiving driver. The activity
+archiving driver will then extract the required information, create one or more artifact files, and returns them to the
+[archiving manager](archiving-manager.md). All further processing is done by other components.
+
+[:material-file-code-outline: Activity Archiving Driver API Specification](../api/activity-archiving-drivers.md){ .md-button }
+
 
 ## Tasks and Responsibilities
 
@@ -37,20 +44,6 @@ driver exists for every Moodle activity that is supported by the archiving syste
 
 - [Archiving Manager](archiving-manager.md)
 - [Worker Services](worker-services.md) (Optional)
-
-
-## Implementation
-
-Each activity archiving driver must implement the {{ source_file('classes/driver/archivingmod.php', '\\local_archiving\\driver\\archivingmod') }} interface with a class, placed
-at the following location: `/local/archiving/driver/mod/<pluginname>/classes/archivingmod.php`, where `<pluginname>` is
-the name of the activity archiving driver (e.g., `quiz`, `assign`, ...).
-
-[:material-file-code-outline: Activity Archiving Driver API](../api/activity-archiving-drivers.md){ .md-button }
-
-Once an archive job reached the activity archiving phase, the [archiving manager](archiving-manager.md) will create an
-activity archiving task for the specific activity type and call the responsible activity archiving driver. The activity
-archiving driver will then extract the required information, create one or more artifact files, and returns them to the
-[archiving manager](archiving-manager.md). All further processing is done by other components.
 
 
 ## Examples

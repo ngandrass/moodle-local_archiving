@@ -101,14 +101,24 @@ nav:
   - "Roadmap": roadmap.md
   - "Changelog": changelog.md
 
+  - "Setup":
+    - "Installation":
+        - setup/install/index.md
+    - "Configuration":
+      - setup/config/index.md
+    - setup/index.md
+
+  - "Usage":
+      - usage/index.md
+
   - "Developer Documentation":
+    - dev/index.md
     - "Requirements and Specifications":
       - dev/requirements/index.md
       - "Existing Solutions": dev/requirements/existing-solutions.md
       - "Data Analysis": dev/requirements/data-analysis.md
       - "User Stories": dev/requirements/user-stories.md
       - "Base Requirements": dev/requirements/base-requirements.md
-
     - "Components":
       - dev/components/index.md
       - dev/components/archiving-manager.md

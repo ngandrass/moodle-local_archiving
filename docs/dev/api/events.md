@@ -2,6 +2,9 @@
 
 This document defines all events that are emitted by the archiving system to the Moodle Events API.
 
+!!! danger "Not implemented yet!"
+    The Moodle Event API is currently not implemented within the archiving system. Stay tuned for future updates :)
+
 !!! warning "Work in Progress (WIP)"
     This section is still under active development. Information and specifications can still be changed in the future.
 

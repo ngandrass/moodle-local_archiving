@@ -6,6 +6,7 @@ and managed by the [archiving manager](../../components/archiving-manager.md).
 A complete list of all valid archive job states is defined in {{ source_file('classes/type/archive_job_status.php', 
 '\\local_archiving\\type\\archive_job_status') }}.
 
+
 ## Overview
 
 This section provides insight into different states an archive job can be in and the transitions between them.

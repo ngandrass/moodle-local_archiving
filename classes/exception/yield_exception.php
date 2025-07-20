@@ -38,6 +38,15 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class yield_exception extends \moodle_exception {
 
+    /**
+     * Creates a new yield exception.
+     *
+     * @param string $errorcode Optional custom error code (default: 'yield')
+     * @param string $module Optional module name (default: 'local_archiving')
+     * @param string $link Optional link
+     * @param string|null $a Optional context for language string
+     * @param string|null $debuginfo Optional debug information
+     */
     public function __construct($errorcode = '', $module = '', $link = '', $a = null, $debuginfo = null) {
         $errorcode = $errorcode ?: 'yield';
         $module = $module ?: 'local_archiving';

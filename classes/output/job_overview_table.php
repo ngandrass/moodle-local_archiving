@@ -24,6 +24,7 @@
 
 namespace local_archiving\output;
 
+use core\exception\moodle_exception;
 use local_archiving\archive_job;
 use local_archiving\file_handle;
 use local_archiving\type\archive_job_status;
@@ -54,9 +55,10 @@ class job_overview_table extends \table_sql {
      *
      * @param string $uniqueid all tables have to have a unique id, this is used
      *      as a key when storing table properties like sort order in the session.
-     * @param \context_course|\context_module $ctx Context for which archive jobs should be shown
-     *
+     * @param \context $ctx Context for which archive jobs should be shown
      * @throws \coding_exception
+     * @throws moodle_exception
+     * @throws \moodle_exception
      */
     public function __construct(string $uniqueid, \context $ctx) {
         global $OUTPUT, $PAGE;

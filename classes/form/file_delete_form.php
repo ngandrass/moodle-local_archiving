@@ -52,7 +52,6 @@ class file_delete_form extends \moodleform {
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    #[\Override]
     public function __construct(
         /** @var int $contextid ID of the context this form is associated with */
         protected int $contextid,

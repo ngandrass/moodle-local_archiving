@@ -42,7 +42,6 @@ class admin_setting_managecomponents extends \admin_setting {
      * @param string $name unique ascii name, either 'mysetting' for settings that in config,
      *                     or 'myplugin/mysetting' for ones in config_plugins.
      */
-    #[\Override]
     public function __construct($name) {
         parent::__construct($name, '', '', true);
     }

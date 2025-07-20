@@ -38,7 +38,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class yield_exception extends \moodle_exception {
 
-    #[\Override]
     public function __construct($errorcode = '', $module = '', $link = '', $a = null, $debuginfo = null) {
         $errorcode = $errorcode ?: 'yield';
         $module = $module ?: 'local_archiving';

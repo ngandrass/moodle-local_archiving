@@ -55,7 +55,6 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
      * @param mixed $paramtype int means PARAM_XXX type, string is a allowed format in regex
      * @param int|null $size default field size
      */
-    #[\Override]
     public function __construct(
         string $name,
         string $visiblename,

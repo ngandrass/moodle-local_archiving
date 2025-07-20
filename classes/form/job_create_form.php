@@ -50,7 +50,6 @@ class job_create_form extends \moodleform {
      * @param \cm_info $cminfo Info object for the targeted course module
      * @throws \dml_exception
      */
-    #[\Override]
     public function __construct(
         /** @var string $handler Name of the archivingmod sub-plugin that handles this job */
         protected string $handler,

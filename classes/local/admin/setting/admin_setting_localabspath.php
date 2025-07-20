@@ -41,7 +41,6 @@ class admin_setting_localabspath extends \admin_setting_configtext {
      * @param string $defaultsetting Default value
      * @param int|null $size default field size
      */
-    #[\Override]
     public function __construct(
         $name,
         $visiblename,

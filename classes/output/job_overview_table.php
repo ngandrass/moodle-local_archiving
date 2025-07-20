@@ -58,7 +58,6 @@ class job_overview_table extends \table_sql {
      *
      * @throws \coding_exception
      */
-    #[\Override]
     public function __construct(string $uniqueid, \context $ctx) {
         global $OUTPUT, $PAGE;
 

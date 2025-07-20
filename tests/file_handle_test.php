@@ -39,7 +39,7 @@ final class file_handle_test extends \advanced_testcase {
      * @return \local_archiving_generator
      */
     private function generator(): \local_archiving_generator {
-        /** @var \local_archiving_generator */
+        /** @var \local_archiving_generator */ // phpcs:disable moodle.Commenting.InlineComment.DocBlock
         return self::getDataGenerator()->get_plugin_generator('local_archiving');
     }
 
@@ -135,12 +135,12 @@ final class file_handle_test extends \advanced_testcase {
         $this->resetAfterTest();
         $generator = $this->generator();
 
-        // Create various file handles for different jobs. Array indexed by job id
+        // Create various file handles for different jobs. Array indexed by job id.
         $expected = [
             42 => [
                 $generator->create_file_handle(['jobid' => 42, 'filename' => 'file1.txt']),
                 $generator->create_file_handle(['jobid' => 42, 'filename' => 'file2.txt']),
-                $generator->create_file_handle(['jobid' => 42, 'filename' => 'file3.txt'])
+                $generator->create_file_handle(['jobid' => 42, 'filename' => 'file3.txt']),
             ],
             123 => [
                 $generator->create_file_handle(['jobid' => 123, 'filename' => 'file1.txt']),

@@ -40,7 +40,7 @@ class local_archiving_generator extends \testing_data_generator {
     public function create_archive_job(array $params = []): \local_archiving\archive_job {
         global $USER;
 
-        // Prepare course and activity
+        // Prepare course and activity.
         $course = $this->create_course();
         $cm = $this->create_module('quiz', ['course' => $course->id]);
 

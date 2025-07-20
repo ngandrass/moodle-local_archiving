@@ -1,0 +1,15 @@
+[submodule "driver/mod/quiz"]
+	path = driver/mod/quiz
+	url = git@github.com:ngandrass/moodle-archivingmod_quiz.git
+[submodule "driver/store/localdir"]
+	path = driver/store/localdir
+	url = git@github.com:ngandrass/moodle-archivingstore_localdir.git
+[submodule "driver/store/moodle"]
+	path = driver/store/moodle
+	url = git@github.com:ngandrass/moodle-archivingstore_moodle.git
+[submodule "driver/mod/assign"]
+	path = driver/mod/assign
+	url = git@github.com:ngandrass/moodle-archivingmod_assign.git
+[submodule "driver/event/apistub"]
+	path = driver/event/apistub
+	url = git@github.com:ngandrass/moodle-archivingevent_apistub.git

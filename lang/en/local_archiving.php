@@ -205,3 +205,8 @@ $string['storage_tier_REMOTE_fast_help'] = 'Data is stored on a fast remote serv
 $string['storage_tier_REMOTE_slow'] = 'Remote (slow)';
 $string['storage_tier_REMOTE_slow_help'] = 'Data is stored on a slow remote server but needs to be fetched before use.';
 $string['storage_usage'] = 'Usage';
+
+// TSP client.
+$string['tsp_client_error_content_type'] = 'TSP server returned unexpected content type {$a}';
+$string['tsp_client_error_curl'] = 'Error while sending TSP request: {$a}';
+$string['tsp_client_error_http_code'] = 'TSP server returned HTTP status code {$a}';

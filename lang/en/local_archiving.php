@@ -25,6 +25,7 @@
 // @codingStandardsIgnoreFile
 
 $string['pluginname'] = 'Archiving';
+$string['privacy:metadata'] = 'TODO!';
 
 // Common.
 $string['activitytype'] = 'Activity type';

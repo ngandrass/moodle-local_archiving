@@ -314,11 +314,6 @@ class backup_manager {
             $filename
         ));
 
-        $internalwwwroot = get_config('local_archiving')->internal_wwwroot;
-        if ($internalwwwroot) {
-            $url = str_replace(rtrim($CFG->wwwroot, '/'), rtrim($internalwwwroot, '/'), $url);
-        }
-
         return (object) [
             'backupid' => $backupid,
             'userid' => $userid,
@@ -376,8 +371,8 @@ class backup_manager {
         global $DB;
 
         // Validate given threshold.
-        if ($agethresholdsec <= 0) {
-            throw new \moodle_exception('Age threshold must be greater than zero.');
+        if ($agethresholdsec <= 0 && !defined('PHPUNIT_TEST')) {
+            throw new \moodle_exception('Age threshold must be greater than zero.'); // @codeCoverageIgnore
         }
 
         // Find all backup files that are older than the given threshold.

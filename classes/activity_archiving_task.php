@@ -94,6 +94,7 @@ final class activity_archiving_task {
      * to this task.
      *
      * @return task_logger Logger instance
+     * @throws \dml_exception
      */
     public function get_logger(): task_logger {
         if ($this->logger instanceof task_logger) {

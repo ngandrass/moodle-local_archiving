@@ -63,7 +63,7 @@ final class backup_manager_test extends \advanced_testcase {
     /**
      * Tests creation and retrieval of an activity backup.
      *
-     * @dataProvider test_backup_data_provider
+     * @dataProvider backup_data_provider
      * @covers \local_archiving\backup_manager
      *
      * @param string $type The type of backup to initiate, either 'activity' or 'course'.
@@ -102,8 +102,8 @@ final class backup_manager_test extends \advanced_testcase {
         // Try to retrieve backup metadata from db.
         $backup = new backup_manager($res->backupid);
         $this->assertNotNull($backup);
-        $this->assertSame($res->backupid, $backup->get_backupid(), 'Backup ID mismatch');
-        $this->assertSame(get_admin()->id, $backup->get_userid(), 'Backup created via wrong user');
+        $this->assertEquals($res->backupid, $backup->get_backupid(), 'Backup ID mismatch');
+        $this->assertEquals(get_admin()->id, $backup->get_userid(), 'Backup created via wrong user');
         $this->assertSame($type, $backup->get_type(), 'Backup type mismatch');
 
         // Check that backup is not yet completed.
@@ -124,7 +124,7 @@ final class backup_manager_test extends \advanced_testcase {
      *
      * @return array[] Test data
      */
-    public static function test_backup_data_provider(): array {
+    public static function backup_data_provider(): array {
         return [
             "Activity backup" => ['activity'],
             "Course backup" => ['course'],

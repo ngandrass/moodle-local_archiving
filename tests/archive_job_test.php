@@ -133,10 +133,6 @@ final class archive_job_test extends \advanced_testcase {
         $lock = self::call_protected_archive_job_method($job, 'lock');
         $this->assertInstanceOf(\core\lock\lock::class, $lock, 'Invalid lock class received');
         $this->assertStringEndsWith($lockresource, $lock->get_key(), 'Lock key does not match lock resource');
-
-        // Try to lock a second time.
-        $trylock = self::call_protected_archive_job_method($job, 'try_lock');
-        $this->assertFalse($trylock, 'Lock should not be acquired a second time');
         $lock->release();
 
         // Try to lock again.

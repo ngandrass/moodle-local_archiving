@@ -198,8 +198,13 @@ class archive_job {
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    protected function lock(bool $timeouterror = true, int $timeoutsec = 15) {
-        $lockfactory = \core\lock\lock_config::get_lock_factory('local_archiving_archive_job');
+    protected function lock(bool $timeouterror = true, int $timeoutsec = 15): bool|\core\lock\lock {
+        // Create a static lock_factory to prevent double-locking issues with postgres driver (See MDL-81731)
+        static $lockfactory;
+        if (!$lockfactory instanceof \core\lock\lock_factory) {
+            $lockfactory = \core\lock\lock_config::get_lock_factory('local_archiving_archive_job');
+        }
+
         $jobtimeoutmin = get_config('local_archiving', 'job_timeout_min');
 
         if (!$lock = $lockfactory->get_lock(

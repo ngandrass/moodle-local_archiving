@@ -199,7 +199,7 @@ class archive_job {
      * @throws \moodle_exception
      */
     protected function lock(bool $timeouterror = true, int $timeoutsec = 15): bool|\core\lock\lock {
-        // Create a static lock_factory to prevent double-locking issues with postgres driver (See MDL-81731)
+        // Create a static lock_factory to prevent double-locking issues with postgres driver (See MDL-81731).
         static $lockfactory;
         if (!$lockfactory instanceof \core\lock\lock_factory) {
             $lockfactory = \core\lock\lock_config::get_lock_factory('local_archiving_archive_job');
@@ -742,6 +742,7 @@ class archive_job {
     public function is_completed(): bool {
         switch ($this->get_status()) {
             case archive_job_status::COMPLETED:
+            case archive_job_status::DELETED:
             case archive_job_status::TIMEOUT:
             case archive_job_status::FAILURE:
                 return true;
@@ -777,20 +778,29 @@ class archive_job {
      */
     public function get_progress(): ?int {
         switch ($this->get_status()) {
+            case archive_job_status::UNINITIALIZED:
             case archive_job_status::QUEUED:
             case archive_job_status::PRE_PROCESSING:
                 return 0;
             case archive_job_status::ACTIVITY_ARCHIVING:
                 $tasks = activity_archiving_task::get_by_jobid($this->id);
-                $total = array_reduce($tasks, fn ($carry, $task) => $carry + $task->get_progress(), 0);
-                return 0.6 * ($total / count($tasks));
+                if (count($tasks) == 0) {
+                    return 60;
+                } else {
+                    $total = array_reduce($tasks, fn ($carry, $task) => $carry + $task->get_progress(), 0);
+                    return 0.6 * ($total / count($tasks));
+                }
             case archive_job_status::POST_PROCESSING:
+            case archive_job_status::BACKUP_COLLECTION:
                 return 60;
             case archive_job_status::STORE:
                 return 60 + 20;  // TODO (MDL-0): Implement proper status reporting for storing step.
+            case archive_job_status::SIGN:
+                return 90;
             case archive_job_status::CLEANUP:
-                return 99;
+                return 95;
             case archive_job_status::COMPLETED:
+            case archive_job_status::DELETED:
                 return 100;
             default:
                 return null;
@@ -862,6 +872,7 @@ class archive_job {
             'id' => $this->id,
             'settings' => null,
         ]);
+
         $this->settings = new \stdClass();
     }
 

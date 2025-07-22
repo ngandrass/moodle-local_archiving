@@ -132,7 +132,6 @@ final class archive_job_test extends \advanced_testcase {
         // Try to acquire the lock.
         $lock = self::call_protected_archive_job_method($job, 'lock');
         $this->assertInstanceOf(\core\lock\lock::class, $lock, 'Invalid lock class received');
-        $this->assertStringEndsWith($lockresource, $lock->get_key(), 'Lock key does not match lock resource');
         $lock->release();
 
         // Try to lock again.

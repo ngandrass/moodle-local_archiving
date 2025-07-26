@@ -619,6 +619,7 @@ class archive_job {
         // Delete records from the database.
         $DB->delete_records(db_table::METADATA->value, ['jobid' => $this->id]);
         $DB->delete_records(db_table::TEMPFILE->value, ['jobid' => $this->id]);
+        $DB->delete_records(db_table::LOG->value, ['jobid' => $this->id]);
         $DB->delete_records(db_table::JOB->value, ['id' => $this->id]);
     }
 

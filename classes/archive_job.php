@@ -511,11 +511,11 @@ class archive_job {
                 $this->cleanup();
                 $this->set_status(archive_job_status::COMPLETED);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Catch the yield silently and let everything else bubble up.
             if (!$e instanceof yield_exception) {
-                $this->set_status(archive_job_status::FAILURE);
                 $this->get_logger()->fatal($e->getMessage());
+                $this->set_status(archive_job_status::FAILURE);
                 throw $e;
             }
         } finally {

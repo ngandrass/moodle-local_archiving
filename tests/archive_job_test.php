@@ -17,6 +17,9 @@
 namespace local_archiving;
 
 use local_archiving\type\archive_job_status;
+use local_archiving\type\db_table;
+use local_archiving\type\log_level;
+use mod_lti\search\activity;
 use ReflectionClass;
 
 /**
@@ -228,9 +231,54 @@ final class archive_job_test extends \advanced_testcase {
      * @covers \local_archiving\archive_job
      *
      * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function test_execute(): void {
-        $this->markTestSkipped('TODO');
+        // Create a new job with a quiz.
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $job->set_status(archive_job_status::QUEUED);
+
+        // Try to complete the job.
+        $executioncycle = 0;
+        do {
+            try {
+                $job->execute();
+            } finally {
+                // Make sure that we always see the error logs of the job for debugging purposes.
+                $this->assertSame(
+                    $job->get_logger()->get_logs(log_level::ERROR),
+                    [],
+                    'Job should not produce any error or fatal log events during execution'
+                );
+            }
+
+            if ($executioncycle > 5) {
+                $this->fail('Job did not complete after 5 execution cycles');
+            } else {
+                $executioncycle++;
+            }
+        } while (!$job->is_completed());
+
+        // Verify that job completed successfully and did not produce any errors.
+        $this->assertSame(archive_job_status::COMPLETED, $job->get_status(), 'Job should complete successfully');
+        $this->assertSame( // Use assertSame instead of assertEmpty to ensure error logs are printed during test execution.
+            $job->get_logger()->get_logs(log_level::ERROR),
+            [],
+            'Job should not produce any error or fatal log events during execution'
+        );
+
+        // Ensure that the job actually created an activity archive task and produced an arctifact file.
+        $activitytasks = activity_archiving_task::get_by_jobid($job->get_id());
+        $this->assertNotEmpty($activitytasks, 'Job should create at least one activity archiving task');
+        foreach ($activitytasks as $task) {
+            $this->assertTrue($task->is_completed(), 'Activity archiving task should be completed when job is completed');
+        }
+
+        $filehandles = file_handle::get_by_jobid($job->get_id());
+        $this->assertNotEmpty($filehandles, 'Job should create at least one file handle for the archived content');
     }
 
     /**
@@ -239,9 +287,68 @@ final class archive_job_test extends \advanced_testcase {
      * @covers \local_archiving\archive_job
      *
      * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function test_delete(): void {
-        $this->markTestSkipped('TODO');
+        global $DB;
+
+        // Create a new job and let it complete.
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+
+        $jobid = $job->get_id();
+        $job->set_metadata_entry('foo', 'bar');
+        $job->set_status(archive_job_status::QUEUED);
+
+        $cycle = 0;
+        do {
+            $job->execute();
+
+            if ($cycle > 5) {
+                $this->fail('Job did not complete after 5 execution cycles');
+            } else {
+                $cycle++;
+            }
+        } while (!$job->is_completed());
+
+        // Ensure that we have activity archiving tasks and file handles.
+        $this->assertNotEmpty(
+            activity_archiving_task::get_by_jobid($jobid),
+            'Job should create at least one activity archiving task'
+        );
+        $this->assertNotEmpty(
+            file_handle::get_by_jobid($jobid),
+            'Job should create at least one file handle for the archived content'
+        );
+
+        // Delete the job and check that everything was cleaned up correctly.
+        $job->delete();
+        $this->assertEmpty(
+            $DB->get_records(db_table::JOB->value, ['id' => $jobid]),
+            'Job should be deleted from the database'
+        );
+        $this->assertEmpty(
+            $DB->get_records(db_table::METADATA->value, ['jobid' => $jobid]),
+            'Job metadata should be deleted from the database'
+        );
+        $this->assertEmpty(
+            $DB->get_records(db_table::TEMPFILE->value, ['jobid' => $jobid]),
+            'Job temp files should be deleted from the database'
+        );
+        $this->assertEmpty(
+            $DB->get_records(db_table::ACTIVITY_TASK->value, ['jobid' => $jobid]),
+            'Activity archiving tasks should be deleted from the database'
+        );
+        $this->assertEmpty(
+            $DB->get_records(db_table::FILE_HANDLE->value, ['jobid' => $jobid]),
+            'Job file handles should be deleted from the database'
+        );
+        $this->assertEmpty(
+            $DB->get_records(db_table::LOG->value, ['jobid' => $jobid]),
+            'Job logs should be deleted from the database'
+        );
     }
 
     /**

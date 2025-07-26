@@ -38,20 +38,14 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 class plugin_util {
 
     /**
-     * Retrieves the given subplugin class name for the given driver type and modname
+     * Checks if the base class for the given sub-plugin exists
      *
-     * @param string $plugintype Type of the subplugin to look for (e.g., 'archivingmod')
-     * @param string $pluginname Name of the subplugin to look for (e.g., 'quiz')
-     * @return string|null Fully-quallified class name of the subplugin class if found, null otherwise
+     * @param string $type Type of the sub-plugin (e.g., 'archivingmod', 'archivingstore', 'archivingevent')
+     * @param string $name Name of the sub-plugin (e.g., 'quiz', 'moodle', 'logstore')
+     * @return bool True if the sub-plugin is installed, false otherwise
      */
-    public static function get_subplugin_by_name(string $plugintype, string $pluginname): ?string {
-        $archivingmod = "\\{$plugintype}_{$pluginname}\\{$plugintype}";
-
-        if (!class_exists($archivingmod)) {
-            return null;
-        }
-
-        return $archivingmod;
+    public static function is_subplugin_installed(string $type, string $name): bool {
+        return \local_archiving\driver\factory::get_subplugin_class($type, $name, strict: false) !== null;
     }
 
     /**
@@ -73,7 +67,7 @@ class plugin_util {
             }
 
             /** @var archivingmod $pluginclass */
-            $pluginclass = self::get_subplugin_by_name('archivingmod', $plugin->name);
+            $pluginclass = \local_archiving\driver\factory::get_subplugin_class('archivingmod', $plugin->name);
 
             $res[$plugin->name] = [
                 'component' => $plugin->component,
@@ -114,12 +108,12 @@ class plugin_util {
      * the given activity type (dm modname)
      *
      * @param string $modname Name of the course module
-     * @return string|null Class of the chosen driver or null if no driver is available
+     * @return string|null Name of the chosen driver or null if no driver is available
      */
     public static function get_archiving_driver_for_cm(string $modname): ?string {
-        foreach (self::get_activity_archiving_drivers() as $driver) {
-            if (in_array($modname, $driver['activities'])) {
-                return $driver['class'];
+        foreach (self::get_activity_archiving_drivers() as $drivername => $drivermeta) {
+            if (in_array($modname, $drivermeta['activities'])) {
+                return $drivername;
             }
         }
 
@@ -145,7 +139,7 @@ class plugin_util {
             }
 
             /** @var archivingstore $pluginclass */
-            $pluginclass = self::get_subplugin_by_name('archivingstore', $plugin->name);
+            $pluginclass = \local_archiving\driver\factory::get_subplugin_class('archivingstore', $plugin->name);
 
             $res[$plugin->name] = [
                 'component' => $plugin->component,
@@ -182,7 +176,7 @@ class plugin_util {
             }
 
             /** @var archivingevent $pluginclass */
-            $pluginclass = self::get_subplugin_by_name('archivingevent', $plugin->name);
+            $pluginclass = \local_archiving\driver\factory::get_subplugin_class('archivingevent', $plugin->name);
 
             $res[$plugin->name] = [
                 'component' => $plugin->component,

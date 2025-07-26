@@ -282,9 +282,8 @@ class admin_setting_managecomponents extends \admin_setting {
             // Usage.
             $usagehtml = '';
             if ($storagedriver['enabled']) {
-                // Create storage driver instance.
-                /** @var \local_archiving\driver\archivingstore $driver */
-                $driver = new $storagedriver['class']();
+                // From this point on, we need a proper instance of the storage driver.
+                $driver = \local_archiving\driver\factory::storage_driver($storagedrivername);
 
                 // Calculate usage.
                 $usage = storage::calculate_archivingstore_stats($storagedrivername);

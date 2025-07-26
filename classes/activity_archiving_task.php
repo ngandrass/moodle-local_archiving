@@ -131,7 +131,7 @@ final class activity_archiving_task {
         global $DB;
 
         // Validate input.
-        if (!plugin_util::get_subplugin_by_name('archivingmod', $archivingmodname)) {
+        if (!plugin_util::is_subplugin_installed('archivingmod', $archivingmodname)) {
             throw new \moodle_exception('invalid_archivingmod', 'local_archiving');
         }
 
@@ -227,12 +227,10 @@ final class activity_archiving_task {
             return $this->archivingmod;
         }
 
-        $driverclass = plugin_util::get_subplugin_by_name('archivingmod', $this->archivingmodname);
-        if (!$driverclass) {
-            throw new \moodle_exception('invalid_archivingmod', 'local_archiving');
-        }
-
-        $this->archivingmod = new $driverclass($this->context);
+        $this->archivingmod = \local_archiving\driver\factory::activity_archiving_driver(
+            $this->archivingmodname,
+            $this->context
+        );
 
         return $this->archivingmod;
     }

@@ -25,7 +25,6 @@
 namespace local_archiving;
 
 use local_archiving\driver\archivingmod;
-use local_archiving\driver\archivingstore;
 use local_archiving\exception\yield_exception;
 use local_archiving\logging\job_logger;
 use local_archiving\type\archive_filename_variable;
@@ -429,7 +428,7 @@ class archive_job {
                 $tasks = activity_archiving_task::get_by_jobid($this->id);
                 $storagepath = "job-{$this->id}";
 
-                $driver = $this->storage_driver();
+                $driver = \local_archiving\driver\factory::storage_driver($this->get_setting('storage_driver') ?? 'null');
                 $this->set_metadata_entry('storage_driver', $driver->get_plugin_name());
 
                 if (!$driver->is_enabled()) {
@@ -552,32 +551,13 @@ class archive_job {
      */
     protected function activity_archiving_driver(): archivingmod {
         $cminfo = mod_util::get_cm_info($this->context);
-        $driverclass = plugin_util::get_archiving_driver_for_cm($cminfo->modname);
+        $drivername = plugin_util::get_archiving_driver_for_cm($cminfo->modname);
 
-        if (!$driverclass) {
+        if (!$drivername) {
             throw new \moodle_exception('no_supported_activity_archiving_driver_found', 'local_archiving');
         }
 
-        return new $driverclass($this->context);
-    }
-
-    /**
-     * Returns a new instance of the storage driver for this job
-     *
-     * @return archivingstore Storage driver instance
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \moodle_exception
-     */
-    protected function storage_driver(): archivingstore {
-        $drivername = $this->get_setting('storage_driver') ?? 'null';
-        $driverclass = plugin_util::get_subplugin_by_name('archivingstore', $drivername);
-
-        if (!$driverclass) {
-            throw new \moodle_exception('storage_driver_instaitiation_failed', 'local_archiving');
-        }
-
-        return new $driverclass();
+        return \local_archiving\driver\factory::activity_archiving_driver($drivername, $this->context);
     }
 
     /**

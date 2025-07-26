@@ -305,8 +305,7 @@ final class file_handle_test extends \advanced_testcase {
         $job = $generator->create_archive_job();
         $file = $generator->create_temp_file();
 
-        /** @var \local_archiving\driver\archivingstore $archivingstore */
-        $archivingstore = new (plugin_util::get_subplugin_by_name('archivingstore', 'localdir'))();
+        $archivingstore = \local_archiving\driver\factory::storage_driver('localdir');
         $filehandle = $archivingstore->store($job->get_id(), $file, '/');
 
         // Try to retrieve not yet cached local file.
@@ -344,8 +343,7 @@ final class file_handle_test extends \advanced_testcase {
         $job = $generator->create_archive_job();
         $file = $generator->create_temp_file();
 
-        /** @var \local_archiving\driver\archivingstore $archivingstore */
-        $archivingstore = new (plugin_util::get_subplugin_by_name('archivingstore', 'localdir'))();
+        $archivingstore = \local_archiving\driver\factory::storage_driver('localdir');
         $filehandle = $archivingstore->store($job->get_id(), $file, '/');
 
         // Retrieve the file initially.

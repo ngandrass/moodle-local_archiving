@@ -56,14 +56,7 @@ $PAGE->set_pagelayout('incourse');
 $html = '';
 
 // Get job create form for this activity.
-$driverclass = plugin_util::get_archiving_driver_for_cm($cm->modname);
-if (!$driverclass) {
-    throw new \moodle_exception('supported_archive_driver_not_found', 'local_archiving');
-}
-
-/** @var \local_archiving\driver\archivingmod $driver */
-$driver = new $driverclass($ctx);
-
+$driver = \local_archiving\driver\factory::activity_archiving_driver($cm->modname, $ctx);
 $form = $driver->get_job_create_form($cm->modname, $cm);
 
 // Handle form submission.

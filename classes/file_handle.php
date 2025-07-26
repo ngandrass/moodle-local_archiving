@@ -132,7 +132,7 @@ final class file_handle {
             throw new \coding_exception(get_string('invalid_jobid', 'local_archiving'));
         }
 
-        if (empty($archivingstorename) || !plugin_util::get_subplugin_by_name('archivingstore', $archivingstorename)) {
+        if (empty($archivingstorename) || !plugin_util::is_subplugin_installed('archivingstore', $archivingstorename)) {
             throw new \coding_exception(get_string('invalid_archivingstore', 'local_archiving'));
         }
 
@@ -371,11 +371,7 @@ final class file_handle {
             return $this->archivingstore;
         }
 
-        $driverclass = plugin_util::get_subplugin_by_name('archivingstore', $this->archivingstorename);
-        if (!$driverclass) {
-            throw new \moodle_exception('invalid_archivingstore', 'local_archiving');
-        }
-        $this->archivingstore = new $driverclass();
+        $this->archivingstore = \local_archiving\driver\factory::storage_driver($this->archivingstorename);
 
         return $this->archivingstore;
     }

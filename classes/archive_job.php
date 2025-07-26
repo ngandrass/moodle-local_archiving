@@ -601,8 +601,6 @@ class archive_job {
         $archivingtasks = activity_archiving_task::get_by_jobid($this->id);
         foreach ($archivingtasks as $task) {
             $task->cancel();
-
-            $DB->delete_records(db_table::CONTENT->value, ['taskid' => $task->get_id()]);
             $task->delete();
         }
 

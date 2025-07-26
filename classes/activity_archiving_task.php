@@ -354,6 +354,9 @@ final class activity_archiving_task {
             $this->unlink_artifact($artifact, true);
         }
 
+        // Remove all task content metadata entries from the database.
+        $DB->delete_records(db_table::CONTENT->value, ['taskid' => $this->taskid]);
+
         // Finally delete the task from the database.
         $DB->delete_records(db_table::ACTIVITY_TASK->value, ['id' => $this->taskid]);
     }

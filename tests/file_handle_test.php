@@ -395,7 +395,7 @@ final class file_handle_test extends \advanced_testcase {
 
         // Retrieve archivingstore instance and validate.
         $archivingstore = $filehandle->archivingstore();
-        $this->assertInstanceOf(\archivingstore_localdir\archivingstore::class, $archivingstore);
+        $this->assertInstanceOf(\archivingstore_localdir_mock::class, $archivingstore);
     }
 
 }

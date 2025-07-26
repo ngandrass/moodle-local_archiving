@@ -43,6 +43,12 @@ class factory {
      * @throws \coding_exception If no archivingmod driver with the given name exists
      */
     public static function activity_archiving_driver(string $archivingmodname, \context_module $context): archivingmod {
+        // Only use mock drivers in unit tests.
+        if (defined('PHPUNIT_TEST')) {
+            require_once(__DIR__.'/../../tests/mock/archivingmod_quiz_mock.php');
+            return new \archivingmod_quiz_mock($context);
+        }
+
         $driverclass = self::get_subplugin_class('archivingmod', $archivingmodname, strict: true);
         return new $driverclass($context);
     }
@@ -55,6 +61,12 @@ class factory {
      * @throws \coding_exception If no archivingstore driver with the given name exists
      */
     public static function storage_driver(string $archivingstorename): archivingstore {
+        // Only use mock drivers in unit tests.
+        if (defined('PHPUNIT_TEST')) {
+            require_once(__DIR__.'/../../tests/mock/archivingstore_localdir_mock.php');
+            return new \archivingstore_localdir_mock();
+        }
+
         $driverclass = self::get_subplugin_class('archivingstore', $archivingstorename, strict: true);
         return new $driverclass();
     }
@@ -67,6 +79,12 @@ class factory {
      * @throws \coding_exception If no archivingevent driver with the given name exists
      */
     public static function event_connector(string $archivingeventname): archivingevent {
+        // Only use mock drivers in unit tests.
+        if (defined('PHPUNIT_TEST')) {
+            require_once(__DIR__.'/../../tests/mock/archivingevent_stub_mock.php');
+            return new \archivingevent_stub_mock();
+        }
+
         $driverclass = self::get_subplugin_class('archivingevent', $archivingeventname, strict: true);
         return new $driverclass();
     }
@@ -81,6 +99,11 @@ class factory {
      * @throws \coding_exception If strict is true and the class does not exist
      */
     public static function get_subplugin_class(string $plugintype, string $pluginname, bool $strict = false): ?string {
+        // Return mock classes during unit tests.
+        if (defined('PHPUNIT_TEST') && str_ends_with($pluginname, '_mock')) {
+            return "\\{$plugintype}_{$pluginname}";
+        }
+
         $cls = "\\{$plugintype}_{$pluginname}\\{$plugintype}";
 
         if (!class_exists($cls)) {

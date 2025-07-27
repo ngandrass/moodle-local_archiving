@@ -16,6 +16,7 @@
 
 use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
+use local_archiving\type\activity_archiving_task_status;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -89,6 +90,7 @@ class local_archiving_generator extends \testing_data_generator {
             'userid' => $USER->id,
             'archivingmodname' => 'quiz',
             'settings' => (object) ['foo' => 'bar'],
+            'status' => activity_archiving_task_status::UNINITIALIZED,
         ];
         $data = array_merge($taskdefaults, $params);
 
@@ -98,7 +100,8 @@ class local_archiving_generator extends \testing_data_generator {
             context: $data['context'],
             userid: $data['userid'],
             archivingmodname: $data['archivingmodname'],
-            settings: $data['settings']
+            settings: $data['settings'],
+            status: $data['status']
         );
     }
 
@@ -162,19 +165,22 @@ class local_archiving_generator extends \testing_data_generator {
      * @throws stored_file_creation_exception
      */
     public function create_temp_file(): \stored_file {
+        $uniqid = uniqid(more_entropy: true);
+
         return get_file_storage()->create_file_from_string(
             [
                 'contextid'    => context_user::instance(get_admin()->id)->id,
                 'component'    => \local_archiving\type\filearea::TEMP->get_component(),
                 'filearea'     => \local_archiving\type\filearea::TEMP->value,
                 'itemid'       => 0,
-                'filepath'     => '/'.uniqid(more_entropy: true).'/',
-                'filename'     => 'testfile.txt',
+                'filepath'     => "/{$uniqid}/",
+                'filename'     => "testfile-{$uniqid}.txt",
                 'timecreated'  => time(),
                 'timemodified' => time(),
             ],
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do '.
-            'eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+            'eiusmod tempor incididunt ut labore et dolore magna aliqua. '.
+            'time='.time().' id='.$uniqid
         );
     }
 

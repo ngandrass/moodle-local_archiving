@@ -305,7 +305,7 @@ final class activity_archiving_task {
      * operation to completed or event to occur.
      */
     public function execute(): void {
-        $this->archivingmod()->execute_task($this);
+        $this->archivingmod()->execute_task($this); // @codeCoverageIgnore
     }
 
     /**
@@ -317,7 +317,7 @@ final class activity_archiving_task {
      * @throws \moodle_exception
      */
     public function cancel(): void {
-        $this->archivingmod()->cancel_task($this);
+        $this->archivingmod()->cancel_task($this); // @codeCoverageIgnore
     }
 
     /**
@@ -329,7 +329,7 @@ final class activity_archiving_task {
      * @throws \moodle_exception
      */
     public function delete(): void {
-        $this->archivingmod()->delete_task($this);
+        $this->archivingmod()->delete_task($this); // @codeCoverageIgnore
     }
 
     /**
@@ -539,6 +539,9 @@ final class activity_archiving_task {
         if ($lifetimesec <= 0) {
             throw new \moodle_exception('invalid_wstoken_lifetime', 'local_archiving');
         }
+
+        // Invalidate existing token if present.
+        $this->delete_webservice_token();
 
         // Generate wstoken and store it in the database.
         $wstoken = \core_external\util::generate_token(

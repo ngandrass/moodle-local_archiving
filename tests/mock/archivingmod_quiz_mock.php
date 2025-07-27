@@ -24,6 +24,7 @@
 
 use archivingmod_quiz\quiz_manager;
 use local_archiving\activity_archiving_task;
+use local_archiving\exception\yield_exception;
 use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\task_content_metadata;
 
@@ -92,13 +93,22 @@ class archivingmod_quiz_mock extends \local_archiving\driver\archivingmod {
     #[\Override]
     public function execute_task(activity_archiving_task $task): void {
         if (!$task->is_completed()) {
-            $tempfile = get_file_storage()->create_file_from_string(
-                $task->generate_artifact_fileinfo('artifact.txt'),
-                'Lorem ipsum dolor sit amet'
-            );
-            $task->link_artifact($tempfile);
-            $task->set_progress(100);
-            $task->set_status(activity_archiving_task_status::FINISHED);
+            if ($task->get_progress() < 50) {
+                // Yield once to simulate a long-running task.
+                $task->set_status(activity_archiving_task_status::RUNNING);
+                $task->set_progress(50);
+
+                throw new yield_exception();
+            } else {
+                // Complete the task by creating an artifact file.
+                $tempfile = get_file_storage()->create_file_from_string(
+                    $task->generate_artifact_fileinfo('artifact.txt'),
+                    'Lorem ipsum dolor sit amet'
+                );
+                $task->link_artifact($tempfile);
+                $task->set_progress(100);
+                $task->set_status(activity_archiving_task_status::FINISHED);
+            }
         }
     }
 

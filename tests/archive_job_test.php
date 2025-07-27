@@ -105,6 +105,16 @@ final class archive_job_test extends \advanced_testcase {
         // Try to retrieve the job again.
         $retrievedjob = archive_job::get_by_id($createdjob->get_id());
         $this->assertEquals($createdjob, $retrievedjob, 'Retrieved job should be the same as created job');
+        $this->assertSame(
+            $createdjob->get_timecreated(),
+            $retrievedjob->get_timecreated(),
+            'Creation time should not be altered by retrieval'
+        );
+        $this->assertSame(
+            $createdjob->get_timemodified(),
+            $retrievedjob->get_timemodified(),
+            'Modification time should not be altered by retrieval'
+        );
 
         // Validate stored data.
         $this->assertEquals($ctx->id, $retrievedjob->get_context()->id, 'Context ID should match');
@@ -226,7 +236,8 @@ final class archive_job_test extends \advanced_testcase {
     }
 
     /**
-     * Tests the execution of an archive job.
+     * Tests the execution of an archive job including activity archiving tasks
+     * and Moodle backup export.
      *
      * @covers \local_archiving\archive_job
      *
@@ -238,7 +249,14 @@ final class archive_job_test extends \advanced_testcase {
     public function test_execute(): void {
         // Create a new job with a quiz.
         $this->resetAfterTest();
-        $job = $this->generator()->create_archive_job();
+        $this->setAdminUser();
+        $job = $this->generator()->create_archive_job([
+            'settings' => (object) [
+                'export_course_backup' => true,
+                'export_cm_backup' => true,
+                'storage_driver' => 'localdir',
+            ],
+        ]);
         $job->set_status(archive_job_status::QUEUED);
 
         // Try to complete the job.
@@ -246,6 +264,18 @@ final class archive_job_test extends \advanced_testcase {
         do {
             try {
                 $job->execute();
+
+                // Check job progress.
+                $this->assertGreaterThanOrEqual(0, $job->get_progress(), 'Job progress should be non-negative');
+                $this->assertLessThanOrEqual(100, $job->get_progress(), 'Job progress should not exceed 100%');
+
+                // Let backups async backups complete.
+                while ($task = \core\task\manager::get_next_adhoc_task(time())) {
+                    ob_start();
+                    $task->execute();
+                    \core\task\manager::adhoc_task_complete($task);
+                    ob_end_clean();
+                }
             } finally {
                 // Make sure that we always see the error logs of the job for debugging purposes.
                 $this->assertSame(

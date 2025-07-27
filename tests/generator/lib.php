@@ -75,6 +75,8 @@ class local_archiving_generator extends \testing_data_generator {
      * @throws moodle_exception
      */
     public function create_activity_archiving_task(array $params = [], ?archive_job $job = null): activity_archiving_task {
+        global $USER;
+
         // Create default job if not explicitly provided.
         if ($job === null) {
             $job = $this->create_archive_job($params);
@@ -83,9 +85,9 @@ class local_archiving_generator extends \testing_data_generator {
         // Prepare task data.
         $taskdefaults = [
             'jobid' => $job->get_id(),
-            'context' => $job->get_context()->instanceid,
-            'userid' => $job->get_context()->contextlevel,
-            'archivingmodname' => new \stdClass(),
+            'context' => $job->get_context(),
+            'userid' => $USER->id,
+            'archivingmodname' => 'quiz',
             'settings' => (object) ['foo' => 'bar'],
         ];
         $data = array_merge($taskdefaults, $params);

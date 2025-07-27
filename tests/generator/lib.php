@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+use local_archiving\activity_archiving_task;
+use local_archiving\archive_job;
+
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -33,11 +36,11 @@ class local_archiving_generator extends \testing_data_generator {
      * Creates a new archive job for a new course with a quiz activity.
      *
      * @param array $params Optional parameters to override defaults.
-     * @return \local_archiving\archive_job Archive job object ready to be used.
+     * @return archive_job Archive job object ready to be used.
      * @throws dml_exception
      * @throws moodle_exception
      */
-    public function create_archive_job(array $params = []): \local_archiving\archive_job {
+    public function create_archive_job(array $params = []): archive_job {
         global $USER;
 
         // Prepare course and activity.
@@ -54,11 +57,46 @@ class local_archiving_generator extends \testing_data_generator {
         $data = array_merge($jobdefaults, $params);
 
         // Create new archive job.
-        return \local_archiving\archive_job::create(
+        return archive_job::create(
             context: $data['context'],
             userid: $data['userid'],
             settings: $data['settings'],
             cleansettings: $data['cleansettings']
+        );
+    }
+
+    /**
+     * Creates a new activity archiving task for an given or created archive job.
+     *
+     * @param array $params Optional parameters to override defaults.
+     * @param archive_job|null $job Optional archive job to use. If not provided, a new job will be created.
+     * @return activity_archiving_task Freshly created activity archiving task.
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    public function create_activity_archiving_task(array $params = [], ?archive_job $job = null): activity_archiving_task {
+        // Create default job if not explicitly provided.
+        if ($job === null) {
+            $job = $this->create_archive_job($params);
+        }
+
+        // Prepare task data.
+        $taskdefaults = [
+            'jobid' => $job->get_id(),
+            'context' => $job->get_context()->instanceid,
+            'userid' => $job->get_context()->contextlevel,
+            'archivingmodname' => new \stdClass(),
+            'settings' => (object) ['foo' => 'bar'],
+        ];
+        $data = array_merge($taskdefaults, $params);
+
+        // Create and return the activity archiving task.
+        return activity_archiving_task::create(
+            jobid: $data['jobid'],
+            context: $data['context'],
+            userid: $data['userid'],
+            archivingmodname: $data['archivingmodname'],
+            settings: $data['settings']
         );
     }
 

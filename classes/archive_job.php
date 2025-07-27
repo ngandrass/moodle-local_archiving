@@ -484,6 +484,7 @@ class archive_job {
                 if (!tsp_manager::is_automatic_tsp_signing_enabled()) {
                     $this->get_logger()->info("Automatic TSP signing of job artifacts is disabled, skipping signing step.");
                 } else {
+                    // @codeCoverageIgnoreStart
                     // Sign all stored files with TSP.
                     $filehandles = file_handle::get_by_jobid($this->id);
 
@@ -500,6 +501,7 @@ class archive_job {
                             );
                         }
                     }
+                    // @codeCoverageIgnoreEnd
                 }
 
                 $this->set_status(archive_job_status::CLEANUP);

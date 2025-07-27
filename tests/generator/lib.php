@@ -184,4 +184,28 @@ class local_archiving_generator extends \testing_data_generator {
         );
     }
 
+    /**
+     * Creates a new webservice for testing purposes.
+     *
+     * @return stdClass Webservice record object containing the created webservice data.
+     * @throws dml_exception
+     */
+    public function create_webservice(): \stdClass {
+        global $DB;
+
+        $uniqid = uniqid(more_entropy: true);
+        $webserviceid = $DB->insert_record('external_services', (object) [
+            'name' => "Test Webservice {$uniqid}",
+            'shortname' => "testws-{$uniqid}",
+            'enabled' => 1,
+            'requiredcapabilities' => '',
+            'restrictedusers' => false,
+            'downloadfiles' => true,
+            'uploadfiles' => true,
+            'timecreated' => time(),
+        ]);
+
+        return $DB->get_record('external_services', ['id' => $webserviceid], '*', MUST_EXIST);
+    }
+
 }

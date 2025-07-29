@@ -76,7 +76,7 @@ class tsp_manager {
      * @return tsp_client A fresh Timestamp-Protocol client instance
      */
     protected function get_tsp_client(): tsp_client {
-        return new tsp_client($this->config->tsp_server_url);
+        return new tsp_client($this->config->tsp_server_url); // @codeCoverageIgnore
     }
 
     /**
@@ -298,14 +298,17 @@ class tsp_manager {
         header('Pragma: no-cache');
         header('Content-Length: '.strlen($filecontents));
         echo $filecontents;
-        ob_flush();
 
-        // Do not kill tests.
-        if (PHPUNIT_TEST === true) {
+        // Stop at this point if we are running a unit test, so that we don't
+        // kill the test runner and can access the output buffer.
+        if (defined('PHPUNIT_TEST')) {
             return;
         }
 
+        // @codeCoverageIgnoreStart
+        ob_flush();
         die;
+        // @codeCoverageIgnoreEnd
     }
 
 }

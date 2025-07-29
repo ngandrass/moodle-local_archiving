@@ -558,6 +558,7 @@ final class archive_job_test extends \advanced_testcase {
      */
     public static function job_settings_data_provider(): array {
         return [
+            'Empty object' => [new \stdClass()],
             'Simple list' => [(object) [1, 2, 3]],
             'Simple object' => [(object) ['foo' => 'bar', 'baz' => 42]],
             'Nested object' => [(object) [

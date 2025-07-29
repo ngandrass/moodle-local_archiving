@@ -113,9 +113,13 @@ class storage {
         }
 
         // Trim whole path and each segment / "file"name.
-        $res = trim($res, " \n\r\t\v\x00/\\");
+        $trimmedchars = " \n\r\t\v\x00/\\";
+        $res = trim($res, $trimmedchars);
         $parts = explode('/', $res);
-        $trimmedparts = array_map(fn($part) => substr($part, 0, self::FILENAME_MAX_LENGTH), $parts);
+        $trimmedparts = array_map(fn($part) => substr(trim($part, $trimmedchars), 0, self::FILENAME_MAX_LENGTH), $parts);
+
+        // Remove empty segments (e.g., with 'foo//bar').
+        $trimmedparts = array_filter($trimmedparts, fn($part) => !empty($part));
 
         return join('/', $trimmedparts);
     }
@@ -195,7 +199,8 @@ class storage {
         // Scan the directory for files and folders.
         $files = scandir($dir);
         if ($files === false) {
-            return false;
+            // Should be coverey by the check above but better safe than sorry.
+            return false; // @codeCoverageIgnore
         }
 
         // Rule out the obvious case of a non empty directory.

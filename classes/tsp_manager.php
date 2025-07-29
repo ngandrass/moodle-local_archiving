@@ -155,7 +155,7 @@ class tsp_manager {
      *
      * @return void
      * @throws \dml_exception On database error
-     * @throws \Exception On TSP error
+     * @throws \moodle_exception On TSP error
      * @throws \RuntimeException If the associated file has no valid artifact
      */
     public function timestamp(): void {
@@ -163,7 +163,7 @@ class tsp_manager {
 
         // Check if TSP signing globally is enabled.
         if (!$this->config->tsp_enable) {
-            throw new \Exception(get_string('artifact_signing_failed_tsp_disabled', 'local_archiving'));
+            throw new \moodle_exception('artifact_signing_failed_tsp_disabled', 'local_archiving');
         }
 
         // Issue TSP timestamp.
@@ -204,7 +204,7 @@ class tsp_manager {
                 break;
             default:
                 // Invalid TSP file type.
-                return null;
+                return null; // @codeCoverageIgnore
         }
 
         // Generate download URL.
@@ -282,7 +282,8 @@ class tsp_manager {
                 $filecontents = $tspdata->reply;
                 break;
             default:
-                throw new \moodle_exception('invalid_tsp_file_type', 'local_archiving');
+                // Should be catched by regex above but better safe than sorry.
+                throw new \moodle_exception('invalid_tsp_file_type', 'local_archiving'); // @codeCoverageIgnore
         }
 
         // Send virtual TSP file to the client.

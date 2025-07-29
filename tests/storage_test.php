@@ -317,11 +317,11 @@ final class storage_test extends \advanced_testcase {
     /**
      * Tests the validation of SHA256 checksums.
      *
-     * @covers       \local_archiving\storage
+     * @covers \local_archiving\storage
      * @dataProvider is_valid_sha256sum_data_provider
      *
-     * @param string $sample
-     ' * @param bool $isvalid
+     * @param string $sample Sample string to check as SHA256 checksum
+     * @param bool $isvalid Whether the sample should be considered a valid SHA256 checksum
      * @return void
      */
     public function test_is_valid_sha256sum(string $sample, bool $isvalid): void {

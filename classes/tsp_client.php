@@ -91,9 +91,10 @@ class tsp_client {
         // Error handling.
         if ($c->error) {  // Moodle curl wrapper provides no getter for curl error message.
             throw new \moodle_exception('tsp_client_error_curl', 'local_archiving', a: $c->error);
-        } else {
-            $curlinfo = $c->get_info();
         }
+
+        // @codeCoverageIgnoreStart
+        $curlinfo = $c->get_info();
 
         if ($curlinfo['http_code'] !== 200) {
             throw new \moodle_exception('tsp_client_error_http_code', 'local_archiving', a: $curlinfo['http_code']);
@@ -108,6 +109,7 @@ class tsp_client {
             'query' => $tsreq,
             'reply' => $tsresp,
         ];
+        // @codeCoverageIgnoreEnd
     }
 
     /**

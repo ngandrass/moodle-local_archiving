@@ -796,7 +796,7 @@ class archive_job {
             case archive_job_status::DELETED:
                 return 100;
             default:
-                return null;
+                return null; // @codeCoverageIgnore
         }
     }
 

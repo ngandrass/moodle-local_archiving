@@ -68,10 +68,8 @@ class tsp_client {
      * Signs the given hexadecimal SHA256 hash using the Time-Stamp Protocol
      *
      * @param string $sha256hash Hexadecimal SHA256 hash of the data to be signed
-     * @return array Associative array containing the binary ASN.1/DER encoded
-     *               TimeStampRequest and the TimeStampReply
-     * @throws \Exception If an error occurs while sending the request or
-     *                    invalid data was received
+     * @return array Associative array containing the binary ASN.1/DER encoded TimeStampRequest and the TimeStampReply
+     * @throws \moodle_exception If an error occurs while sending the request or invalid data was received
      */
     public function sign(string $sha256hash): array {
         // Prepare TimeStampRequest.
@@ -92,17 +90,17 @@ class tsp_client {
 
         // Error handling.
         if ($c->error) {  // Moodle curl wrapper provides no getter for curl error message.
-            throw new \Exception(get_string('tsp_client_error_curl', 'local_archiving', $c->error));
+            throw new \moodle_exception('tsp_client_error_curl', 'local_archiving', a: $c->error);
         } else {
             $curlinfo = $c->get_info();
         }
 
         if ($curlinfo['http_code'] !== 200) {
-            throw new \Exception(get_string('tsp_client_error_http_code', 'local_archiving', $curlinfo['http_code']));
+            throw new \moodle_exception('tsp_client_error_http_code', 'local_archiving', a: $curlinfo['http_code']);
         }
 
         if ($curlinfo['content_type'] !== self::CONTENT_TYPE_TIMESTAMP_REPLY) {
-            throw new \Exception(get_string('tsp_client_error_content_type', 'local_archiving', $curlinfo['content_type']));
+            throw new \moodle_exception('tsp_client_error_content_type', 'local_archiving', a: $curlinfo['content_type']);
         }
 
         // Success.

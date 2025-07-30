@@ -53,8 +53,20 @@ you can run the tests using the following commands:
   ```text
   vendor/bin/phpunit --colors --testdox -v --testsuite tool_dataprivacy_testsuite,tool_policy_testsuite,core_privacy_testsuite
   ```
-
+  
 **Attention:** All commands must be run from inside your Moodle root directory.
+
+### Debugging tests
+
+From time to time it can be useful to attach XDebug during a test run. To do this,
+you can activate XDebug by passing the respective environment variable(s) during
+the PHPUnit runner invocation.
+
+Example:
+
+```text
+XDEBUG_CONFIG="idekey=PHPSTORM" XDEBUG_MODE=debug vendor/bin/phpunit --colors --testdox -v --filter "local_archiving"
+```
 
 
 ## Code coverage

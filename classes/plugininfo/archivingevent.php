@@ -70,8 +70,15 @@ class archivingevent extends \core\plugininfo\base {
      */
     #[\Override]
     public static function enable_plugin(string $pluginname, int $enabled): bool {
+        // Allow to pass the plugin name with or without the 'archivingevent_' prefix.
+        if (str_starts_with($pluginname, 'archivingevent_')) {
+            $pluginname = substr($pluginname, strlen('archivingevent_'));
+        }
+
+        // Determine if the plugin was enabled before.
         $wasenabled = (get_config("archivingevent_{$pluginname}", 'enabled') == 1);
 
+        // Enable or disable the plugin.
         if ($enabled && !$wasenabled) {
             set_config('enabled', 1, "archivingevent_{$pluginname}");
             return true;

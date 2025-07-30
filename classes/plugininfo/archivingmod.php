@@ -70,8 +70,15 @@ class archivingmod extends \core\plugininfo\base {
      */
     #[\Override]
     public static function enable_plugin(string $pluginname, int $enabled): bool {
+        // Allow to pass the plugin name with or without the 'archivingmod_' prefix.
+        if (str_starts_with($pluginname, 'archivingmod_')) {
+            $pluginname = substr($pluginname, strlen('archivingmod_'));
+        }
+
+        // Determine if the plugin was enabled before.
         $wasenabled = (get_config("archivingmod_{$pluginname}", 'enabled') == 1);
 
+        // Enable or disable the plugin.
         if ($enabled && !$wasenabled) {
             set_config('enabled', 1, "archivingmod_{$pluginname}");
             return true;

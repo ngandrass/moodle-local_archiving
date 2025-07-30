@@ -70,8 +70,15 @@ class archivingstore extends \core\plugininfo\base {
      */
     #[\Override]
     public static function enable_plugin(string $pluginname, int $enabled): bool {
+        // Allow to pass the plugin name with or without the 'archivingstore_' prefix.
+        if (str_starts_with($pluginname, 'archivingstore_')) {
+            $pluginname = substr($pluginname, strlen('archivingstore_'));
+        }
+
+        // Determine if the plugin was enabled before.
         $wasenabled = (get_config("archivingstore_{$pluginname}", 'enabled') == 1);
 
+        // Enable or disable the plugin.
         if ($enabled && !$wasenabled) {
             set_config('enabled', 1, "archivingstore_{$pluginname}");
             return true;

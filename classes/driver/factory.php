@@ -49,8 +49,10 @@ class factory {
             return new \archivingmod_quiz_mock($context);
         }
 
+        // @codeCoverageIgnoreStart
         $driverclass = self::get_subplugin_class('archivingmod', $archivingmodname, strict: true);
         return new $driverclass($context);
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -67,8 +69,10 @@ class factory {
             return new \archivingstore_localdir_mock();
         }
 
+        // @codeCoverageIgnoreStart
         $driverclass = self::get_subplugin_class('archivingstore', $archivingstorename, strict: true);
         return new $driverclass();
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -85,8 +89,10 @@ class factory {
             return new \archivingevent_stub_mock();
         }
 
+        // @codeCoverageIgnoreStart
         $driverclass = self::get_subplugin_class('archivingevent', $archivingeventname, strict: true);
         return new $driverclass();
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -104,6 +110,7 @@ class factory {
             return "\\{$plugintype}_{$pluginname}";
         }
 
+        // @codeCoverageIgnoreStart
         $cls = "\\{$plugintype}_{$pluginname}\\{$plugintype}";
 
         if (!class_exists($cls)) {
@@ -115,6 +122,7 @@ class factory {
         }
 
         return $cls;
+        // @codeCoverageIgnoreEnd
     }
 
 }

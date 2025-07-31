@@ -130,7 +130,7 @@ class logger {
         }
 
         if ($taskid) {
-            $wheresql .= "taskid = :taskid";
+            $wheresql .= " AND taskid = :taskid";
             $params['taskid'] = $taskid;
         }
 

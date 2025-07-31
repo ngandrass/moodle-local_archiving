@@ -26,6 +26,8 @@ namespace local_archiving\driver;
 
 /**
  * Tests for the generic driver base.
+ *
+ * @runTestsInSeparateProcesses Prevent sharing of mock objects between tests.
  */
 final class base_test extends \advanced_testcase {
 
@@ -51,7 +53,7 @@ final class base_test extends \advanced_testcase {
      * @throws \coding_exception
      */
     public function test_get_frankenstyle_name(string $subplugintype, bool $isvalid): void {
-        $base = $this->getMockForAbstractClass(base::class, [], $subplugintype.'_mock', callOriginalConstructor: false);
+        $base = $this->getMockForAbstractClass(base::class, [], $subplugintype.'_mock');
 
         // Expect an exception if the sub-plugin type is not valid.
         if (!$isvalid) {

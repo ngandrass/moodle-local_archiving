@@ -30,6 +30,8 @@ use local_archiving\type\activity_archiving_task_status;
 
 /**
  * Tests for the archivingmod driver base.
+ *
+ * @runTestsInSeparateProcesses Prevent sharing of mock objects between tests.
  */
 final class archivingmod_test extends \advanced_testcase {
 

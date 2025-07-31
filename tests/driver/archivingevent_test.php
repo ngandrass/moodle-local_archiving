@@ -26,6 +26,8 @@ namespace local_archiving\driver;
 
 /**
  * Tests for the archivingevent driver base.
+ *
+ * @runTestsInSeparateProcesses Prevent sharing of mock objects between tests.
  */
 final class archivingevent_test extends \advanced_testcase {
 

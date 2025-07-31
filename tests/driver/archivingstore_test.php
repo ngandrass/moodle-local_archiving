@@ -26,6 +26,8 @@ namespace local_archiving\driver;
 
 /**
  * Tests for the archivingstore driver base.
+ *
+ * @runTestsInSeparateProcesses Prevent sharing of mock objects between tests.
  */
 final class archivingstore_test extends \advanced_testcase {
 

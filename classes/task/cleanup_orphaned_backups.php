@@ -68,8 +68,10 @@ class cleanup_orphaned_backups extends \core\task\scheduled_task {
             try {
                 $f->delete();
                 mtrace('Deleted orphaned backup file: '.$f->get_filename());
+                // @codeCoverageIgnoreStart
             } catch (\Exception $e) {
                 mtrace('Failed to delete orphaned backup file "'.$f->get_filename().'" with error: ' . $e->getMessage());
+                // @codeCoverageIgnoreEnd
             }
         }
     }

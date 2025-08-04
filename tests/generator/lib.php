@@ -185,6 +185,75 @@ class local_archiving_generator extends \testing_data_generator {
     }
 
     /**
+     * Creates a test file within the filstore cache area.
+     *
+     * @param int $filehandleid Optional file handle ID to use as item ID for the file
+     * @param int|null $timecreated Optional time created for the file, defaults to current time
+     * @param int|null $timemodified Optional time modified for the file, defaults to current time
+     * @return stored_file Created file in the filestore cache area
+     * @throws file_exception
+     * @throws stored_file_creation_exception
+     */
+    public function create_filestore_cache_file(
+        int $filehandleid = 32,
+        ?int $timecreated = null,
+        ?int $timemodified = null
+    ): \stored_file {
+        $uniqid = uniqid(more_entropy: true);
+        $timecreated = $timecreated ?? time();
+        $timemodified = $timemodified ?? $timecreated;
+
+        return get_file_storage()->create_file_from_string(
+            [
+                'contextid'    => context_user::instance(get_admin()->id)->id,
+                'component'    => \local_archiving\type\filearea::FILESTORE_CACHE->get_component(),
+                'filearea'     => \local_archiving\type\filearea::FILESTORE_CACHE->value,
+                'itemid'       => $filehandleid,
+                'filepath'     => '/',
+                'filename'     => "testfile-{$uniqid}.txt",
+                'timecreated'  => $timecreated,
+                'timemodified' => $timemodified,
+            ],
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do '.
+            'eiusmod tempor incididunt ut labore et dolore magna aliqua. '.
+            'time='.time().' id='.$uniqid
+        );
+    }
+
+    /**
+     * Creates a mocked Moodle course backup file inside the backup file area
+     *
+     * @param int|null $timecreated Optional time created for the file, defaults to current time
+     * @param int|null $timemodified Optional time modified for the file, defaults to current time
+     * @return stored_file Created Moodle course backup file in the backup area
+     * @throws file_exception
+     * @throws stored_file_creation_exception
+     */
+    public function create_moodle_course_backup_stub_file(
+        ?int $timecreated = null,
+        ?int $timemodified = null
+    ): \stored_file {
+        $uniqid = uniqid(more_entropy: true);
+        $timecreated = $timecreated ?? time();
+        $timemodified = $timemodified ?? $timecreated;
+
+        return get_file_storage()->create_file_from_string(
+            [
+                'contextid'    => context_user::instance(get_admin()->id)->id,
+                'component'    => 'backup',
+                'filearea'     => 'course',
+                'itemid'       => 0,
+                'filepath'     => '/',
+                'filename'     => "local_archiving-course-backup-{$timecreated}-{$uniqid}.mbz",
+                'mimetype'     => 'application/vnd.moodle.backup',
+                'timecreated'  => $timecreated,
+                'timemodified' => $timemodified,
+            ],
+            'This is a test backup file with id '.$uniqid
+        );
+    }
+
+    /**
      * Creates a new webservice for testing purposes.
      *
      * @return stdClass Webservice record object containing the created webservice data.

@@ -301,7 +301,7 @@ class tsp_manager {
 
         // Stop at this point if we are running a unit test, so that we don't
         // kill the test runner and can access the output buffer.
-        if (defined('PHPUNIT_TEST')) {
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
             return;
         }
 

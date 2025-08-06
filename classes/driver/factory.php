@@ -44,7 +44,7 @@ class factory {
      */
     public static function activity_archiving_driver(string $archivingmodname, \context_module $context): archivingmod {
         // Only use mock drivers in unit tests.
-        if (defined('PHPUNIT_TEST')) {
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
             require_once(__DIR__.'/../../tests/mock/archivingmod_quiz_mock.php');
             return new \archivingmod_quiz_mock($context);
         }
@@ -64,7 +64,7 @@ class factory {
      */
     public static function storage_driver(string $archivingstorename): archivingstore {
         // Only use mock drivers in unit tests.
-        if (defined('PHPUNIT_TEST')) {
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
             require_once(__DIR__.'/../../tests/mock/archivingstore_localdir_mock.php');
             return new \archivingstore_localdir_mock();
         }
@@ -84,7 +84,7 @@ class factory {
      */
     public static function event_connector(string $archivingeventname): archivingevent {
         // Only use mock drivers in unit tests.
-        if (defined('PHPUNIT_TEST')) {
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
             require_once(__DIR__.'/../../tests/mock/archivingevent_stub_mock.php');
             return new \archivingevent_stub_mock();
         }
@@ -106,7 +106,7 @@ class factory {
      */
     public static function get_subplugin_class(string $plugintype, string $pluginname, bool $strict = false): ?string {
         // Return mock classes during unit tests.
-        if (defined('PHPUNIT_TEST') && str_ends_with($pluginname, '_mock')) {
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true && str_ends_with($pluginname, '_mock')) {
             return "\\{$plugintype}_{$pluginname}";
         }
 

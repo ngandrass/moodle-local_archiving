@@ -135,3 +135,4 @@ nav:
       - dev/api/external-event-connectors.md
     - "Testing":
       - dev/testing/index.md
+    - dev/builddocs.md

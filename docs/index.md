@@ -31,6 +31,14 @@ and their results on the [Roadmap](roadmap.md) page.
 [:material-road-variant: Show Roadmap](roadmap.md){.md-button}
 
 
+## Join the Discussion and Contribute
+
+If you want to take part in the discussion and shape the future of this project, you can join us over on
+[Matrix](https://matrix.org/): [#archiving:gandrass.de](https://matrix.to/#/#archiving:gandrass.de)
+
+[:simple-matrix:&nbsp;&nbsp;Join the Matrix Chat<br><tt><small>#archiving:gandrass.de</small></tt>](https://matrix.to/#/#archiving:gandrass.de){ .md-button }
+
+
 ## Developer Documentation
 
 Are you planing to contribute to the Moodle archiving subsystem? Check out our [developer documentation](dev/index.md)

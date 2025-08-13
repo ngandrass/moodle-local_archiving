@@ -6,7 +6,7 @@ and several sub-plugins that implement various functions of the archiving systa 
 This page provides a list of the different sub-plugin types and highlights existing implementations. The diagram below
 gives a brief overview of the different components.
 
-![Archiving subsystem components overview](assets/diagrams/architecture-overview-simple.drawio)
+![](assets/diagrams/architecture-overview-simple.drawio)
 
 
 !!! example "Additional information"

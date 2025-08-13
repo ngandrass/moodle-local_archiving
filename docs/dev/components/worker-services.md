@@ -58,4 +58,4 @@ that is used in conjunction with the [Moodle Quiz Archiver Plugin](https://moodl
 The following diagram depicts the general architecture and information flow of the Moodle plugin and the corresponding
 worker service:
 
-![Quiz Archive Worker Architecture Diagram](../../assets/diagrams/quiz-archiver-architecture.drawio)
+![](../../assets/diagrams/quiz-archiver-architecture.drawio)

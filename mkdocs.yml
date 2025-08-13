@@ -8,8 +8,15 @@ copyright: "Copyright &copy; 2025 Niels Gandraß<br>License: GNU General Public 
 
 extra:
   social:
+    - icon: simple/matrix
+      link: https://matrix.to/#/#archiving:gandrass.de
+      name: "Matrix room: #archiving:gandrass.de"
+    - icon: material/bug
+      link: https://github.com/ngandrass/moodle-local_archiving/issues
+      name: "Issue Tracker"
     - icon: fontawesome/brands/github
       link: https://github.com/ngandrass/moodle-local_archiving
+      name: "GitHub Repository"
 #    - icon: simple/moodle
 #      link: https://moodle.org/plugins/quiz_archiver
 #      name: "Moodle Plugin Directory: quiz_archiver"

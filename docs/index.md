@@ -1,6 +1,16 @@
 # Moodle Archiving Subsystem
 
-This is the official documentation for the Moodle Archiving Subsystem project.
+This is the official documentation for the Moodle Archiving Subsystem project. It provides a solid framework for
+archiving data from various Moodle activities, such as quizzes and assignments, and transferring it to different storage
+locations, such as the Moodle file store or external WORM storage systems.
+
+!!! warning "Work-in-Progress"
+    This project is currently under active development and is not yet ready for production use. Please feel free to try
+    it out on a test system and provide feedback if you like :)
+
+If you are new here, taking a look at the component overview is a good starting point:
+
+[:fontawesome-solid-cubes: Components Overview](components.md){ .md-button }
 
 
 ## Quickstart

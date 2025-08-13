@@ -29,7 +29,7 @@ The following events are related to the top-level archiving jobs.
 ## Activity Archiving Tasks
 
 The following events are used for the communication with the
-[activity archiving drivers](../../components/activity-archiving-drivers.md).
+[activity archiving drivers](../components/activity-archiving-drivers.md).
 
 | Class name                                                               | Trigger                                                                         | CRUD   | Payload                                      | Record snapshot |
 |--------------------------------------------------------------------------|---------------------------------------------------------------------------------|--------|----------------------------------------------|-----------------|
@@ -43,7 +43,7 @@ The following events are used for the communication with the
 ## External Event Connectors
 
 The following events are used for communication with
-[external event connectors](../../components/external-event-connectors.md).
+[external event connectors](../components/external-event-connectors.md).
 
 | Class name                                                                     | Trigger                                                                               | CRUD   | Payload                              | Record snapshot |
 |--------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|--------|--------------------------------------|-----------------|
@@ -53,7 +53,7 @@ The following events are used for communication with
 
 ## Storage Tasks
 
-The following events are used for the communication with the [storage drivers](../../components/storage-drivers.md).
+The following events are used for the communication with the [storage drivers](../components/storage-drivers.md).
 
 | Class name                                                                | Trigger                                                                 | CRUD   | Payload             | Record snapshot |
 |---------------------------------------------------------------------------|-------------------------------------------------------------------------|--------|---------------------|-----------------|
@@ -75,4 +75,4 @@ The following events are used for the communication with the [storage drivers](.
 ## Worker Services
 
 Worker services communicate via the Moodle external API and do not emit any events. Communication is handled directly
-within the respective [activity archiving drivers](../../components/activity-archiving-drivers.md).
+within the respective [activity archiving drivers](../components/activity-archiving-drivers.md).

@@ -1,6 +1,6 @@
 # Storage Drivers
 
-This document defines the interface that [storage driver](../../components/storage-drivers.md) implementations must adhere
+This document defines the interface that [storage driver](../components/storage-drivers.md) implementations must adhere
 to.
 
 

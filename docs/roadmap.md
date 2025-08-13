@@ -28,9 +28,9 @@ The state of each Milestone is depicted by the respective icon and color:
     Finding and inspecting existing solutions for extracting data from Moodle activities used for e-assessments.
     Identifying core features and limitations of each solution to gain insight into the current landscape.
 
-    This task is completed. Results can be found here: [Analysis > Existing Solutions](analysis/existingsolutions.md)
+    This task is completed. Results can be found here: [Analysis > Existing Solutions](dev/requirements/existing-solutions.md)
 
-    [:material-package-variant-closed: Show Results](analysis/existingsolutions.md){.md-button}
+    [:material-package-variant-closed: Show Results](dev/requirements/existing-solutions.md){.md-button}
 
 !!! success "Analysis of core Moodle activities available for e-assessments"
     Identifying all Moodle core activities that can be used for e-assessments and therefore should potentially be
@@ -38,9 +38,9 @@ The state of each Milestone is depicted by the respective icon and color:
     listing all relevant user data points, metadata, file submissions, and other relevant information. Moreover, the
     structure of the existing data and how it relates to other data of the activity is analyzed.
     
-    This task is completed. Results can be found here: [Analysis > Data Analysis](analysis/data-analysis.md)
+    This task is completed. Results can be found here: [Analysis > Data Analysis](dev/requirements/data-analysis.md)
 
-    [:material-package-variant-closed: Show Results](analysis/data-analysis.md){.md-button}
+    [:material-package-variant-closed: Show Results](dev/requirements/data-analysis.md){.md-button}
 
 !!! success "Stakeholder workshop"
     Conducting a workshop with stakeholders / universities in Germany, Switzerland, and Austria to gather requirements
@@ -77,27 +77,27 @@ The state of each Milestone is depicted by the respective icon and color:
     User stories are based on the results of the stakeholder workshop, inputs from multiple conference talks / sessions
     about archiving of Moodle quizzes, and results from personal interviews with members of the Moodle community.
 
-    This task is completed. Results can be found here: [Requirements > User Stories](requirements/user-stories.md)
+    This task is completed. Results can be found here: [Requirements > User Stories](dev/requirements/user-stories.md)
 
-    [:material-package-variant-closed: Show Results](requirements/user-stories.md){.md-button}
+    [:material-package-variant-closed: Show Results](dev/requirements/user-stories.md){.md-button}
 
 !!! success "Definition of base requirements for archiving exam data from Moodle"
     Defining hard base requirements that the aspired archiving solution must fulfill from a technical, functional and
     legal point of view. These requirements are independent of the actual Moodle activity itself but target general
     topics like data integrity, traceability, compatibility, regulatory topics, and privacy.
 
-    This task is completed. Results can be found here: [Requirements > Base Requirements](requirements/base-requirements.md)
+    This task is completed. Results can be found here: [Requirements > Base Requirements](dev/requirements/base-requirements.md)
 
-    [:material-package-variant-closed: Show Results](requirements/base-requirements.md){.md-button}
+    [:material-package-variant-closed: Show Results](dev/requirements/base-requirements.md){.md-button}
 
 !!! success "First technical architecture draft"
     Creating a first draft of a possible technical architecture for the aspired archiving solution. Defining core
     components, interfaces, process states, and information flow. Forming proper abstractions and interfaces to allow
     flexible embedding in university infrastructures. Defining core implementation philosophies and principles.
 
-    This task is completed. Results can be found here: [Architecture](architecture/index.md)
+    This task is completed. Results can be found here: [Architecture](dev/index.md)
 
-    [:material-package-variant-closed: Show Results](architecture/index.md){.md-button}
+    [:material-package-variant-closed: Show Results](dev/index.md){.md-button}
 
 !!! success "Public availability of this document and project sources"
     Making this document and the project sources publicly available on GitHub.

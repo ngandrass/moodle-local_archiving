@@ -1,6 +1,6 @@
 # Activity Archiving Drivers
 
-This document defines the interface that [activity archiving driver](../../components/activity-archiving-drivers.md)
+This document defines the interface that [activity archiving driver](../components/activity-archiving-drivers.md)
 implementations must adhere to.
 
 

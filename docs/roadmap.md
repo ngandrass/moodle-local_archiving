@@ -17,6 +17,7 @@ The state of each Milestone is depicted by the respective icon and color:
     justify-content: center;
 " markdown>
 !!! success "Completed"
+!!! example "Testing / Finalizing"
 !!! note "In progress"
 !!! abstract "Not started yet"
 </div>
@@ -106,27 +107,54 @@ The state of each Milestone is depicted by the respective icon and color:
 
     [:material-github: View Repository](https://github.com/ngandrass/moodle-data-archiving-concept){:target="_blank" .md-button}
 
-!!! abstract "Presentation within the Moodle community"
+!!! success "Presentation within the Moodle community"
     Present this work and the next steps within the Moodle community to get the news out, gather feedback, and
     potentially find early adopters as well as potential contributors.
 
-!!! note "Prototype implementation"
+    This task is completed. The work was presented at the Moodle University Conference 2025 at the University of
+    Potsdam, Germany.
+
+    [:material-presentation: Get the slides](https://gandrass.de/#pub-Gandrass2025MAT){.md-button}
+
+!!! success "Prototype implementation"
     Creating a prototypical implementation of the aspired archiving solution for a single Moodle activity. This shall
     include all core components and interfaces as defined in the technical architecture draft. The prototype should be
     limited to a single Moodle activity and a single storage backend.
 
-!!! abstract "Re-evaluation of the technical architecture"
+    This task is completed. The current implementation can be found on GitHub:
+
+    [:material-github: View Repository](https://github.com/ngandrass/moodle-local_archiving){:target="_blank" .md-button}
+
+!!! success "Re-evaluation of the technical architecture"
     Re-evaluating the technical architecture based on the insights gained during the prototype implementation. Adjusting
     the architecture where necessary and refining the interfaces and components.
 
-!!! abstract "Automated tests"
+    This task is completed. You can find the up to date architecture within the [developer documentation](dev/index.md).
+
+    [:material-package-variant-closed: Show Results](dev/index.md){.md-button}
+
+!!! example "Automated tests"
     Creating automated tests for all central components of the archiving solution. Tests must be automatically
     executed by a CI pipeline and be mandatory for every release. Tests must cover all supported Moodle, PHP, and
     database versions to lessen the likelihood for regressions.
 
-!!! abstract "Full implementation of the archiving solution for a single activity"
+    Unit tests for all core features and APIs are implemented. However, some components are still missing tests. This
+    task remains uncompleted until all components are covered by automated tests.
+
+    [:material-code-tags: View Unit Tests](https://github.com/ngandrass/moodle-local_archiving/tree/master/tests){:target="_blank" .md-button}
+
+!!! note "Full implementation of the archiving solution for a single activity"
     Implementing the full set of features for a single Moodle activity. This implementation should represent a reference
     implementation to be used as a guideline for further activities, storage backends, and other extensions.
+
+!!! note "Support for automated archive triggers"
+    Creating a software architecture and implementations that allow for automated triggering of archive creation. This
+    can, for example, be time-base triggering or triggering based on specific events, such as the submission of a new
+    quiz attempt.
+
+!!! abstract "Finalizing of sub-plugin APIs"
+    Declare APIs for sub-plugins as stable. From this point on, changes to the APIs must be carefully considered, must
+    not break existing implementations, and must be well documented.
 
 !!! abstract "Stable release on GitHub for early-adopters"
     Publishing a stable release on GitHub to allow early adopters to test the solution in their environments. This shall

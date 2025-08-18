@@ -8,8 +8,10 @@ locations, such as the Moodle file store or external WORM storage systems.
     This project is currently under active development and is not yet ready for production use. Please feel free to try
     it out on a test system and provide feedback if you like :)
 
-If you are new here, taking a look at the component overview is a good starting point:
+If you are new here, taking a look at screenshots and the component overview is a good way to familiarize yourself with
+the project:
 
+[:material-monitor-screenshot: Screenshots](screenshots.md){ .md-button }&nbsp;&nbsp;
 [:fontawesome-solid-cubes: Components Overview](components.md){ .md-button }
 
 
@@ -28,7 +30,8 @@ navigation on the left side._
 You can find information about the current state of this project as well as an overview of already achieved milestones
 and their results on the [Roadmap](roadmap.md) page.
 
-[:material-road-variant: Show Roadmap](roadmap.md){.md-button}
+[:material-road-variant: Show Roadmap](roadmap.md){.md-button}&nbsp;&nbsp;
+[:material-file-document-edit-outline: Changelog](changelog.md){.md-button}
 
 
 ## Join the Discussion and Contribute

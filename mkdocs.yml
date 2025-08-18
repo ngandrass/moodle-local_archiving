@@ -107,6 +107,7 @@ nav:
   - "Introduction": index.md
   - "Components": components.md
   - "Roadmap": roadmap.md
+  - "Screenshots": screenshots.md
   - "Changelog": changelog.md
 
   - "Setup":

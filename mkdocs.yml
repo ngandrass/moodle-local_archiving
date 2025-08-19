@@ -113,6 +113,8 @@ nav:
   - "Setup":
     - "Installation":
         - setup/install/index.md
+        - "Archiving Core": setup/install/core.md
+        - setup/install/plugins.md
     - "Configuration":
       - setup/config/index.md
     - setup/index.md

@@ -4,7 +4,7 @@ This is the official documentation for the Moodle Archiving Subsystem project. I
 archiving data from various Moodle activities, such as quizzes and assignments, and transferring it to different storage
 locations, such as the Moodle file store or external WORM storage systems.
 
-!!! warning "Work-in-Progress"
+!!! warning "Work in Progress (WIP)"
     This project is currently under active development and is not yet ready for production use. Please feel free to try
     it out on a test system and provide feedback if you like :)
 
@@ -47,7 +47,8 @@ If you want to take part in the discussion and shape the future of this project,
 Are you planing to contribute to the Moodle archiving subsystem? Check out our [developer documentation](dev/index.md)
 to learn more about the system architecture, its components, and how to implement new sub-plugins.
 
-[:material-file-code-outline: Developer Documentation](dev/index.md){.md-button}
+[:material-file-code-outline: Developer Documentation](dev/index.md){.md-button}&nbsp;&nbsp;
+[:simple-github: GitHub Repository](https://github.com/ngandrass/moodle-local_archiving){ .md-button }
 
 
 ## License

@@ -3,6 +3,8 @@
 You can install this plugin like any other Moodle plugin, by either placing it inside your Moodle installation folder or
 by uploading it as a ZIP archive via the website administration. Both methods are described below.
 
+[:simple-github: GitHub Repository](https://github.com/ngandrass/moodle-local_archiving){ .md-button }
+
 
 ## Installing via uploaded ZIP file
 

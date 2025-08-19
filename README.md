@@ -1,6 +1,6 @@
 # Archiving Subsystem for Moodle
 
-[![Latest Version](https://img.shields.io/github/v/release/ngandrass/moodle-local_archiving)](https://github.com/ngandrass/moodle-local_archiving/releases)
+[![Latest Version](https://img.shields.io/github/v/release/ngandrass/moodle-local_archiving?include_prereleases)](https://github.com/ngandrass/moodle-local_archiving/releases)
 [![PHP Support](https://img.shields.io/badge/PHP-8.1%20--%208.4-blue)](https://github.com/ngandrass/moodle-local_archiving)
 [![Moodle Support](https://img.shields.io/badge/Moodle-4.5%20--%205.0-orange)](https://github.com/ngandrass/moodle-local_archiving)
 [![GitHub Workflow Status: Moodle Plugin CI](https://img.shields.io/github/actions/workflow/status/ngandrass/moodle-local_archiving/moodle-plugin-ci.yml?label=Moodle%20Plugin%20CI)](https://github.com/ngandrass/moodle-local_archiving/actions/workflows/moodle-plugin-ci.yml)

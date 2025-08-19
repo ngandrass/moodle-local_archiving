@@ -1,5 +1,24 @@
 # Moodle Archiving Subsystem
 
+<div style="margin-top: -30px;" markdown>
+
+[![Latest Version](https://img.shields.io/github/v/release/ngandrass/moodle-local_archiving?include_prereleases)](https://github.com/ngandrass/moodle-local_archiving/releases)
+[![PHP Support](https://img.shields.io/badge/PHP-8.1%20--%208.4-blue)](https://github.com/ngandrass/moodle-local_archiving)
+[![Moodle Support](https://img.shields.io/badge/Moodle-4.5%20--%205.0-orange)](https://github.com/ngandrass/moodle-local_archiving)
+[![GitHub Workflow Status: Moodle Plugin CI](https://img.shields.io/github/actions/workflow/status/ngandrass/moodle-local_archiving/moodle-plugin-ci.yml?label=Moodle%20Plugin%20CI)](https://github.com/ngandrass/moodle-local_archiving/actions/workflows/moodle-plugin-ci.yml)
+[![Code Coverage](https://img.shields.io/coverallsCoverage/github/ngandrass/moodle-local_archiving)](https://coveralls.io/github/ngandrass/moodle-local_archiving)
+[![GitHub Issues](https://img.shields.io/github/issues/ngandrass/moodle-local_archiving)](https://github.com/ngandrass/moodle-local_archiving/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/ngandrass/moodle-local_archiving)](https://github.com/ngandrass/moodle-local_archiving/pulls)
+[![Maintenance Status](https://img.shields.io/maintenance/yes/9999)](https://github.com/ngandrass/moodle-local_archiving/)
+[![License](https://img.shields.io/github/license/ngandrass/moodle-local_archiving)](https://github.com/ngandrass/moodle-local_archiving/blob/master/LICENSE)
+[![Donate with PayPal](https://img.shields.io/badge/PayPal-donate-d85fa0)](https://www.paypal.me/ngandrass)
+[![Sponsor with GitHub](https://img.shields.io/badge/GitHub-sponsor-d85fa0)](https://github.com/sponsors/ngandrass)
+[![GitHub Stars](https://img.shields.io/github/stars/ngandrass/moodle-local_archiving?style=social)](https://github.com/ngandrass/moodle-local_archiving/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/ngandrass/moodle-local_archiving?style=social)](https://github.com/ngandrass/moodle-local_archiving/network/members)
+[![GitHub Contributors](https://img.shields.io/github/contributors/ngandrass/moodle-local_archiving?style=social)](https://github.com/ngandrass/moodle-local_archiving/graphs/contributors)
+
+</div>
+
 This is the official documentation for the Moodle Archiving Subsystem project. It provides a solid framework for
 archiving data from various Moodle activities, such as quizzes and assignments, and transferring it to different storage
 locations, such as the Moodle file store or external WORM storage systems.

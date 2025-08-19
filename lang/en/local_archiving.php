@@ -80,6 +80,7 @@ $string['archive_job'] = 'Archive job';
 $string['archive_jobs'] = 'Archive jobs';
 $string['archive_job_created_details'] = 'A new archive job (<code>#{$a->jobid}</code>) for the activity "<code>{$a->cmname}</code>" has been created successfully.';
 $string['archive_job_logs'] = 'Archive job logs';
+$string['archive_job_logs_desc'] = 'Archive jobs log certain events and actions during execution. Below you can find a list of all logged events for this archive job. If you need more information, please ask your Moodle administrator to increase the log level on the admin settings page of this plugin.';
 $string['archive_jobs_cm_table_desc'] = 'The table below lists all archive jobs that have been created for this activity. To list all archive jobs in this course, please go to the course archiving overview page.';
 $string['archived'] = 'Archived';
 $string['delete_job'] = 'Delete archive job';
@@ -135,6 +136,14 @@ $string['job_status_240'] = 'Failure';
 $string['job_status_240_help'] = 'The job has failed. Please try again and contact your system administrator if this problem persists.';
 $string['job_status_255'] = 'Unknown';
 $string['job_status_255_help'] = 'The job status is unknown. Please open a bug report if this problem persists.';
+
+// Job metadata fields.
+$string['job_metadata_activity_archiving_driver'] = 'Activity archiving driver';
+$string['job_metadata_course_backup_id'] = 'Course backup ID';
+$string['job_metadata_cm_backup_id'] = 'Activity backup ID';
+$string['job_metadata_num_attempts'] = 'Number of attempts';
+$string['job_metadata_num_attachments'] = 'Number of attachments';
+$string['job_metadata_storage_driver'] = 'Storage driver';
 
 // Job settings: General.
 $string['export_course_backup'] = 'Export full Moodle course backup (.mbz)';

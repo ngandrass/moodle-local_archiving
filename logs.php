@@ -67,7 +67,11 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
         ),
         // TODO (MDL-0): Move this to a separate archive inspection page.
         "metadata" => array_map(
-            fn($key, $value): array => ['key' => $key, 'value' => $value],
+            fn($key, $value): array => [
+                'key' => $key,
+                'humankey' => get_string("job_metadata_{$key}", 'local_archiving'),
+                'value' => $value,
+            ],
             array_keys($jobmeta),
             array_values($jobmeta)
         ),

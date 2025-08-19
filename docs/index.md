@@ -1,4 +1,4 @@
-# Moodle Archiving Subsystem
+# Archiving Subsystem for Moodle
 
 <div style="margin-top: -30px;" markdown>
 

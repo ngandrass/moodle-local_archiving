@@ -1,4 +1,4 @@
-site_name: Moodle Archiving Plugin
+site_name: Archiving Subsystem for Moodle
 site_url: "https://archiving.gandrass.de/"
 use_directory_urls: !ENV [OFFLINE, true]
 repo_url: https://github.com/ngandrass/moodle-local_archiving

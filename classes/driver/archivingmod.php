@@ -29,6 +29,7 @@ use local_archiving\archive_job;
 use local_archiving\exception\yield_exception;
 use local_archiving\form\job_create_form;
 use local_archiving\type\activity_archiving_task_status;
+use local_archiving\type\cm_state_fingerprint;
 use local_archiving\type\task_content_metadata;
 
 // phpcs:ignore
@@ -101,6 +102,19 @@ abstract class archivingmod extends base {
     abstract public function get_task_content_metadata(activity_archiving_task $task): array;
 
     /**
+     * Creates a new fingerprint for the current state of the referenced course
+     * module.
+     *
+     * Those fingerprints are used to determine if the course module has changed
+     * since the last archive job. For information on cm_state_fingerprints and
+     * their creation, see the cm_state_fingerprint class documentation.
+     *
+     * @return cm_state_fingerprint Fingerprint for the current state of the
+     * referenced course module
+     */
+    abstract public function fingerprint(): cm_state_fingerprint;
+
+    /**
      * Provides access to the Moodle form that holds all settings for creating a
      * single archiving job. Generic settings are populated by the base class
      * and can be extended as needed.
@@ -126,9 +140,18 @@ abstract class archivingmod extends base {
      * @throws \moodle_exception
      */
     public function create_task(archive_job $job, \stdClass $tasksettings): activity_archiving_task {
+        // Create stub fingerprint if this is used in a PHPUnit test because we need to mock this abstract class and
+        // this breaks with cm_state_fingerprint being a final class (and should stay that way!).
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
+            $fingerprint = cm_state_fingerprint::from_raw_value(str_repeat('0', 64));
+        } else {
+            $fingerprint = $this->fingerprint();
+        }
+
         return activity_archiving_task::create(
             $job->get_id(),
             $this->context,
+            $fingerprint,
             $job->get_userid(),
             $this->get_plugin_name(),
             $tasksettings,

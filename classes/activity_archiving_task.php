@@ -28,6 +28,7 @@ use local_archiving\driver\archivingmod;
 use local_archiving\exception\yield_exception;
 use local_archiving\logging\task_logger;
 use local_archiving\type\activity_archiving_task_status;
+use local_archiving\type\cm_state_fingerprint;
 use local_archiving\type\db_table;
 use local_archiving\type\filearea;
 use local_archiving\type\task_content_metadata;
@@ -74,6 +75,8 @@ final class activity_archiving_task {
         protected readonly int $jobid,
         /** @var \context_module Moodle context this task is run in */
         protected readonly \context_module $context,
+        /** @var cm_state_fingerprint Fingerprint of the course module at task creation */
+        protected readonly cm_state_fingerprint $fingerprint,
         /** @var int $userid ID of the user that owns this task */
         protected readonly int $userid,
         /** @var string $archivingmodname Name of the activity archiving driver that handles this task */
@@ -123,6 +126,7 @@ final class activity_archiving_task {
     public static function create(
         int $jobid,
         \context_module $context,
+        cm_state_fingerprint $cmfingerprint,
         int $userid,
         string $archivingmodname,
         ?\stdClass $settings = null,
@@ -141,6 +145,7 @@ final class activity_archiving_task {
             'jobid' => $jobid,
             'archivingmod' => $archivingmodname,
             'contextid' => $context->id,
+            'fingerprint' => $cmfingerprint->get_raw_value(),
             'userid' => $userid,
             'status' => $status->value,
             'progress' => 0,
@@ -149,7 +154,7 @@ final class activity_archiving_task {
             'timemodified' => $now,
         ]);
 
-        return new self($taskid, $jobid, $context, $userid, $archivingmodname, $status);
+        return new self($taskid, $jobid, $context, $cmfingerprint, $userid, $archivingmodname, $status);
     }
 
     /**
@@ -175,6 +180,7 @@ final class activity_archiving_task {
             $task->id,
             $task->jobid,
             $context,
+            cm_state_fingerprint::from_raw_value($task->fingerprint),
             $task->userid,
             $task->archivingmod,
             activity_archiving_task_status::from($task->status)
@@ -207,6 +213,7 @@ final class activity_archiving_task {
                 $task->id,
                 $task->jobid,
                 $context,
+                cm_state_fingerprint::from_raw_value($task->fingerprint),
                 $task->userid,
                 $task->archivingmod,
                 activity_archiving_task_status::from($task->status)
@@ -278,6 +285,15 @@ final class activity_archiving_task {
      */
     public function get_context(): \context_module {
         return $this->context;
+    }
+
+    /**
+     * Returns the fingerprint of the course module at task creation
+     *
+     * @return cm_state_fingerprint Fingerprint of the course module at task creation
+     */
+    public function get_fingerprint(): cm_state_fingerprint {
+        return $this->fingerprint;
     }
 
     /**

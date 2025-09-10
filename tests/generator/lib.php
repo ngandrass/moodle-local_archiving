@@ -17,6 +17,7 @@
 use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
 use local_archiving\type\activity_archiving_task_status;
+use local_archiving\type\cm_state_fingerprint;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -87,6 +88,7 @@ class local_archiving_generator extends \testing_data_generator {
         $taskdefaults = [
             'jobid' => $job->get_id(),
             'context' => $job->get_context(),
+            'cmfingerprint' => cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
             'userid' => $USER->id,
             'archivingmodname' => 'quiz',
             'settings' => (object) ['foo' => 'bar'],
@@ -98,6 +100,7 @@ class local_archiving_generator extends \testing_data_generator {
         return activity_archiving_task::create(
             jobid: $data['jobid'],
             context: $data['context'],
+            cmfingerprint: $data['cmfingerprint'],
             userid: $data['userid'],
             archivingmodname: $data['archivingmodname'],
             settings: $data['settings'],

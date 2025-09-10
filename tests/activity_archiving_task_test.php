@@ -17,6 +17,7 @@
 namespace local_archiving;
 
 use local_archiving\type\activity_archiving_task_status;
+use local_archiving\type\cm_state_fingerprint;
 use local_archiving\type\db_table;
 use local_archiving\type\filearea;
 use local_archiving\type\task_content_metadata;
@@ -61,9 +62,11 @@ final class activity_archiving_task_test extends \advanced_testcase {
         $job = $this->generator()->create_archive_job();
 
         // Create a new activity archiving task.
+        $fingerprint = cm_state_fingerprint::from_raw_value(str_repeat('1234', 16));
         $task = activity_archiving_task::create(
             jobid: $job->get_id(),
             context: $job->get_context(),
+            cmfingerprint: $fingerprint,
             userid: $job->get_userid(),
             archivingmodname: 'quiz',
             settings: (object) ['foo' => 'bar'],
@@ -74,6 +77,7 @@ final class activity_archiving_task_test extends \advanced_testcase {
         $this->assertSame($job->get_userid(), $task->get_userid(), 'User ID should match');
         $this->assertSame('quiz', $task->get_archivingmodname(), 'Archiving mod name should match');
         $this->assertEquals($job, $task->get_job(), 'Job should match');
+        $this->assertEquals($fingerprint, $task->get_fingerprint(), 'CM state fingerprint should match');
 
         // Check that the task can be retrieved by its ID.
         $retrievedtask = activity_archiving_task::get_by_id($task->get_id());

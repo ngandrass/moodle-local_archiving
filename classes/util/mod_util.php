@@ -27,6 +27,7 @@ namespace local_archiving\util;
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+use local_archiving\activity_archiving_task;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 
@@ -80,13 +81,30 @@ class mod_util {
         // Build response.
         $res = [];
         foreach ($cms as $cm) {
-            $res[$cm->id] = (object) [
+            $data = [
                 'cm' => $cm,
                 'supported' => in_array($cm->modname, $supported),
                 'enabled' => $drivers[$cm->modname]['enabled'] ?? false,
                 'ready' => $drivers[$cm->modname]['ready'] ?? false,
                 'lastarchived' => ($lastarchivedcms[$cm->context->id] ?? null)?->lastarchived,
+                'dirty' => true,  // By default we always assume new changes unless we know better as determined below.
             ];
+
+            // Determine if cm is dirty (new changes since last archiving).
+            if ($data['lastarchived']) {
+                // Only calculate fingerprint if the activity is supported, enabled, and ready.
+                if ($data['supported'] && $data['enabled'] && $data['ready']) {
+                    // Check if this fingerprint was already seen.
+                    $driver = \local_archiving\driver\factory::activity_archiving_driver(
+                        plugin_util::get_archiving_driver_for_cm($cm->modname),
+                        $cm->context
+                    );
+
+                    $data['dirty'] = activity_archiving_task::fingerprint_exists($cm->context, $driver->fingerprint()) === false;
+                }
+            }
+
+            $res[$cm->id] = (object) $data;
         }
 
         return $res;

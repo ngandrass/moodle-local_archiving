@@ -46,6 +46,7 @@ $string['free_space_unknown'] = 'Free space unknown';
 $string['id'] = 'ID';
 $string['jobid'] = 'Job ID';
 $string['last_updated'] = 'Last updated';
+$string['new_changes'] = 'New changes';
 $string['progress'] = 'Progress';
 $string['ready'] = 'Ready';
 $string['type'] = 'Type';
@@ -67,11 +68,18 @@ $string['archiving:create'] = 'Create new archives';
 $string['archiving:delete'] = 'Delete archives and metadata';
 
 // Archiving overview.
-$string['archiving_course_overview_desc'] = 'This page is allows to create and access archives for all supported activities in this course.';
 $string['activity_archiving_list_desc'] = 'Below you can find a list of all activities in this course. Supported activities can be archived by clicking the respective entry in the list. If an activity is not supported, it will be disabled.';
 $string['archive_jobs_course_table_desc'] = 'This table lists all archive jobs that have been created for any of the activities in this course.';
-$string['show_all_activities'] = 'Show all activities';
+$string['archiving_course_overview_desc'] = 'This page is allows to create and access archives for all supported activities in this course.';
+$string['badge_archived_help'] = 'This activity was successfully archived at the given time.';
+$string['badge_cannot_be_archived_help'] = 'This activity can currently not be archived due to an unknown reason.';
+$string['badge_disabled_help'] = 'Archiving this activity type is currently disabled by the system administrator.';
+$string['badge_never_archived_help'] = 'This activity was never archived.';
+$string['badge_new_changes_help'] = 'There has been new changes to the activity since the last successful archiving job.';
+$string['badge_not_ready_help'] = 'This activity is currently not ready to be archived.';
+$string['badge_unsupported_help'] = 'This activity type is currently not supported by the archiving system.';
 $string['hide_unsupported_activities'] = 'Hide unsupported activities';
+$string['show_all_activities'] = 'Show all activities';
 
 // Job management.
 $string['a_archive_jobs'] = '{$a} archive jobs';

@@ -29,6 +29,7 @@ classDiagram
         +can_be_archived() bool
         +execute_task(task: activity_archiving_task) void
         +get_task_content_metadata(task: activity_archiving_task) task_content_metadata[]
+        +fingerprint() cm_state_fingerprint
         +get_job_create_form(handler: string, cminfo: cm_info) job_create_form
     }
     
@@ -147,3 +148,9 @@ the job is finished, it will be re-executed periodically until it is either fini
 in time, the `get_task_content_metadata()` method can be used to retrieve metadata about the data that is being targeted
 by a specific activity archiving task. This metadata will be processed by the archiving manager and stored inside the
 archive jobs metadata record.
+
+The `fingerprint()` method creates a hash that represents the current state of the referenced activity. Such
+fingerprints are used to determine if the course module has changed since the last archive job. They are based on a
+minimalistic set of data that guarantees to change whenever the activity is changed in any way (e.g., new quiz attempt,
+regrading, changed questions, ...). The given data must be serializable and is used to calculate the final fingerprint
+hash.

@@ -26,6 +26,7 @@ use archivingmod_quiz\quiz_manager;
 use local_archiving\activity_archiving_task;
 use local_archiving\exception\yield_exception;
 use local_archiving\type\activity_archiving_task_status;
+use local_archiving\type\cm_state_fingerprint;
 use local_archiving\type\task_content_metadata;
 
 // @codingStandardsIgnoreFile
@@ -128,6 +129,39 @@ class archivingmod_quiz_mock extends \local_archiving\driver\archivingmod {
         }
 
         return $res;
+    }
+
+    /**
+     * Returns a fingerprint for the current state of the referenced quiz.
+     *
+     * We use the latest modification time of the quiz itself and the latest
+     * modification time of any attempt inside this quiz to calculate the
+     * fingerprint.
+     *
+     * @return cm_state_fingerprint Fingerprint for the current state of the
+     * referenced course module
+     * @throws \JsonException On JSON encoding errors
+     * @throws \coding_exception If the fingerprint calculation fails
+     * @throws \dml_exception On database errors
+     */
+    #[\Override]
+    public function fingerprint(): cm_state_fingerprint {
+        global $DB;
+
+        // Get the latest modification time of any attempt indide this quiz as well as the quiz itself.
+        $quiztimemodified = $DB->get_field('quiz', 'timemodified', ['id' => $this->quizid], MUST_EXIST);
+
+        $attempttimemodified = $DB->get_field_sql(
+            "SELECT MAX(timemodified) FROM {quiz_attempts} WHERE quiz = :quizid",
+            ['quizid' => $this->quizid],
+            MUST_EXIST
+        );
+
+        // Calculate the fingerprint.
+        return cm_state_fingerprint::generate([
+            'quiztimemodified' => $quiztimemodified,
+            'attempttimemodified' => $attempttimemodified,
+        ]);
     }
 
 }

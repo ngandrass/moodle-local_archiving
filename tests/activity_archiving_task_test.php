@@ -606,4 +606,50 @@ final class activity_archiving_task_test extends \advanced_testcase {
         $this->assertSame('testfile.txt', $fileinfo->filename, 'Filename should match provided name');
     }
 
+    /**
+     * Tests checking for existing fingerprints in activity archiving tasks.
+     *
+     * @covers \local_archiving\activity_archiving_task
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_fingerprint_exists(): void {
+        // Prepare.
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $ctx = \context_module::instance($cm->cmid);
+        $driver = \local_archiving\driver\factory::activity_archiving_driver('quiz', $ctx);
+
+        // There should be no fingerprint for a freshly created cm.
+        $this->assertFalse(
+            activity_archiving_task::fingerprint_exists($ctx, $driver->fingerprint()),
+            'No fingerprint should exist for a fresh cm without any activity archiving tasks'
+        );
+
+        // Uncompleted tasks should not be considered as existing fingerprints by default.
+        $task = $this->generator()->create_activity_archiving_task();
+        $this->assertFalse(
+            activity_archiving_task::fingerprint_exists($task->get_context(), $task->get_fingerprint()),
+            'Fingerprint should not be considered as existing for uncompleted tasks'
+        );
+
+        // We should be able to force the fingerprint check to ignore task status.
+        $this->assertTrue(activity_archiving_task::fingerprint_exists(
+            $task->get_context(),
+            $task->get_fingerprint(),
+            requiresuccess: false
+        ), 'Fingerprint should be considered as existing when ignoring task status');
+
+        // Once the task is completed, the fingerprint should be considered as existing.
+        $task->set_status(activity_archiving_task_status::FINISHED);
+        $this->assertTrue(
+            activity_archiving_task::fingerprint_exists($task->get_context(), $task->get_fingerprint()),
+            'Fingerprint should be considered as existing for completed tasks'
+        );
+    }
+
 }

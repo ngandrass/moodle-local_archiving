@@ -31,7 +31,8 @@
                 "lastarchived": 1700000000,
                 "supported": true,
                 "enabled": true,
-                "ready": true
+                "ready": true,
+                "dirty": false
             }
         ],
         "jobtablehtml": "generated HTML for the job table"
@@ -83,6 +84,12 @@
                                             {{#str}} archived, local_archiving {{/str}}:
                                             {{#userdate}} {{lastarchived}}, {{#str}} strftimedatetimeshort, core_langconfig {{/str}} {{/userdate}}
                                         </span>
+                                        {{#dirty}}
+                                            <span class="badge badge-danger pb-1 px-2">
+                                            <i class="fa-solid fa-exclamation-triangle"></i>
+                                                {{#str}} new_changes, local_archiving {{/str}}
+                                        </span>
+                                        {{/dirty}}
                                     {{/lastarchived}}
                                     {{^lastarchived}}
                                         <span class="badge badge-warning pb-1 px-2">

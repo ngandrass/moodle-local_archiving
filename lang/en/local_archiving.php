@@ -46,6 +46,7 @@ $string['free_space_unknown'] = 'Free space unknown';
 $string['id'] = 'ID';
 $string['jobid'] = 'Job ID';
 $string['last_updated'] = 'Last updated';
+$string['new_changes'] = 'New changes';
 $string['progress'] = 'Progress';
 $string['ready'] = 'Ready';
 $string['type'] = 'Type';

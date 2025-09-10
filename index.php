@@ -72,6 +72,7 @@ foreach (mod_util::get_cms_with_metadata($courseid, $excludedisabledcms) as $obj
         'ready' => $obj->ready,
         'canbearchived' => $obj->supported && $obj->enabled && $obj->ready,
         'lastarchived' => $obj->lastarchived ?: null,
+        'dirty' => $obj->dirty,
     ];
 }
 

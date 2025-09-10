@@ -64,6 +64,7 @@ final class activity_archiving_task {
      * @param int $taskid ID of this activity archiving task
      * @param int $jobid ID of the archive job this task is associated with
      * @param \context_module $context Moodle context this task is run in
+     * @param cm_state_fingerprint $fingerprint Fingerprint of the course module at task creation
      * @param int $userid ID of the user that owns this task
      * @param string $archivingmodname Name of the activity archiving driver that handles this task
      * @param activity_archiving_task_status $status Status of this task
@@ -115,6 +116,7 @@ final class activity_archiving_task {
      *
      * @param int $jobid ID of the archive job this task is associated with
      * @param \context_module $context Moodle context this task is run in
+     * @param cm_state_fingerprint $cmfingerprint Fingerprint of the course module at task creation
      * @param int $userid ID of the user that owns this task
      * @param string $archivingmodname Name of the activity archiving driver that handles this task
      * @param ?\stdClass $settings Optional task specific settings

@@ -29,7 +29,7 @@ require_once(__DIR__ . '/../../config.php');
 global $OUTPUT, $PAGE;
 
 $courseid = required_param('courseid', PARAM_INT);
-$excludedisabledcms = optional_param('edc', false, PARAM_BOOL);
+$excludedisabledcms = optional_param('edc', true, PARAM_BOOL);
 $ctx = context_course::instance($courseid);
 $course = get_course($courseid);
 

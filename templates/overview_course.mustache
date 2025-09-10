@@ -79,20 +79,35 @@
                             <div>
                                 {{#canbearchived}}
                                     {{#lastarchived}}
-                                        <span class="badge badge-success pb-1 px-2">
+                                        <span
+                                            class="badge badge-success pb-1 px-2"
+                                            title="{{#str}} badge_archived_help, local_archiving {{/str}}"
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                        >
                                             <i class="fa-solid fa-check"></i>
                                             {{#str}} archived, local_archiving {{/str}}:
                                             {{#userdate}} {{lastarchived}}, {{#str}} strftimedatetimeshort, core_langconfig {{/str}} {{/userdate}}
                                         </span>
                                         {{#dirty}}
-                                            <span class="badge badge-danger pb-1 px-2">
+                                            <span
+                                                class="badge badge-danger pb-1 px-2"
+                                                title="{{#str}} badge_new_changes_help, local_archiving {{/str}}"
+                                                data-toggle="tooltip"
+                                                data-placement="top"
+                                            >
                                             <i class="fa-solid fa-exclamation-triangle"></i>
                                                 {{#str}} new_changes, local_archiving {{/str}}
                                         </span>
                                         {{/dirty}}
                                     {{/lastarchived}}
                                     {{^lastarchived}}
-                                        <span class="badge badge-warning pb-1 px-2">
+                                        <span
+                                            class="badge badge-warning pb-1 px-2"
+                                            title="{{#str}} badge_never_archived_help, local_archiving {{/str}}"
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                        >
                                             <i class="fa-solid fa-exclamation-triangle"></i>
                                             {{#str}} never_archived, local_archiving {{/str}}
                                         </span>
@@ -100,27 +115,47 @@
                                 {{/canbearchived}}
                                 {{^canbearchived}}
                                     {{^supported}}
-                                        <span class="badge badge-muted pb-1 px-2">
+                                        <span
+                                            class="badge badge-muted pb-1 px-2"
+                                            title="{{#str}} badge_unsupported_help, local_archiving {{/str}}"
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                        >
                                             <i class="fa-solid fa-bolt"></i>
                                             {{#str}} unsupported, local_archiving {{/str}}
                                         </span>
                                     {{/supported}}
                                     {{#supported}}
                                         {{^enabled}}
-                                            <span class="badge badge-muted pb-1 px-2">
+                                            <span
+                                                class="badge badge-muted pb-1 px-2"
+                                                title="{{#str}} badge_disabled_help, local_archiving {{/str}}"
+                                                data-toggle="tooltip"
+                                                data-placement="top"
+                                            >
                                                 <i class="fa-regular fa-eye-slash"></i>
                                                 {{#str}} disabled, local_archiving {{/str}}
                                             </span>
                                         {{/enabled}}
                                         {{#enabled}}
                                             {{^ready}}
-                                                <span class="badge badge-danger pb-1 px-2">
+                                                <span
+                                                    class="badge badge-danger pb-1 px-2"
+                                                    title="{{#str}} badge_not_ready_help, local_archiving {{/str}}"
+                                                    data-toggle="tooltip"
+                                                    data-placement="top"
+                                                >
                                                     <i class="fa-solid fa-pause"></i>
                                                     {{#str}} not_ready, local_archiving {{/str}}
                                                 </span>
                                             {{/ready}}
                                             {{#ready}}
-                                                <span class="badge badge-danger pb-1 px-2">
+                                                <span
+                                                    class="badge badge-danger pb-1 px-2"
+                                                    title="{{#str}} badge_cannot_be_archived_help, local_archiving {{/str}}"
+                                                    data-toggle="tooltip"
+                                                    data-placement="top"
+                                                >
                                                 <i class="fa-solid fa-bolt"></i>
                                                     {{#str}} cannot_be_archived, local_archiving {{/str}}
                                                 </span>
@@ -141,7 +176,7 @@
             <div class="text-right">
                 <a
                     href="{{{hidedisabledcmsurl}}}"
-                    class="btn btn-sm {{#hidedisabledcms}}btn-primary{{/hidedisabledcms}}{{^hidedisabledcms}}btn-secondary{{/hidedisabledcms}}"
+                    class="btn btn-sm {{#hidedisabledcms}}btn-secondary{{/hidedisabledcms}}{{^hidedisabledcms}}btn-primary{{/hidedisabledcms}}"
                     style="border-top-left-radius: 0; border-top-right-radius: 0;"
                 >
                     {{#hidedisabledcms}}

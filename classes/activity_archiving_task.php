@@ -768,4 +768,35 @@ final class activity_archiving_task {
 
     }
 
+    /**
+     * Determines if an activity archiving task with the given fingerprint already
+     * exists in the given context.
+     *
+     * @param \context_module $ctx Context of the module to check
+     * @param cm_state_fingerprint $fingerprint Fingerprint to check for
+     * @param bool $requiresuccess If true, only tasks with status FINISHED are considered
+     * @return bool
+     * @throws \dml_exception
+     */
+    public static function fingerprint_exists(
+        \context_module $ctx,
+        cm_state_fingerprint $fingerprint,
+        bool $requiresuccess = true
+    ): bool {
+        global $DB;
+
+        // Prepare query.
+        $queryparams = [
+            'contextid' => $ctx->id,
+            'fingerprint' => $fingerprint->get_raw_value(),
+        ];
+
+        if ($requiresuccess) {
+            $queryparams['status'] = activity_archiving_task_status::FINISHED->value;
+        }
+
+        // Execute query to determine if fingerprint exists.
+        return $DB->record_exists(db_table::ACTIVITY_TASK->value, $queryparams);
+    }
+
 }

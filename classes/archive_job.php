@@ -327,6 +327,14 @@ class archive_job {
                 $this->get_logger()->info('Created activity archiving task (driver: '.$drivername.')');
                 $this->set_metadata_entry('activity_archiving_driver', $drivername);
 
+                // Check if we already have a task with the same fingerprint.
+                $this->get_logger()->trace('Activity fingerprint: '.$task->get_fingerprint()->get_raw_value());
+                if (activity_archiving_task::fingerprint_exists($task->get_context(), $task->get_fingerprint())) {
+                    $this->get_logger()->info(
+                        'An archive for the current state of the activity already was created successfully. Continuing anyway ...'
+                    );
+                }
+
                 // Create backup tasks if requested.
                 if ($this->get_setting('export_course_backup')) {
                     $backup = backup_manager::initiate_course_backup($this->courseid, $this->userid);

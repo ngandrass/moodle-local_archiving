@@ -29,6 +29,7 @@ classDiagram
         +can_be_archived() bool
         +execute_task(task: activity_archiving_task) void
         +get_task_content_metadata(task: activity_archiving_task) task_content_metadata[]
+        +fingerprint() cm_state_fingerprint
         +get_job_create_form(handler: string, cminfo: cm_info) job_create_form
     }
     

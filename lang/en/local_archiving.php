@@ -61,6 +61,8 @@ $string['subplugintype_archivingstore'] = 'Storage driver';
 $string['subplugintype_archivingstore_plural'] = 'Storage drivers';
 $string['subplugintype_archivingevent'] = 'External event connector';
 $string['subplugintype_archivingevent_plural'] = 'External event connectors';
+$string['subplugintype_archivingtrigger'] = 'Archiving trigger';
+$string['subplugintype_archivingtrigger_plural'] = 'Archiving triggers';
 
 // Capabilities.
 $string['archiving:view'] = 'View archiving overview page and sub-pages';
@@ -209,6 +211,7 @@ $string['manage_components'] = 'Manage components';
 $string['manage_components_archivingmod_desc'] = 'The activity archiving drivers are responsible for the actual archiving process of a specific Moodle activity. One such driver exists for every Moodle activity that is supported by the archiving system.';
 $string['manage_components_archivingstore_desc'] = 'Storage drivers are responsible for taking a freshly create archive and transferring it to a specific storage location designated for long-term storage or post-processing.';
 $string['manage_components_archivingevent_desc'] = 'External event connectors allow forwarding of specific events within the archiving system to external services, such as campus management systems. This can be used to trigger specific actions in external systems, such as storing the path to an archived exam file for a given student inside a student record.';
+$string['manage_components_archivingtrigger_desc'] = 'Archiving triggers are different ways to start the archiving process for a specific activity. They allow for manual or automated creation of activity archives.';
 $string['error_localpath_must_be_absolute'] = 'Must be an absolute path.';
 $string['error_localpath_cloud_not_be_created'] = 'Could not create directory. Please make sure that the parent directory exists and is writable by the web server user.';
 $string['error_localpath_must_be_directory'] = 'A file with the given name already exists but a directory is expected.';

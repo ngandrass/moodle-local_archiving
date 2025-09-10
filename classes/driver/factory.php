@@ -96,6 +96,26 @@ class factory {
     }
 
     /**
+     * Creates a new instance of the requested archiving trigger
+     *
+     * @param string $archivingtriggername Name of the archivingtrigger to load (e.g., 'manual' for 'archivingtrigger_manual')
+     * @return archivingtrigger Instance of the requested archivingtrigger
+     * @throws \coding_exception If no archivingtrigger with the given name exists
+     */
+    public static function archiving_trigger(string $archivingtriggername): archivingtrigger {
+        // Only use mock drivers in unit tests.
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
+            require_once(__DIR__.'/../../tests/mock/archivingtrigger_manual_mock.php');
+            return new \archivingtrigger_manual_mock();
+        }
+
+        // @codeCoverageIgnoreStart
+        $driverclass = self::get_subplugin_class('archivingtrigger', $archivingtriggername, strict: true);
+        return new $driverclass();
+        // @codeCoverageIgnoreEnd
+    }
+
+    /**
      * Retrieves the given subplugin class name for the given driver type and modname
      *
      * @param string $plugintype Type of the subplugin to look for (e.g., 'archivingmod')

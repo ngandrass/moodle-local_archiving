@@ -15,18 +15,24 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here
+ * Interface definitions for archiving triggers
  *
  * @package     local_archiving
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_archiving\driver;
+
+use local_archiving\trait\subplugin_get_plugin_name;
+
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-$plugin->component = 'local_archiving';
-$plugin->release = '0.1.0';
-$plugin->version = 2025081903;
-$plugin->requires = 2024100700;
-$plugin->supported = [405, 500];
-$plugin->maturity = MATURITY_ALPHA;
+
+/**
+ * Interface for archiving trigger (archivingtrigger) sub-plugins
+ */
+abstract class archivingtrigger extends base {
+
+}

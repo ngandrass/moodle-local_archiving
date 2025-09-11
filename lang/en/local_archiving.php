@@ -68,6 +68,7 @@ $string['subplugintype_archivingtrigger_plural'] = 'Archiving triggers';
 $string['archiving:view'] = 'View archiving overview page and sub-pages';
 $string['archiving:create'] = 'Create new archives';
 $string['archiving:delete'] = 'Delete archives and metadata';
+$string['archiving:bypasscourserestrictions'] = 'Bypass course category restrictions for archiving';
 
 // Archiving overview.
 $string['activity_archiving_list_desc'] = 'Below you can find a list of all activities in this course. Supported activities can be archived by clicking the respective entry in the list. If an activity is not supported, it will be disabled.';

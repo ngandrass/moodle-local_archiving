@@ -50,8 +50,16 @@ $PAGE->set_pagelayout('incourse');
 
 // Build context for page template.
 $archivingenabled = course_util::archiving_enabled_for_course($courseid);
+$archivingenableforced = false;
+if (!$archivingenabled && has_capability('local/archiving:bypasscourserestrictions', $ctx)) {
+    // Archiving is disabled for this course, but the user is allowed to bypass this restriction.
+    $archivingenabled = true;
+    $archivingenableforced = true;
+}
+
 $tplctx = [
     'archivingenabled' => $archivingenabled,
+    'archivingenableforced' => $archivingenableforced,
     'hidedisabledcms' => $excludedisabledcms,
     'hidedisabledcmsurl' => new \moodle_url('/local/archiving/index.php', [
         'courseid' => $courseid,

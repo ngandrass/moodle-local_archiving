@@ -22,6 +22,7 @@
     Example context (json):
     {
         "archivingenabled": true,
+        "archivingenableforced": false,
         "cms": [
             {
                 "name": "Activity name",
@@ -57,6 +58,11 @@
                 <p>
                     {{#str}} activity_archiving_list_desc, local_archiving {{/str}}
                 </p>
+                {{#archivingenableforced}}
+                    <div class="alert alert-warning" role="alert">
+                        {{#str}} archiving_force_allowed_for_course, local_archiving {{/str}}
+                    </div>
+                {{/archivingenableforced}}
                 <div class="list-group" style="border-bottom-right-radius: 0;">
                     {{#cms}}
                         <a

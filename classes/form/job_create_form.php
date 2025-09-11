@@ -78,6 +78,16 @@ class job_create_form extends \moodleform {
     public function definition() {
         $this->definition_header();
 
+        // Prevent form from being displayed if manual archiving is disabled.
+        if (!\local_archiving\driver\factory::archiving_trigger('manual')->is_enabled()) {
+            $this->_form->addElement('html',
+                '<div class="alert alert-warning">'.
+                    get_string('can_not_create_archive_manual_archiving_disabled', 'local_archiving').
+                '</div>'
+            );
+            return;
+        }
+
         // Basic settings.
         $this->_form->addElement('header', 'header_settings', get_string('settings'));
         $this->_form->setExpanded('header_settings', true);

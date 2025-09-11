@@ -58,4 +58,42 @@ class course_util {
         );
     }
 
+    /**
+     * Checks if the given course is in a category that is whitelisted for archiving.
+     *
+     * @param int $courseid ID of the course to check.
+     * @return bool True if archiving is enabled for this course, false otherwise.
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public static function archiving_enabled_for_course(int $courseid): bool {
+        global $DB;
+        $allowedcoursecats = explode(',', get_config('local_archiving', 'coursecat_whitelist'));
+
+        // If top category is allowed, everything is possible!
+        if (in_array(0, $allowedcoursecats)) {
+            return true;
+        }
+
+        // Get the path of the course category this course is in and check if the course is in any of the whitelisted categories.
+        $coursepath = $DB->get_field_sql('
+            SELECT cat.path
+            FROM {course} course JOIN {course_categories} cat ON course.category = cat.id
+            WHERE course.id=:courseid
+            ', ['courseid' => $courseid]);
+        if (!$coursepath) {
+            throw new \moodle_exception('invalidcourseid');
+        }
+
+        $coursecategories = explode('/', trim($coursepath, '/'));
+        foreach ($coursecategories as $coursecategory) {
+            if (in_array($coursecategory, $allowedcoursecats)) {
+                return true;
+            }
+        }
+
+        // No matching category found.
+        return false;
+    }
+
 }

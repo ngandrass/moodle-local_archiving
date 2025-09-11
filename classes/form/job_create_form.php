@@ -27,6 +27,7 @@ namespace local_archiving\form;
 
 use local_archiving\storage;
 use local_archiving\type\archive_filename_variable;
+use local_archiving\util\course_util;
 use local_archiving\util\plugin_util;
 use local_archiving\util\time_util;
 
@@ -77,6 +78,16 @@ class job_create_form extends \moodleform {
     #[\Override]
     public function definition() {
         $this->definition_header();
+
+        // Prevent form from being displayed if archiving is disabled for this course.
+        if (!course_util::archiving_enabled_for_course($this->cminfo->get_course()->id)) {
+            $this->_form->addElement('html',
+                '<div class="alert alert-warning">'.
+                    get_string('archiving_disabled_for_this_course_by_category', 'local_archiving').
+                '</div>'
+            );
+            return;
+        }
 
         // Prevent form from being displayed if manual archiving is disabled.
         if (!\local_archiving\driver\factory::archiving_trigger('manual')->is_enabled()) {

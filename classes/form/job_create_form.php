@@ -340,4 +340,15 @@ class job_create_form extends \moodleform {
         return $data;
     }
 
+    /**
+     * Exports the current raw form data without any validation or cleaning.
+     *
+     * ATTENTION: Use this function with caution. Always use get_data() if possible!
+     *
+     * @return \stdClass Raw, unvalidated form data
+     */
+    public function export_raw_data(): \stdClass {
+        return (object) $this->_form->exportValues();
+    }
+
 }

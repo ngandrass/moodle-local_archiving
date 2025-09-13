@@ -64,6 +64,7 @@ class archive_job {
      * @param int $id ID of this archive job
      * @param \context_module $context Moodle context this archive job is run in
      * @param int $userid ID of the user that owns this job
+     * @param string $trigger Name of the archiving trigger that created this job
      * @param int $timecreated Unix timestamp of creation
      * @param archive_job_status $status Current job status
      */

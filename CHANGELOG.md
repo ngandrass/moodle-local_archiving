@@ -14,6 +14,7 @@
   activities using the button below the table.
 - Replace list of activities with a info message if archiving is disabled for this course / category.
 - Log activity fingerprints during archiving and log an info message if a duplicate archive is about to be created.
+- Fix archive job progress indicator tooltip text
 
 
 ## Version 0.1.0 (2025081900)

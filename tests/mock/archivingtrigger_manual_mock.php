@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Empty event connector mock for unit tests
+ * Manual archiving trigger mock for unit tests
  *
- * @package     archivingmod_quiz
+ * @package     local_archiving
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,9 +28,9 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Empty event connector mock for unit tests
+ * Manual archiving trigger mock for unit tests
  */
-class archivingevent_stub_mock extends \local_archiving\driver\archivingevent {
+class archivingtrigger_manual_mock extends \local_archiving\driver\archivingtrigger {
 
     #[\Override]
     public static function is_ready(): bool {

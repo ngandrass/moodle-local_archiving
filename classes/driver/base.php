@@ -38,6 +38,7 @@ abstract class base {
         'archivingmod',
         'archivingstore',
         'archivingevent',
+        'archivingtrigger',
     ];
 
     /**

@@ -22,6 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_archiving\util\course_util;
 use local_archiving\util\mod_util;
 
 require_once(__DIR__ . '/../../config.php');
@@ -48,7 +49,17 @@ $PAGE->set_url(new \moodle_url(
 $PAGE->set_pagelayout('incourse');
 
 // Build context for page template.
+$archivingenabled = course_util::archiving_enabled_for_course($courseid);
+$archivingenableforced = false;
+if (!$archivingenabled && has_capability('local/archiving:bypasscourserestrictions', $ctx)) {
+    // Archiving is disabled for this course, but the user is allowed to bypass this restriction.
+    $archivingenabled = true;
+    $archivingenableforced = true;
+}
+
 $tplctx = [
+    'archivingenabled' => $archivingenabled,
+    'archivingenableforced' => $archivingenableforced,
     'hidedisabledcms' => $excludedisabledcms,
     'hidedisabledcmsurl' => new \moodle_url('/local/archiving/index.php', [
         'courseid' => $courseid,
@@ -56,24 +67,26 @@ $tplctx = [
     ]),
 ];
 
-foreach (mod_util::get_cms_with_metadata($courseid, $excludedisabledcms) as $obj) {
-    $tplctx['cms'][] = [
-        'id' => $obj->cm->id,
-        'modname' => $obj->cm->modname,
-        'modpurpose' => plugin_supports('mod', $obj->cm->modname, FEATURE_MOD_PURPOSE, MOD_PURPOSE_OTHER) ?: '',
-        'name' => $obj->cm->name,
-        'archiveurl' => new \moodle_url("/local/archiving/archive.php", [
-            'courseid' => $courseid,
-            'cmid' => $obj->cm->id,
-        ]),
-        'iconurl' => $obj->cm->get_icon_url(),
-        'supported' => $obj->supported,
-        'enabled' => $obj->enabled,
-        'ready' => $obj->ready,
-        'canbearchived' => $obj->supported && $obj->enabled && $obj->ready,
-        'lastarchived' => $obj->lastarchived ?: null,
-        'dirty' => $obj->dirty,
-    ];
+if ($archivingenabled) {
+    foreach (mod_util::get_cms_with_metadata($courseid, $excludedisabledcms) as $obj) {
+        $tplctx['cms'][] = [
+            'id' => $obj->cm->id,
+            'modname' => $obj->cm->modname,
+            'modpurpose' => plugin_supports('mod', $obj->cm->modname, FEATURE_MOD_PURPOSE, MOD_PURPOSE_OTHER) ?: '',
+            'name' => $obj->cm->name,
+            'archiveurl' => new \moodle_url("/local/archiving/archive.php", [
+                'courseid' => $courseid,
+                'cmid' => $obj->cm->id,
+            ]),
+            'iconurl' => $obj->cm->get_icon_url(),
+            'supported' => $obj->supported,
+            'enabled' => $obj->enabled,
+            'ready' => $obj->ready,
+            'canbearchived' => $obj->supported && $obj->enabled && $obj->ready,
+            'lastarchived' => $obj->lastarchived ?: null,
+            'dirty' => $obj->dirty,
+        ];
+    }
 }
 
 $jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);

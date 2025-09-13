@@ -95,9 +95,11 @@ class admin_setting_managecomponents extends \admin_setting {
             'archivingmod',
             'archivingstore',
             'archivingevent',
+            'archivingtrigger',
             get_string('subplugintype_archivingmod_plural', 'local_archiving'),
             get_string('subplugintype_archivingstore_plural', 'local_archiving'),
             get_string('subplugintype_archivingevent_plural', 'local_archiving'),
+            get_string('subplugintype_archivingtrigger_plural', 'local_archiving'),
         ];
 
         foreach ($keywords as $keyword) {
@@ -136,6 +138,12 @@ class admin_setting_managecomponents extends \admin_setting {
         $html .= $OUTPUT->heading(get_string('subplugintype_archivingstore_plural', 'local_archiving'), 3, 'border-0 mb-n2');
         $html .= $OUTPUT->paragraph(get_string('manage_components_archivingstore_desc', 'local_archiving'));
         $html .= $this->define_storage_drivers_table();
+        $html .= $OUTPUT->box_end();
+
+        $html .= $OUTPUT->box_start('generalbox');
+        $html .= $OUTPUT->heading(get_string('subplugintype_archivingtrigger_plural', 'local_archiving'), 3, 'border-0 mb-n2');
+        $html .= $OUTPUT->paragraph(get_string('manage_components_archivingtrigger_desc', 'local_archiving'));
+        $html .= $this->define_archiving_triggers_table();
         $html .= $OUTPUT->box_end();
 
         $html .= $OUTPUT->box_start('generalbox');
@@ -334,6 +342,77 @@ class admin_setting_managecomponents extends \admin_setting {
                 \html_writer::link($settingsurl, get_string('settings')),
             ]);
             if (!$storagedriver['enabled']) {
+                $row->attributes['class'] = 'dimmed_text';
+            }
+            $table->data[] = $row;
+        }
+
+        return \html_writer::table($table);
+    }
+
+    /**
+     * Defines the archiving triggers table
+     *
+     * @return string HTML for the archiving triggers table
+     * @throws \coding_exception
+     * @throws moodle_exception
+     */
+    protected function define_archiving_triggers_table() {
+        global $OUTPUT, $PAGE;
+
+        $triggers = plugin_util::get_archiving_triggers();
+
+        // Prepare table structure.
+        $table = new \html_table();
+        $table->id = "{$this->name}table";
+        $table->attributes['class'] = 'admintable generaltable';
+        $table->head = [
+            get_string('name'),
+            get_string('version'),
+            get_string('enable'),
+            get_string('status'),
+            get_string('settings'),
+        ];
+        $table->colclasses = ['leftalign', 'leftalign', 'centeralign', 'centeralign', 'leftalign'];
+        $table->data = [];
+
+        // Add rows to the table.
+        foreach ($triggers as $trigger) {
+            // Enable / disable column.
+            $enableurl = new \moodle_url('/local/archiving/admin/manage.php', [
+                'action' => $trigger['enabled'] ? 'plugindisable' : 'pluginenable',
+                'plugin' => $trigger['component'],
+                'wantsurl' => $PAGE->url,
+            ]);
+            if ($trigger['enabled']) {
+                $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));
+            } else {
+                $enableicon = $OUTPUT->pix_icon('t/show', get_string('enable'));
+            }
+
+            // Status pill.
+            if ($trigger['enabled']) {
+                if ($trigger['ready']) {
+                    $statushtml = '<span class="badge badge-success">'.get_string('ready', 'local_archiving').'</span>';
+                } else {
+                    $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
+                }
+            } else {
+                $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
+            }
+
+            // Settings link.
+            $settingsurl = new \moodle_url('/admin/settings.php', ['section' => $trigger['component']]);
+
+            // Build row.
+            $row = new \html_table_row([
+                $trigger['displayname'],
+                "{$trigger['release']} <span class=\"text-muted\">({$trigger['version']})</span>",
+                \html_writer::link($enableurl, $enableicon),
+                $statushtml,
+                \html_writer::link($settingsurl, get_string('settings')),
+            ]);
+            if (!$trigger['enabled']) {
                 $row->attributes['class'] = 'dimmed_text';
             }
             $table->data[] = $row;

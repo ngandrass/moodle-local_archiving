@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" COMMENT="XMLDB file for Moodle local/archiving" PATH="local/archiving/db" VERSION="2025081902" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" COMMENT="XMLDB file for Moodle local/archiving" PATH="local/archiving/db" VERSION="2025091300" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
     <TABLE NAME="local_archiving_job" COMMENT="Archive jobs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the context this job is run in"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user that initiated this job"/>
+        <FIELD NAME="origin" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Archiving trigger plugin that was used to initiate this job"/>
         <FIELD NAME="status" TYPE="int" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Status of this job"/>
         <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialized JSON object with job settings"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was created"/>
@@ -43,7 +44,7 @@
         <FIELD NAME="fingerprint" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="CM state fingerprint at the point of task creation"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user that initiated this task"/>
         <FIELD NAME="status" TYPE="int" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Status of this job"/>
-        <FIELD NAME="progress" TYPE="number" LENGTH="3" DECIMALS="0" NOTNULL="true" SEQUENCE="false" COMMENT="Task progress in percent (0-100)"/>
+        <FIELD NAME="progress" TYPE="int" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Task progress in percent (0-100)"/>
         <FIELD NAME="wstoken" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="Webservice token that is associated with this task"/>
         <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialized JSON object with optional task settings"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was created"/>

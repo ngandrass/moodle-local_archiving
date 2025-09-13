@@ -58,4 +58,11 @@ $capabilities = [
             'manager' => CAP_ALLOW,
         ],
     ],
+    // Capability to create new archives, regardless of any filters.
+    'local/archiving:bypasscourserestrictions' => [
+        'riskbitmask' => (RISK_PERSONAL),
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => [],
+    ],
 ];

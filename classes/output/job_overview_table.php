@@ -169,7 +169,7 @@ class job_overview_table extends \table_sql {
         $progress = $job->get_progress();
         if ($progress !== null && $progress < 100) {
             // phpcs:ignore
-            $html .= '<span title="'.get_string('progress', 'local_archiving').' alt="'.get_string('progress', 'local_archiving').'" data-toggle="tooltip" data-placement="top">';
+            $html .= '<span title="'.get_string('progress', 'local_archiving').'" alt="'.get_string('progress', 'local_archiving').'" data-toggle="tooltip" data-placement="top">';
             $html .= '<i class="fa fa-spinner"></i>&nbsp;'.$progress.'%';
             $html .= '</span><br/>';
         }

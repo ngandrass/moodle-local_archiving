@@ -67,11 +67,17 @@ if ($form->is_cancelled()) {
 if ($form->is_submitted() && $form->is_validated()) {
     require_capability('local/archiving:create', $ctx);
 
+    // Ensure that manual archive job creation is enabled.
+    if (!\local_archiving\driver\factory::archiving_trigger('manual')->is_enabled()) {
+        // We should never get here if nobody messes with the form. But who knows how creative people might get ;) ...
+        throw new \moodle_exception('manual_job_creation_disabled', 'local_archiving');
+    }
+
     $jobsettings = $form->get_data();
     if (!$jobsettings) {
         throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
     }
-    $job = \local_archiving\archive_job::create($ctx, $USER->id, $jobsettings);
+    $job = \local_archiving\archive_job::create($ctx, $USER->id, 'manual', $jobsettings);
     $job->enqueue();
 
     $html .= $OUTPUT->notification(

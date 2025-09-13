@@ -27,6 +27,7 @@ namespace local_archiving\form;
 
 use local_archiving\storage;
 use local_archiving\type\archive_filename_variable;
+use local_archiving\util\course_util;
 use local_archiving\util\plugin_util;
 use local_archiving\util\time_util;
 
@@ -77,6 +78,36 @@ class job_create_form extends \moodleform {
     #[\Override]
     public function definition() {
         $this->definition_header();
+
+        // Prevent form from being displayed if archiving is disabled for this course.
+        if (!course_util::archiving_enabled_for_course($this->cminfo->get_course()->id)) {
+            if (has_capability('local/archiving:bypasscourserestrictions', $this->cminfo->context)) {
+                // User is allowed to bypass the course archiving restriction. But warn the user about it.
+                $this->_form->addElement('html',
+                    '<div class="alert alert-warning">'.
+                        get_string('archiving_force_allowed_for_course', 'local_archiving').
+                    '</div>'
+                );
+            } else {
+                // User is not allowed to bypass this restriction. Display warning and abort.
+                $this->_form->addElement('html',
+                    '<div class="alert alert-danger">'.
+                        get_string('archiving_disabled_for_this_course_by_category', 'local_archiving').
+                    '</div>'
+                );
+                return;
+            }
+        }
+
+        // Prevent form from being displayed if manual archiving is disabled.
+        if (!\local_archiving\driver\factory::archiving_trigger('manual')->is_enabled()) {
+            $this->_form->addElement('html',
+                '<div class="alert alert-warning">'.
+                    get_string('can_not_create_archive_manual_archiving_disabled', 'local_archiving').
+                '</div>'
+            );
+            return;
+        }
 
         // Basic settings.
         $this->_form->addElement('header', 'header_settings', get_string('settings'));
@@ -307,6 +338,17 @@ class job_create_form extends \moodleform {
         }
 
         return $data;
+    }
+
+    /**
+     * Exports the current raw form data without any validation or cleaning.
+     *
+     * ATTENTION: Use this function with caution. Always use get_data() if possible!
+     *
+     * @return \stdClass Raw, unvalidated form data
+     */
+    public function export_raw_data(): \stdClass {
+        return (object) $this->_form->exportValues();
     }
 
 }

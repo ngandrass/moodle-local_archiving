@@ -27,6 +27,7 @@ namespace local_archiving\util;
 use local_archiving\driver\archivingevent;
 use local_archiving\driver\archivingmod;
 use local_archiving\driver\archivingstore;
+use local_archiving\driver\archivingtrigger;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -125,6 +126,7 @@ class plugin_util {
      * respective metadata
      *
      * @return array List of installed archivingstore plugins
+     * @throws \coding_exception
      */
     public static function get_storage_drivers(): array {
         // Retrieve list of installed archivingstore plugins.
@@ -162,6 +164,7 @@ class plugin_util {
      * respective metadata
      *
      * @return array List of installed archivingevent plugins
+     * @throws \coding_exception
      */
     public static function get_event_connectors(): array {
         // Retrieve list of installed archivingevent plugins.
@@ -177,6 +180,43 @@ class plugin_util {
 
             /** @var archivingevent $pluginclass */
             $pluginclass = \local_archiving\driver\factory::get_subplugin_class('archivingevent', $plugin->name);
+
+            $res[$plugin->name] = [
+                'component' => $plugin->component,
+                'displayname' => $plugin->displayname,
+                'rootdir' => $plugin->rootdir,
+                'class' => $pluginclass,
+                'enabled' => $plugin->is_enabled() ?? false,
+                'ready' => $pluginclass::is_ready() ?? false,
+                'version' => $plugin->versiondb,
+                'release' => $plugin->release,
+            ];
+        }
+
+        return $res;
+    }
+
+    /**
+     * Returns a list of all installed archivingtrigger plugins and their
+     * respective metadata
+     *
+     * @return array List of installed archivingtrigger plugins
+     * @throws \coding_exception
+     */
+    public static function get_archiving_triggers(): array {
+        // Retrieve list of installed archivingevent plugins.
+        $plugins = \core_plugin_manager::instance()->get_plugins_of_type('archivingtrigger');
+        $res = [];
+
+        // Iterate over all plugins and collect their metadata.
+        foreach ($plugins as $plugin) {
+            if (!$plugin->rootdir) {
+                // Skip plugins with missing sources.
+                continue;
+            }
+
+            /** @var archivingtrigger $pluginclass */
+            $pluginclass = \local_archiving\driver\factory::get_subplugin_class('archivingtrigger', $plugin->name);
 
             $res[$plugin->name] = [
                 'component' => $plugin->component,

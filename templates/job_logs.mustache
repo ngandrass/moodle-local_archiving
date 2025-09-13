@@ -23,6 +23,7 @@
     {
         "job": {
             "id": 1,
+            "triggername": "Manual",
             "status": {
                 "text": "Completed",
                 "help": "The job has been completed.",
@@ -57,6 +58,10 @@
                     <tr>
                         <td>{{#str}} jobid, local_archiving {{/str}}</td>
                         <td>{{job.id}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{#str}} trigger, local_archiving {{/str}}</td>
+                        <td>{{job.triggername}}</td>
                     </tr>
                     <tr>
                         <td>{{#str}} status {{/str}}</td>

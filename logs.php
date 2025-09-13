@@ -56,6 +56,7 @@ echo $OUTPUT->header();
 echo $renderer->render_from_template('local_archiving/job_logs', [
     'job' => [
         'id' => $job->get_id(),
+        'triggername' => get_string('pluginname', 'archivingtrigger_' . $job->get_trigger()) ?: $job->get_trigger(),
         'status' => $job->get_status()->status_display_args(),
         'completed' => $job->is_completed(),
         'timecreated' => $job->get_timecreated(),

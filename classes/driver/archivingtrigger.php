@@ -15,31 +15,24 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Empty event connector mock for unit tests
+ * Interface definitions for archiving triggers
  *
- * @package     archivingmod_quiz
+ * @package     local_archiving
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_archiving\driver;
 
-// @codingStandardsIgnoreFile
+use local_archiving\trait\subplugin_get_plugin_name;
+
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Empty event connector mock for unit tests
+ * Interface for archiving trigger (archivingtrigger) sub-plugins
  */
-class archivingevent_stub_mock extends \local_archiving\driver\archivingevent {
-
-    #[\Override]
-    public static function is_ready(): bool {
-        return true;
-    }
-
-    #[\Override]
-    public function is_enabled(): bool {
-        return true;
-    }
+abstract class archivingtrigger extends base {
 
 }

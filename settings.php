@@ -22,6 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_archiving\local\admin\setting\admin_setting_coursecat_multiselect;
 use local_archiving\local\admin\setting\admin_setting_managecomponents;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
 use local_archiving\storage;
@@ -65,6 +66,12 @@ if ($hassiteconfig) {
             get_string('setting_log_level_desc', 'local_archiving'),
             log_level::INFO->value,
             array_combine(log_level::values(), log_level::keys())
+        ));
+
+        // Common: Course categories.
+        $commonpage->add(new admin_setting_coursecat_multiselect('local_archiving/coursecat_whitelist',
+            get_string('setting_coursecat_whitelist', 'local_archiving'),
+            get_string('setting_coursecat_whitelist_desc', 'local_archiving'),
         ));
 
         // Common: Job Presets.

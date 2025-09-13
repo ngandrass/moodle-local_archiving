@@ -2,11 +2,13 @@
     "plugintypes": {
         "archivingmod": "local/archiving/driver/mod",
         "archivingstore": "local/archiving/driver/store",
-        "archivingevent": "local/archiving/driver/event"
+        "archivingevent": "local/archiving/driver/event",
+        "archivingtrigger": "local/archiving/driver/trigger"
     },
     "subplugintypes": {
         "archivingmod": "driver/mod",
         "archivingstore": "driver/store",
-        "archivingevent": "driver/event"
+        "archivingevent": "driver/event",
+        "archivingtrigger": "driver/trigger"
     }
 }

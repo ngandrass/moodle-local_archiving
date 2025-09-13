@@ -96,6 +96,7 @@ final class archive_job_test extends \advanced_testcase {
         $createdjob = archive_job::create(
             context: $ctx,
             userid: get_admin()->id,
+            trigger: 'manual',
             settings: $settings,
             cleansettings: true
         );

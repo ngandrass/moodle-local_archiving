@@ -13,3 +13,9 @@
 [submodule "driver/event/apistub"]
 	path = driver/event/apistub
 	url = git@github.com:ngandrass/moodle-archivingevent_apistub.git
+[submodule "driver/trigger/manual"]
+	path = driver/trigger/manual
+	url = git@github.com:ngandrass/moodle-archivingtrigger_manual.git
+[submodule "driver/trigger/cron"]
+	path = driver/trigger/cron
+	url = git@github.com:ngandrass/moodle-archivingtrigger_cron.git

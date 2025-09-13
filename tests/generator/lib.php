@@ -53,6 +53,7 @@ class local_archiving_generator extends \testing_data_generator {
         $jobdefaults = [
             'context' => context_module::instance($cm->cmid),
             'userid' => $USER->id,
+            'trigger' => 'manual',
             'settings' => (object) ['foo' => 'bar'],
             'cleansettings' => true,
         ];
@@ -62,6 +63,7 @@ class local_archiving_generator extends \testing_data_generator {
         return archive_job::create(
             context: $data['context'],
             userid: $data['userid'],
+            trigger: $data['trigger'],
             settings: $data['settings'],
             cleansettings: $data['cleansettings']
         );

@@ -74,6 +74,8 @@ class archive_job {
         protected readonly \context_module $context,
         /** @var int $userid ID of the user that owns this job */
         protected readonly int $userid,
+        /** @var string Name of the archiving trigger that created this job */
+        protected readonly string $trigger,
         /** @var int $timecreated Unix timestamp of creation */
         protected readonly int $timecreated,
         /** @var archive_job_status $status Current job status */
@@ -110,6 +112,7 @@ class archive_job {
      *
      * @param \context $context Context this job is run in
      * @param int $userid ID of the user that owns this job
+     * @param string $trigger Name of the archiving trigger that creates this job
      * @param \stdClass $settings Job settings object
      * @param bool $cleansettings If true, the settings object will be cleared from any mform stuff
      * @return archive_job Created archive job instance
@@ -120,6 +123,7 @@ class archive_job {
     public static function create(
         \context $context,
         int $userid,
+        string $trigger,
         \stdClass $settings,
         bool $cleansettings = true
     ): archive_job {
@@ -145,13 +149,14 @@ class archive_job {
         $id = $DB->insert_record(db_table::JOB->value, [
             'contextid' => $context->id,
             'userid' => $userid,
+            'origin' => $trigger,
             'status' => $jobstatus->value,
             'settings' => json_encode($settings),
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
 
-        return new self($id, $context, $userid, $now, $jobstatus);
+        return new self($id, $context, $userid, $trigger, $now, $jobstatus);
     }
 
     /**
@@ -172,7 +177,7 @@ class archive_job {
             throw new \moodle_exception('invalid_context', 'local_archiving');
         }
 
-        return new self($job->id, $context, $job->userid, $job->timecreated, archive_job_status::from($job->status));
+        return new self($job->id, $context, $job->userid, $job->origin, $job->timecreated, archive_job_status::from($job->status));
     }
 
     /**
@@ -308,7 +313,8 @@ class archive_job {
             // Queued -> Pre-Processing.
             if ($this->get_status(usecached: true) == archive_job_status::QUEUED) {
                 $this->get_logger()->trace(
-                    "Initialized new archive job. Settings: \r\n".json_encode($this->get_settings(), JSON_PRETTY_PRINT)
+                    "Initialized new archive job. Trigger: {$this->trigger} - Settings: \r\n".
+                    json_encode($this->get_settings(), JSON_PRETTY_PRINT)
                 );
 
                 $this->set_status(archive_job_status::PRE_PROCESSING);
@@ -658,6 +664,15 @@ class archive_job {
      */
     public function get_userid(): int {
         return $this->userid;
+    }
+
+    /**
+     * Retrieves tha name of the archiving trigger plugin that created this job
+     *
+     * @return string Name of the archiving trigger plugin that created this job
+     */
+    public function get_trigger(): string {
+        return $this->trigger;
     }
 
     /**

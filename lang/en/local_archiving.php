@@ -49,6 +49,7 @@ $string['last_updated'] = 'Last updated';
 $string['new_changes'] = 'New changes';
 $string['progress'] = 'Progress';
 $string['ready'] = 'Ready';
+$string['trigger'] = 'Trigger';
 $string['type'] = 'Type';
 $string['unconfigured'] = 'Unconfigured';
 $string['used'] = 'Used';

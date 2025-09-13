@@ -6,6 +6,8 @@
   they belong to.
 - Introduce a new capability (`local/archiving:bypasscourserestrictions`) to allow certain users to bypass any course
   category restrictions and create new archives nonetheless.
+- Define archiving trigger sub-plugin interface for creating new archive jobs.
+- Store and display the trigger source for archive jobs.
 - Introduce activity fingerprints to determine if an activity has changed since the last successful archiving job.
 - Show a warning badge in the archiving overview page if an activity was previously archived but had changes since the
   last run.

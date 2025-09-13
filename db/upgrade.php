@@ -43,28 +43,5 @@ function xmldb_local_archiving_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2025081902) {
-        // Define field fingerprint to be added to local_archiving_activity_task.
-        $table = new xmldb_table('local_archiving_activity_task');
-        $field = new xmldb_field(
-            'fingerprint',
-            XMLDB_TYPE_CHAR,
-            '64',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            str_repeat('0', 64),
-            'timemodified'
-        );
-
-        // Conditionally launch add field fingerprint.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Archiving savepoint reached.
-        upgrade_plugin_savepoint(true, 2025081902, 'local', 'archiving');
-    }
-
     return true;
 }

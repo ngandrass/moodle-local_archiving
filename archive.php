@@ -77,7 +77,7 @@ if ($form->is_submitted() && $form->is_validated()) {
     if (!$jobsettings) {
         throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
     }
-    $job = \local_archiving\archive_job::create($ctx, $USER->id, $jobsettings);
+    $job = \local_archiving\archive_job::create($ctx, $USER->id, 'manual', $jobsettings);
     $job->enqueue();
 
     $html .= $OUTPUT->notification(

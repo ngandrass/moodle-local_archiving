@@ -24,6 +24,8 @@
 
 namespace local_archiving\util;
 
+use core_course_category;
+
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -94,6 +96,32 @@ class course_util {
 
         // No matching category found.
         return false;
+    }
+
+    /**
+     * Returns a list of all course categories that are whitelisted for archiving.
+     *
+     * The result includes all child categories of whitelisted categories.
+     *
+     * @return int[] List of course category IDs that are whitelisted for archiving.
+     * @throws \dml_exception
+     */
+    public static function get_archivable_course_category_ids(): array {
+        $allowedcoursecats = explode(',', get_config('local_archiving', 'coursecat_whitelist'));
+
+        // Return all course category IDs if the top category is allowed.
+        if (in_array(0, $allowedcoursecats)) {
+            return core_course_category::top()->get_all_children_ids();
+        }
+
+        // Get all allowed paths from the db.
+        $res = [];
+        $cats = core_course_category::get_many($allowedcoursecats);
+        foreach ($cats as $cat) {
+            $res = array_merge($res, [$cat->id], $cat->get_all_children_ids());
+        }
+
+        return array_unique($res);
     }
 
 }

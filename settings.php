@@ -60,6 +60,14 @@ if ($hassiteconfig) {
             PARAM_INT
         ));
 
+        // Common: Max concurrent jobs.
+        $commonpage->add(new admin_setting_configtext('local_archiving/max_concurrent_jobs',
+            get_string('setting_max_concurrent_jobs', 'local_archiving'),
+            get_string('setting_max_concurrent_jobs_desc', 'local_archiving'),
+            '5',
+            PARAM_INT
+        ));
+
         // Common: Log level.
         $commonpage->add(new admin_setting_configselect('local_archiving/log_level',
             get_string('setting_log_level', 'local_archiving'),

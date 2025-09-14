@@ -260,6 +260,25 @@ class archive_job {
     }
 
     /**
+     * Calculates the number of archive jobs that are currently being actively
+     * processed based on their status values.
+     *
+     * @return int Number of active archive jobs
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function get_active_job_count(): int {
+        global $DB;
+
+        // Prepare query.
+        $activestatusvalues = array_map(fn ($s) => $s->value, archive_job_status::get_active_states());
+        [$insql, $inparams] = $DB->get_in_or_equal($activestatusvalues);
+
+        // Count number of archive jobs with an active status.
+        return $DB->count_records_sql("SELECT COUNT(1) FROM {local_archiving_job} WHERE status {$insql}", $inparams);
+    }
+
+    /**
      * Main processing loop. Once the scheduler picks this job from the queue,
      * this function is called. It will be called periodically until this job
      * reached a final state, as indicated by is_completed().
@@ -313,6 +332,16 @@ class archive_job {
 
             // Queued -> Pre-Processing.
             if ($this->get_status(usecached: true) == archive_job_status::QUEUED) {
+                // Check if there is space to run this job.
+                // Yes, counting the active jobs without a global lock imposes a race condition. However, there is no big danger in
+                // having an additional job running. Should only be a problem if multiple cron workers are used and we can solve
+                // this once it becomes an issue.
+                $joblimit = get_config('local_archiving', 'max_concurrent_jobs') ?: 5;
+                if (self::get_active_job_count() >= $joblimit) {
+                    $this->get_logger()->info("Maximum number of {$joblimit} concurrent archive jobs reached. Waiting ...");
+                    throw new yield_exception();
+                }
+
                 $this->get_logger()->trace(
                     "Initialized new archive job. Trigger: {$this->trigger} - Settings: \r\n".
                     json_encode($this->get_settings(), JSON_PRETTY_PRINT)
@@ -757,15 +786,7 @@ class archive_job {
      * @return bool True if this job reached a final state
      */
     public function is_completed(): bool {
-        switch ($this->get_status()) {
-            case archive_job_status::COMPLETED:
-            case archive_job_status::DELETED:
-            case archive_job_status::TIMEOUT:
-            case archive_job_status::FAILURE:
-                return true;
-            default:
-                return false;
-        }
+        return $this->get_status()->is_final();
     }
 
     /**

@@ -11,6 +11,9 @@
 - Introduce activity fingerprints to determine if an activity has changed since the last successful archiving job.
 - Show a warning badge in the archiving overview page if an activity was previously archived but had changes since the
   last run.
+- Make the number of archive jobs that can actively be run in parallel configurable via an admin setting. Once the
+  concurrency limit is reached, new jobs can still be queued but won't be executed until at least one active job
+  finishes.
 - Create help tooltips for all status badges on the activity archiving overview page.
 - Hide unsupported or disabled activities from the archiving overview page by default. Users can still list all
   activities using the button below the table.

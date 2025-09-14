@@ -757,15 +757,7 @@ class archive_job {
      * @return bool True if this job reached a final state
      */
     public function is_completed(): bool {
-        switch ($this->get_status()) {
-            case archive_job_status::COMPLETED:
-            case archive_job_status::DELETED:
-            case archive_job_status::TIMEOUT:
-            case archive_job_status::FAILURE:
-                return true;
-            default:
-                return false;
-        }
+        return $this->get_status()->is_final();
     }
 
     /**

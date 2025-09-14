@@ -87,6 +87,56 @@ enum archive_job_status: int {
     case UNKNOWN = 255;
 
     /**
+     * Retrieves all archive job states that are considered final, i.e. will not
+     * change anymore in the future.
+     *
+     * @return archive_job_status[] List of final states
+     */
+    public static function get_final_states(): array {
+        return [
+            self::COMPLETED,
+            self::DELETED,
+            self::TIMEOUT,
+            self::FAILURE,
+        ];
+    }
+
+    /**
+     * Retrieves all archive job states that are considered active, i.e. the job
+     * is currently being processed.
+     *
+     * @return archive_job_status[] List of active states
+     */
+    public static function get_active_states(): array {
+        return [
+            self::PRE_PROCESSING,
+            self::ACTIVITY_ARCHIVING,
+            self::BACKUP_COLLECTION,
+            self::POST_PROCESSING,
+            self::STORE,
+            self::SIGN,
+            self::CLEANUP,
+            self::ERROR,
+            self::RECOVERABLE_ERROR,
+            self::ERROR_HANDLING,
+            self::UNKNOWN,
+        ];
+    }
+
+    /**
+     * Retrieves all archive job states that are considered idle, i.e. the job
+     * exists, is not finished yet, but is not currently being processed.
+     *
+     * @return archive_job_status[] List of idle states
+     */
+    public static function get_idle_states(): array {
+        return [
+            self::UNINITIALIZED,
+            self::QUEUED,
+        ];
+    }
+
+    /**
      * Returns the localized string representation of the given archive job
      * status value
      *
@@ -149,6 +199,36 @@ enum archive_job_status: int {
             'help' => $this->help(),
             'color' => $this->color(),
         ];
+    }
+
+    /**
+     * Checks whether this status is final, i.e. will not change anymore
+     * in the future
+     *
+     * @return bool True if the status is final, false otherwise
+     */
+    public function is_final(): bool {
+        return in_array($this, self::get_final_states(), true);
+    }
+
+    /**
+     * Checks whether this status is active, i.e. the job is currently being
+     * processed
+     *
+     * @return bool True if the status is active, false otherwise
+     */
+    public function is_active(): bool {
+        return in_array($this, self::get_active_states(), true);
+    }
+
+    /**
+     * Checks whether this status is idle, i.e. the job exists, is not finished
+     * yet, but is also not currently being processed
+     *
+     * @return bool True if the status is idle, false otherwise
+     */
+    public function is_idle(): bool {
+        return in_array($this, self::get_idle_states(), true);
     }
 
 }

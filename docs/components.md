@@ -49,13 +49,35 @@ Archiving storage driver for storing data on the local filesystem.
 !!! github "GitHub Repository"
     [https://github.com/ngandrass/moodle-archivingstore_localdir](https://github.com/ngandrass/moodle-archivingstore_localdir)
 
-
 ### Moodledata (`archivingstorage_moodle`)
 
 Archiving storage driver for storing archived data inside the Moodle file store.
 
 !!! github "GitHub Repository"
     [https://github.com/ngandrass/moodle-archivingstore_moodle](https://github.com/ngandrass/moodle-archivingstore_moodle)
+
+
+## Archiving Triggers
+
+Archiving triggers are responsible for creating new archive jobs based on specific events or conditions. This can be,
+for example, a manual trigger by a user or an automatic trigger that is based on a configurable schedule. Multiple
+archiving triggers can be used simultaneously, e.g., to allow both manual on-demand archive creation but also initiate
+archiving for all activities that have unarchived changes every night.
+
+### Manual Trigger (`archivingtrigger_manual`)
+
+This trigger allows users to manually create new archive jobs for specific activities on-demand.
+
+!!! github "GitHub Repository"
+    [https://github.com/ngandrass/moodle-archivingtrigger_manual](https://github.com/ngandrass/moodle-archivingtrigger_manual)
+
+### Scheduled Trigger (`archivingtrigger_cron`)
+
+This trigger automatically creates new archive jobs for all activities that have unarchived changes and are located
+within any of the specified course categories for archiving. Archive jobs are created based on a configurable schedule.
+
+!!! github "GitHub Repository"
+    [https://github.com/ngandrass/moodle-archivingtrigger_cron](https://github.com/ngandrass/moodle-archivingtrigger_cron)
 
 
 ## External Event Connectors

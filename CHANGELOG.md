@@ -21,6 +21,8 @@
 - Log activity fingerprints during archiving and log an info message if a duplicate archive is about to be created.
 - Fix archive job progress indicator tooltip text
 - Fix database field type for archive job progress
+- Add created default archive trigger plugins to plugin overview in the docs
+- Add archiving trigger sub-plugin component and API descriptions to developer docs
 
 
 ## Version 0.1.0 (2025081900)

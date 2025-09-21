@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 0.2.0 (2025092100)
 
 Listed changes are split into categories, reflecting the affected component / (sub-) plugin.
 

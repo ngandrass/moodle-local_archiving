@@ -2,6 +2,10 @@
 
 ## Version X.Y.Z (YYYYMMDDXX)
 
+Listed changes are split into categories, reflecting the affected component / (sub-) plugin.
+
+### Archiving Core (`local_archiving`)
+
 - Create a global course category whitelist that allows to enable / disable archiving for courses, based on the category
   they belong to.
 - Introduce a new capability (`local/archiving:bypasscourserestrictions`) to allow certain users to bypass any course
@@ -23,6 +27,44 @@
 - Fix database field type for archive job progress
 - Add created default archive trigger plugins to plugin overview in the docs
 - Add archiving trigger sub-plugin component and API descriptions to developer docs
+
+### Sub-Plugins
+
+#### Activity Archiving Driver: Quiz (`archivingmod_quiz`)
+
+- Implement course module state fingerprinting based on quiz and attempt modification times
+- Adapt test data generator to new archiving trigger API
+- Add Moodle plugin CI for all supported Moodle versions
+
+#### Activity Archiving Driver: Assign (`archivingmod_assign`)
+
+- Add stub implementation for cm state fingerprinting
+- Add Moodle plugin CI for all supported Moodle versions
+
+#### Storage Driver: Local Directory (`archivingstore_localdir`)
+
+- Add Moodle plugin CI for all supported Moodle versions
+
+#### Storage Driver: Moodle Filestore (`archivingstore_moodle`)
+
+- Add Moodle plugin CI for all supported Moodle versions
+
+#### Archiving Trigger: Manual (´archivingtrigger_manual`)
+
+- Create plain archiving trigger for manually creating archive jobs via the UI of the core component
+- Add Moodle plugin CI for all supported Moodle versions
+
+#### Archiving Trigger: Scheduled (`archivingtrigger_cron`)
+
+- Automatically create archive jobs for all activities that have unarchived changes and are located within any of the
+  specified course categories for archiving.
+- Configurable time interval for how often the automatic archiving process should run.
+- Dry-run mode to simulate the automatic archiving process without actually creating any archive jobs.
+- Add Moodle plugin CI for all supported Moodle versions
+
+#### External Event Connector: API Stub (`archivingevent_apistub`)
+
+- Add Moodle plugin CI for all supported Moodle versions
 
 
 ## Version 0.1.0 (2025081900)

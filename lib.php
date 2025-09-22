@@ -128,6 +128,13 @@ function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $f
     $filename = array_pop($args);
     $filepath = '/'.implode('/', $args).'/';
 
+    // Stop here if we are running unit tests because the following functions send output and stop execution.
+    if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
+        return 'PHPUNIT_TEST';
+    }
+
+    // @codeCoverageIgnoreStart
+
     // Catch virtual files.
     if ($filearea == filearea::TSP) {
         try {
@@ -155,4 +162,6 @@ function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $f
 
     send_stored_file($file, 0, 0, $forcedownload, $options);
     return true;
+
+    // @codeCoverageIgnoreEnd
 }

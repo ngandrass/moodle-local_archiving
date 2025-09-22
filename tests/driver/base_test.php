@@ -89,6 +89,10 @@ final class base_test extends \advanced_testcase {
                 'subplugintype' => 'archivingevent',
                 'isvalid' => true,
             ],
+            "Archiving trigger (archivingtrigger)" => [
+                'subplugintype' => 'archivingtrigger',
+                'isvalid' => true,
+            ],
             "Invalid sub-plugin type (invalidtype)" => [
                 'subplugintype' => 'invalidtype',
                 'isvalid' => false,

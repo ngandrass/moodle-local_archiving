@@ -96,14 +96,7 @@ final class local_archiving_lib_test extends \advanced_testcase {
         $this->setUser($user);
 
         // Enrol user into course.
-        $enrol = enrol_get_plugin('manual');
-        $enrolinstances = enrol_get_instances($course->id, true);
-        foreach ($enrolinstances as $instance) {
-            if ($instance->enrol === 'manual') {
-                $enrol->enrol_user($instance, $user->id, $instance->roleid);
-                break;
-            }
-        }
+        $generator->enrol_user($user->id, $course->id);
 
         // Create module and get proper cm object.
         $module = $generator->create_module('page', ['course' => $course->id]);
@@ -168,4 +161,5 @@ final class local_archiving_lib_test extends \advanced_testcase {
             forcedownload: false
         ), 'Invalid filearea should return false');
     }
+
 }

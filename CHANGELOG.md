@@ -7,6 +7,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 ### Archiving Core (`local_archiving`)
 
 - Exclude sub-plugins from archiving core PHPUnit coverage calculations.
+- Extend PHPUnit tests to cover latest additions.
 
 ### Sub-Plugins
 

@@ -16,6 +16,7 @@
 
 namespace local_archiving;
 
+use local_archiving\exception\yield_exception;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 use local_archiving\type\log_level;
@@ -121,6 +122,7 @@ final class archive_job_test extends \advanced_testcase {
         $this->assertEquals($ctx->id, $retrievedjob->get_context()->id, 'Context ID should match');
         $this->assertEquals(get_admin()->id, $retrievedjob->get_userid(), 'User ID should match');
         $this->assertEquals($settings, $retrievedjob->get_settings(), 'Settings should match');
+        $this->assertEquals('manual', $retrievedjob->get_trigger(), 'Trigger should match');
     }
 
     /**
@@ -310,6 +312,68 @@ final class archive_job_test extends \advanced_testcase {
 
         $filehandles = file_handle::get_by_jobid($job->get_id());
         $this->assertNotEmpty($filehandles, 'Job should create at least one file handle for the archived content');
+    }
+
+    /**
+     * Tests that an archive job is postponed if the parallelism limit is reached.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_execute_parallelism_limit(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create multiple jobs that currently are in an active state.
+        for ($i = 0; $i < 3; $i++) {
+            $activejob = $this->generator()->create_archive_job([
+                'settings' => (object) [
+                    'export_course_backup' => false,
+                    'export_cm_backup' => false,
+                    'storage_driver' => 'localdir',
+                ],
+            ]);
+            $activejob->set_status(archive_job_status::PRE_PROCESSING);
+        }
+
+        // Create a new job that waits to be executed.
+        $job = $this->generator()->create_archive_job([
+            'settings' => (object) [
+                'export_course_backup' => false,
+                'export_cm_backup' => false,
+                'storage_driver' => 'localdir',
+            ],
+        ]);
+        $job->set_status(archive_job_status::QUEUED);
+
+        // Set the parallelism limit to 3.
+        set_config('max_concurrent_jobs', 3, 'local_archiving');
+
+        // Try to complete the job.
+        try {
+            $job->execute();
+        } catch (yield_exception) { // phpcs:ignore
+            // We expect a yield exception here because the job should not be able to proceed.
+        }
+
+        // Validate that the job was indeed postponed.
+        $this->assertSame(archive_job_status::QUEUED, $job->get_status(), 'Job should remain in QUEUED status');
+        $this->assertSame(0, $job->get_progress(), 'Job progress should remain at 0%');
+
+        $logs = $job->get_logger()->get_logs();
+        $jobwaitlogged = false;
+        foreach ($logs as $log) {
+            if (str_contains($log->message, 'concurrent archive jobs reached')) {
+                $jobwaitlogged = true;
+                break;
+            }
+        }
+
+        $this->assertTrue($jobwaitlogged, 'Job should have logged that it was postponed.');
     }
 
     /**

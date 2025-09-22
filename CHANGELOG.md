@@ -8,6 +8,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 
 - Exclude sub-plugins from archiving core PHPUnit coverage calculations.
 - Extend PHPUnit tests to cover latest additions.
+- Add missing language strings for storage tier descriptions.
 
 ### Sub-Plugins
 

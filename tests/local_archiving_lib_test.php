@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/local/archiving/lib.php');
  * @copyright 2025 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class lib_test extends \advanced_testcase {
+final class local_archiving_lib_test extends \advanced_testcase {
 
     /**
      * Test navigation node injection for course and module contexts using Moodle generators.
@@ -84,8 +84,8 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test pluginfile serving for valid and invalid fileareas using Moodle generators.
      *
-     * @dataProvider pluginfile_serving_data_provider
      * @covers ::local_archiving_pluginfile
+     * @dataProvider pluginfile_serving_data_provider
      */
     public function test_pluginfile_serving(filearea $filearea) {
         // Prepare test data.

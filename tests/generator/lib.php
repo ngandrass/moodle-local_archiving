@@ -38,16 +38,18 @@ class local_archiving_generator extends \testing_data_generator {
      * Creates a new archive job for a new course with a quiz activity.
      *
      * @param array $params Optional parameters to override defaults.
+     * @param \stdClass|null $course Optional course object to use. If not provided, a new course will be created.
+     * @param \stdClass|null $cm Optional course module object to use. If not provided, a new quiz module will be created.
      * @return archive_job Archive job object ready to be used.
      * @throws dml_exception
      * @throws moodle_exception
      */
-    public function create_archive_job(array $params = []): archive_job {
+    public function create_archive_job(array $params = [], ?\stdClass $course = null, ?\stdClass $cm = null): archive_job {
         global $USER;
 
         // Prepare course and activity.
-        $course = $this->create_course();
-        $cm = $this->create_module('quiz', ['course' => $course->id]);
+        $course = $course ?? $this->create_course();
+        $cm = $cm ?? $this->create_module('quiz', ['course' => $course->id]);
 
         // Prepare archive job data.
         $jobdefaults = [

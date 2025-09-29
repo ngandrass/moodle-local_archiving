@@ -39,7 +39,7 @@ class archivingtrigger_manual_mock extends \local_archiving\driver\archivingtrig
 
     #[\Override]
     public function is_enabled(): bool {
-        return true;
+        return get_config('archivingtrigger_manual', 'enabled') == 1;
     }
 
 }

@@ -14,9 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-// phpcs:ignore
+namespace local_archiving;
+
+use core\exception\moodle_exception;
 use local_archiving\type\filearea;
 
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 global $CFG;
@@ -35,8 +38,12 @@ final class local_archiving_lib_test extends \advanced_testcase {
      * Test navigation node injection for course and module contexts using Moodle generators.
      *
      * @covers ::local_archiving_extend_settings_navigation
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws moodle_exception
      */
-    public function test_extend_settings_navigation_injects_nodes() {
+    public function test_extend_settings_navigation_injects_nodes(): void {
         // Prepare test data.
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
@@ -59,7 +66,7 @@ final class local_archiving_lib_test extends \advanced_testcase {
         role_assign($roleid, $user->id, $modulecontext->id);
 
         // Use a real settings_navigation object with a dummy page.
-        $page = new moodle_page();
+        $page = new \moodle_page();
         $page->set_context($coursecontext);
         $settingsnav = new \settings_navigation($page);
         // Add dummy parent nodes for test injection.
@@ -86,8 +93,13 @@ final class local_archiving_lib_test extends \advanced_testcase {
      *
      * @covers ::local_archiving_pluginfile
      * @dataProvider pluginfile_serving_data_provider
+     *
+     * @param filearea $filearea The filearea to test.
+     * @return void
+     * @throws \coding_exception
+     * @throws \moodle_exception
      */
-    public function test_pluginfile_serving(filearea $filearea) {
+    public function test_pluginfile_serving(filearea $filearea): void {
         // Prepare test data.
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
@@ -147,9 +159,9 @@ final class local_archiving_lib_test extends \advanced_testcase {
      * @covers ::local_archiving_pluginfile
      *
      * @return void
-     * @throws coding_exception
-     * @throws moodle_exception
-     * @throws required_capability_exception
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
      */
     public function test_pluginfile_serving_invalid_type(): void {
         $this->assertFalse(local_archiving_pluginfile(

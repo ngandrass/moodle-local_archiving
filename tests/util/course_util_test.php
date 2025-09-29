@@ -46,8 +46,12 @@ final class course_util_test extends \advanced_testcase {
      * Tests user group retrieval in various scenarios.
      *
      * @covers \local_archiving\util\course_util
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
-    public function test_get_user_groups() {
+    public function test_get_user_groups(): void {
         // Prepare a course with groups and users.
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();

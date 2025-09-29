@@ -44,9 +44,13 @@ final class time_util_test extends \advanced_testcase {
      * Test conversion of seconds to short human-readable representations.
      *
      * @dataProvider human_readable_data_provider
-     * @covers \local_archiving\util\time_util
+     * @covers       \local_archiving\util\time_util
+     *
+     * @param int $duration Duration in seconds.
+     * @param string $expected Expected human-readable string.
+     * @return void
      */
-    public function test_duration_to_human_readable(int $duration, string $expected) {
+    public function test_duration_to_human_readable(int $duration, string $expected): void {
         $this->assertEquals($expected, time_util::duration_to_human_readable($duration));
     }
 
@@ -77,9 +81,14 @@ final class time_util_test extends \advanced_testcase {
      * Test conversion of seconds to largest fitting time unit.
      *
      * @dataProvider duration_to_unit_data_provider
-     * @covers \local_archiving\util\time_util
+     * @covers       \local_archiving\util\time_util
+     *
+     * @param int $duration Duration in seconds.
+     * @param array $expected Expected [value, unit] combination.
+     * @return void
+     * @throws \coding_exception
      */
-    public function test_duration_to_unit(int $duration, array $expected) {
+    public function test_duration_to_unit(int $duration, array $expected): void {
         $this->assertEquals($expected, time_util::duration_to_unit($duration));
     }
 

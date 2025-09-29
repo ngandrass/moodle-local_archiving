@@ -1,0 +1,18 @@
+{
+    "courseid": "28",
+    "cmid": "92",
+    "mform_isexpanded_id_header_settings": "1",
+    "mform_isexpanded_id_header_advanced_settings": "1",
+    "archive_retention_time": "94608000",
+    "sesskey": "0",
+    "_qf__local_archiving_form_job_create_form": "1",
+    "export_cm_backup": [
+        "0",
+        "1"
+    ],
+    "export_course_backup": "0",
+    "storage_driver": "localdir",
+    "archive_filename_pattern": "archive-${courseid}",
+    "archive_autodelete": "0",
+    "submitbutton": "Create+archive"
+}

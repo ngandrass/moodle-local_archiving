@@ -64,6 +64,7 @@ final class factory_test extends \advanced_testcase {
             'archivingmod_quiz' => ['archivingmod', 'quiz_mock'],
             'archivingstore_moodle' => ['archivingstore', 'moodle_mock'],
             'archivingevent_course' => ['archivingevent', 'course_mock'],
+            'archivingtrigger_manual' => ['archivingtrigger', 'manual_mock'],
         ];
     }
 
@@ -111,6 +112,19 @@ final class factory_test extends \advanced_testcase {
     public function test_event_connector_mock(): void {
         $instance = factory::event_connector('stub');
         $this->assertInstanceOf(\archivingevent_stub_mock::class, $instance, 'Expected mocked event connector instance');
+    }
+
+    /**
+     * Tests creation of a mocked archiving trigger instance.
+     *
+     * @covers \local_archiving\driver\factory
+     *
+     * @return void
+     * @throws \coding_exception
+     */
+    public function test_archiving_trigger_mock(): void {
+        $instance = factory::archiving_trigger('manual');
+        $this->assertInstanceOf(\archivingtrigger_manual_mock::class, $instance, 'Expected mocked archiving trigger instance');
     }
 
 }

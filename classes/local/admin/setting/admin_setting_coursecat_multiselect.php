@@ -45,10 +45,7 @@ class admin_setting_coursecat_multiselect extends \core_admin\local\settings\aut
     public function __construct($name, $visiblename, $description, $allowempty = false) {
         $this->allowempty = $allowempty;
 
-        $choices = array_merge(
-            [0 => get_string('top')],
-            \core_course_category::make_categories_list('', 0, ' / ')
-        );
+        $choices = [0 => get_string('top')] + \core_course_category::make_categories_list('', 0, ' / ');
 
         parent::__construct($name, $visiblename, $description, [0], $choices, [
             'manageurl' => '',
@@ -65,7 +62,7 @@ class admin_setting_coursecat_multiselect extends \core_admin\local\settings\aut
      */
     public function write_setting($data) {
         if (!$this->allowempty) {
-            if (array_keys($data) == ['xxxxx']) {
+            if (empty($data) || array_keys($data) == ['xxxxx']) {
                 return get_string('error_at_least_one_coursecat_required', 'local_archiving');
             }
         }

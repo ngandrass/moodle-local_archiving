@@ -230,10 +230,10 @@ $string['error_at_least_one_coursecat_required'] = 'At least one course category
 $string['storage_tier'] = 'Storage tier';
 $string['storage_tier_LOCAL'] = 'Local';
 $string['storage_tier_LOCAL_help'] = 'Data is stored locally on the server or is accessible very fast.';
-$string['storage_tier_REMOTE_fast'] = 'Remote (fast)';
-$string['storage_tier_REMOTE_fast_help'] = 'Data is stored on a fast remote server but needs to be fetched before use.';
-$string['storage_tier_REMOTE_slow'] = 'Remote (slow)';
-$string['storage_tier_REMOTE_slow_help'] = 'Data is stored on a slow remote server but needs to be fetched before use.';
+$string['storage_tier_REMOTE_FAST'] = 'Remote (fast)';
+$string['storage_tier_REMOTE_FAST_help'] = 'Data is stored on a fast remote server but needs to be fetched before use.';
+$string['storage_tier_REMOTE_SLOW'] = 'Remote (slow)';
+$string['storage_tier_REMOTE_SLOW_help'] = 'Data is stored on a slow remote server but needs to be fetched before use.';
 $string['storage_usage'] = 'Usage';
 
 // TSP client.

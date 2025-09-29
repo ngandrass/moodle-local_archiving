@@ -104,8 +104,8 @@ class archivingevent extends \core\plugininfo\base {
     #[\Override]
     public function is_enabled() {
         if (!$this->rootdir) {
-            // Plugin missing.
-            return false;
+            // Plugin missing. Should not happen, but ...
+            return false; // @codeCoverageIgnore
         }
 
         if (get_config("archivingevent_{$this->name}", 'enabled') == 1) {
@@ -119,6 +119,7 @@ class archivingevent extends \core\plugininfo\base {
      * Finds all enabled plugins, the result may include missing plugins.
      *
      * @return array|null of enabled plugins $pluginname=>$pluginname, null means unknown
+     * @throws \coding_exception
      */
     #[\Override]
     public static function get_enabled_plugins() {

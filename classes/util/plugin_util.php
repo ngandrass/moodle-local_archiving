@@ -44,6 +44,7 @@ class plugin_util {
      * @param string $type Type of the sub-plugin (e.g., 'archivingmod', 'archivingstore', 'archivingevent')
      * @param string $name Name of the sub-plugin (e.g., 'quiz', 'moodle', 'logstore')
      * @return bool True if the sub-plugin is installed, false otherwise
+     * @throws \coding_exception
      */
     public static function is_subplugin_installed(string $type, string $name): bool {
         return \local_archiving\driver\factory::get_subplugin_class($type, $name, strict: false) !== null;
@@ -54,6 +55,7 @@ class plugin_util {
      * metadata
      *
      * @return array List of installed archivingmod plugins
+     * @throws \coding_exception
      */
     public static function get_activity_archiving_drivers(): array {
         // Retrieve list of installed archivingmod plugins.
@@ -91,6 +93,7 @@ class plugin_util {
      * one of the installed activity archiving driver plugins
      *
      * @return array List of supported activities for archiving
+     * @throws \coding_exception
      */
     public static function get_supported_activities(): array {
         $res = [];
@@ -110,6 +113,7 @@ class plugin_util {
      *
      * @param string $modname Name of the course module
      * @return string|null Name of the chosen driver or null if no driver is available
+     * @throws \coding_exception
      */
     public static function get_archiving_driver_for_cm(string $modname): ?string {
         foreach (self::get_activity_archiving_drivers() as $drivername => $drivermeta) {

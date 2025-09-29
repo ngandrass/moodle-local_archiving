@@ -8,8 +8,8 @@ Listed changes are split into categories, reflecting the affected component / (s
 
 - Fix storage of course category IDs for archiving scope selection.
 - Fix loading of components management admin setting from other contexts.
+- Extend PHPUnit tests to cover latest features and other parts of the archiving core.
 - Exclude sub-plugins from archiving core PHPUnit coverage calculations.
-- Extend PHPUnit tests to cover latest additions.
 - Add missing language strings for storage tier descriptions.
 
 ### Sub-Plugins

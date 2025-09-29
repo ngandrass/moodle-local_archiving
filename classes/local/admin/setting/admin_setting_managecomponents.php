@@ -23,6 +23,8 @@ use core\exception\moodle_exception;
 use local_archiving\storage;
 use local_archiving\util\plugin_util;
 
+require_once($CFG->libdir.'/adminlib.php');
+
 
 /**
  * Admin setting for managing sub-plugins of local_archiving

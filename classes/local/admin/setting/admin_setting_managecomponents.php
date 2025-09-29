@@ -23,7 +23,7 @@ use core\exception\moodle_exception;
 use local_archiving\storage;
 use local_archiving\util\plugin_util;
 
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir.'/adminlib.php'); // @codeCoverageIgnore
 
 
 /**

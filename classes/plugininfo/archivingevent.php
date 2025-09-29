@@ -119,6 +119,7 @@ class archivingevent extends \core\plugininfo\base {
      * Finds all enabled plugins, the result may include missing plugins.
      *
      * @return array|null of enabled plugins $pluginname=>$pluginname, null means unknown
+     * @throws \coding_exception
      */
     #[\Override]
     public static function get_enabled_plugins() {

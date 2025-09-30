@@ -20,8 +20,6 @@ use local_archiving\exception\yield_exception;
 use local_archiving\type\archive_job_status;
 use local_archiving\type\db_table;
 use local_archiving\type\log_level;
-use mod_lti\search\activity;
-use ReflectionClass;
 
 /**
  * Tests for the archive_job class

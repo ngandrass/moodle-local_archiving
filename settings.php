@@ -121,7 +121,7 @@ if ($hassiteconfig) {
             get_string('storage_location', 'local_archiving'),
             get_string('storage_location_help', 'local_archiving'),
             [
-                'value' => 'localdir',
+                'value' => 'moodle',
                 'locked' => false,
             ],
             $storagedriverselects

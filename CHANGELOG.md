@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 0.3.0 (2025101200)
 
 Listed changes are split into categories, reflecting the affected component / (sub-) plugin.
 
@@ -16,19 +16,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 
 ### Sub-Plugins
 
-#### Activity Archiving Driver: Quiz (`archivingmod_quiz`)
-
-#### Activity Archiving Driver: Assign (`archivingmod_assign`)
-
-#### Storage Driver: Local Directory (`archivingstore_localdir`)
-
-#### Storage Driver: Moodle Filestore (`archivingstore_moodle`)
-
-#### Archiving Trigger: Manual (`archivingtrigger_manual`)
-
-#### Archiving Trigger: Scheduled (`archivingtrigger_cron`)
-
-#### External Event Connector: API Stub (`archivingevent_apistub`)
+No sub-plugin changes in this release.
 
 
 ## Version 0.2.0 (2025092100)

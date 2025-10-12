@@ -29,7 +29,6 @@ namespace local_archiving\exception;
  * Tests for the yield_exception.
  */
 final class yield_exception_test extends \advanced_testcase {
-
     /**
      * Tests creation of a default yield_exception.
      *
@@ -42,5 +41,4 @@ final class yield_exception_test extends \advanced_testcase {
         $this->assertSame('yield', $exception->errorcode, 'Yield exception must have error code "yield" by default.');
         $this->assertSame('local_archiving', $exception->module, 'Yield exception must have module "local_archiving" by default.');
     }
-
 }

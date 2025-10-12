@@ -29,7 +29,6 @@ namespace local_archiving\util;
  * Tests for the time util class.
  */
 final class time_util_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -108,5 +107,4 @@ final class time_util_test extends \advanced_testcase {
             'seconds' => [123, [123, get_string('seconds')]],
         ];
     }
-
 }

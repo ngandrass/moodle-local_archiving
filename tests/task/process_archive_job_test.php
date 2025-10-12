@@ -30,7 +30,6 @@ use local_archiving\type\archive_job_status;
  * Tests for the process_archive_job ad-hoc task.
  */
 final class process_archive_job_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -72,7 +71,8 @@ final class process_archive_job_test extends \advanced_testcase {
             $task->get_archive_job(),
             'The initial task should be associated with the correct archive job.'
         );
-        $this->assertEquals($job,
+        $this->assertEquals(
+            $job,
             $createdtask->get_archive_job(),
             'The created task should also be associated with the correct archive job.'
         );
@@ -187,5 +187,4 @@ final class process_archive_job_test extends \advanced_testcase {
             'There should be at least one rescheduled task after execution.'
         );
     }
-
 }

@@ -28,7 +28,6 @@ namespace local_archiving\task;
  * Tests for the cleanup_orphaned_backups task.
  */
 final class cleanup_orphaned_backups_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -127,5 +126,4 @@ final class cleanup_orphaned_backups_test extends \advanced_testcase {
             'Active backup file should not have been deleted: ' . $activebackup->get_filename()
         );
     }
-
 }

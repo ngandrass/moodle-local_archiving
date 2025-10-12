@@ -34,7 +34,6 @@ use local_archiving\type\activity_archiving_task_status;
  * @runTestsInSeparateProcesses Prevent sharing of mock objects between tests.
  */
 final class archivingmod_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -360,5 +359,4 @@ final class archivingmod_test extends \advanced_testcase {
             'With both tasks completed, the job should be considered completed.'
         );
     }
-
 }

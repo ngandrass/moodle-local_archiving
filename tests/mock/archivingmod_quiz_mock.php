@@ -29,7 +29,7 @@ use local_archiving\type\activity_archiving_task_status;
 use local_archiving\type\cm_state_fingerprint;
 use local_archiving\type\task_content_metadata;
 
-// @codingStandardsIgnoreFile
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
@@ -37,7 +37,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Mock activity archiving driver
  */
 class archivingmod_quiz_mock extends \local_archiving\driver\archivingmod {
-
     /** @var \stdClass Course the quiz lives in */
     protected \stdClass $course;
 
@@ -47,16 +46,22 @@ class archivingmod_quiz_mock extends \local_archiving\driver\archivingmod {
     /** @var int ID of the targeted quiz */
     protected int $quizid;
 
+    /**
+     * Creates a new mocked activity archiving driver instance.
+     *
+     * @param context_module $context
+     * @throws moodle_exception
+     */
     public function __construct(\context_module $context) {
         parent::__construct($context);
 
         // Ensure this is not misused.
         if (!defined('PHPUNIT_TEST')) {
-            die('This is a mock driver and should not be used outside of tests.');
+            die('This is a mock driver and should not be used outside of tests.'); // phpcs:ignore
         }
 
         // Try to get course, cm info, and quiz.
-        list($this->course, $this->cm) = get_course_and_cm_from_cmid($this->cmid, 'quiz');
+        [$this->course, $this->cm] = get_course_and_cm_from_cmid($this->cmid, 'quiz');
         if (empty($this->cm)) {
             throw new \moodle_exception('invalid_cmid', 'archivingmod_quiz');
         }
@@ -163,5 +168,4 @@ class archivingmod_quiz_mock extends \local_archiving\driver\archivingmod {
             'attempttimemodified' => $attempttimemodified,
         ]);
     }
-
 }

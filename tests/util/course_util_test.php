@@ -31,7 +31,6 @@ use local_archiving\util\course_util;
  * Tests for the course util class.
  */
 final class course_util_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -229,5 +228,4 @@ final class course_util_test extends \advanced_testcase {
             'Only selected course categories should be returned when selective archiving is enabled'
         );
     }
-
 }

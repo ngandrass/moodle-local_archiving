@@ -28,7 +28,6 @@ namespace local_archiving\type;
  * Tests for the filearea class.
  */
 final class filearea_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -72,6 +71,4 @@ final class filearea_test extends \advanced_testcase {
 
         return $res;
     }
-
 }
-

@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php'); // @
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_archiving_generator extends \testing_data_generator {
-
     /**
      * Creates a new archive job for a new course with a quiz activity.
      *
@@ -185,9 +184,9 @@ class local_archiving_generator extends \testing_data_generator {
                 'timecreated'  => time(),
                 'timemodified' => time(),
             ],
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do '.
-            'eiusmod tempor incididunt ut labore et dolore magna aliqua. '.
-            'time='.time().' id='.$uniqid
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' .
+            'eiusmod tempor incididunt ut labore et dolore magna aliqua. ' .
+            'time=' . time() . ' id=' . $uniqid
         );
     }
 
@@ -221,9 +220,9 @@ class local_archiving_generator extends \testing_data_generator {
                 'timecreated'  => $timecreated,
                 'timemodified' => $timemodified,
             ],
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do '.
-            'eiusmod tempor incididunt ut labore et dolore magna aliqua. '.
-            'time='.time().' id='.$uniqid
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' .
+            'eiusmod tempor incididunt ut labore et dolore magna aliqua. ' .
+            'time=' . time() . ' id=' . $uniqid
         );
     }
 
@@ -256,7 +255,7 @@ class local_archiving_generator extends \testing_data_generator {
                 'timecreated'  => $timecreated,
                 'timemodified' => $timemodified,
             ],
-            'This is a test backup file with id '.$uniqid
+            'This is a test backup file with id ' . $uniqid
         );
     }
 
@@ -283,5 +282,4 @@ class local_archiving_generator extends \testing_data_generator {
 
         return $DB->get_record('external_services', ['id' => $webserviceid], '*', MUST_EXIST);
     }
-
 }

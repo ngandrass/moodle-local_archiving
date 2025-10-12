@@ -28,7 +28,6 @@ namespace local_archiving\plugininfo;
  * Tests for the archivingstore plugininfo class.
  */
 final class archivingstore_test extends \advanced_testcase {
-
     /**
      * Tests that the plugin reports correct flags.
      *
@@ -115,5 +114,4 @@ final class archivingstore_test extends \advanced_testcase {
             'The number of enabled archivingstore plugins should match the number reported by get_enabled_plugins().'
         );
     }
-
 }

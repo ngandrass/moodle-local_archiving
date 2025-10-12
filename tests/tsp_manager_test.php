@@ -31,7 +31,6 @@ use local_archiving\type\filearea;
  * Tests for the tsp_manager class.
  */
 final class tsp_manager_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -162,8 +161,8 @@ final class tsp_manager_test extends \advanced_testcase {
         $tspmanager = $this->create_tsp_manager_mock(
             $filehandle,
             'localhost',
-            'tsp-dummy-query-'.$filehandle->id,
-            'tsp-dummy-reply-'.$filehandle->id
+            'tsp-dummy-query-' . $filehandle->id,
+            'tsp-dummy-reply-' . $filehandle->id
         );
 
         $this->assertFalse($tspmanager->has_tsp_timestamp(), 'New file should not have a TSP timestamp.');
@@ -173,8 +172,8 @@ final class tsp_manager_test extends \advanced_testcase {
         $tspdata = $tspmanager->get_tsp_data();
         $this->assertNotNull($tspdata, 'TSP data should not be null after timestamping.');
         $this->assertEquals('localhost', $tspdata->server, 'TSP server URL should match the mocked one.');
-        $this->assertEquals('tsp-dummy-query-'.$filehandle->id, $tspdata->query, 'TSP query should match the mocked one.');
-        $this->assertEquals('tsp-dummy-reply-'.$filehandle->id, $tspdata->reply, 'TSP reply should match the mocked one.');
+        $this->assertEquals('tsp-dummy-query-' . $filehandle->id, $tspdata->query, 'TSP query should match the mocked one.');
+        $this->assertEquals('tsp-dummy-reply-' . $filehandle->id, $tspdata->reply, 'TSP reply should match the mocked one.');
         $this->assertGreaterThan(time() - MINSECS, $tspdata->timecreated, 'TSP timestamp should be recent.');
     }
 
@@ -352,8 +351,8 @@ final class tsp_manager_test extends \advanced_testcase {
             'filehandleid' => $filehandle->id,
             'timecreated' => time(),
             'server' => 'localhost',
-            'timestampquery' => 'sample-'.tsp_manager::TSP_QUERY_FILE_EXTENSION,
-            'timestampreply' => 'sample-'.tsp_manager::TSP_REPLY_FILE_EXTENSION,
+            'timestampquery' => 'sample-' . tsp_manager::TSP_QUERY_FILE_EXTENSION,
+            'timestampreply' => 'sample-' . tsp_manager::TSP_REPLY_FILE_EXTENSION,
         ]);
         $this->assertTrue($tspmanager->has_tsp_timestamp(), 'File should have a TSP timestamp after inserting data.');
 
@@ -367,7 +366,7 @@ final class tsp_manager_test extends \advanced_testcase {
         ob_end_clean();
 
         // Validate the output.
-        $this->assertEquals('sample-'.$type, $sentdata, 'Sent data should match the expected sample data.');
+        $this->assertEquals('sample-' . $type, $sentdata, 'Sent data should match the expected sample data.');
     }
 
     /**
@@ -397,7 +396,7 @@ final class tsp_manager_test extends \advanced_testcase {
         );
         tsp_manager::send_virtual_tsp_file(
             '/../../../secret/',
-            '64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c.'.tsp_manager::TSP_QUERY_FILE_EXTENSION
+            '64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c.' . tsp_manager::TSP_QUERY_FILE_EXTENSION
         );
     }
 
@@ -439,5 +438,4 @@ final class tsp_manager_test extends \advanced_testcase {
             filename: $filehandle->sha256sum . '.' . tsp_manager::TSP_QUERY_FILE_EXTENSION
         );
     }
-
 }

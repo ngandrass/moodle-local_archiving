@@ -28,7 +28,6 @@ namespace local_archiving\type;
  * Tests for the task_content_metadata class.
  */
 final class task_content_metadata_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -98,6 +97,4 @@ final class task_content_metadata_test extends \advanced_testcase {
             'Invalid data with missing refid but present reference table' => [1, 2, 'course', null, null, false],
         ];
     }
-
 }
-

@@ -28,7 +28,6 @@ namespace local_archiving\plugininfo;
  * Tests for the archivingevent plugininfo class.
  */
 final class archivingevent_test extends \advanced_testcase {
-
     /**
      * Tests that the plugin reports correct flags.
      *
@@ -115,5 +114,4 @@ final class archivingevent_test extends \advanced_testcase {
             'The number of enabled archivingevent plugins should match the number reported by get_enabled_plugins().'
         );
     }
-
 }

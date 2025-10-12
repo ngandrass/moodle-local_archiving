@@ -32,7 +32,6 @@ use local_archiving\util\plugin_util;
  * Unit tests for file_handle
  */
 final class file_handle_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -397,5 +396,4 @@ final class file_handle_test extends \advanced_testcase {
         $archivingstore = $filehandle->archivingstore();
         $this->assertInstanceOf(\archivingstore_localdir_mock::class, $archivingstore);
     }
-
 }

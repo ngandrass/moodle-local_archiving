@@ -28,7 +28,6 @@ namespace local_archiving\type;
  * Tests for the archive_job_status class.
  */
 final class archive_job_status_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -108,6 +107,4 @@ final class archive_job_status_test extends \advanced_testcase {
 
         return $data;
     }
-
 }
-

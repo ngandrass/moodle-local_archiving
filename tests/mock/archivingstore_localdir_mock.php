@@ -28,7 +28,7 @@ use local_archiving\file_handle;
 use local_archiving\storage;
 use local_archiving\type\storage_tier;
 
-// @codingStandardsIgnoreFile
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
@@ -36,7 +36,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Driver for storing archive data inside a directory on the local filesystem
  */
 class archivingstore_localdir_mock extends \local_archiving\driver\archivingstore {
-
     #[\Override]
     public function is_enabled(): bool {
         return true;
@@ -96,5 +95,4 @@ class archivingstore_localdir_mock extends \local_archiving\driver\archivingstor
     public function delete(file_handle $handle, bool $strict = false): void {
         return;
     }
-
 }

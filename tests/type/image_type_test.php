@@ -28,7 +28,6 @@ namespace local_archiving\type;
  * Tests for the image_type class.
  */
 final class image_type_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -116,6 +115,4 @@ final class image_type_test extends \advanced_testcase {
     public function test_invalid_extension(): void {
         $this->assertNull(image_type::from_extension('invalidextension'));
     }
-
 }
-

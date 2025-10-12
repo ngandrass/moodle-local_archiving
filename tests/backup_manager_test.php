@@ -28,7 +28,6 @@ namespace local_archiving;
  * Unit tests for backup_manager
  */
 final class backup_manager_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -194,5 +193,4 @@ final class backup_manager_test extends \advanced_testcase {
         $res = backup_manager::get_orphaned_backup_files(agethresholdsec: -1);
         $this->assertCount(1, $res, 'One orphaned backup file should be retrieved');
     }
-
 }

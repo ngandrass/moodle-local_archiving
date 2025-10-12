@@ -28,7 +28,6 @@ namespace local_archiving\type;
  * Tests for the archive_filename_variable class.
  */
 final class archive_filename_variable_test extends \advanced_testcase {
-
     /**
      * Tests convenience access methods for retrieving enum cases by key or value as plain arrays.
      *
@@ -54,6 +53,4 @@ final class archive_filename_variable_test extends \advanced_testcase {
             'The values of the enum cases must match the values returned by values().'
         );
     }
-
 }
-

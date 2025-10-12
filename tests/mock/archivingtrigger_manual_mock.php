@@ -23,7 +23,7 @@
  */
 
 
-// @codingStandardsIgnoreFile
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
@@ -31,7 +31,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Manual archiving trigger mock for unit tests
  */
 class archivingtrigger_manual_mock extends \local_archiving\driver\archivingtrigger {
-
     #[\Override]
     public static function is_ready(): bool {
         return true;
@@ -41,5 +40,4 @@ class archivingtrigger_manual_mock extends \local_archiving\driver\archivingtrig
     public function is_enabled(): bool {
         return get_config('archivingtrigger_manual', 'enabled') == 1;
     }
-
 }

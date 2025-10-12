@@ -30,7 +30,6 @@ use local_archiving\type\archive_job_status;
  * Tests for the job_overview_table class.
  */
 final class job_overview_table_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -89,5 +88,4 @@ final class job_overview_table_test extends \advanced_testcase {
         $this->assertStringContainsString($job3->get_id(), $output, 'Job 3 ID should be in output');
         $this->assertStringContainsString($job4->get_id(), $output, 'Job 4 ID should be in output');
     }
-
 }

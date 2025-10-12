@@ -28,7 +28,6 @@ namespace local_archiving;
  * Tests for the tsp_client class
  */
 final class tsp_client_test extends \advanced_testcase {
-
     /**
      * Tests the creation of a tsp_client instance
      *
@@ -78,7 +77,7 @@ final class tsp_client_test extends \advanced_testcase {
         $client = new tsp_client('http://localhost:12345');
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessageMatches('/'.get_string('tsp_client_error_curl', 'local_archiving', '').'/');
+        $this->expectExceptionMessageMatches('/' . get_string('tsp_client_error_curl', 'local_archiving', '') . '/');
         $client->sign('6e82908cfa04dbf1706aa938e32f27e6a1d5f096df5c472795a93f8ab9de4c72');
     }
 
@@ -97,5 +96,4 @@ final class tsp_client_test extends \advanced_testcase {
         $this->expectExceptionMessageMatches('/Invalid hexadecimal SHA256 hash/');
         $client->sign('invalid-data');
     }
-
 }

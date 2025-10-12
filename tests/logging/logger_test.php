@@ -30,7 +30,6 @@ use local_archiving\type\log_level;
  * Tests for the logger classes.
  */
 final class logger_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -274,5 +273,4 @@ final class logger_test extends \advanced_testcase {
         $this->assertStringContainsString($level->name, $formatted, 'Formatted log entry does not contain the log level.');
         $this->assertStringContainsString($message, $formatted, 'Formatted log entry does not contain the log message.');
     }
-
 }

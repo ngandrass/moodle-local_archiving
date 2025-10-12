@@ -28,7 +28,6 @@ namespace local_archiving\local\admin\setting;
  * Tests for the admin_setting_coursecat_multiselect class.
  */
 final class admin_setting_coursecat_multiselect_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -116,6 +115,4 @@ final class admin_setting_coursecat_multiselect_test extends \advanced_testcase 
             'The setting value should be saved correctly when a non-empty selection is provided.'
         );
     }
-
 }
-

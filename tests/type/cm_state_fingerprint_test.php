@@ -28,7 +28,6 @@ namespace local_archiving\type;
  * Tests for the cm_state_fingerprint class.
  */
 final class cm_state_fingerprint_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -96,6 +95,4 @@ final class cm_state_fingerprint_test extends \advanced_testcase {
         $this->expectException(\coding_exception::class);
         cm_state_fingerprint::from_raw_value('invalidhash');
     }
-
 }
-

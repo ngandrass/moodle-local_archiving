@@ -28,7 +28,6 @@ namespace local_archiving\local\admin\setting;
  * Tests for the admin_setting_managecomponents class.
  */
 final class admin_setting_managecomponents_test extends \advanced_testcase {
-
     /**
      * This method is called before each test.
      */
@@ -140,5 +139,4 @@ final class admin_setting_managecomponents_test extends \advanced_testcase {
             'Unrelated: mod' => ['mod', false],
         ];
     }
-
 }

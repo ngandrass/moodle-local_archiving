@@ -31,7 +31,6 @@ use local_archiving\type\filearea;
  * Unit tests for the unit test data generator for local_archiving
  */
 final class generator_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -176,7 +175,8 @@ final class generator_test extends \advanced_testcase {
             $file->get_component(),
             'The temporary file should have the TEMP component'
         );
-        $this->assertSame(filearea::TEMP->value,
+        $this->assertSame(
+            filearea::TEMP->value,
             $file->get_filearea(),
             'The temporary file should be in the TEMP file area'
         );
@@ -324,5 +324,4 @@ final class generator_test extends \advanced_testcase {
             'The web service should allow file uploads'
         );
     }
-
 }

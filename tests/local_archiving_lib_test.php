@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/local/archiving/lib.php');
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class local_archiving_lib_test extends \advanced_testcase {
-
     /**
      * Test navigation node injection for course and module contexts using Moodle generators.
      *
@@ -70,10 +69,20 @@ final class local_archiving_lib_test extends \advanced_testcase {
         $page->set_context($coursecontext);
         $settingsnav = new \settings_navigation($page);
         // Add dummy parent nodes for test injection.
-        $courseadminnode = $settingsnav->add('Course admin', null, \navigation_node::TYPE_CONTAINER,
-            'courseadmin', 'courseadmin');
-        $modulesettingsnode = $settingsnav->add('Module settings', null, \navigation_node::TYPE_CONTAINER,
-            'modulesettings', 'modulesettings');
+        $courseadminnode = $settingsnav->add(
+            'Course admin',
+            null,
+            \navigation_node::TYPE_CONTAINER,
+            'courseadmin',
+            'courseadmin'
+        );
+        $modulesettingsnode = $settingsnav->add(
+            'Module settings',
+            null,
+            \navigation_node::TYPE_CONTAINER,
+            'modulesettings',
+            'modulesettings'
+        );
 
         // Test course context injection.
         local_archiving_extend_settings_navigation($settingsnav, $coursecontext);
@@ -173,5 +182,4 @@ final class local_archiving_lib_test extends \advanced_testcase {
             forcedownload: false
         ), 'Invalid filearea should return false');
     }
-
 }

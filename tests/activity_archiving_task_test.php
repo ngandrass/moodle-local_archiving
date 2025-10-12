@@ -35,7 +35,6 @@ use mod_lti\search\activity;
  * Unit tests for archive_job
  */
 final class activity_archiving_task_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -596,7 +595,7 @@ final class activity_archiving_task_test extends \advanced_testcase {
             'File should be in the course context'
         );
         $this->assertSame(
-            'archivingmod_'.$task->get_archivingmodname().'_mock',
+            'archivingmod_' . $task->get_archivingmodname() . '_mock',
             $fileinfo->component,
             'Component should match archiving mod name'
         );
@@ -651,5 +650,4 @@ final class activity_archiving_task_test extends \advanced_testcase {
             'Fingerprint should be considered as existing for completed tasks'
         );
     }
-
 }

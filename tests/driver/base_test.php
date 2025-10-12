@@ -30,7 +30,6 @@ namespace local_archiving\driver;
  * @runTestsInSeparateProcesses Prevent sharing of mock objects between tests.
  */
 final class base_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -53,7 +52,7 @@ final class base_test extends \advanced_testcase {
      * @throws \coding_exception
      */
     public function test_get_frankenstyle_name(string $subplugintype, bool $isvalid): void {
-        $base = $this->getMockForAbstractClass(base::class, [], $subplugintype.'_mock');
+        $base = $this->getMockForAbstractClass(base::class, [], $subplugintype . '_mock');
 
         // Expect an exception if the sub-plugin type is not valid.
         if (!$isvalid) {
@@ -153,5 +152,4 @@ final class base_test extends \advanced_testcase {
         $base = $this->getMockForAbstractClass(base::class);
         $this->assertTrue($base->is_ready(), 'Base driver should always be ready.');
     }
-
 }

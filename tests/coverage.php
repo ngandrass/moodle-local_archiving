@@ -28,7 +28,6 @@ defined('MOODLE_INTERNAL') || die();
  * PHPUnit coverage information class for local_archiving.
  */
 return new class extends phpunit_coverage_info {
-
     /** @var array The list of folders relative to the plugin root to includelist in coverage generation. */
     protected $includelistfolders = [];
 
@@ -40,5 +39,4 @@ return new class extends phpunit_coverage_info {
 
     /** @var array The list of files relative to the plugin root to excludelist in coverage generation. */
     protected $excludelistfiles = [];
-
 };

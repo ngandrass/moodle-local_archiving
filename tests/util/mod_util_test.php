@@ -30,7 +30,6 @@ use local_archiving\type\archive_job_status;
  * Tests for the mod util class.
  */
 final class mod_util_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -112,5 +111,4 @@ final class mod_util_test extends \advanced_testcase {
             $this->assertTrue($cm->enabled, 'CM should be enabled');
         }
     }
-
 }

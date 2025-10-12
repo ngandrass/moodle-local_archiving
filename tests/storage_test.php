@@ -32,7 +32,6 @@ use local_archiving\type\filearea;
  * Tests for the storage helper class.
  */
 final class storage_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -63,7 +62,7 @@ final class storage_test extends \advanced_testcase {
                 archive_filename_variable::values(),
                 storage::FILENAME_FORBIDDEN_CHARACTERS
             ),
-            'Pattern "'.$pattern.'" should be '.($isvalidfilename ? 'valid' : 'invalid').' for filenames.'
+            'Pattern "' . $pattern . '" should be ' . ($isvalidfilename ? 'valid' : 'invalid') . ' for filenames.'
         );
 
         // Check if the pattern is valid for folder names.
@@ -74,7 +73,7 @@ final class storage_test extends \advanced_testcase {
                 archive_filename_variable::values(),
                 storage::FOLDERNAME_FORBIDDEN_CHARACTERS
             ),
-            'Pattern "'.$pattern.'" should be '.($isvalidfoldername ? 'valid' : 'invalid').' for folder names.'
+            'Pattern "' . $pattern . '" should be ' . ($isvalidfoldername ? 'valid' : 'invalid') . ' for folder names.'
         );
     }
 
@@ -92,7 +91,11 @@ final class storage_test extends \advanced_testcase {
                 'isvalidfoldername' => true,
             ],
             'All allowed filename variables' => [
-                'pattern' => array_reduce(archive_filename_variable::values(), fn ($carry, $item) => $carry.'${'.$item.'}', ''),
+                'pattern' => array_reduce(
+                    archive_filename_variable::values(),
+                    fn ($carry, $item) => $carry . '${' . $item . '}',
+                    ''
+                ),
                 'isvalidfilename' => true,
                 'isvalidfoldername' => true,
             ],
@@ -167,7 +170,7 @@ final class storage_test extends \advanced_testcase {
         $this->assertSame(
             $expected,
             storage::sanitize_filename($filename),
-            'Filename "'.$filename.'" should be changed by sanitization.'
+            'Filename "' . $filename . '" should be changed by sanitization.'
         );
     }
 
@@ -196,7 +199,7 @@ final class storage_test extends \advanced_testcase {
         // Add all forbidden filename characters.
         foreach (storage::FILENAME_FORBIDDEN_CHARACTERS as $char) {
             $data['Filename with forbidden character: ' . $char] = [
-                'foo'.$char,
+                'foo' . $char,
                 'foo',
             ];
         }
@@ -218,7 +221,7 @@ final class storage_test extends \advanced_testcase {
         $this->assertSame(
             $expected,
             storage::sanitize_foldername($foldername),
-            'Folder name "'.$foldername.'" should be changed by sanitization.'
+            'Folder name "' . $foldername . '" should be changed by sanitization.'
         );
     }
 
@@ -241,8 +244,8 @@ final class storage_test extends \advanced_testcase {
                 str_repeat('a', storage::FILENAME_MAX_LENGTH),
             ],
             'Too long sub-folder name' => [
-                'foo/'.str_repeat('a', storage::FILENAME_MAX_LENGTH + 1).'/subfolder',
-                'foo/'.str_repeat('a', storage::FILENAME_MAX_LENGTH).'/subfolder',
+                'foo/' . str_repeat('a', storage::FILENAME_MAX_LENGTH + 1) . '/subfolder',
+                'foo/' . str_repeat('a', storage::FILENAME_MAX_LENGTH) . '/subfolder',
             ],
             'Folder name with leading spaces' => [' foldername', 'foldername'],
             'Folder name with trailing spaces' => ['foldername ', 'foldername'],
@@ -257,7 +260,7 @@ final class storage_test extends \advanced_testcase {
         // Add all forbidden foldername characters.
         foreach (storage::FOLDERNAME_FORBIDDEN_CHARACTERS as $char) {
             $data['foldername with forbidden character: ' . $char] = [
-                'foo'.$char,
+                'foo' . $char,
                 'foo',
             ];
         }
@@ -328,7 +331,7 @@ final class storage_test extends \advanced_testcase {
         $this->assertSame(
             $isvalid,
             storage::is_valid_sha256sum($sample),
-            'SHA256 checksum "'.$sample.'" should be considered '.($isvalid ? 'valid' : 'invalid').'.'
+            'SHA256 checksum "' . $sample . '" should be considered ' . ($isvalid ? 'valid' : 'invalid') . '.'
         );
     }
 
@@ -405,12 +408,12 @@ final class storage_test extends \advanced_testcase {
         );
 
         // Create a temporary directory and check if it is empty.
-        $tempdir = make_temp_directory('local_archiving_test_'.time());
+        $tempdir = make_temp_directory('local_archiving_test_' . time());
         $this->assertNotEmpty($tempdir, 'Temporary directory should be created successfully.');
         $this->assertTrue(storage::is_dir_empty($tempdir), 'Freshly created directory should be considered empty.');
 
         // Create a file in the temporary directory and check if it is still considered empty.
-        $tempfile = $tempdir.'/testfile.txt';
+        $tempfile = $tempdir . '/testfile.txt';
         file_put_contents($tempfile, 'Test content');
         $this->assertFalse(storage::is_dir_empty($tempdir), 'Directory with a file should not be considered empty.');
 
@@ -421,5 +424,4 @@ final class storage_test extends \advanced_testcase {
         // Cleanup.
         rmdir($tempdir);
     }
-
 }

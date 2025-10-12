@@ -33,7 +33,6 @@ use local_archiving\type\log_level;
  * Unit tests for archive_job
  */
 final class archive_job_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -939,5 +938,4 @@ final class archive_job_test extends \advanced_testcase {
             'There should be 0 incomplete jobs for context 2'
         );
     }
-
 }

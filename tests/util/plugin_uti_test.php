@@ -29,7 +29,6 @@ namespace local_archiving\util;
  * Tests for the plugin util class.
  */
 final class plugin_uti_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -111,5 +110,4 @@ final class plugin_uti_test extends \advanced_testcase {
             $this->assertTrue(plugin_util::is_subplugin_installed('archivingmod', $drivername));
         }
     }
-
 }

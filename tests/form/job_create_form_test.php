@@ -31,7 +31,6 @@ use local_archiving\util\course_util;
  * Unit tests for the job_create_form class
  */
 final class job_create_form_test extends \advanced_testcase {
-
     /**
      * This method is called before each test.
      */
@@ -291,7 +290,7 @@ final class job_create_form_test extends \advanced_testcase {
 
         // Prepare malicious POST data and create the form.
         $validpostdata = json_decode(
-            file_get_contents(__DIR__.'/../fixtures/job_create_form_request_valid.json'),
+            file_get_contents(__DIR__ . '/../fixtures/job_create_form_request_valid.json'),
             true
         );
         foreach ($validpostdata as $key => $value) {
@@ -323,5 +322,4 @@ final class job_create_form_test extends \advanced_testcase {
             'Locked: archive_retention_time' => ['archive_retention_time', 3600, 1],
         ];
     }
-
 }

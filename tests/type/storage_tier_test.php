@@ -28,7 +28,6 @@ namespace local_archiving\type;
  * Tests for the storage_tier class.
  */
 final class storage_tier_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -68,6 +67,4 @@ final class storage_tier_test extends \advanced_testcase {
 
         return $data;
     }
-
 }
-

@@ -30,7 +30,6 @@ namespace local_archiving\driver;
  * @runTestsInSeparateProcesses Prevent sharing of mock objects between tests.
  */
 final class archivingtrigger_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -54,5 +53,4 @@ final class archivingtrigger_test extends \advanced_testcase {
         $mock = $this->getMockForAbstractClass(archivingtrigger::class, [], 'archivingtrigger_mock');
         $this->assertSame('archivingtrigger', $mock->get_plugin_type());
     }
-
 }

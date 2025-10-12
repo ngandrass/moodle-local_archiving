@@ -28,7 +28,6 @@ namespace local_archiving\task;
  * Tests for the cleanup_filestore_cache task.
  */
 final class cleanup_filestore_cache_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -152,5 +151,4 @@ final class cleanup_filestore_cache_test extends \advanced_testcase {
             );
         }
     }
-
 }

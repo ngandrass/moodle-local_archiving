@@ -28,7 +28,6 @@ namespace local_archiving\plugininfo;
  * Tests for the archivingtrigger plugininfo class.
  */
 final class archivingtrigger_test extends \advanced_testcase {
-
     /**
      * Tests that the plugin reports correct flags.
      *
@@ -126,5 +125,4 @@ final class archivingtrigger_test extends \advanced_testcase {
             'The number of enabled archivingtrigger plugins should match the number reported by get_enabled_plugins().'
         );
     }
-
 }

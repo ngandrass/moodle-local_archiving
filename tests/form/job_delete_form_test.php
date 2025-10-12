@@ -29,7 +29,6 @@ namespace local_archiving\form;
  * Unit tests for the job_delete_form class
  */
 final class job_delete_form_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -112,5 +111,4 @@ final class job_delete_form_test extends \advanced_testcase {
             wantsurl: 'http://localhost/foo'
         );
     }
-
 }

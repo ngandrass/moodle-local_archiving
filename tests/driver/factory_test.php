@@ -28,7 +28,6 @@ namespace local_archiving\driver;
  * Tests for the driver factory.
  */
 final class factory_test extends \advanced_testcase {
-
     /**
      * Helper to get the test data generator for local_archiving
      *
@@ -126,5 +125,4 @@ final class factory_test extends \advanced_testcase {
         $instance = factory::archiving_trigger('manual');
         $this->assertInstanceOf(\archivingtrigger_manual_mock::class, $instance, 'Expected mocked archiving trigger instance');
     }
-
 }

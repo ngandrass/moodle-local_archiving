@@ -37,7 +37,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * I'll get the developer that brings the Python "with" statement to PHP a beer ...
  */
 class yield_exception extends \moodle_exception {
-
     /**
      * Creates a new yield exception.
      *
@@ -52,5 +51,4 @@ class yield_exception extends \moodle_exception {
         $module = $module ?: 'local_archiving';
         parent::__construct($errorcode, $module, $link, $a, $debuginfo);
     }
-
 }

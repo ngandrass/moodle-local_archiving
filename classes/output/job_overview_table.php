@@ -35,7 +35,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 // @codeCoverageIgnoreStart
 global $CFG;
-require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir . '/tablelib.php');
 // @codeCoverageIgnoreEnd
 
 
@@ -43,7 +43,6 @@ require_once($CFG->libdir.'/tablelib.php');
  * Table renderer for the job overview table
  */
 class job_overview_table extends \table_sql {
-
     /** @var \context_course Course context this table is associated with */
     protected \context_course $coursectx;
 
@@ -101,12 +100,12 @@ class job_overview_table extends \table_sql {
 
         $this->set_sql(
             'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, u.username',
-            '{'.db_table::JOB->value.'} j '.
-                'JOIN {user} u ON j.userid = u.id '.
+            '{' . db_table::JOB->value . '} j ' .
+                'JOIN {user} u ON j.userid = u.id ' .
                 'JOIN {context} ctx ON ctx.id = j.contextid',
             "ctx.path LIKE :ctxpath",
             [
-                'ctxpath' => $ctx->path.'%',
+                'ctxpath' => $ctx->path . '%',
             ]
         );
 
@@ -131,12 +130,13 @@ class job_overview_table extends \table_sql {
      * @param \stdClass $values Values of the current row
      * @return string HTML code to be displayed
      * @throws \coding_exception
+     * @throws \moodle_exception
      */
     public function col_contextid($values) {
         $modctx = \context::instance_by_id($values->contextid);
         $cm = $this->coursemodinfo->get_cm($modctx->instanceid);
 
-        return '<a href="'.$cm->get_url().'">'.$cm->name.'</a>';
+        return '<a href="' . $cm->get_url() . '">' . $cm->name . '</a>';
     }
 
     /**
@@ -147,7 +147,7 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_user($values) {
-        return '<a href="'.new \moodle_url('/user/profile.php', ['id' => $values->userid]).'">'.$values->username.'</a>';
+        return '<a href="' . new \moodle_url('/user/profile.php', ['id' => $values->userid]) . '">' . $values->username . '</a>';
     }
 
     /**
@@ -163,18 +163,18 @@ class job_overview_table extends \table_sql {
         $job = archive_job::get_by_id($values->id);
         $status = archive_job_status::from($values->status)->status_display_args();
 
-        $statustooltiphtml = 'data-toggle="tooltip" data-placement="top" title="'.$status->help.'"';
-        $html = '<span class="badge badge-'.$status->color.'" '.$statustooltiphtml.'>'.$status->text.'</span><br/>';
+        $statustooltiphtml = 'data-toggle="tooltip" data-placement="top" title="' . $status->help . '"';
+        $html = '<span class="badge badge-' . $status->color . '" ' . $statustooltiphtml . '>' . $status->text . '</span><br/>';
 
         $progress = $job->get_progress();
         if ($progress !== null && $progress < 100) {
             // phpcs:ignore
             $html .= '<span title="'.get_string('progress', 'local_archiving').'" alt="'.get_string('progress', 'local_archiving').'" data-toggle="tooltip" data-placement="top">';
-            $html .= '<i class="fa fa-spinner"></i>&nbsp;'.$progress.'%';
+            $html .= '<i class="fa fa-spinner"></i>&nbsp;' . $progress . '%';
             $html .= '</span><br/>';
         }
 
-        $html .= '<small>'.date('H:i:s', $values->timemodified).'</small>';
+        $html .= '<small>' . date('H:i:s', $values->timemodified) . '</small>';
 
         return $html;
     }
@@ -220,5 +220,4 @@ class job_overview_table extends \table_sql {
 
         return $html;
     }
-
 }

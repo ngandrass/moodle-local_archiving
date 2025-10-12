@@ -29,14 +29,13 @@ use local_archiving\type\archive_job_status;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
+require_once($CFG->dirroot . '/lib/formslib.php'); // @codeCoverageIgnore
 
 
 /**
  * Form to delete an archiving job
  */
 class job_delete_form extends \moodleform {
-
     /** @var archive_job Archive job this form is associated with */
     protected archive_job $job;
 
@@ -79,11 +78,11 @@ class job_delete_form extends \moodleform {
 
         // Print delete warning.
         $this->_form->addElement('html', $OUTPUT->notification(
-            '<h4>'.get_string('delete_job', 'local_archiving').'</h4>'.
-            '<p>'.get_string('delete_job_warning', 'local_archiving').'</p>'.
-            '<code>'.
-                get_string('jobid', 'local_archiving').': '.$this->job->get_id().'<br>'.
-                get_string('status').': '.$this->job->get_status()->name.
+            '<h4>' . get_string('delete_job', 'local_archiving') . '</h4>' .
+            '<p>' . get_string('delete_job_warning', 'local_archiving') . '</p>' .
+            '<code>' .
+                get_string('jobid', 'local_archiving') . ': ' . $this->job->get_id() . '<br>' .
+                get_string('status') . ': ' . $this->job->get_status()->name .
             '</code>',
             \core\output\notification::NOTIFY_WARNING,
             false
@@ -105,5 +104,4 @@ class job_delete_form extends \moodleform {
         // Action buttons.
         $this->add_action_buttons(true, get_string('delete'));
     }
-
 }

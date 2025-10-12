@@ -32,7 +32,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Utility functions for working with dates and time
  */
 class time_util {
-
     /**
      * Convert duration in seconds to a human readable format
      *
@@ -109,5 +108,4 @@ class time_util {
 
         return [$duration, get_string('seconds')];
     }
-
 }

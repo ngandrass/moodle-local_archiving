@@ -89,7 +89,7 @@ if ($archivingenabled) {
     }
 }
 
-$jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
+$jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_' . $ctx->id, $ctx);
 $jobtbl->define_baseurl($PAGE->url);
 ob_start();
 $jobtbl->out(20, true);

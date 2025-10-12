@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Database table name mappings
  */
 enum db_table: string {
-
     /** @var string Name of the job table */
     case JOB = 'local_archiving_job';
 
@@ -58,5 +57,4 @@ enum db_table: string {
 
     /** @var string Name of the table that stores metadata about data that was archived by activity archiving tasks */
     case CONTENT = 'local_archiving_content';
-
 }

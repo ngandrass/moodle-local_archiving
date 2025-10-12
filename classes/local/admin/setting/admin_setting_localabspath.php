@@ -31,7 +31,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_localabspath extends \admin_setting_configtext {
-
     /**
      * Creates a new instance of this setting
      *
@@ -103,5 +102,4 @@ class admin_setting_localabspath extends \admin_setting_configtext {
 
         return true;
     }
-
 }

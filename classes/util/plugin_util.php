@@ -37,7 +37,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Utility functions for working with subplugins
  */
 class plugin_util {
-
     /**
      * Checks if the base class for the given sub-plugin exists
      *
@@ -236,5 +235,4 @@ class plugin_util {
 
         return $res;
     }
-
 }

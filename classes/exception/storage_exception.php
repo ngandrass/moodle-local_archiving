@@ -32,5 +32,4 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Used to signal a problem when working with a storage
  */
 class storage_exception extends \moodle_exception {
-
 }

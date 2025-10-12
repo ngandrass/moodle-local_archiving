@@ -126,7 +126,7 @@ function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $f
     // Get remaining file information from $args.
     $itemid = array_shift($args);
     $filename = array_pop($args);
-    $filepath = '/'.implode('/', $args).'/';
+    $filepath = '/' . implode('/', $args) . '/';
 
     // Stop here if we are running unit tests because the following functions send output and stop execution.
     if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {

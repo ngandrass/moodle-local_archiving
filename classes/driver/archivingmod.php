@@ -40,7 +40,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Interface for activity archiving driver (archivingmod) sub-plugins
  */
 abstract class archivingmod extends base {
-
     /** @var int ID of the course the targeted activity is part of */
     protected readonly int $courseid;
 
@@ -179,6 +178,7 @@ abstract class archivingmod extends base {
      * @param activity_archiving_task $task
      * @return void
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function delete_task(activity_archiving_task $task): void {
         $task->delete_from_db();
@@ -244,5 +244,4 @@ abstract class archivingmod extends base {
 
         return true;
     }
-
 }

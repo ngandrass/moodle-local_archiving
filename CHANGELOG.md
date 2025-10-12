@@ -7,6 +7,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 ### Archiving Core (`local_archiving`)
 
 - Add Moodle 5.1 with all supported PHP versions as well as pgsql and mariadb to CI testing matrix.
+- Refactor code to comply with new Moodle coding standard v3.6
 
 
 ### Sub-Plugins

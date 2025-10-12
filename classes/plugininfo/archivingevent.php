@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Subplugin info class for archivingevent
  */
 class archivingevent extends \core\plugininfo\base {
-
     /**
      * Should there be a way to uninstall the plugin via the administration UI.
      *
@@ -133,5 +132,4 @@ class archivingevent extends \core\plugininfo\base {
 
         return $enabledplugins;
     }
-
 }

@@ -37,7 +37,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * full process flow from start to finish.
  */
 class process_archive_job extends \core\task\adhoc_task {
-
     /**
      * Creates a new task instance that is associated with the given archive
      * job.
@@ -75,7 +74,7 @@ class process_archive_job extends \core\task\adhoc_task {
         // FIXME: Debug mode. Remove delaysec override later!
         $delaysec = 5;
 
-        mtrace('Rescheduling self for future run after '.$delaysec.' seconds.');
+        mtrace('Rescheduling self for future run after ' . $delaysec . ' seconds.');
         $task = self::create($this->get_archive_job());
         $task->set_next_run_time(time() + $delaysec);
         \core\task\manager::queue_adhoc_task($task);

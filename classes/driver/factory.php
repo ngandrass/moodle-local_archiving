@@ -33,7 +33,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Factory for all sub-plugins.
  */
 class factory {
-
     /**
      * Creates a new instance of the requested archivingmod driver
      *
@@ -41,11 +40,12 @@ class factory {
      * @param \context_module $context Moodle context this driver instance is associated with
      * @return archivingmod Instance of the requested archivingmod driver
      * @throws \coding_exception If no archivingmod driver with the given name exists
+     * @throws \moodle_exception
      */
     public static function activity_archiving_driver(string $archivingmodname, \context_module $context): archivingmod {
         // Only use mock drivers in unit tests.
         if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
-            require_once(__DIR__.'/../../tests/mock/archivingmod_quiz_mock.php');
+            require_once(__DIR__ . '/../../tests/mock/archivingmod_quiz_mock.php');
             return new \archivingmod_quiz_mock($context);
         }
 
@@ -65,7 +65,7 @@ class factory {
     public static function storage_driver(string $archivingstorename): archivingstore {
         // Only use mock drivers in unit tests.
         if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
-            require_once(__DIR__.'/../../tests/mock/archivingstore_localdir_mock.php');
+            require_once(__DIR__ . '/../../tests/mock/archivingstore_localdir_mock.php');
             return new \archivingstore_localdir_mock();
         }
 
@@ -85,7 +85,7 @@ class factory {
     public static function event_connector(string $archivingeventname): archivingevent {
         // Only use mock drivers in unit tests.
         if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
-            require_once(__DIR__.'/../../tests/mock/archivingevent_stub_mock.php');
+            require_once(__DIR__ . '/../../tests/mock/archivingevent_stub_mock.php');
             return new \archivingevent_stub_mock();
         }
 
@@ -105,7 +105,7 @@ class factory {
     public static function archiving_trigger(string $archivingtriggername): archivingtrigger {
         // Only use mock drivers in unit tests.
         if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
-            require_once(__DIR__.'/../../tests/mock/archivingtrigger_manual_mock.php');
+            require_once(__DIR__ . '/../../tests/mock/archivingtrigger_manual_mock.php');
             return new \archivingtrigger_manual_mock();
         }
 
@@ -144,5 +144,4 @@ class factory {
         return $cls;
         // @codeCoverageIgnoreEnd
     }
-
 }

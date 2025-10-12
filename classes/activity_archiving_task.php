@@ -43,7 +43,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * activity archiving task.
  */
 final class activity_archiving_task {
-
     /** @var archive_job|null Instance of the associated archive_job (lazy-loaded) */
     protected ?archive_job $archivejob;
 
@@ -471,7 +470,7 @@ final class activity_archiving_task {
         if ($this->status != $status) {
             $this->status = $status;
             $this->get_logger()->info(
-                "Activity archiving task status: ".$status->name." ({$status->value})"
+                "Activity archiving task status: " . $status->name . " ({$status->value})"
             );
         }
     }
@@ -505,6 +504,7 @@ final class activity_archiving_task {
      *
      * @return task_content_metadata[] List of task content metadata entries
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function get_task_content_metadata(): array {
         global $DB;
@@ -761,13 +761,12 @@ final class activity_archiving_task {
     public function generate_artifact_fileinfo(string $filename): \stdClass {
         return (object) [
             'contextid' => $this->context->get_course_context()->id,
-            'component' => 'archivingmod_'.$this->archivingmod()->get_plugin_name(),
+            'component' => 'archivingmod_' . $this->archivingmod()->get_plugin_name(),
             'filearea' => filearea::ARTIFACT->value,
             'itemid' => 0,
             'filepath' => "/job-{$this->jobid}/task-{$this->taskid}/",
             'filename' => $filename,
         ];
-
     }
 
     /**
@@ -800,5 +799,4 @@ final class activity_archiving_task {
         // Execute query to determine if fingerprint exists.
         return $DB->record_exists(db_table::ACTIVITY_TASK->value, $queryparams);
     }
-
 }

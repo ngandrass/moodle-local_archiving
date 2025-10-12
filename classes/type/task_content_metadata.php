@@ -37,7 +37,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * contents of generated archives.
  */
 final class task_content_metadata {
-
     /**
      * Creates a new task_content_metadata instance.
      *
@@ -77,5 +76,4 @@ final class task_content_metadata {
     public function as_array(): array {
         return get_object_vars($this);
     }
-
 }

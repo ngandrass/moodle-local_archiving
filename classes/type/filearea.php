@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Moodle fileareas used by this plugin
  */
 enum filearea: string {
-
     /** @var string Filearea for temporary files */
     case TEMP = 'temp';
 
@@ -71,5 +70,4 @@ enum filearea: string {
     public function is_virtual(): bool {
         return $this === self::TSP;
     }
-
 }

@@ -36,7 +36,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * covered by storage drivers.
  */
 class storage {
-
     /** @var int Number of characters a string variable will be cut off after expansion */
     public const FILENAME_VARIABLE_MAX_LENGTH = 128;
 
@@ -69,7 +68,7 @@ class storage {
         }
 
         // Check for variables.
-        $residue = preg_replace('/\$\{\s*('.implode('|', $allowedvariables).')\s*\}/m', '', $pattern);
+        $residue = preg_replace('/\$\{\s*(' . implode('|', $allowedvariables) . ')\s*\}/m', '', $pattern);
         if (str_contains($residue, '$')) {
             return false;
         }
@@ -168,7 +167,8 @@ class storage {
         global $DB;
 
         // Calculate stats in the database.
-        $res = $DB->get_record_sql('
+        $res = $DB->get_record_sql(
+            '
                 SELECT SUM(filesize) AS usagebytes, COUNT(*) AS filecount, COUNT(DISTINCT jobid) AS jobcount
                 FROM {' . db_table::FILE_HANDLE->value . '}
                 WHERE archivingstore = :archivingstore;
@@ -214,5 +214,4 @@ class storage {
         // If there are no files or folders left, the directory is empty.
         return empty($files);
     }
-
 }

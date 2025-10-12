@@ -37,7 +37,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * performance and availability.
  */
 enum storage_tier {
-
     /**
      * Data is stored locally on the server or is accessible VERY fast
      * (e.g., mounted NFS, CephFS).
@@ -70,7 +69,7 @@ enum storage_tier {
      * @throws \coding_exception
      */
     public function name(): string {
-        return get_string('storage_tier_'.$this->name, 'local_archiving');
+        return get_string('storage_tier_' . $this->name, 'local_archiving');
     }
 
     /**
@@ -80,7 +79,7 @@ enum storage_tier {
      * @throws \coding_exception
      */
     public function help(): string {
-        return get_string('storage_tier_'.$this->name.'_help', 'local_archiving');
+        return get_string('storage_tier_' . $this->name . '_help', 'local_archiving');
     }
 
     /**
@@ -89,12 +88,11 @@ enum storage_tier {
      * @return string CSS color class name
      */
     public function color(): string {
-        return match($this) {
+        return match ($this) {
             self::LOCAL => 'success',
             self::REMOTE_FAST => 'warning',
             self::REMOTE_SLOW => 'danger',
             default => 'secondary',
         };
     }
-
 }

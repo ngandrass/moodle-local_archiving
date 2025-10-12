@@ -32,7 +32,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_filename_pattern extends \admin_setting_configtext {
-
     /**
      * @var string[] $allowedvariables Allowed variable names in the filename pattern
      */
@@ -93,5 +92,4 @@ class admin_setting_filename_pattern extends \admin_setting_configtext {
 
         return true;
     }
-
 }

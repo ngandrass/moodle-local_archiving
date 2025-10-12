@@ -36,7 +36,7 @@ global $OUTPUT, $PAGE, $USER;
 $jobid = required_param('jobid', PARAM_INT);
 $job = archive_job::get_by_id($jobid);
 $ctx = $job->get_context();
-list($course, $cm) = get_course_and_cm_from_cmid($ctx->instanceid);
+[$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
 
 // Check login and capabilities.
 require_login($course);

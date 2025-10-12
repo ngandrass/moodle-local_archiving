@@ -51,7 +51,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @property-read string $filekey Optional unique key for identifying the file
  */
 final class file_handle {
-
     /** @var archivingstore|null Instance of the storage driver that is responsible for this file handle (lazy-loaded) */
     protected ?archivingstore $archivingstore;
 
@@ -296,7 +295,8 @@ final class file_handle {
     public function get_local_file(): ?\stored_file {
         global $DB;
 
-        $file = $DB->get_record_sql("
+        $file = $DB->get_record_sql(
+            "
                 SELECT id
                 FROM {files}
                 WHERE
@@ -413,5 +413,4 @@ final class file_handle {
 
         $this->deleted = true;
     }
-
 }

@@ -36,7 +36,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Interface for storage driver (archivingstore) sub-plugins
  */
 abstract class archivingstore extends base {
-
     /**
      * Returns the storage tier of this storage plugin.
      *
@@ -111,5 +110,4 @@ abstract class archivingstore extends base {
      * @throws storage_exception
      */
     abstract public function delete(file_handle $handle, bool $strict = false): void;
-
 }

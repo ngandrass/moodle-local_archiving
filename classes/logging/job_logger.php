@@ -36,7 +36,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * All log entries will be linked to the respective job.
  */
 class job_logger extends logger {
-
     /**
      * Create a new logger instance that is tied to the given job
      *
@@ -65,10 +64,10 @@ class job_logger extends logger {
     #[\Override]
     public function get_logs(
         log_level $minlevel = log_level::TRACE,
-        int       $aftertime = 0,
-        int       $beforetime = 9999999999,
-        int       $limitnum = 100,
-        int       $limitfrom = 0
+        int $aftertime = 0,
+        int $beforetime = 9999999999,
+        int $limitnum = 100,
+        int $limitfrom = 0
     ): array {
         return $this->get_log_entries_from_db(
             $minlevel,
@@ -166,5 +165,4 @@ class job_logger extends logger {
     public function fatal(string $message): void {
         $this->write_log_entry_to_db(log_level::FATAL, $message, $this->jobid);
     }
-
 }

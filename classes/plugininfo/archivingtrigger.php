@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Subplugin info class for archivingtrigger
  */
 class archivingtrigger extends \core\plugininfo\base {
-
     /**
      * Should there be a way to uninstall the plugin via the administration UI.
      *
@@ -124,6 +123,7 @@ class archivingtrigger extends \core\plugininfo\base {
      * Finds all enabled plugins, the result may include missing plugins.
      *
      * @return array|null of enabled plugins $pluginname=>$pluginname, null means unknown
+     * @throws \coding_exception
      */
     #[\Override]
     public static function get_enabled_plugins() {
@@ -137,5 +137,4 @@ class archivingtrigger extends \core\plugininfo\base {
 
         return $enabledplugins;
     }
-
 }

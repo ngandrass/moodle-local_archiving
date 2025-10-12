@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Utility functions for working with courses
  */
 class course_util {
-
     /**
      * Retrieves the groups a user is member of in a given course
      *
@@ -46,13 +45,15 @@ class course_util {
     public static function get_user_groups(int $courseid, int $userid): array {
         global $DB;
 
-        return $DB->get_records_sql("
-            SELECT g.id, g.idnumber, g.name
-            FROM {groups} g
-            JOIN {groups_members} gm ON g.id = gm.groupid
-            WHERE
-                g.courseid = :courseid AND
-                gm.userid = :userid;",
+        return $DB->get_records_sql(
+            "
+                SELECT g.id, g.idnumber, g.name
+                FROM {groups} g
+                JOIN {groups_members} gm ON g.id = gm.groupid
+                WHERE
+                    g.courseid = :courseid AND
+                    gm.userid = :userid;
+            ",
             [
                 'courseid' => $courseid,
                 'userid' => $userid,
@@ -123,5 +124,4 @@ class course_util {
 
         return array_unique($res);
     }
-
 }

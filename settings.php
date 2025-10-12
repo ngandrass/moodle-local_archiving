@@ -43,7 +43,8 @@ if ($hassiteconfig) {
     // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
     if ($ADMIN->fulltree) {
         // Common: Header.
-        $commonpage->add(new admin_setting_heading('local_archiving/header_common',
+        $commonpage->add(new admin_setting_heading(
+            'local_archiving/header_common',
             null,
             get_string(
                 'setting_header_common_desc',
@@ -53,7 +54,8 @@ if ($hassiteconfig) {
         ));
 
         // Common: Job timeout.
-        $commonpage->add(new admin_setting_configtext('local_archiving/job_timeout_min',
+        $commonpage->add(new admin_setting_configtext(
+            'local_archiving/job_timeout_min',
             get_string('setting_job_timeout_min', 'local_archiving'),
             get_string('setting_job_timeout_min_desc', 'local_archiving'),
             '120',
@@ -61,7 +63,8 @@ if ($hassiteconfig) {
         ));
 
         // Common: Max concurrent jobs.
-        $commonpage->add(new admin_setting_configtext('local_archiving/max_concurrent_jobs',
+        $commonpage->add(new admin_setting_configtext(
+            'local_archiving/max_concurrent_jobs',
             get_string('setting_max_concurrent_jobs', 'local_archiving'),
             get_string('setting_max_concurrent_jobs_desc', 'local_archiving'),
             '5',
@@ -69,7 +72,8 @@ if ($hassiteconfig) {
         ));
 
         // Common: Log level.
-        $commonpage->add(new admin_setting_configselect('local_archiving/log_level',
+        $commonpage->add(new admin_setting_configselect(
+            'local_archiving/log_level',
             get_string('setting_log_level', 'local_archiving'),
             get_string('setting_log_level_desc', 'local_archiving'),
             log_level::INFO->value,
@@ -77,19 +81,22 @@ if ($hassiteconfig) {
         ));
 
         // Common: Course categories.
-        $commonpage->add(new admin_setting_coursecat_multiselect('local_archiving/coursecat_whitelist',
+        $commonpage->add(new admin_setting_coursecat_multiselect(
+            'local_archiving/coursecat_whitelist',
             get_string('setting_coursecat_whitelist', 'local_archiving'),
             get_string('setting_coursecat_whitelist_desc', 'local_archiving'),
         ));
 
         // Common: Job Presets.
-        $commonpage->add(new admin_setting_heading('local_archiving/header_job_presets',
+        $commonpage->add(new admin_setting_heading(
+            'local_archiving/header_job_presets',
             get_string('setting_header_job_presets', 'local_archiving'),
             get_string('setting_header_job_presets_desc', 'local_archiving'),
         ));
 
         // Common - Job Preset: Export Activity (course module) Backup.
-        $set = new admin_setting_configcheckbox('local_archiving/job_preset_export_cm_backup',
+        $set = new admin_setting_configcheckbox(
+            'local_archiving/job_preset_export_cm_backup',
             get_string('export_cm_backup', 'local_archiving'),
             get_string('export_cm_backup_help', 'local_archiving'),
             '1',
@@ -98,7 +105,8 @@ if ($hassiteconfig) {
         $commonpage->add($set);
 
         // Common - Job Preset: Export Course Backup.
-        $set = new admin_setting_configcheckbox('local_archiving/job_preset_export_course_backup',
+        $set = new admin_setting_configcheckbox(
+            'local_archiving/job_preset_export_course_backup',
             get_string('export_course_backup', 'local_archiving'),
             get_string('export_course_backup_help', 'local_archiving'),
             '0',
@@ -117,7 +125,8 @@ if ($hassiteconfig) {
             // No storage drivers available, add a dummy option.
             $storagedriverselects['null'] = '';
         }
-        $set = new admin_setting_configselect_with_lock('local_archiving/job_preset_storage_driver',
+        $set = new admin_setting_configselect_with_lock(
+            'local_archiving/job_preset_storage_driver',
             get_string('storage_location', 'local_archiving'),
             get_string('storage_location_help', 'local_archiving'),
             [
@@ -129,15 +138,16 @@ if ($hassiteconfig) {
         $commonpage->add($set);
 
         // Common - Job Preset: Archive filename pattern.
-        $set = new admin_setting_filename_pattern('local_archiving/job_preset_archive_filename_pattern',
+        $set = new admin_setting_filename_pattern(
+            'local_archiving/job_preset_archive_filename_pattern',
             get_string('archive_filename_pattern', 'local_archiving'),
             get_string('archive_filename_pattern_help', 'local_archiving', [
                 'variables' => array_reduce(
                     \local_archiving\type\archive_filename_variable::values(),
-                    fn ($res, $varname) => $res."<li><code>\${".$varname."}</code>: ".
-                        get_string('archive_filename_pattern_variable_'.$varname, 'local_archiving').
-                        "</li>"
-                    , ""
+                    fn ($res, $varname) => $res . "<li><code>\${" . $varname . "}</code>: " .
+                        get_string('archive_filename_pattern_variable_' . $varname, 'local_archiving') .
+                        "</li>",
+                    ""
                 ),
                 'forbiddenchars' => implode('', storage::FILENAME_FORBIDDEN_CHARACTERS),
             ]),
@@ -150,7 +160,8 @@ if ($hassiteconfig) {
         $commonpage->add($set);
 
         // Common - Job Preset: Archive autodelete.
-        $set = new admin_setting_configcheckbox('local_archiving/job_preset_archive_autodelete',
+        $set = new admin_setting_configcheckbox(
+            'local_archiving/job_preset_archive_autodelete',
             get_string('archive_autodelete', 'local_archiving'),
             get_string('archive_autodelete_help', 'local_archiving'),
             '0',
@@ -159,7 +170,8 @@ if ($hassiteconfig) {
         $commonpage->add($set);
 
         // Common - Job Preset: Archive autodelete retention time.
-        $set = new admin_setting_configduration('local_archiving/job_preset_archive_retention_time',
+        $set = new admin_setting_configduration(
+            'local_archiving/job_preset_archive_retention_time',
             get_string('archive_retention_time', 'local_archiving'),
             get_string('archive_retention_time_help', 'local_archiving'),
             3 * YEARSECS,
@@ -170,27 +182,31 @@ if ($hassiteconfig) {
         $commonpage->add($set);
 
         // Common: Time-Stamp Protocol settings.
-        $commonpage->add(new admin_setting_heading('quit_archiver/header_tsp',
+        $commonpage->add(new admin_setting_heading(
+            'local_archiving/header_tsp',
             get_string('setting_header_tsp', 'local_archiving'),
             get_string('setting_header_tsp_desc', 'local_archiving')
         ));
 
         // Common - TSP: Enable.
-        $commonpage->add(new admin_setting_configcheckbox('local_archiving/tsp_enable',
+        $commonpage->add(new admin_setting_configcheckbox(
+            'local_archiving/tsp_enable',
             get_string('setting_tsp_enable', 'local_archiving'),
             get_string('setting_tsp_enable_desc', 'local_archiving'),
             '0'
         ));
 
         // Common - TSP: Automatic signing.
-        $commonpage->add(new admin_setting_configcheckbox('local_archiving/tsp_automatic_signing',
+        $commonpage->add(new admin_setting_configcheckbox(
+            'local_archiving/tsp_automatic_signing',
             get_string('setting_tsp_automatic_signing', 'local_archiving'),
             get_string('setting_tsp_automatic_signing_desc', 'local_archiving'),
             '1'
         ));
 
         // Common - TSP: Server URL.
-        $commonpage->add(new admin_setting_configtext('local_archiving/tsp_server_url',
+        $commonpage->add(new admin_setting_configtext(
+            'local_archiving/tsp_server_url',
             get_string('setting_tsp_server_url', 'local_archiving'),
             get_string('setting_tsp_server_url_desc', 'local_archiving'),
             'https://freetsa.org/tsr',
@@ -205,7 +221,8 @@ if ($hassiteconfig) {
     );
     if ($ADMIN->fulltree) {
         // Manage components: Header.
-        $managecomponentspage->add(new admin_setting_heading('local_archiving/header_managecomponents',
+        $managecomponentspage->add(new admin_setting_heading(
+            'local_archiving/header_managecomponents',
             null,
             get_string(
                 'setting_header_managecomponents_desc',
@@ -247,5 +264,4 @@ if ($hassiteconfig) {
 
         $settings = null;
     }
-
 }

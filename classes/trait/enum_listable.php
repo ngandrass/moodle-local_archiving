@@ -32,7 +32,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Allows to get all values of a backed enum as an array
  */
 trait enum_listable {
-
     /**
      * Returns all backed values of the enum as an array
      *
@@ -56,5 +55,4 @@ trait enum_listable {
             self::cases()
         );
     }
-
 }

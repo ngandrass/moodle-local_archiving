@@ -31,5 +31,4 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Renderer class for the local_archiving plugin.
  */
 class renderer extends \plugin_renderer_base {
-
 }

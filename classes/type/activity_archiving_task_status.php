@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Status values of an activity archiving task
  */
 enum activity_archiving_task_status: int {
-
     /** @var int The task has not been initialized yet */
     case UNINITIALIZED = 0;
 
@@ -64,5 +63,4 @@ enum activity_archiving_task_status: int {
 
     /** @var int The task status is unknown due to an internal data error */
     case UNKNOWN = 255;
-
 }

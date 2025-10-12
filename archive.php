@@ -34,7 +34,7 @@ $cmid = required_param('cmid', PARAM_INT);
 
 $coursectx = context_course::instance($courseid);
 $ctx = context_module::instance($cmid);
-list($course, $cm) = get_course_and_cm_from_cmid($cmid);
+[$course, $cm] = get_course_and_cm_from_cmid($cmid);
 
 // Check login and capabilities.
 require_login($courseid);
@@ -90,7 +90,7 @@ if ($form->is_submitted() && $form->is_validated()) {
 }
 
 // Prepare template context for page.
-$jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_'.$ctx->id, $ctx);
+$jobtbl = new \local_archiving\output\job_overview_table('job_overview_table_' . $ctx->id, $ctx);
 $jobtbl->define_baseurl($PAGE->url);
 ob_start();
 $jobtbl->out(20, true);

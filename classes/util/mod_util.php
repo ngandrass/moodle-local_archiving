@@ -35,7 +35,6 @@ use local_archiving\type\db_table;
  * Utility functions for working with activities
  */
 class mod_util {
-
     /**
      * Retrieves the course modules inside a given course and enriches them with
      * metadata of this plugin
@@ -67,9 +66,10 @@ class mod_util {
         // Get latest successfull archiving job for each cm.
         $cmcontextids = array_map(fn ($cm) => $cm->context->id, $cms);
         $cmcontextidssql = implode(',', array_map('intval', $cmcontextids));
-        $lastarchivedcms = $DB->get_records_sql("
+        $lastarchivedcms = $DB->get_records_sql(
+            "
                 SELECT contextid, MAX(timecreated) AS lastarchived
-                FROM {".db_table::JOB->value."}
+                FROM {" . db_table::JOB->value . "}
                 WHERE
                     status = :status AND
                     contextid IN ({$cmcontextidssql})
@@ -87,7 +87,7 @@ class mod_util {
                 'enabled' => $drivers[$cm->modname]['enabled'] ?? false,
                 'ready' => $drivers[$cm->modname]['ready'] ?? false,
                 'lastarchived' => ($lastarchivedcms[$cm->context->id] ?? null)?->lastarchived,
-                'dirty' => true,  // By default we always assume new changes unless we know better as determined below.
+                'dirty' => true, // By default we always assume new changes unless we know better as determined below.
             ];
 
             // Determine if cm is dirty (new changes since last archiving).
@@ -121,5 +121,4 @@ class mod_util {
         $cinfo = get_fast_modinfo($ctx->get_course_context()->instanceid);
         return $cinfo->get_cm($ctx->instanceid);
     }
-
 }

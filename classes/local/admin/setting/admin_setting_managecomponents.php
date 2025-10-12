@@ -23,7 +23,7 @@ use core\exception\moodle_exception;
 use local_archiving\storage;
 use local_archiving\util\plugin_util;
 
-require_once($CFG->libdir.'/adminlib.php'); // @codeCoverageIgnore
+require_once($CFG->libdir . '/adminlib.php'); // @codeCoverageIgnore
 
 
 /**
@@ -38,7 +38,6 @@ require_once($CFG->libdir.'/adminlib.php'); // @codeCoverageIgnore
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_managecomponents extends \admin_setting {
-
     /**
      * Constructor
      * @param string $name unique ascii name, either 'mysetting' for settings that in config,
@@ -201,19 +200,21 @@ class admin_setting_managecomponents extends \admin_setting {
             // Status pill.
             if ($archivingdriver['enabled']) {
                 if ($archivingdriver['ready']) {
-                    $statushtml = '<span class="badge badge-success">'.get_string('ready', 'local_archiving').'</span>';
+                    $statushtml = '<span class="badge badge-success">' . get_string('ready', 'local_archiving') . '</span>';
                 } else {
-                    $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
+                    $statushtml = '<span class="badge badge-danger">' . get_string('unconfigured', 'local_archiving') . '</span>';
                 }
             } else {
-                $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
+                $statushtml = '<span class="badge badge-secondary">' . get_string('disabled', 'admin') . '</span>';
             }
 
             // Activity pills.
             $badgecolor = $archivingdriver['enabled'] ? 'primary' : 'secondary';
-            $activitieshtml = array_reduce($archivingdriver['activities'],
-                fn ($res, $activity) => $res.'<span class="badge badge-'.$badgecolor.'">'.$activity.'</span>'
-            , '');
+            $activitieshtml = array_reduce(
+                $archivingdriver['activities'],
+                fn ($res, $activity) => $res . '<span class="badge badge-' . $badgecolor . '">' . $activity . '</span>',
+                ''
+            );
 
             // Settings link.
             $settingsurl = new \moodle_url('/admin/settings.php', ['section' => $archivingdriver['component']]);
@@ -281,12 +282,12 @@ class admin_setting_managecomponents extends \admin_setting {
             // Status pill.
             if ($storagedriver['enabled']) {
                 if ($storagedriver['ready']) {
-                    $statushtml = '<span class="badge badge-success">'.get_string('ready', 'local_archiving').'</span>';
+                    $statushtml = '<span class="badge badge-success">' . get_string('ready', 'local_archiving') . '</span>';
                 } else {
-                    $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
+                    $statushtml = '<span class="badge badge-danger">' . get_string('unconfigured', 'local_archiving') . '</span>';
                 }
             } else {
-                $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
+                $statushtml = '<span class="badge badge-secondary">' . get_string('disabled', 'admin') . '</span>';
             }
 
             // Usage.
@@ -298,27 +299,28 @@ class admin_setting_managecomponents extends \admin_setting {
                 // Calculate usage.
                 $usage = storage::calculate_archivingstore_stats($storagedrivername);
                 $usagehtml .= '<div><i class="fa-regular fa-file-zipper text-center" style="min-width: 24px;"></i>';
-                $usagehtml .= $usage->jobcount.'&nbsp;'.strtolower(get_string('archive_jobs', 'local_archiving')).'</div>';
+                $usagehtml .= $usage->jobcount . '&nbsp;' . strtolower(get_string('archive_jobs', 'local_archiving')) . '</div>';
 
                 $usagehtml .= '<div><i class="fa-regular fa-file text-center" style="min-width: 24px;"></i>';
-                $usagehtml .= $usage->filecount.'&nbsp;'.strtolower(get_string('files', 'local_archiving')).'</div>';
+                $usagehtml .= $usage->filecount . '&nbsp;' . strtolower(get_string('files', 'local_archiving')) . '</div>';
 
                 $usagehtml .= '<div><i class="fa-regular fa-hard-drive text-center" style="min-width: 24px;"></i>';
-                $usagehtml .= display_size($usage->usagebytes).'&nbsp;'.strtolower(get_string('used', 'local_archiving')).'</div>';
+                $usagehtml .= display_size($usage->usagebytes) . '&nbsp;' . strtolower(get_string('used', 'local_archiving'));
+                $usagehtml .= '</div>';
 
                 // Calculate free space.
                 $freebytes = $driver->get_free_bytes();
                 $usagehtml .= '<div><i class="fa-solid fa-database text-center" style="min-width: 24px;"></i>';
                 if (is_numeric($freebytes)) {
-                    $usagehtml .= display_size($driver->get_free_bytes()).'&nbsp;';
+                    $usagehtml .= display_size($driver->get_free_bytes()) . '&nbsp;';
                     $usagehtml .= strtolower(get_string('available', 'local_archiving'));
                 } else {
                     $usagehtml .= '<span class="text-muted font-italic">';
-                    $usagehtml .= get_string('free_space_unknown', 'local_archiving').'</span>';
+                    $usagehtml .= get_string('free_space_unknown', 'local_archiving') . '</span>';
                 }
                 $usagehtml .= '</div>';
             } else {
-                $usagehtml .= '<div class="text-muted">'.get_string('disabled', 'admin').'</div>';
+                $usagehtml .= '<div class="text-muted">' . get_string('disabled', 'admin') . '</div>';
             }
 
             // Storage tier.
@@ -395,12 +397,12 @@ class admin_setting_managecomponents extends \admin_setting {
             // Status pill.
             if ($trigger['enabled']) {
                 if ($trigger['ready']) {
-                    $statushtml = '<span class="badge badge-success">'.get_string('ready', 'local_archiving').'</span>';
+                    $statushtml = '<span class="badge badge-success">' . get_string('ready', 'local_archiving') . '</span>';
                 } else {
-                    $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
+                    $statushtml = '<span class="badge badge-danger">' . get_string('unconfigured', 'local_archiving') . '</span>';
                 }
             } else {
-                $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
+                $statushtml = '<span class="badge badge-secondary">' . get_string('disabled', 'admin') . '</span>';
             }
 
             // Settings link.
@@ -466,12 +468,12 @@ class admin_setting_managecomponents extends \admin_setting {
             // Status pill.
             if ($eventconnector['enabled']) {
                 if ($eventconnector['ready']) {
-                    $statushtml = '<span class="badge badge-success">'.get_string('ready', 'local_archiving').'</span>';
+                    $statushtml = '<span class="badge badge-success">' . get_string('ready', 'local_archiving') . '</span>';
                 } else {
-                    $statushtml = '<span class="badge badge-danger">'.get_string('unconfigured', 'local_archiving').'</span>';
+                    $statushtml = '<span class="badge badge-danger">' . get_string('unconfigured', 'local_archiving') . '</span>';
                 }
             } else {
-                $statushtml = '<span class="badge badge-secondary">'.get_string('disabled', 'admin').'</span>';
+                $statushtml = '<span class="badge badge-secondary">' . get_string('disabled', 'admin') . '</span>';
             }
 
             // Settings link.
@@ -493,5 +495,4 @@ class admin_setting_managecomponents extends \admin_setting {
 
         return \html_writer::table($table);
     }
-
 }

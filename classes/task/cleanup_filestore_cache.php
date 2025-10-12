@@ -42,7 +42,6 @@ use local_archiving\type\filearea;
  * to the locally cached copies.
  */
 class cleanup_filestore_cache extends \core\task\scheduled_task {
-
     /**
      * Get a descriptive name for the task (shown to admins)
      *
@@ -88,10 +87,9 @@ class cleanup_filestore_cache extends \core\task\scheduled_task {
             $file = $fs->get_file_by_id($filerow->id);
             $file->delete();
             mtrace(
-                "Deleted expired file: ".
+                "Deleted expired file: " .
                 "{$file->get_filename()} (file id: {$file->get_id()}) (file handle id: {$file->get_itemid()})"
             );
         }
     }
-
 }

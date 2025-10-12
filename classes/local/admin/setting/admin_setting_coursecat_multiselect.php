@@ -28,7 +28,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_coursecat_multiselect extends \core_admin\local\settings\autocomplete {
-
     /** @var bool If false, at least one course category must be selected to be able to save */
     protected bool $allowempty;
 
@@ -69,5 +68,4 @@ class admin_setting_coursecat_multiselect extends \core_admin\local\settings\aut
 
         return parent::write_setting($data);
     }
-
 }

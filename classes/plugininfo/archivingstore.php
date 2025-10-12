@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Subplugin info class for archivingstore
  */
 class archivingstore extends \core\plugininfo\base {
-
     /**
      * Should there be a way to uninstall the plugin via the administration UI.
      *
@@ -132,5 +131,4 @@ class archivingstore extends \core\plugininfo\base {
 
         return $enabledplugins;
     }
-
 }

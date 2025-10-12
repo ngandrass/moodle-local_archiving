@@ -34,5 +34,4 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Interface for archiving trigger (archivingtrigger) sub-plugins
  */
 abstract class archivingtrigger extends base {
-
 }

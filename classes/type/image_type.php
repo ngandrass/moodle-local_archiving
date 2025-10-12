@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Supported image types with their file extensions and mime types
  */
 enum image_type {
-
     case PNG;
     case JPEG;
     case SVG;
@@ -116,5 +115,4 @@ enum image_type {
         }
         return null;
     }
-
 }

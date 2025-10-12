@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Status values an archive job can have
  */
 enum archive_job_status: int {
-
     /** @var int Job is uninitialized */
     case UNINITIALIZED = 0;
 
@@ -144,7 +143,7 @@ enum archive_job_status: int {
      * @throws \coding_exception
      */
     public function name(): string {
-        return get_string('job_status_'.$this->value, 'local_archiving');
+        return get_string('job_status_' . $this->value, 'local_archiving');
     }
 
     /**
@@ -154,7 +153,7 @@ enum archive_job_status: int {
      * @throws \coding_exception
      */
     public function help(): string {
-        return get_string('job_status_'.$this->value.'_help', 'local_archiving');
+        return get_string('job_status_' . $this->value . '_help', 'local_archiving');
     }
 
     /**
@@ -163,7 +162,7 @@ enum archive_job_status: int {
      * @return string CSS color class name
      */
     public function color(): string {
-        return match($this) {
+        return match ($this) {
             self::PRE_PROCESSING,
             self::ACTIVITY_ARCHIVING,
             self::BACKUP_COLLECTION,
@@ -230,5 +229,4 @@ enum archive_job_status: int {
     public function is_idle(): bool {
         return in_array($this, self::get_idle_states(), true);
     }
-
 }

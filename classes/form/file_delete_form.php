@@ -29,14 +29,13 @@ use local_archiving\file_handle;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
+require_once($CFG->dirroot . '/lib/formslib.php'); // @codeCoverageIgnore
 
 
 /**
  * Form to delete a single artifact file that's part of an archive job
  */
 class file_delete_form extends \moodleform {
-
     /** @var file_handle The file handle to delete the referenced file from */
     protected file_handle $filehandle;
 
@@ -83,12 +82,12 @@ class file_delete_form extends \moodleform {
 
         // Print delete warning.
         $this->_form->addElement('html', $OUTPUT->notification(
-            '<h4>'.get_string('delete_job_artifact_file', 'local_archiving').'</h4>'.
-            '<p>'.get_string('delete_job_artifact_file_warning', 'local_archiving').'</p>'.
-            '<code>'.
-                get_string('filename', 'backup').': '.$this->filehandle->filename.'<br>'.
-                get_string('size').': '.display_size($this->filehandle->filesize).'<br>'.
-                get_string('timecreated').': '.userdate($this->filehandle->timecreated).
+            '<h4>' . get_string('delete_job_artifact_file', 'local_archiving') . '</h4>' .
+            '<p>' . get_string('delete_job_artifact_file_warning', 'local_archiving') . '</p>' .
+            '<code>' .
+                get_string('filename', 'backup') . ': ' . $this->filehandle->filename . '<br>' .
+                get_string('size') . ': ' . display_size($this->filehandle->filesize) . '<br>' .
+                get_string('timecreated') . ': ' . userdate($this->filehandle->timecreated) .
             '</code>',
             \core\output\notification::NOTIFY_WARNING,
             false
@@ -110,5 +109,4 @@ class file_delete_form extends \moodleform {
         // Action buttons.
         $this->add_action_buttons(true, get_string('delete'));
     }
-
 }

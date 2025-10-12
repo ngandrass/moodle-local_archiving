@@ -35,7 +35,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Provides logging functions for local_archiving and all its subplugins.
  */
 class logger {
-
     /** @var log_level The minimum level a new log entry must have to be actually logged */
     public readonly log_level $loglevel;
 
@@ -135,8 +134,9 @@ class logger {
         }
 
         // Execute query.
-        return $DB->get_records_sql("
-                SELECT * FROM {".db_table::LOG->value."}
+        return $DB->get_records_sql(
+            "
+                SELECT * FROM {" . db_table::LOG->value . "}
                 WHERE {$wheresql}
                 ORDER BY timecreated ASC
             ",
@@ -144,7 +144,6 @@ class logger {
             $limitfrom,
             $limitnum
         );
-
     }
 
     /**
@@ -161,10 +160,10 @@ class logger {
      */
     public function get_logs(
         log_level $minlevel = log_level::TRACE,
-        int       $aftertime = 0,
-        int       $beforetime = 9999999999,
-        int       $limitnum = 100,
-        int       $limitfrom = 0
+        int $aftertime = 0,
+        int $beforetime = 9999999999,
+        int $limitnum = 100,
+        int $limitfrom = 0
     ): array {
         return $this->get_log_entries_from_db(
             $minlevel,
@@ -262,10 +261,9 @@ class logger {
      * @return string Formatted log entry
      */
     public static function format_log_entry(\stdClass $logentry): string {
-        return date('Y-m-d H:i:s', $logentry->timecreated).
-            ' ['.str_pad(log_level::from($logentry->level)->name, 5, ' ', STR_PAD_LEFT).'] '.
-            ($logentry->taskid ? ' -> ' : '').
+        return date('Y-m-d H:i:s', $logentry->timecreated) .
+            ' [' . str_pad(log_level::from($logentry->level)->name, 5, ' ', STR_PAD_LEFT) . '] ' .
+            ($logentry->taskid ? ' -> ' : '') .
             $logentry->message;
     }
-
 }

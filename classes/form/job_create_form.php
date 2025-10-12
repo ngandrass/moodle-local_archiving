@@ -33,14 +33,13 @@ use local_archiving\util\time_util;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-require_once($CFG->dirroot.'/lib/formslib.php'); // @codeCoverageIgnore
+require_once($CFG->dirroot . '/lib/formslib.php'); // @codeCoverageIgnore
 
 
 /**
  * Form to initiate an activity archiving job
  */
 class job_create_form extends \moodleform {
-
     /** @var \stdClass Moodle admin settings values for 'core' (local_archiving) and the respective 'handler' (archivingmod_*) */
     protected \stdClass $config;
 
@@ -72,8 +71,9 @@ class job_create_form extends \moodleform {
     /**
      * Full form definition
      *
-     * @throws \dml_exception
      * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     #[\Override]
     public function definition() {
@@ -83,16 +83,18 @@ class job_create_form extends \moodleform {
         if (!course_util::archiving_enabled_for_course($this->cminfo->get_course()->id)) {
             if (has_capability('local/archiving:bypasscourserestrictions', $this->cminfo->context)) {
                 // User is allowed to bypass the course archiving restriction. But warn the user about it.
-                $this->_form->addElement('html',
-                    '<div class="alert alert-warning">'.
-                        get_string('archiving_force_allowed_for_course', 'local_archiving').
+                $this->_form->addElement(
+                    'html',
+                    '<div class="alert alert-warning">' .
+                        get_string('archiving_force_allowed_for_course', 'local_archiving') .
                     '</div>'
                 );
             } else {
                 // User is not allowed to bypass this restriction. Display warning and abort.
-                $this->_form->addElement('html',
-                    '<div class="alert alert-danger">'.
-                        get_string('archiving_disabled_for_this_course_by_category', 'local_archiving').
+                $this->_form->addElement(
+                    'html',
+                    '<div class="alert alert-danger">' .
+                        get_string('archiving_disabled_for_this_course_by_category', 'local_archiving') .
                     '</div>'
                 );
                 return;
@@ -101,9 +103,10 @@ class job_create_form extends \moodleform {
 
         // Prevent form from being displayed if manual archiving is disabled.
         if (!\local_archiving\driver\factory::archiving_trigger('manual')->is_enabled()) {
-            $this->_form->addElement('html',
-                '<div class="alert alert-warning">'.
-                    get_string('can_not_create_archive_manual_archiving_disabled', 'local_archiving').
+            $this->_form->addElement(
+                'html',
+                '<div class="alert alert-warning">' .
+                    get_string('can_not_create_archive_manual_archiving_disabled', 'local_archiving') .
                 '</div>'
             );
             return;
@@ -129,16 +132,17 @@ class job_create_form extends \moodleform {
      * @throws \coding_exception
      */
     protected function definition_header(): void {
-        $this->_form->addElement('html', '<h1>'.get_string(
-            'job_create_form_header_typed',
-            'local_archiving',
-            get_string('pluginname', "mod_{$this->handler}"),
-        ).'</h1>');
-        $this->_form->addElement('html', '<p>'.get_string('job_create_form_header_desc', 'local_archiving').'</p>');
+        $this->_form->addElement(
+            'html',
+            '<h1>' .
+                get_string('job_create_form_header_typed', 'local_archiving', get_string('pluginname', "mod_{$this->handler}")) .
+            '</h1>'
+        );
+        $this->_form->addElement('html', '<p>' . get_string('job_create_form_header_desc', 'local_archiving') . '</p>');
 
         $modpurpose = plugin_supports('mod', $this->cminfo->modname, FEATURE_MOD_PURPOSE, MOD_PURPOSE_OTHER) ?: '';
         $activityhtml = '<div class="mb-4">
-            <h6>'.get_string('target_activity', 'local_archiving').'</h6>
+            <h6>' . get_string('target_activity', 'local_archiving') . '</h6>
             <ul class="list-group" style="max-width: 600px;">
                 <a href="' . $this->cminfo->get_url() . '" class="list-group-item list-group-item-action text-primary">
                     <div class="d-inline activity-icon activityiconcontainer ' . $modpurpose . ' pl-0">
@@ -222,9 +226,9 @@ class job_create_form extends \moodleform {
             [
                 'variables' => array_reduce(
                     archive_filename_variable::values(),
-                    fn($res, $varname) => $res."<li>".
-                            "<code>\${".$varname."}</code>: ".
-                            get_string('archive_filename_pattern_variable_'.$varname, 'local_archiving').
+                    fn($res, $varname) => $res . "<li>" .
+                            "<code>\${" . $varname . "}</code>: " .
+                            get_string('archive_filename_pattern_variable_' . $varname, 'local_archiving') .
                         "</li>",
                     ""
                 ),
@@ -256,7 +260,7 @@ class job_create_form extends \moodleform {
                 'static',
                 'archive_retention_time_static',
                 '',
-                $durationwithunit[0].' '.$durationwithunit[1]
+                $durationwithunit[0] . ' ' . $durationwithunit[1]
             );
             $this->_form->addElement('hidden', 'archive_retention_time', $this->config->core->job_preset_archive_retention_time);
         } else {
@@ -306,11 +310,13 @@ class job_create_form extends \moodleform {
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
 
-        if (!storage::is_valid_filename_pattern(
-            $data['archive_filename_pattern'],
-            archive_filename_variable::values(),
-            storage::FILENAME_FORBIDDEN_CHARACTERS
-        )) {
+        if (
+            !storage::is_valid_filename_pattern(
+                $data['archive_filename_pattern'],
+                archive_filename_variable::values(),
+                storage::FILENAME_FORBIDDEN_CHARACTERS
+            )
+        ) {
             $errors['archive_filename_pattern'] = get_string('error_invalid_archive_filename_pattern', 'local_archiving');
         }
 
@@ -350,5 +356,4 @@ class job_create_form extends \moodleform {
     public function export_raw_data(): \stdClass {
         return (object) $this->_form->exportValues();
     }
-
 }

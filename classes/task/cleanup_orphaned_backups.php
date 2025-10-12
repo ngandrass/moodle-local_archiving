@@ -41,7 +41,6 @@ use local_archiving\backup_manager;
  * backup files.
  */
 class cleanup_orphaned_backups extends \core\task\scheduled_task {
-
     /**
      * Get a descriptive name for the task (shown to admins)
      *
@@ -67,13 +66,12 @@ class cleanup_orphaned_backups extends \core\task\scheduled_task {
         foreach ($orphanedfiles as $f) {
             try {
                 $f->delete();
-                mtrace('Deleted orphaned backup file: '.$f->get_filename());
+                mtrace('Deleted orphaned backup file: ' . $f->get_filename());
                 // @codeCoverageIgnoreStart
             } catch (\Exception $e) {
-                mtrace('Failed to delete orphaned backup file "'.$f->get_filename().'" with error: ' . $e->getMessage());
+                mtrace('Failed to delete orphaned backup file "' . $f->get_filename() . '" with error: ' . $e->getMessage());
                 // @codeCoverageIgnoreEnd
             }
         }
     }
-
 }

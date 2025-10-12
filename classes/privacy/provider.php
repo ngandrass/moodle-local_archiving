@@ -35,11 +35,9 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @codeCoverageIgnore This is handled by Moodle core tests
  */
 class provider implements \core_privacy\local\metadata\null_provider {
-
     #[\Override]
     public static function get_reason(): string {
         // TODO (MDL-0): This is just a placeholder for unit test happiness. Implement properly!
         return 'privacy:metadata';
     }
-
 }

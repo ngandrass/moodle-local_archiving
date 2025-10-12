@@ -43,7 +43,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * consists of multiple stages and tasks.
  */
 class archive_job {
-
     /** @var int ID of the course this job is run in */
     protected int $courseid;
 
@@ -166,7 +165,9 @@ class archive_job {
      * @param int $jobid The ID of the job to retrieve
      * @return archive_job Archive job instance
      *
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public static function get_by_id(int $jobid): archive_job {
         global $DB;
@@ -212,11 +213,13 @@ class archive_job {
 
         $jobtimeoutmin = get_config('local_archiving', 'job_timeout_min');
 
-        if (!$lock = $lockfactory->get_lock(
-            $this->get_lock_resource(),
-            $timeoutsec,
-            ($jobtimeoutmin ?: 6 * 60) * 60
-        )) {
+        if (
+            !$lock = $lockfactory->get_lock(
+                $this->get_lock_resource(),
+                $timeoutsec,
+                ($jobtimeoutmin ?: 6 * 60) * 60
+            )
+        ) {
             $this->get_logger()->warn("Failed to acquire lock for '{$this->get_lock_resource()}' after {$timeoutsec} seconds.");
             if ($timeouterror) {
                 throw new \moodle_exception('locktimeout');
@@ -369,7 +372,7 @@ class archive_job {
                 }
 
                 $this->get_logger()->trace(
-                    "Initialized new archive job. Trigger: {$this->trigger} - Settings: \r\n".
+                    "Initialized new archive job. Trigger: {$this->trigger} - Settings: \r\n" .
                     json_encode($this->get_settings(), JSON_PRETTY_PRINT)
                 );
 
@@ -386,11 +389,11 @@ class archive_job {
                 }
 
                 $drivername = $this->activity_archiving_driver()->get_plugin_name();
-                $this->get_logger()->info('Created activity archiving task (driver: '.$drivername.')');
+                $this->get_logger()->info('Created activity archiving task (driver: ' . $drivername . ')');
                 $this->set_metadata_entry('activity_archiving_driver', $drivername);
 
                 // Check if we already have a task with the same fingerprint.
-                $this->get_logger()->trace('Activity fingerprint: '.$task->get_fingerprint()->get_raw_value());
+                $this->get_logger()->trace('Activity fingerprint: ' . $task->get_fingerprint()->get_raw_value());
                 if (activity_archiving_task::fingerprint_exists($task->get_context(), $task->get_fingerprint())) {
                     $this->get_logger()->info(
                         'An archive for the current state of the activity already was created successfully. Continuing anyway ...'
@@ -409,7 +412,7 @@ class archive_job {
                     $backup = backup_manager::initiate_activity_backup($this->cmid, $this->userid);
                     $this->set_metadata_entry('cm_backup_id', $backup->backupid);
                     $this->get_logger()->info(
-                        'Requested a Moodle activity backup (#'.$backup->backupid.'): '.$backup->filename
+                        'Requested a Moodle activity backup (#' . $backup->backupid . '): ' . $backup->filename
                     );
                 }
 
@@ -417,9 +420,9 @@ class archive_job {
                 $taskcontent = $this->activity_archiving_driver()->get_task_content_metadata($task);
                 if (count($taskcontent) > 0) {
                     $task->store_task_content_metadata($taskcontent);
-                    $this->get_logger()->info('Stored '.count($taskcontent).' task content metadata entries.');
+                    $this->get_logger()->info('Stored ' . count($taskcontent) . ' task content metadata entries.');
                     if ($this->get_logger()->loglevel <= log_level::TRACE) {
-                        $this->get_logger()->trace("Task content metadata:\r\n".json_encode($taskcontent, JSON_PRETTY_PRINT));
+                        $this->get_logger()->trace("Task content metadata:\r\n" . json_encode($taskcontent, JSON_PRETTY_PRINT));
                     }
                 } else {
                     $this->get_logger()->warn('No task content metadata provided by the archiving driver!');
@@ -486,7 +489,7 @@ class archive_job {
                     $this->set_status(archive_job_status::FAILURE);
                     throw new \moodle_exception('no_activity_artifacts_found', 'local_archiving');
                 } else {
-                    $this->get_logger()->info('Got '.count($artifacts).' artifact(s) from the activity.');
+                    $this->get_logger()->info('Got ' . count($artifacts) . ' artifact(s) from the activity.');
                 }
 
                 $this->set_status(archive_job_status::STORE);
@@ -515,8 +518,8 @@ class archive_job {
                 foreach ($tasks as $task) {
                     foreach ($task->get_linked_artifacts() as $artifact) {
                         $filehandle = $driver->store($this->id, $artifact, $storagepath);
-                        $this->get_logger()->info('Stored activity artifact: '.
-                            "{$filehandle->filename} (size: ".display_size($filehandle->filesize).") (id: {$filehandle->id})");
+                        $this->get_logger()->info('Stored activity artifact: ' .
+                            "{$filehandle->filename} (size: " . display_size($filehandle->filesize) . ") (id: {$filehandle->id})");
                         $task->unlink_artifact($artifact, true);
                     }
                 }
@@ -538,8 +541,8 @@ class archive_job {
                         }
 
                         $filehandle = $driver->store($this->id, $backupfile, $storagepath);
-                        $this->get_logger()->info('Stored backup: '.
-                            "{$filehandle->filename} (size: ".display_size($filehandle->filesize).") (id: {$filehandle->id})");
+                        $this->get_logger()->info('Stored backup: ' .
+                            "{$filehandle->filename} (size: " . display_size($filehandle->filesize) . ") (id: {$filehandle->id})");
                         $bm->cleanup();
                     } else {
                         $this->get_logger()->debug("No {$backupidkey} found.");
@@ -800,7 +803,7 @@ class archive_job {
         if ($this->status != $status) {
             $this->status = $status;
             $this->get_logger()->info(
-                "Job status: ".$status->name()." ({$status->value})"
+                "Job status: " . $status->name() . " ({$status->value})"
             );
         }
     }
@@ -1045,11 +1048,13 @@ class archive_job {
     public function generate_archive_name_prefix(): string {
         // Validate pattern.
         $pattern = $this->get_setting('archive_filename_pattern', strict: true);
-        if (!storage::is_valid_filename_pattern(
-            $pattern,
-            archive_filename_variable::values(),
-            storage::FILENAME_FORBIDDEN_CHARACTERS
-        )) {
+        if (
+            !storage::is_valid_filename_pattern(
+                $pattern,
+                archive_filename_variable::values(),
+                storage::FILENAME_FORBIDDEN_CHARACTERS
+            )
+        ) {
             throw new \invalid_parameter_exception(get_string('error_invalid_filename_pattern', 'local_archiving'));
         }
 
@@ -1072,7 +1077,7 @@ class archive_job {
         $filename = $pattern;
         foreach ($data as $key => $value) {
             $filename = preg_replace(
-                '/\$\{\s*'.$key.'\s*\}/m',
+                '/\$\{\s*' . $key . '\s*\}/m',
                 substr($value, 0, storage::FILENAME_VARIABLE_MAX_LENGTH),
                 $filename
             );
@@ -1080,5 +1085,4 @@ class archive_job {
 
         return storage::sanitize_filename($filename);
     }
-
 }

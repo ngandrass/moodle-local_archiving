@@ -70,5 +70,4 @@ enum paper_format: string {
 
     /** @var string US Ledger paper format */
     case LEDGER = 'Ledger';
-
 }

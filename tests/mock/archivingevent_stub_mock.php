@@ -17,7 +17,7 @@
 /**
  * Empty event connector mock for unit tests
  *
- * @package     archivingmod_quiz
+ * @package     local_archiving
  * @copyright   2025 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

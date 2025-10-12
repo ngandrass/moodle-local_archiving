@@ -40,7 +40,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * to allow for quick comparisons.
  */
 final class cm_state_fingerprint {
-
     /**
      * @var string Fingerprint of the current course module state.
      */
@@ -103,5 +102,4 @@ final class cm_state_fingerprint {
     public function get_raw_value(): string {
         return $this->fingerprint;
     }
-
 }

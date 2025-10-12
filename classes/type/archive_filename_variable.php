@@ -64,5 +64,4 @@ enum archive_filename_variable : string {
 
     /** @var string Current UNIX timestamp */
     case TIMESTAMP = 'timestamp';
-
 }

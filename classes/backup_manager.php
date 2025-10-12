@@ -33,13 +33,12 @@ use context_module;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
-require_once($CFG->dirroot.'/backup/util/includes/backup_includes.php'); // @codeCoverageIgnore
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php'); // @codeCoverageIgnore
 
 /**
  * Manages everything related to backups via the Moodle Backup API
  */
 class backup_manager {
-
     /** @var \stdClass Backup controller metadata from DB */
     protected \stdClass $backupmetadata;
 
@@ -201,8 +200,7 @@ class backup_manager {
      * @return string Filename for the backup target archive including its extension
      */
     public static function generate_backup_filename(string $backuptype, int $itemid, int $timecreated): string {
-        return 'local_archiving-'.$backuptype.'-backup-'.$itemid.'-'.date("Ymd-His", $timecreated).'.mbz';
-
+        return 'local_archiving-' . $backuptype . '-backup-' . $itemid . '-' . date("Ymd-His", $timecreated) . '.mbz';
     }
 
     /**
@@ -309,7 +307,7 @@ class backup_manager {
             $context->id,
             'backup',
             $type,
-            null,  // The make_webservice_pluginfile_url expects null if no itemid is given against it's PHPDoc specification ...
+            null, // The make_webservice_pluginfile_url expects null if no itemid is given against it's PHPDoc specification ...
             '/',
             $filename
         ));
@@ -400,5 +398,4 @@ class backup_manager {
 
         return $orphanedfiles;
     }
-
 }

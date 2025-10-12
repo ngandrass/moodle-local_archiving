@@ -35,7 +35,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Manages all Time-Stamp Protocol (TSP) related tasks.
  */
 class tsp_manager {
-
     /** @var file_handle Handle of the file this TSP manager instance is for */
     protected file_handle $filehandle;
 
@@ -88,7 +87,8 @@ class tsp_manager {
      * @throws \dml_exception On database error
      */
     public function wants_tsp_timestamp(): bool {
-        if ($this->config->tsp_enable &&
+        if (
+            $this->config->tsp_enable &&
             $this->config->tsp_automatic_signing &&
             $this->has_tsp_timestamp() === false
         ) {
@@ -291,12 +291,12 @@ class tsp_manager {
         ob_clean();
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="'.$filename.'"');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
         header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0, no-transform');
         header('Pragma: no-cache');
-        header('Content-Length: '.strlen($filecontents));
+        header('Content-Length: ' . strlen($filecontents));
         echo $filecontents;
 
         // Stop at this point if we are running a unit test, so that we don't
@@ -310,5 +310,4 @@ class tsp_manager {
         die;
         // @codeCoverageIgnoreEnd
     }
-
 }

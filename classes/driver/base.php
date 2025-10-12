@@ -32,7 +32,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Abstract base class for all sub-plugin / driver interfaces
  */
 abstract class base {
-
     /** @var string[] Allowed sub-plugin types to be detected */
     public const ALLOWED_PLUGIN_TYPES = [
         'archivingmod',
@@ -55,7 +54,7 @@ abstract class base {
 
         foreach (self::ALLOWED_PLUGIN_TYPES as $type) {
             // Only allow whitelisted namespaces.
-            if (str_starts_with($namespace, $type.'_')) {
+            if (str_starts_with($namespace, $type . '_')) {
                 return (object) [
                     'type' => $type,
                     'name' => substr($namespace, strlen($type) + 1),
@@ -119,5 +118,4 @@ abstract class base {
     public static function is_ready(): bool {
         return true;
     }
-
 }

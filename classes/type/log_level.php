@@ -58,5 +58,4 @@ enum log_level: int {
 
     /** @var self Fatal unrecoverable case */
     case FATAL = 50;
-
 }

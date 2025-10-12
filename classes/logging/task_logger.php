@@ -36,7 +36,6 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * entries will be linked to the respective activity archiving task.
  */
 class task_logger extends job_logger {
-
     /**
      * Create a new logger instance that is tied to the given job
      *
@@ -67,10 +66,10 @@ class task_logger extends job_logger {
     #[\Override]
     public function get_logs(
         log_level $minlevel = log_level::TRACE,
-        int       $aftertime = 0,
-        int       $beforetime = 9999999999,
-        int       $limitnum = 100,
-        int       $limitfrom = 0
+        int $aftertime = 0,
+        int $beforetime = 9999999999,
+        int $limitnum = 100,
+        int $limitfrom = 0
     ): array {
         return $this->get_log_entries_from_db(
             $minlevel,
@@ -167,5 +166,4 @@ class task_logger extends job_logger {
     public function fatal(string $message): void {
         $this->write_log_entry_to_db(log_level::FATAL, $message, $this->jobid, $this->taskid);
     }
-
 }

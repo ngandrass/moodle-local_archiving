@@ -279,6 +279,32 @@ class archive_job {
     }
 
     /**
+     * Calculates the number of archive jobs that are either pending or active
+     * for the given context / course module.
+     *
+     * @param \context $ctx Context to check existing archive jobs for
+     * @return int Number of incomplete archive jobs for the given context
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function get_incomplete_job_count_for_context(\context $ctx): int {
+        global $DB;
+
+        // Prepare query.
+        $pendingstatusvalues = array_map(
+            fn ($s) => $s->value,
+            array_merge(archive_job_status::get_idle_states(), archive_job_status::get_active_states())
+        );
+        [$insql, $inparams] = $DB->get_in_or_equal($pendingstatusvalues, SQL_PARAMS_NAMED);
+
+        // Count number of archive jobs that are not yet completed.
+        return $DB->count_records_sql(
+            "SELECT COUNT(1) FROM {local_archiving_job} WHERE contextid = :contextid AND status {$insql}",
+            array_merge(['contextid' => $ctx->id], $inparams)
+        );
+    }
+
+    /**
      * Main processing loop. Once the scheduler picks this job from the queue,
      * this function is called. It will be called periodically until this job
      * reached a final state, as indicated by is_completed().

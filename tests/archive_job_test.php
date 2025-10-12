@@ -820,4 +820,124 @@ final class archive_job_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Tests that active jobs are counted correctly.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_active_job_count(): void {
+        // Create some jobs.
+        $this->resetAfterTest();
+        $job1 = $this->generator()->create_archive_job();
+        $job2 = $this->generator()->create_archive_job();
+        $job3 = $this->generator()->create_archive_job();
+        $job4 = $this->generator()->create_archive_job();
+        $job5 = $this->generator()->create_archive_job();
+
+        // Inactive jobs.
+        $job1->set_status(archive_job_status::UNINITIALIZED);
+        $job2->set_status(archive_job_status::QUEUED);
+        $job3->set_status(archive_job_status::COMPLETED);
+
+        // Active jobs.
+        $job4->set_status(archive_job_status::ACTIVITY_ARCHIVING);
+        $job5->set_status(archive_job_status::STORE);
+
+        // Check active job count.
+        $this->assertSame(2, archive_job::get_active_job_count(), 'There should be 2 active jobs');
+
+        // Let job 5 finish.
+        $job5->set_status(archive_job_status::COMPLETED);
+        $this->assertSame(1, archive_job::get_active_job_count(), 'There should be 1 active job');
+
+        // Let job 4 fail.
+        $job4->set_status(archive_job_status::FAILURE);
+        $this->assertSame(0, archive_job::get_active_job_count(), 'There should be 0 active jobs');
+    }
+
+    /**
+     * Tests that incompleted jobs are counted correctly for their respective contexts.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_incomplete_job_count_for_context(): void {
+        // Create some jobs for two activities.
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm1 = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $cm2 = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $ctx1 = \context_module::instance($cm1->cmid);
+        $ctx2 = \context_module::instance($cm2->cmid);
+
+        // Jobs for activity 1.
+        $job11 = $this->generator()->create_archive_job(course: $course, cm: $cm1);
+        $job12 = $this->generator()->create_archive_job(course: $course, cm: $cm1);
+        $job13 = $this->generator()->create_archive_job(course: $course, cm: $cm1);
+
+        $job11->set_status(archive_job_status::QUEUED);
+        $job12->set_status(archive_job_status::ACTIVITY_ARCHIVING);
+        $job13->set_status(archive_job_status::COMPLETED);
+
+        // Jobs for activity 2.
+        $job21 = $this->generator()->create_archive_job(course: $course, cm: $cm2);
+        $job22 = $this->generator()->create_archive_job(course: $course, cm: $cm2);
+        $job23 = $this->generator()->create_archive_job(course: $course, cm: $cm2);
+
+        $job21->set_status(archive_job_status::FAILURE);
+        $job22->set_status(archive_job_status::POST_PROCESSING);
+        $job23->set_status(archive_job_status::STORE);
+
+        // Check incomplete job counts.
+        $this->assertSame(
+            2,
+            archive_job::get_incomplete_job_count_for_context($ctx1),
+            'There should be 2 incomplete jobs for context 1'
+        );
+        $this->assertSame(
+            2,
+            archive_job::get_incomplete_job_count_for_context($ctx2),
+            'There should be 2 incomplete jobs for context 2'
+        );
+
+        // Finish some jobs.
+        $job12->set_status(archive_job_status::COMPLETED);
+        $job22->set_status(archive_job_status::COMPLETED);
+        $job23->set_status(archive_job_status::FAILURE);
+
+        $this->assertSame(
+            1,
+            archive_job::get_incomplete_job_count_for_context($ctx1),
+            'There should be 1 incomplete job for context 1'
+        );
+        $this->assertSame(
+            0,
+            archive_job::get_incomplete_job_count_for_context($ctx2),
+            'There should be 0 incomplete jobs for context 2'
+        );
+
+        // Finish everything.
+        $job11->set_status(archive_job_status::COMPLETED);
+
+        $this->assertSame(
+            0,
+            archive_job::get_incomplete_job_count_for_context($ctx1),
+            'There should be 0 incomplete jobs for context 1'
+        );
+        $this->assertSame(
+            0,
+            archive_job::get_incomplete_job_count_for_context($ctx2),
+            'There should be 0 incomplete jobs for context 2'
+        );
+    }
+
 }

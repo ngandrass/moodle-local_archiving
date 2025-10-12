@@ -7,6 +7,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 ### Archiving Core (`local_archiving`)
 
 - Make `archivingstore_moodle` the default storage plugin for new installations.
+- Add method to determine number of currently running and pending archive jobs for a given course module.
 - Fix storage of course category IDs for archiving scope selection.
 - Fix loading of components management admin setting from other contexts.
 - Extend PHPUnit tests to cover latest features and other parts of the archiving core.

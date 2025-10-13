@@ -8,6 +8,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 
 - Add Moodle 5.1 with all supported PHP versions as well as pgsql and mariadb to CI testing matrix.
 - Refactor code to comply with new Moodle coding standard v3.6
+- Exclude sub-plugins from CI coding style checks since they have their own CI pipelines
 
 
 ### Sub-Plugins

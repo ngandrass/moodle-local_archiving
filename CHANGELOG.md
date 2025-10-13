@@ -14,17 +14,51 @@ Listed changes are split into categories, reflecting the affected component / (s
 
 #### Activity Archiving Driver: Quiz (`archivingmod_quiz`)
 
+- Ensure Moodle 5.1 compatibility
+- Add missing language strings
+- Refactor code to comply with new Moodle coding standard v3.6
+- Fix import of legacy compatibility layers in unit tests
+- Fix unit test for archive task status update web service function
+
 #### Activity Archiving Driver: Assign (`archivingmod_assign`)
+
+- Ensure Moodle 5.1 compatibility
+- Refactor code to comply with new Moodle coding standard v3.6
 
 #### Storage Driver: Local Directory (`archivingstore_localdir`)
 
+- Ensure Moodle 5.1 compatibility
+- Refactor code to comply with new Moodle coding standard v3.6
+- Clean up empty subdirectories during file deletion
+- Add privacy provider class
+- Create unit tests
+
 #### Storage Driver: Moodle Filestore (`archivingstore_moodle`)
+
+- Implement store, retrieve, and delete functionality using the Moodle Filestore backend
+- Check free space in the moodledata directory to determine storage availability
+- Ensure Moodle 5.1 compatibility
+- Refactor code to comply with new Moodle coding standard v3.6
+- Add privacy provider class
+- Create unit tests
 
 #### Archiving Trigger: Manual (`archivingtrigger_manual`)
 
+- Ensure Moodle 5.1 compatibility
+- Refactor code to comply with new Moodle coding standard v3.6
+- Add privacy provider class
+
 #### Archiving Trigger: Scheduled (`archivingtrigger_cron`)
 
+- Ensure Moodle 5.1 compatibility
+- Refactor code to comply with new Moodle coding standard v3.6
+- Implementation of the privacy provider class
+- Definition of unit tests
+
 #### External Event Connector: API Stub (`archivingevent_apistub`)
+
+- Ensure Moodle 5.1 compatibility
+- Refactor code to comply with new Moodle coding standard v3.6
 
 
 ## Version 0.3.0 (2025101200)

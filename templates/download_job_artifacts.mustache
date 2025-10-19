@@ -129,14 +129,19 @@
                             <li class="list-group-item">
                                 <i class="fa-solid fa-trash"></i>&nbsp;
                                 <strong>{{#str}} automatic_deletion, local_archiving {{/str}}:</strong>
-                                {{#retentiontime}}
-                                    {{#str}} file_will_be_deleted_in, local_archiving {{/str}}
-                                    {{relative}}
-                                    ({{#userdate}} {{absolute}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}})
-                                {{/retentiontime}}
-                                {{^retentiontime}}
-                                    <span>{{#str}} never {{/str}}</span>
-                                {{/retentiontime}}
+                                {{#deleted}}
+                                    {{#str}} this_file_was_deleted, local_archiving {{/str}}
+                                {{/deleted}}
+                                {{^deleted}}
+                                    {{#retentiontime}}
+                                        {{#str}} file_will_be_deleted_in, local_archiving {{/str}}
+                                        {{relative}}
+                                        ({{#userdate}} {{absolute}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}})
+                                    {{/retentiontime}}
+                                    {{^retentiontime}}
+                                        <span>{{#str}} never {{/str}}</span>
+                                    {{/retentiontime}}
+                                {{/deleted}}
                             </li>
                             <li class="list-group-item">
                                 <i class="fa fa-database"></i>&nbsp;

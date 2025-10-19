@@ -256,7 +256,7 @@ final class file_handle {
      * Retrieves all file handles that link to still existing files that posess
      * an expired retention time
      *
-     * @return array List of expired file handles
+     * @return file_handle[] List of expired file handles
      * @throws \dml_exception
      */
     public static function get_expired(): array {

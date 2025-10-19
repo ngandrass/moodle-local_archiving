@@ -131,6 +131,7 @@ class local_archiving_generator extends \testing_data_generator {
             'mimetype' => 'text/plain',
             'timecreated' => time(),
             'timemodified' => time(),
+            'retentiontime' => null,
             'filekey' => 'testkey',
         ];
 
@@ -158,6 +159,7 @@ class local_archiving_generator extends \testing_data_generator {
             filesize: $data->filesize,
             sha256sum: $data->sha256sum,
             mimetype: $data->mimetype,
+            retentiontime: $data->retentiontime,
             filekey: $data->filekey
         );
     }

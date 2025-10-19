@@ -97,7 +97,73 @@ final class file_handle_test extends \advanced_testcase {
         $this->assertEquals($data->filesize, $filehandle->filesize);
         $this->assertEquals($data->sha256sum, $filehandle->sha256sum);
         $this->assertEquals($data->mimetype, $filehandle->mimetype);
+        $this->assertNull($filehandle->retentiontime);
         $this->assertEquals($data->filekey, $filehandle->filekey);
+    }
+
+    /**
+     * Tests the creation of a file_handle with retention time
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function test_create_file_handle_with_retentiontime(): void {
+        $this->resetAfterTest();
+        $generator = $this->generator();
+
+        // Create new file_handle with retention time.
+        $data = $generator->generate_file_handle_data();
+        $retentiontime = time() + WEEKSECS;
+        $filehandle = file_handle::create(
+            jobid: $data->jobid,
+            archivingstorename: $data->archivingstorename,
+            filename: $data->filename,
+            filepath: $data->filepath,
+            filesize: $data->filesize,
+            sha256sum: $data->sha256sum,
+            mimetype: $data->mimetype,
+            retentiontime: $retentiontime,
+            filekey: $data->filekey
+        );
+
+        // Assert that the test data object was created and properties are set.
+        $this->assertInstanceOf(file_handle::class, $filehandle);
+        $this->assertEquals($retentiontime, $filehandle->retentiontime);
+    }
+
+    /**
+     * Tests the creation of a file_handle with invalid retention time
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function test_create_file_handle_with_invalid_retentiontime(): void {
+        $this->resetAfterTest();
+        $generator = $this->generator();
+
+        // Create new file_handle with invalid retention time (in the past).
+        $data = $generator->generate_file_handle_data();
+        $retentiontime = -1;
+
+        // Expect exception.
+        $this->expectException(\coding_exception::class);
+        file_handle::create(
+            jobid: $data->jobid,
+            archivingstorename: $data->archivingstorename,
+            filename: $data->filename,
+            filepath: $data->filepath,
+            filesize: $data->filesize,
+            sha256sum: $data->sha256sum,
+            mimetype: $data->mimetype,
+            retentiontime: $retentiontime,
+            filekey: $data->filekey
+        );
     }
 
     /**
@@ -159,6 +225,59 @@ final class file_handle_test extends \advanced_testcase {
                 $this->assertEquals($file, $actual[$file->id], "File handle mismatch for job ID $jobid");
             }
         }
+    }
+
+    /**
+     * Tests retrieval of file handles with expired retention times
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function test_get_expired(): void {
+        $this->resetAfterTest();
+        $generator = $this->generator();
+
+        // Create file handles with different retention times.
+        $now = time();
+        $neverexpire = [
+            $generator->create_file_handle(['retentiontime' => null]),
+            $generator->create_file_handle(['retentiontime' => null]),
+        ];
+        $unexpired = [
+            $generator->create_file_handle(['retentiontime' => $now + DAYSECS]),
+            $generator->create_file_handle(['retentiontime' => $now + WEEKSECS]),
+            $generator->create_file_handle(['retentiontime' => $now + YEARSECS]),
+        ];
+        $expiredandnotdeleted = [
+            $generator->create_file_handle(['retentiontime' => $now - DAYSECS]),
+            $generator->create_file_handle(['retentiontime' => $now - WEEKSECS]),
+            $generator->create_file_handle(['retentiontime' => $now - 1]),
+        ];
+        $expiredanddeleted = [
+            $generator->create_file_handle(['retentiontime' => $now - DAYSECS]),
+            $generator->create_file_handle(['retentiontime' => $now - WEEKSECS]),
+        ];
+        foreach ($expiredanddeleted as $filehandle) {
+            $filehandle->mark_as_deleted();
+        }
+
+        // Retrieve expired file handles.
+        $expiredhandles = file_handle::get_expired();
+
+        // Assert that only the expired file handle is returned.
+        $this->assertCount(
+            count($expiredandnotdeleted),
+            $expiredhandles,
+            'Number of expired file handles does not match the expected count'
+        );
+        $this->assertEqualsCanonicalizing(
+            $expiredandnotdeleted,
+            $expiredhandles,
+            'Expired file handles do not match the expected ones'
+        );
     }
 
     /**
@@ -395,5 +514,81 @@ final class file_handle_test extends \advanced_testcase {
         // Retrieve archivingstore instance and validate.
         $archivingstore = $filehandle->archivingstore();
         $this->assertInstanceOf(\archivingstore_localdir_mock::class, $archivingstore);
+    }
+
+    /**
+     * Tests updating the retention time of a file_handle
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_update_retention_time(): void {
+        // Prepare.
+        $this->resetAfterTest();
+        $filehandle = $this->generator()->create_file_handle();
+
+        // Update retention time.
+        $newretentiontime = time() + (2 * WEEKSECS);
+        $filehandle->update_retention_time($newretentiontime);
+        $this->assertEquals($newretentiontime, $filehandle->retentiontime, 'Retention time should be updated');
+
+        // Reload from database and check again.
+        $reloaded = file_handle::get_by_id($filehandle->id);
+        $this->assertEquals($newretentiontime, $reloaded->retentiontime, 'Retention time should be updated in database');
+
+        // Try to remove retention time.
+        $filehandle->update_retention_time(null);
+        $this->assertNull($filehandle->retentiontime, 'Retention time should be null after removal');
+
+        // Reload from database and check again.
+        $reloaded = file_handle::get_by_id($filehandle->id);
+        $this->assertNull($reloaded->retentiontime, 'Retention time should be null in database after removal');
+    }
+
+    /**
+     * Tests updating the retention time of a file_handle with invalid data
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_update_invalid_retention_time(): void {
+        // Prepare.
+        $this->resetAfterTest();
+        $filehandle = $this->generator()->create_file_handle();
+
+        // Try to set invalid retention time (in the past).
+        $invalidretentiontime = -1;
+        $this->expectException(\coding_exception::class);
+        $filehandle->update_retention_time($invalidretentiontime);
+    }
+
+    /**
+     * Tests updating the retention time of a deleted file_handle
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_update_retention_time_on_deleted_file(): void {
+        // Prepare.
+        $this->resetAfterTest();
+        $filehandle = $this->generator()->create_file_handle();
+        $filehandle->mark_as_deleted();
+
+        // Try to update retention time on deleted file.
+        $newretentiontime = time() + (2 * WEEKSECS);
+        $this->expectException(\moodle_exception::class);
+        $filehandle->update_retention_time($newretentiontime);
     }
 }

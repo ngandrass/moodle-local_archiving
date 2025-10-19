@@ -549,6 +549,26 @@ class archive_job {
                     }
                 }
 
+                // Set retention times if autodelete is enabled.
+                if ($this->get_setting('archive_autodelete')) {
+                    $retentiontimerelsec = $this->get_setting('archive_retention_time');
+                    if ($retentiontimerelsec <= 0) {
+                        throw new \moodle_exception('retentiontime_must_be_positive', 'local_archiving');
+                    }
+
+                    // Apply retention time to all file handles.
+                    $retentiontimesec = time() + $retentiontimerelsec;
+                    foreach (file_handle::get_by_jobid($this->id) as $filehandle) {
+                        $filehandle->update_retention_time($retentiontimesec);
+                        $this->get_logger()->info(
+                            "Set retention time for {$filehandle->filename} (ID: {$filehandle->id}) to: " .
+                            date('Y-m-d H:i:s', $retentiontimesec)
+                        );
+                    }
+                } else {
+                    $this->get_logger()->info('Automatic deletion of job artifacts is disabled.');
+                }
+
                 $this->set_status(archive_job_status::SIGN);
             }
 

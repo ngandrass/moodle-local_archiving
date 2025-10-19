@@ -229,6 +229,7 @@ $string['error_localpath_must_be_directory'] = 'A file with the given name alrea
 $string['error_at_least_one_coursecat_required'] = 'At least one course category must be selected.';
 
 // Storage.
+$string['cannot_update_retentiontime_of_deleted_file'] = 'Cannot update retention time of deleted file';
 $string['file_will_be_deleted_in'] = 'File will be deleted in';
 $string['storage_tier'] = 'Storage tier';
 $string['storage_tier_LOCAL'] = 'Local';

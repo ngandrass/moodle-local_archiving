@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" COMMENT="XMLDB file for Moodle local/archiving" PATH="local/archiving/db" VERSION="2025091300" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" COMMENT="XMLDB file for Moodle local/archiving" PATH="local/archiving/db" VERSION="2025101600" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
     <TABLE NAME="local_archiving_job" COMMENT="Archive jobs">
       <FIELDS>
@@ -96,6 +96,7 @@
         <FIELD NAME="mimetype" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="MIME type of the file"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this file handle was created"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this file handle was updated"/>
+        <FIELD NAME="retentiontime" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The unix timestamp until when this archive file has to be retained. It can be deleted automatically afterwards. NULL means infinite."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

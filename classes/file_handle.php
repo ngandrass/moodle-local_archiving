@@ -48,6 +48,8 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @property-read string $mimetype MIME type of the file
  * @property-read int $timecreated Timestamp when the file handle was created
  * @property-read int $timemodified Timestamp when the file handle was last modified
+ * @property-read int|null $retentiontime The unix timestamp this file will be automatically deleted after or
+ * null if automatic deletion is disabled for this file
  * @property-read string $filekey Optional unique key for identifying the file
  */
 final class file_handle {
@@ -68,6 +70,8 @@ final class file_handle {
      * @param string $mimetype MIME type of the file
      * @param int $timecreated Timestamp when the file handle was created
      * @param int $timemodified Timestamp when the file handle was last modified
+     * @param int|null $retentiontime The unix timestamp this file will be automatically deleted after or
+     * null if automatic deletion is disabled for this file
      * @param string $filekey Optional unique key for identifying the file
      */
     protected function __construct(
@@ -93,6 +97,8 @@ final class file_handle {
         protected readonly int $timecreated,
         /** @var int $timemodified Timestamp when the file handle was last modified */
         protected readonly int $timemodified,
+        /** @var int|null The unix timestamp this file will be automatically deleted after or null automatic deletion is disabled */
+        protected readonly ?int $retentiontime,
         /** @var string $filekey Optional unique key for identifying the file */
         protected readonly string $filekey = ''
     ) {
@@ -109,6 +115,8 @@ final class file_handle {
      * @param int $filesize Filesize in bytes
      * @param string $sha256sum SHA256 checksum of the file
      * @param string $mimetype MIME type of the file
+     * @param int|null $retentiontime The unix timestamp this file will be automatically deleted after or
+     * null if automatic deletion is disabled for this file
      * @param string $filekey Optional unique key for identifying the file
      * @return file_handle The created file handle
      * @throws \coding_exception
@@ -122,6 +130,7 @@ final class file_handle {
         int $filesize,
         string $sha256sum,
         string $mimetype,
+        ?int $retentiontime,
         string $filekey = ''
     ): file_handle {
         global $DB;
@@ -151,6 +160,10 @@ final class file_handle {
             throw new \coding_exception(get_string('invalid_sha256sum', 'local_archiving'));
         }
 
+        if ($retentiontime < 0) {
+            throw new \coding_exception(get_string('invalid_retentiontime', 'local_archiving'));
+        }
+
         // Insert into DB.
         $now = time();
         $id = $DB->insert_record(db_table::FILE_HANDLE->value, [
@@ -165,6 +178,7 @@ final class file_handle {
             'filekey' => $filekey,
             'timecreated' => $now,
             'timemodified' => $now,
+            'retentiontime' => $retentiontime,
         ]);
 
         return new self(
@@ -179,6 +193,7 @@ final class file_handle {
             $mimetype,
             $now,
             $now,
+            $retentiontime,
             $filekey
         );
     }
@@ -194,6 +209,7 @@ final class file_handle {
         global $DB;
 
         $handle = $DB->get_record(db_table::FILE_HANDLE->value, ['id' => $id], '*', MUST_EXIST);
+
         return new self(
             $handle->id,
             $handle->jobid,
@@ -206,6 +222,7 @@ final class file_handle {
             $handle->mimetype,
             $handle->timecreated,
             $handle->timemodified,
+            $handle->retentiontime,
             $handle->filekey,
         );
     }
@@ -234,6 +251,7 @@ final class file_handle {
             $handle->mimetype,
             $handle->timecreated,
             $handle->timemodified,
+            $handle->retentiontime,
             $handle->filekey
         ), $handles);
     }

@@ -8,6 +8,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 
 - Automatic deletion of archive job artifacts after a configurable retention period.
 - Display of file-specific retention information on the archive job artifacts download page.
+- Implement Moodle privacy API provider
 
 
 ### Sub-Plugins

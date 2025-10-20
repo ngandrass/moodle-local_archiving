@@ -48,6 +48,8 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * @property-read string $mimetype MIME type of the file
  * @property-read int $timecreated Timestamp when the file handle was created
  * @property-read int $timemodified Timestamp when the file handle was last modified
+ * @property-read int|null $retentiontime The unix timestamp this file will be automatically deleted after or
+ * null if automatic deletion is disabled for this file
  * @property-read string $filekey Optional unique key for identifying the file
  */
 final class file_handle {
@@ -68,6 +70,8 @@ final class file_handle {
      * @param string $mimetype MIME type of the file
      * @param int $timecreated Timestamp when the file handle was created
      * @param int $timemodified Timestamp when the file handle was last modified
+     * @param int|null $retentiontime The unix timestamp this file will be automatically deleted after or
+     * null if automatic deletion is disabled for this file
      * @param string $filekey Optional unique key for identifying the file
      */
     protected function __construct(
@@ -93,10 +97,36 @@ final class file_handle {
         protected readonly int $timecreated,
         /** @var int $timemodified Timestamp when the file handle was last modified */
         protected readonly int $timemodified,
+        /** @var int|null The unix timestamp this file will be automatically deleted after or null automatic deletion is disabled */
+        protected ?int $retentiontime,
         /** @var string $filekey Optional unique key for identifying the file */
         protected readonly string $filekey = ''
     ) {
         $this->archivingstore = null;
+    }
+
+    /**
+     * Calls the constructor based on a full file_handle database record
+     *
+     * @param object $record Database record representing a file_handle
+     * @return file_handle The created file handle object
+     */
+    protected static function from_record(object $record): file_handle {
+        return new self(
+            $record->id,
+            $record->jobid,
+            $record->archivingstore,
+            $record->deleted,
+            $record->filename,
+            $record->filepath,
+            $record->filesize,
+            $record->sha256sum,
+            $record->mimetype,
+            $record->timecreated,
+            $record->timemodified,
+            $record->retentiontime,
+            $record->filekey
+        );
     }
 
     /**
@@ -109,6 +139,8 @@ final class file_handle {
      * @param int $filesize Filesize in bytes
      * @param string $sha256sum SHA256 checksum of the file
      * @param string $mimetype MIME type of the file
+     * @param int|null $retentiontime The unix timestamp this file will be automatically deleted after or
+     * null if automatic deletion is disabled for this file
      * @param string $filekey Optional unique key for identifying the file
      * @return file_handle The created file handle
      * @throws \coding_exception
@@ -122,17 +154,18 @@ final class file_handle {
         int $filesize,
         string $sha256sum,
         string $mimetype,
+        ?int $retentiontime = null,
         string $filekey = ''
     ): file_handle {
         global $DB;
 
         // Validate arguments.
         if ($jobid < 1) {
-            throw new \coding_exception(get_string('invalid_jobid', 'local_archiving'));
+            throw new \coding_exception('invalid jobid');
         }
 
         if (empty($archivingstorename) || !plugin_util::is_subplugin_installed('archivingstore', $archivingstorename)) {
-            throw new \coding_exception(get_string('invalid_archivingstore', 'local_archiving'));
+            throw new \coding_exception('invalid archivingstore');
         }
 
         if (
@@ -140,15 +173,19 @@ final class file_handle {
             basename($filename) !== $filename ||  // Filenames must not contain path separators.
             trim($filename, '/') !== $filename    // Filenames must not start or end with path separators.
         ) {
-            throw new \coding_exception(get_string('invalid_filename', 'local_archiving'));
+            throw new \coding_exception('invalid filename');
         }
 
         if ($filesize < 0) {
-            throw new \coding_exception(get_string('invalid_filesize', 'local_archiving'));
+            throw new \coding_exception('invalid filesize');
         }
 
         if (!storage::is_valid_sha256sum($sha256sum)) {
-            throw new \coding_exception(get_string('invalid_sha256sum', 'local_archiving'));
+            throw new \coding_exception('invalid sha256sum');
+        }
+
+        if ($retentiontime < 0) {
+            throw new \coding_exception('invalid retentiontime');
         }
 
         // Insert into DB.
@@ -165,6 +202,7 @@ final class file_handle {
             'filekey' => $filekey,
             'timecreated' => $now,
             'timemodified' => $now,
+            'retentiontime' => $retentiontime,
         ]);
 
         return new self(
@@ -179,6 +217,7 @@ final class file_handle {
             $mimetype,
             $now,
             $now,
+            $retentiontime,
             $filekey
         );
     }
@@ -193,20 +232,8 @@ final class file_handle {
     public static function get_by_id(int $id): file_handle {
         global $DB;
 
-        $handle = $DB->get_record(db_table::FILE_HANDLE->value, ['id' => $id], '*', MUST_EXIST);
-        return new self(
-            $handle->id,
-            $handle->jobid,
-            $handle->archivingstore,
-            $handle->deleted,
-            $handle->filename,
-            $handle->filepath,
-            $handle->filesize,
-            $handle->sha256sum,
-            $handle->mimetype,
-            $handle->timecreated,
-            $handle->timemodified,
-            $handle->filekey,
+        return self::from_record(
+            $DB->get_record(db_table::FILE_HANDLE->value, ['id' => $id], '*', MUST_EXIST)
         );
     }
 
@@ -222,20 +249,32 @@ final class file_handle {
 
         $handles = $DB->get_records(db_table::FILE_HANDLE->value, ['jobid' => $jobid]);
 
-        return array_map(fn ($handle) => new self(
-            $handle->id,
-            $handle->jobid,
-            $handle->archivingstore,
-            $handle->deleted,
-            $handle->filename,
-            $handle->filepath,
-            $handle->filesize,
-            $handle->sha256sum,
-            $handle->mimetype,
-            $handle->timecreated,
-            $handle->timemodified,
-            $handle->filekey
-        ), $handles);
+        return array_map(fn ($handle) => self::from_record($handle), $handles);
+    }
+
+    /**
+     * Retrieves all file handles that link to still existing files that posess
+     * an expired retention time
+     *
+     * @return file_handle[] List of expired file handles
+     * @throws \dml_exception
+     */
+    public static function get_expired(): array {
+        global $DB;
+
+        // Retrieve all file handles that are not marked as deleted and have an elapsed retention time.
+        $handles = $DB->get_records_sql(
+            "
+                SELECT * FROM {" . db_table::FILE_HANDLE->value . "}
+                WHERE
+                    deleted = 0 AND
+                    retentiontime IS NOT NULL AND
+                    retentiontime < :now
+            ",
+            ['now' => time()]
+        );
+
+        return array_map(fn ($handle) => self::from_record($handle), $handles);
     }
 
     /**
@@ -389,6 +428,38 @@ final class file_handle {
         }
 
         throw new \coding_exception('Invalid property: ' . $name);
+    }
+
+    /**
+     * Updates the retention time of this file handle
+     *
+     * @param int|null $retentiontime The new retention time as unix timestamp or
+     * null to disable automatic deletion for this file
+     * @return void
+     * @throws \coding_exception if the provided retention time is invalid
+     * @throws \dml_exception if a database error occurs
+     * @throws \moodle_exception if the file is already marked as deleted
+     */
+    public function update_retention_time(?int $retentiontime): void {
+        global $DB;
+
+        // Validate arguments and state.
+        if ($retentiontime < 0) {
+            throw new \coding_exception('invalid_retentiontime');
+        }
+
+        if ($this->deleted) {
+            throw new \moodle_exception('cannot_update_retentiontime_of_deleted_file', 'local_archiving');
+        }
+
+        // Perform update.
+        $DB->update_record(db_table::FILE_HANDLE->value, [
+            'id' => $this->id,
+            'retentiontime' => $retentiontime,
+            'timemodified' => time(),
+        ]);
+
+        $this->retentiontime = $retentiontime;
     }
 
     /**

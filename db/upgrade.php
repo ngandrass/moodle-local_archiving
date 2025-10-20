@@ -43,5 +43,19 @@ function xmldb_local_archiving_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
+    if ($oldversion < 2025101600) {
+        // Define field retentiontime to be added to local_archiving_file.
+        $table = new xmldb_table('local_archiving_file');
+        $field = new xmldb_field('retentiontime', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'timemodified');
+
+        // Conditionally launch add field retentiontime.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Archiving savepoint reached.
+        upgrade_plugin_savepoint(true, 2025101600, 'local', 'archiving');
+    }
+
     return true;
 }

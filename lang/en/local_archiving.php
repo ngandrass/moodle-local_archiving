@@ -30,6 +30,7 @@ $string['privacy:metadata'] = 'TODO!';
 // Common.
 $string['activitytype'] = 'Activity type';
 $string['archiving'] = 'Archiving';
+$string['automatic_deletion'] = 'Automatic deletion';
 $string['available'] = 'Available';
 $string['back_to_overview'] = 'Back to overview';
 $string['checksum'] = 'Checksum';
@@ -37,6 +38,8 @@ $string['cleanup_filestore_cache'] = 'Cleanup filestore cache';
 $string['cleanup_orphaned_backups'] = 'Cleanup orphaned backups';
 $string['components'] = 'Components';
 $string['create_archive'] = 'Create archive';
+$string['delete_expired_artifacts'] = 'Delete expired artifacts';
+$string['deletion'] = 'Deletion';
 $string['disabled'] = 'Disabled';
 $string['download_files'] = 'Download files';
 $string['file'] = 'File';
@@ -52,8 +55,8 @@ $string['ready'] = 'Ready';
 $string['trigger'] = 'Trigger';
 $string['type'] = 'Type';
 $string['unconfigured'] = 'Unconfigured';
-$string['used'] = 'Used';
 $string['unsupported'] = 'Unsupported';
+$string['used'] = 'Used';
 
 // Sub-plugins.
 $string['subplugintype_archivingmod'] = 'Activity archiving driver';
@@ -227,6 +230,9 @@ $string['error_localpath_must_be_directory'] = 'A file with the given name alrea
 $string['error_at_least_one_coursecat_required'] = 'At least one course category must be selected.';
 
 // Storage.
+$string['cannot_update_retentiontime_of_deleted_file'] = 'Cannot update retention time of deleted file';
+$string['file_scheduled_for_deletion'] = 'File is scheduled for deletion';
+$string['file_will_be_deleted_in'] = 'File will be deleted in';
 $string['storage_tier'] = 'Storage tier';
 $string['storage_tier_LOCAL'] = 'Local';
 $string['storage_tier_LOCAL_help'] = 'Data is stored locally on the server or is accessible very fast.';

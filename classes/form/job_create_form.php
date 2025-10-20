@@ -240,7 +240,6 @@ class job_create_form extends \moodleform {
         $this->_form->addRule('archive_filename_pattern', null, 'maxlength', 255, 'client');
 
         // Autodelete: Enable.
-        // TODO (MDL-0): Implement automatic deletion.
         $this->_form->addElement(
             'advcheckbox',
             'archive_autodelete',

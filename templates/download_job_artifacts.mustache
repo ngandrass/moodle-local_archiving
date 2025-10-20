@@ -38,6 +38,7 @@
                 "filetype": "text/plain",
                 "timecreated": 1700000000,
                 "timemodified": 1700000000,
+                "retentiontime": null,
                 "sha256sum": "abc123def456...",
                 "tsp": null,
                 "storagedriver": "archivingstore_local",
@@ -51,6 +52,11 @@
                 "filetype": "text/plain",
                 "timecreated": 1700000001,
                 "timemodified": 1700000001,
+                "retentiontime": {
+                    "absolute": 1800000000,
+                    "relative": "in 115 days",
+                    "elapsed": false
+                },
                 "sha256sum": "abc789def012...",
                 "tsp": {
                     "timecreated": 1700000001,
@@ -122,6 +128,28 @@
                                 {{#userdate}} {{timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
                             </li>
                             <li class="list-group-item">
+                                <i class="fa-solid fa-trash"></i>&nbsp;
+                                <strong>{{#str}} automatic_deletion, local_archiving {{/str}}:</strong>
+                                {{#deleted}}
+                                    {{#str}} this_file_was_deleted, local_archiving {{/str}}
+                                {{/deleted}}
+                                {{^deleted}}
+                                    {{#retentiontime}}
+                                        {{#elapsed}}
+                                            {{#str}} file_scheduled_for_deletion, local_archiving {{/str}}
+                                        {{/elapsed}}
+                                        {{^elapsed}}
+                                            {{#str}} file_will_be_deleted_in, local_archiving {{/str}}
+                                            {{relative}}
+                                            ({{#userdate}} {{absolute}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}})
+                                        {{/elapsed}}
+                                    {{/retentiontime}}
+                                    {{^retentiontime}}
+                                        <span>{{#str}} never {{/str}}</span>
+                                    {{/retentiontime}}
+                                {{/deleted}}
+                            </li>
+                            <li class="list-group-item">
                                 <i class="fa fa-database"></i>&nbsp;
                                 <strong>{{#str}} subplugintype_archivingstore, local_archiving {{/str}}:</strong>
                                 {{storagedriver}}
@@ -149,7 +177,7 @@
                                     </a>
                                 {{/tsp}}
                                 {{^tsp}}
-                                    <i>{{#str}} not_signed, local_archiving {{/str}}</i>
+                                    <span>{{#str}} not_signed, local_archiving {{/str}}</span>
                                 {{/tsp}}
                             </li>
                         </ul>

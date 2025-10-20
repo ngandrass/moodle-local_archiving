@@ -27,6 +27,7 @@ use local_archiving\file_handle;
 use local_archiving\logging\logger;
 use local_archiving\tsp_manager;
 use local_archiving\type\archive_job_status;
+use local_archiving\util\time_util;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -128,6 +129,16 @@ if (count($filehandles) == 0) {
             ];
         }
 
+        // Prepare retention time data if available.
+        $retentiontime = null;
+        if ($filehandle->retentiontime) {
+            $retentiontime = (object) [
+                'absolute' => $filehandle->retentiontime,
+                'relative' => time_util::duration_to_human_readable(max(0, $filehandle->retentiontime - time())),
+                'elapsed' => time() > $filehandle->retentiontime,
+            ];
+        }
+
         // Add file data to template context.
         $tplctx['files'][] = [
             'deleted' => $filehandle->deleted,
@@ -136,6 +147,7 @@ if (count($filehandles) == 0) {
             'filetype' => $filehandle->mimetype,
             'timecreated' => $filehandle->timecreated,
             'timemodified' => $filehandle->timemodified,
+            'retentiontime' => $retentiontime,
             'sha256sum' => $filehandle->sha256sum,
             'tsp' => $tspdata,
             'storagedriver' => get_string('pluginname', "archivingstore_{$filehandle->archivingstorename}"),

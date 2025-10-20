@@ -1,5 +1,32 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDXX)
+
+Listed changes are split into categories, reflecting the affected component / (sub-) plugin.
+
+### Archiving Core (`local_archiving`)
+
+- Automatic deletion of archive job artifacts after a configurable retention period.
+- Display of file-specific retention information on the archive job artifacts download page.
+
+
+### Sub-Plugins
+
+#### Activity Archiving Driver: Quiz (`archivingmod_quiz`)
+
+#### Activity Archiving Driver: Assign (`archivingmod_assign`)
+
+#### Storage Driver: Local Directory (`archivingstore_localdir`)
+
+#### Storage Driver: Moodle Filestore (`archivingstore_moodle`)
+
+#### Archiving Trigger: Manual (`archivingtrigger_manual`)
+
+#### Archiving Trigger: Scheduled (`archivingtrigger_cron`)
+
+#### External Event Connector: API Stub (`archivingevent_apistub`)
+
+
 ## Version 0.4.0 (2025101300)
 
 Listed changes are split into categories, reflecting the affected component / (sub-) plugin.

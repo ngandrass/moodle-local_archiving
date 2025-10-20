@@ -70,11 +70,13 @@ class delete_expired_artifacts extends \core\task\scheduled_task {
                 $handle->archivingstore()->delete($handle);
                 $handle->mark_as_deleted();
                 mtrace("✅ Deleted artifact file: {$handle->filename} (Job-ID: {$handle->jobid}, File-ID: {$handle->id})");
+                // @codeCoverageIgnoreStart
             } catch (\Exception $e) {
                 mtrace(
                     "❌ Failed to delete artifact file: {$handle->filename} (Job-ID: {$handle->jobid}, File-ID: {$handle->id}) " .
                     $e->getMessage()
                 );
+                // @codeCoverageIgnoreEnd
             }
         }
     }

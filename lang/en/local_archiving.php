@@ -25,10 +25,10 @@
 // @codingStandardsIgnoreFile
 
 $string['pluginname'] = 'Archiving';
-$string['privacy:metadata'] = 'TODO!';
 
 // Common.
 $string['activitytype'] = 'Activity type';
+$string['archived_data'] = 'Archived data';
 $string['archiving'] = 'Archiving';
 $string['automatic_deletion'] = 'Automatic deletion';
 $string['available'] = 'Available';
@@ -90,6 +90,7 @@ $string['show_all_activities'] = 'Show all activities';
 
 // Job management.
 $string['a_archive_jobs'] = '{$a} archive jobs';
+$string['activity_archiving_task'] = 'Activity archiving task';
 $string['activity_archiving_task_failed'] = 'Activity archiving task failed';
 $string['archive_job'] = 'Archive job';
 $string['archive_job_created_details'] = 'A new archive job (<code>#{$a->jobid}</code>) for the activity "<code>{$a->cmname}</code>" has been created successfully.';
@@ -246,3 +247,35 @@ $string['storage_usage'] = 'Usage';
 $string['tsp_client_error_content_type'] = 'TSP server returned unexpected content type {$a}';
 $string['tsp_client_error_curl'] = 'Error while sending TSP request: {$a}';
 $string['tsp_client_error_http_code'] = 'TSP server returned HTTP status code {$a}';
+
+// Privacy.
+$string['privacy:metadata:core_files'] = 'The archiving plugin stores archived data temporarily inside the Moodle file store during creation and retrieval.';
+$string['privacy:metadata:local_archiving_activity_task'] = 'Activity archiving tasks that extract activity data for archiving purposes.';
+$string['privacy:metadata:local_archiving_activity_task:archivingmod'] = 'Name of the activity archiving driver used for this task.';
+$string['privacy:metadata:local_archiving_activity_task:contextid'] = 'ID of the Moodle context this task is associated with.';
+$string['privacy:metadata:local_archiving_activity_task:settings'] = 'Settings used for this activity archiving task.';
+$string['privacy:metadata:local_archiving_activity_task:timecreated'] = 'Timestamp when the activity archiving task was created.';
+$string['privacy:metadata:local_archiving_activity_task:timemodified'] = 'Timestamp when the activity archiving task was last modified.';
+$string['privacy:metadata:local_archiving_activity_task:userid'] = 'ID of the user who created this activity archiving task.';
+$string['privacy:metadata:local_archiving_content'] = 'Metadata about user content that has been archived during activity archiving task execution.';
+$string['privacy:metadata:local_archiving_content:refid'] = 'ID of the referenced data inside the specified reference table.';
+$string['privacy:metadata:local_archiving_content:reftable'] = 'Name of the database table the referenced data is stored in.';
+$string['privacy:metadata:local_archiving_content:summary'] = 'Text summary or description of the archived content.';
+$string['privacy:metadata:local_archiving_content:taskid'] = 'ID of the activity archiving task that archived this content.';
+$string['privacy:metadata:local_archiving_content:userid'] = 'ID of the user the referenced data is associated with.';
+$string['privacy:metadata:local_archiving_job'] = 'Archive jobs that bundle a single archiving pass.';
+$string['privacy:metadata:local_archiving_job:contextid'] = 'ID of the Moodle context this archive job is associated with.';
+$string['privacy:metadata:local_archiving_job:origin'] = 'Name of the trigger that created this archive job.';
+$string['privacy:metadata:local_archiving_job:settings'] = 'Settings used for this archive job.';
+$string['privacy:metadata:local_archiving_job:timecreated'] = 'Timestamp when the archive job was created.';
+$string['privacy:metadata:local_archiving_job:timemodified'] = 'Timestamp when the archive job was last modified.';
+$string['privacy:metadata:local_archiving_job:userid'] = 'ID of the user who created this archive job.';
+$string['privacy:metadata:local_archiving_log'] = 'Logs generated during archive job and activity archiving task execution.';
+$string['privacy:metadata:local_archiving_log:jobid'] = 'ID of the archive job this log entry is associated with.';
+$string['privacy:metadata:local_archiving_log:level'] = 'Log level of this entry.';
+$string['privacy:metadata:local_archiving_log:message'] = 'Log message describing the logged event.';
+$string['privacy:metadata:local_archiving_log:taskid'] = 'ID of the activity archiving task this log entry is associated with.';
+$string['privacy:metadata:local_archiving_log:timecreated'] = 'Timestamp when the log entry was created.';
+$string['privacy:metadata:local_archiving_metadata'] = 'Persistent metadata that is associated with archive jobs.';
+$string['privacy:metadata:local_archiving_metadata:datakey'] = 'Name of the metadata entry.';
+$string['privacy:metadata:local_archiving_metadata:datavalue'] = 'Value of the metadata entry.';

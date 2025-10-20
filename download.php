@@ -134,7 +134,8 @@ if (count($filehandles) == 0) {
         if ($filehandle->retentiontime) {
             $retentiontime = (object) [
                 'absolute' => $filehandle->retentiontime,
-                'relative' => time_util::duration_to_human_readable($filehandle->retentiontime - time()),
+                'relative' => time_util::duration_to_human_readable(max(0, $filehandle->retentiontime - time())),
+                'elapsed' => time() > $filehandle->retentiontime,
             ];
         }
 

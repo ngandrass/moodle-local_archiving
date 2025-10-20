@@ -55,6 +55,7 @@
                 "retentiontime": {
                     "absolute": 1800000000,
                     "relative": "in 115 days",
+                    "elapsed": false
                 },
                 "sha256sum": "abc789def012...",
                 "tsp": {
@@ -134,9 +135,14 @@
                                 {{/deleted}}
                                 {{^deleted}}
                                     {{#retentiontime}}
-                                        {{#str}} file_will_be_deleted_in, local_archiving {{/str}}
-                                        {{relative}}
-                                        ({{#userdate}} {{absolute}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}})
+                                        {{#elapsed}}
+                                            {{#str}} file_scheduled_for_deletion, local_archiving {{/str}}
+                                        {{/elapsed}}
+                                        {{^elapsed}}
+                                            {{#str}} file_will_be_deleted_in, local_archiving {{/str}}
+                                            {{relative}}
+                                            ({{#userdate}} {{absolute}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}})
+                                        {{/elapsed}}
                                     {{/retentiontime}}
                                     {{^retentiontime}}
                                         <span>{{#str}} never {{/str}}</span>

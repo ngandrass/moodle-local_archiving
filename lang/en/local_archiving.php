@@ -230,6 +230,7 @@ $string['error_at_least_one_coursecat_required'] = 'At least one course category
 
 // Storage.
 $string['cannot_update_retentiontime_of_deleted_file'] = 'Cannot update retention time of deleted file';
+$string['file_scheduled_for_deletion'] = 'File is scheduled for deletion';
 $string['file_will_be_deleted_in'] = 'File will be deleted in';
 $string['storage_tier'] = 'Storage tier';
 $string['storage_tier_LOCAL'] = 'Local';

@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 $plugin->component = 'local_archiving';
 $plugin->release = '0.4.0';
-$plugin->version = 2025101600;
+$plugin->version = 2025101601;
 $plugin->requires = 2024100700;
 $plugin->supported = [405, 501];
 $plugin->maturity = MATURITY_ALPHA;

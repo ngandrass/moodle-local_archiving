@@ -38,6 +38,7 @@ $string['cleanup_filestore_cache'] = 'Cleanup filestore cache';
 $string['cleanup_orphaned_backups'] = 'Cleanup orphaned backups';
 $string['components'] = 'Components';
 $string['create_archive'] = 'Create archive';
+$string['delete_expired_artifacts'] = 'Delete expired artifacts';
 $string['deletion'] = 'Deletion';
 $string['disabled'] = 'Disabled';
 $string['download_files'] = 'Download files';

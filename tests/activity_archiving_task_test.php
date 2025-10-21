@@ -411,6 +411,54 @@ final class activity_archiving_task_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that web service tokens are automatically deleted if a task reaches
+     * a final state unless otherwise specified.
+     *
+     * @covers \local_archiving\activity_archiving_task
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_webservice_token_deletion_upon_completion(): void {
+        global $DB;
+
+        // Prepare task and webservice.
+        $this->resetAfterTest();
+        $webservice = $this->generator()->create_webservice();
+        $task = $this->generator()->create_activity_archiving_task();
+
+        // Ensure that the task starts without a webservice token.
+        $this->assertNull($task->get_webservice_token(), 'Task should not have a webservice token initially');
+
+        // Create a web service token for the task.
+        $wstoken = $task->create_webservice_token($webservice->id, get_admin()->id, DAYSECS);
+        $this->assertSame($wstoken, $task->get_webservice_token(), 'Task should have a webservice token after creation');
+        $this->assertCount(
+            1,
+            $DB->get_records('external_tokens', ['token' => $wstoken]),
+            'Webservice token should be stored in the database'
+        );
+
+        // Mark the task as completed but skip token invalidation.
+        $task->set_status(activity_archiving_task_status::FINISHED, deletewstokenoncompletion: false);
+        $this->assertSame($wstoken, $task->get_webservice_token(), 'Task should still have a webservice token');
+        $this->assertCount(
+            1,
+            $DB->get_records('external_tokens', ['token' => $wstoken]),
+            'Webservice token should still be stored in the database'
+        );
+
+        // Mark the task as finished and ensure that the web service token was deleted.
+        $task->set_status(activity_archiving_task_status::FINISHED);
+        $this->assertNull($task->get_webservice_token(), 'Task should not have a webservice token after completion');
+        $this->assertEmpty(
+            $DB->get_records('external_tokens', ['token' => $wstoken]),
+            'Webservice token should have been removed from the database'
+        );
+    }
+
+    /**
      * Tests setting and getting progress of an activity archiving task.
      *
      * @covers \local_archiving\activity_archiving_task

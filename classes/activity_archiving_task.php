@@ -454,10 +454,12 @@ final class activity_archiving_task {
      * Changes the current task status to the given value
      *
      * @param activity_archiving_task_status $status New task status
+     * @param bool $deletewstokenoncompletion If true, deletes the associated web
+     * service token upon completion
      * @return void
      * @throws \dml_exception
      */
-    public function set_status(activity_archiving_task_status $status): void {
+    public function set_status(activity_archiving_task_status $status, bool $deletewstokenoncompletion = true): void {
         global $DB;
 
         // Update status value in the database.
@@ -472,6 +474,11 @@ final class activity_archiving_task {
             $this->get_logger()->info(
                 "Activity archiving task status: " . $status->name . " ({$status->value})"
             );
+        }
+
+        // Delete web service token if desired.
+        if ($deletewstokenoncompletion && $this->is_completed()) {
+            $this->delete_webservice_token();
         }
     }
 
@@ -575,6 +582,9 @@ final class activity_archiving_task {
             'wstoken' => $wstoken,
         ]);
 
+        // Log token creation.
+        $this->get_logger()->debug('Created webservice token: ' . $wstoken);
+
         return $wstoken;
     }
 
@@ -599,6 +609,9 @@ final class activity_archiving_task {
             'id' => $this->taskid,
             'wstoken' => null,
         ]);
+
+        // Log token destruction.
+        $this->get_logger()->debug('Destroyed web service token: ' . $wstoken);
 
         return true;
     }

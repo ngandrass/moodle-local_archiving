@@ -583,7 +583,7 @@ final class activity_archiving_task {
         ]);
 
         // Log token creation.
-        $this->get_logger()->debug('Created webservice token: ' . $wstoken);
+        $this->get_logger()->debug('Created token for web service with ID ' . $webserviceid . ': ' . $wstoken);
 
         return $wstoken;
     }

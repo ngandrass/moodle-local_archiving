@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace local\admin\setting;
-
-use local_archiving\local\admin\setting\admin_setting_webservice_enabler;
+namespace local_archiving\local\admin\setting;
 
 /**
  * Tests for the admin_setting_webservice_enabler class.

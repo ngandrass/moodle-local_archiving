@@ -21,12 +21,12 @@ use core\exception\moodle_exception;
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+require_once($CFG->libdir . '/adminlib.php'); // @codeCoverageIgnore
+
 
 /**
  * Custom admin setting that checks whether webservices are properly enabled and
  * provides shortcuts to enable them if needed.
- *
- * @codeCoverageIgnore
  *
  * @package   local_archiving
  * @copyright 2025 Niels Gandraß <niels@gandrass.de>

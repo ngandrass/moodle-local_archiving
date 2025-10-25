@@ -9,6 +9,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 - Automatic deletion of archive job artifacts after a configurable retention period.
 - Display of file-specific retention information on the archive job artifacts download page.
 - Implement Moodle privacy API provider
+- Provide admin setting component that checks and helps with setting up the Moodle web service component for worker service communication
 - Clean up issued web service tokens prior to timeout once an activity archiving task reached a final state
 
 

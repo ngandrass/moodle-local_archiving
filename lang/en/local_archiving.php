@@ -42,6 +42,7 @@ $string['delete_expired_artifacts'] = 'Delete expired artifacts';
 $string['deletion'] = 'Deletion';
 $string['disabled'] = 'Disabled';
 $string['download_files'] = 'Download files';
+$string['enable_now'] = 'Enable now';
 $string['file'] = 'File';
 $string['files'] = 'Files';
 $string['filetype'] = 'File type';
@@ -229,6 +230,10 @@ $string['error_localpath_must_be_absolute'] = 'Must be an absolute path.';
 $string['error_localpath_cloud_not_be_created'] = 'Could not create directory. Please make sure that the parent directory exists and is writable by the web server user.';
 $string['error_localpath_must_be_directory'] = 'A file with the given name already exists but a directory is expected.';
 $string['error_at_least_one_coursecat_required'] = 'At least one course category must be selected.';
+$string['web_services_are_disabled'] = 'Web services are disabled';
+$string['web_services_are_enabled'] = 'Web services are enabled';
+$string['web_service_rest_protocol_is_disabled'] = 'REST web service protocol is disabled';
+$string['web_service_rest_protocol_is_enabled'] = 'REST web service protocol is enabled';
 
 // Storage.
 $string['cannot_update_retentiontime_of_deleted_file'] = 'Cannot update retention time of deleted file';

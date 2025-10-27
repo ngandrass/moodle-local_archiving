@@ -28,5 +28,5 @@ $plugin->component = 'local_archiving';
 $plugin->release = '0.4.0';
 $plugin->version = 2025101601;
 $plugin->requires = 2024100700;
-$plugin->supported = [405, 501];
+$plugin->supported = [405, 501];  // X meta-supported-moodle{4.5 - 5.1} meta-supported-php{8.1 - 8.4}.
 $plugin->maturity = MATURITY_ALPHA;

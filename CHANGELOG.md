@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 0.5.0 (2025102700)
 
 Listed changes are split into categories, reflecting the affected component / (sub-) plugin.
 
@@ -17,17 +17,24 @@ Listed changes are split into categories, reflecting the affected component / (s
 
 #### Activity Archiving Driver: Quiz (`archivingmod_quiz`)
 
+- First stable release 🎉
+- Simplify web service setup process
+    - Bundle web service functions for worker communication inside a statically provided web service
+    - Remove superfluous admin settings for manual web service setups
+    - Remove superfluous autoinstall feature that was superseded by the statically provided web service
+- Finalize task flow logic for activity archiving tasks
+- Finalize Moodle privacy API provider
+- Adapt web service unit tests to latest activity archiving task access token invalidation behavior
+- Fix language strings in job creation form validator
+- Create unit tests for various miscellaneous components
+
 #### Activity Archiving Driver: Assign (`archivingmod_assign`)
 
-#### Storage Driver: Local Directory (`archivingstore_localdir`)
-
-#### Storage Driver: Moodle Filestore (`archivingstore_moodle`)
-
-#### Archiving Trigger: Manual (`archivingtrigger_manual`)
-
-#### Archiving Trigger: Scheduled (`archivingtrigger_cron`)
+- Add Moodle privacy API stub provider
 
 #### External Event Connector: API Stub (`archivingevent_apistub`)
+
+- Add Moodle privacy API provider
 
 
 ## Version 0.4.0 (2025101300)

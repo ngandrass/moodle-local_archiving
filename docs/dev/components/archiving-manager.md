@@ -3,11 +3,7 @@
 The archiving manager is the central entry point for archiving tasks. It is implemented as the `local_archiving` Moodle
 plugin and gets extended by various sub-plugins, such as [activity archiving drivers](activity-archiving-drivers.md).
 
-Supported sub-plugin types are:
-
-- [Activity Archiving Drivers (`archivingmod`)](activity-archiving-drivers.md)
-- [Storage Drivers (`archivingstore`)](storage-drivers.md)
-- [External Event Connectors (`archivingevent`)](external-event-connectors.md)
+Supported sub-plugin types are listed on the [Components Overview](index.md) page.
 
 
 ## Tasks and Responsibilities
@@ -33,9 +29,8 @@ Supported sub-plugin types are:
     - Requesting of digital signatures using TSP
 
 !!! abstract "Automation"
-    Automation of archiving tasks
+    Support for the automatic creation of archive jobs
 
-    - Initiating archive jobs periodically or on specific signals
     - Selection of criteria for automated archiving (e.g., course categories, activity types, activity status, ...)
     - Sending of error notifications if automated archiving jobs failed
 
@@ -48,7 +43,7 @@ Supported sub-plugin types are:
     Handling of GDPR requests for retrieval of personal data
 
 !!! abstract "Archive File Handling"
-    Forwarding finalized archives to storage drivers
+    Forwarding finalized archives to storage drivers and providing an interface to retrieve stored files
 
 !!! abstract "Global Defaults and Policies"
     Management of global defaults and policies for archiving data

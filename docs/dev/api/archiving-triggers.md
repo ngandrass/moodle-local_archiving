@@ -42,14 +42,14 @@ classDiagram
     class archivingtrigger_cron {
     }
 
-    class archivingtrigger_state {
+    class archivingtrigger_other {
     }
     
     %% Relationships
     base  <|--  archivingtrigger
     archivingtrigger <|-- archivingtrigger_manual
     archivingtrigger <|-- archivingtrigger_cron
-    archivingtrigger <|-- archivingtrigger_state
+    archivingtrigger <|-- archivingtrigger_other
     
     %% style
 ```

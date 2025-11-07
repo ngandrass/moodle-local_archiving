@@ -13,3 +13,5 @@ The developer documentation features the following sections:
 [:material-floor-plan: API Specification](api/index.md){ .md-button }
 
 [:material-flask: Testing](testing/index.md){ .md-button }
+
+[:material-file-document-outline: Building the Docs](builddocs.md){ .md-button }

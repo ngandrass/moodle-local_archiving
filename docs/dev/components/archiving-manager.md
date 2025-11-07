@@ -55,6 +55,7 @@ Supported sub-plugin types are listed on the [Components Overview](index.md) pag
 ## Interfaced Components
 
 - [Activity Archiving Drivers](activity-archiving-drivers.md)
+- [Archiving Triggers](archiving-triggers.md)
 - [Storage Drivers](storage-drivers.md)
 
 

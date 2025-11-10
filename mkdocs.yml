@@ -117,10 +117,18 @@ nav:
         - setup/install/plugins.md
     - "Configuration":
       - setup/config/index.md
+      - setup/config/general.md
+      - setup/config/components.md
+      - setup/config/job-presets.md
+      - setup/config/archive-signing.md
     - setup/index.md
 
   - "Usage":
       - usage/index.md
+      - usage/overview.md
+      - usage/archive-creation.md
+      - usage/download.md
+      - usage/logs.md
 
   - "Developer Documentation":
     - dev/index.md

@@ -8,6 +8,11 @@ descriptions to get started and find your way around. More detailed documentatio
 available.
 
 
+## Quickstart
+
+TODO
+
+
 ## Course archiving overview
 
 This plugin provides a comprehensive archiving overview page that lists all archivable activities within a Moodle

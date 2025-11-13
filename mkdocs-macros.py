@@ -38,3 +38,15 @@ def define_env(env):
 
         # Build markdown link to the source file
         return f'<a href="{url}" target="_blank"><code>{title}</code><sup>:material-code-block-tags:</sup></a>'
+
+    @env.macro
+    def moodle_nav_path(*args):
+        """
+        Renders a Moodle navigation path for the given arguments.
+
+        :param args: Strings of navigation path components.
+        :return: Rendered Moodle navigation path.
+        """
+        navpath = ' / '.join(args)
+
+        return f'<span style="padding: 2px 6px; border-radius: 8px; background-color: #f9f9f9; border: 1px solid #cccccc;">:simple-moodle: <span style="font-size:80%;">{navpath}</span></span>'

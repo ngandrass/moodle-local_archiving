@@ -1,14 +1,25 @@
 # Usage
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
-
-Please note that this plugin is still under very active development. Therefore this section only contains the most basic
-descriptions to get started and find your way around. More detailed documentation will be added when a stable release is
-available.
+This section describes the usage of the archiving subsystem from a course creator's or teacher's perspective. If you are
+looking for information on the initial setup and configuration of the archiving subsystem, please refer to the
+[setup](../setup/index.md) section.
 
 
 ## Quickstart
 
-TODO
+If you just want to get started, follow the link below to see how to create an archive of an existing Moodle activity: 
 
+[:material-archive-plus: Archive Creation](archive-creation.md){ .md-button }
+
+
+## Further Reading
+
+For more in-depth information and advanced topics, refer to the other subsections of this chapter:
+
+[:fontawesome-solid-cubes: Course Overview](overview.md){ .md-button }
+
+[:material-download: Downloading Archived Files](download.md){ .md-button }
+
+[:material-file-search-outline: Inspecting Job Logs](logs.md){ .md-button }
+
+[:material-file-certificate-outline: Archive Signing (TSP)](archive-signing.md){ .md-button }

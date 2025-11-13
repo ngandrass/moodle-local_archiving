@@ -1,13 +1,7 @@
 # Installation
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
-
-This section provides instructions on how to install the archiving core and additional sub-plugins, according to your
-needs.
-
-If you encounter any issues during the installation process, please open a bug report or ask a question in the issue
-tracker over on GitHub.
+This section provides instructions on how to install the archiving core and additional sub-plugins. If you encounter any
+issues during the installation process, please open a bug report or ask a question in the issue tracker over on GitHub.
 
 [:simple-github: Issue Tracker](https://github.com/ngandrass/moodle-local_archiving/issues){ .md-button }
 

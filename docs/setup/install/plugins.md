@@ -23,8 +23,8 @@ of your Moodle installation. The table below lists the different installation lo
 | [External event connector](../../components.md#external-event-connectors)   | `archivingevent`   | `local/archiving/driver/event`   |
 
 After placing the sub-plugins code inside the correct directory (e.g., `local/archiving/driver/mod/quiz` for
-`archivingmod_quiz`), log into your Moodle site as an admin and go to _Site administration_ to complete the
-installation.
+`archivingmod_quiz`), log into your Moodle site as an admin and go to {{ moodle_nav_path('Site administration') }} to
+complete the installation.
 
 !!! info "Check the sub-plugin documentation"
     Sub-plugins may require additional setup steps or dependencies to be met. Please always check the documentation of
@@ -33,8 +33,8 @@ installation.
 
 ## Verifying installation
 
-After the installation is complete, you should see the sub-plugin listed under: _Site administration > Plugins > Local
-plugins > Archiving > Manage Components_.
+After the installation is complete, you should see the sub-plugin listed under: {{ moodle_nav_path('Site
+administration', 'Plugins', 'Local plugins', 'Archiving', 'Manage Components') }}.
 
 
 ## Uninstalling
@@ -42,9 +42,9 @@ plugins > Archiving > Manage Components_.
 To remove sub-plugin perform the following steps:
 
 1. Log in to your Moodle site as an admin.
-2. (Optional) Go to _Site administration > Plugins > Local plugins > Archiving > Manage components_, find the sub-plugin
-   you want to remove and make sure it is disabled, if applicable.
-3. Navigate to _Site administration > Plugins > Plugin overview_.
+2. (Optional) Go to {{ moodle_nav_path('Site administration', 'Plugins', 'Local plugins', 'Archiving', 'Manage
+   components') }}, find the sub-plugin you want to remove and make sure it is disabled, if applicable.
+3. Navigate to {{ moodle_nav_path('Site administration', 'Plugins', 'Plugin overview') }}.
 4. Find the sub-plugin and click on _Uninstall_ next to it.
 5. Let the uninstallation process run.
 6. Delete the plugin files from your Moodle folder.

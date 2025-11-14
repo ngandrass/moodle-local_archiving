@@ -133,36 +133,59 @@ The state of each Milestone is depicted by the respective icon and color:
 
     [:material-package-variant-closed: Show Results](dev/index.md){.md-button}
 
-!!! example "Automated tests"
+!!! success "Automated tests"
     Creating automated tests for all central components of the archiving solution. Tests must be automatically
     executed by a CI pipeline and be mandatory for every release. Tests must cover all supported Moodle, PHP, and
     database versions to lessen the likelihood for regressions.
 
-    Unit tests for all core features and APIs are implemented. However, some components are still missing tests. This
-    task remains uncompleted until all components are covered by automated tests.
+    This task is completed. Unit tests for all core features and APIs are implemented. This also extends to all of the
+    sub-plugins that are part of the core distribution.
 
     [:material-code-tags: View Unit Tests](https://github.com/ngandrass/moodle-local_archiving/tree/master/tests){:target="_blank" .md-button}
 
-!!! note "Full implementation of the archiving solution for a single activity"
+!!! success "Full implementation of the archiving solution for a single activity"
     Implementing the full set of features for a single Moodle activity. This implementation should represent a reference
     implementation to be used as a guideline for further activities, storage backends, and other extensions.
 
-!!! note "Support for automated archive triggers"
+    This task is completed. Archiving of Moodle quizzes is fully implemented via the `archivingmod_quiz` sub-plugin.
+
+    [:material-github: View Repository](https://github.com/ngandrass/moodle-archivingmod_quiz){:target="_blank" .md-button}
+
+!!! success "Support for automated archive triggers"
     Creating a software architecture and implementations that allow for automated triggering of archive creation. This
     can, for example, be time-base triggering or triggering based on specific events, such as the submission of a new
     quiz attempt.
 
-!!! abstract "Finalizing of sub-plugin APIs"
+    This task is completed. The archiving trigger sub-plugin type was created and a time-based trigger implementation
+    (`archivingtrigger_cron`) was developed.
+
+    [:material-github: View Repository](https://github.com/ngandrass/moodle-archivingtrigger_cron){:target="_blank" .md-button}
+
+!!! success "Finalizing of sub-plugin APIs"
     Declare APIs for sub-plugins as stable. From this point on, changes to the APIs must be carefully considered, must
     not break existing implementations, and must be well documented.
 
-!!! abstract "Stable release on GitHub for early-adopters"
+    This task is completed. The first stable version of all sub-plugin APIs was released with version 1.0.0 of the
+    archiving core plugin.
+
+    [:material-package-variant-closed: View Developer Documentation](dev/index.md){.md-button}
+
+!!! success "Stable release on GitHub for early-adopters"
     Publishing a stable release on GitHub to allow early adopters to test the solution in their environments. This shall
     also constitute a base for further feedback and potential contributions.
 
-!!! abstract "User and administrator documentation"
+    This task is completed. The first stable release of the archiving core plugin and a selected set of sub-plugins was
+    published on GitHub.
+
+    [:material-github: View Repository](https://github.com/ngandrass/moodle-local_archiving){:target="_blank" .md-button}
+
+!!! success "User and administrator documentation"
     Creating comprehensive documentation for users and administrators of the archiving solution. This documentation
     should cover installation, configuration, usage, and troubleshooting.
+
+    This task is completed. You are currently viewing the user and administrator documentation.
+
+    [:material-book-open-page-variant: View Documentation Index](index.md){.md-button}
 
 !!! abstract "Implementing additional activities, storage backens, ..."
     Implementing support for additional Moodle activities, storage backends, and other customizations.

@@ -3,9 +3,6 @@
 This document defines the interface that [archiving trigger](../components/archiving-triggers.md)
 implementations must adhere to.
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
-
 
 ## Overview
 

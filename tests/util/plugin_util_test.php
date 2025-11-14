@@ -28,7 +28,7 @@ namespace local_archiving\util;
 /**
  * Tests for the plugin util class.
  */
-final class plugin_uti_test extends \advanced_testcase {
+final class plugin_util_test extends \advanced_testcase {
     /**
      * Helper to get the test data generator for local_archiving
      *

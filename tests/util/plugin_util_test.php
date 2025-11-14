@@ -45,11 +45,19 @@ final class plugin_util_test extends \advanced_testcase {
      * @covers \local_archiving\util\plugin_util
      * @dataProvider get_drivers_data_provider
      *
-     * @param string $drivertypename
+     * @param string $plugintype Sub-plugin type name
+     * @param string $drivertypename Driver name for the driver retrieval function
      * @return void
      * @throws \coding_exception
      */
-    public function test_get_drivers(string $drivertypename): void {
+    public function test_get_drivers(string $plugintype, string $drivertypename): void {
+        // Ensure that we have at least one plugin of the given type.
+        $plugins = \core_plugin_manager::instance()->get_plugins_of_type($plugintype);
+        if (empty($plugins)) {
+            $this->markTestSkipped('No matching subplugin installed to be tested.');
+        }
+
+        // Try to get available drivers and validate results.
         $drivers = plugin_util::{"get_{$drivertypename}s"}();
         $this->assertIsArray($drivers);
         $this->assertNotEmpty($drivers);
@@ -76,10 +84,10 @@ final class plugin_util_test extends \advanced_testcase {
      */
     public static function get_drivers_data_provider(): array {
         return [
-            'archivingmod' => ['activity_archiving_driver'],
-            'archivingstore' => ['storage_driver'],
-            'archivingevent' => ['event_connector'],
-            'archivingtrigger' => ['archiving_trigger'],
+            'archivingmod' => ['archivingmod', 'activity_archiving_driver'],
+            'archivingstore' => ['archivingstore', 'storage_driver'],
+            'archivingevent' => ['archivingevent', 'event_connector'],
+            'archivingtrigger' => ['archivingtrigger', 'archiving_trigger'],
         ];
     }
 

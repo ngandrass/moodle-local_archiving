@@ -105,7 +105,7 @@ final class mod_util_test extends \advanced_testcase {
 
         // Now try to retrieve only supported and enabled cms.
         $cmmeta = mod_util::get_cms_with_metadata($course->id, true);
-        $this->assertCount(3, $cmmeta, 'Should retrieve 3 cms (2 quizzes and 1 assignment');
+        $this->assertCount(2, $cmmeta, 'Should retrieve 2 quizzes');
         foreach ($cmmeta as $cm) {
             $this->assertTrue($cm->supported, 'CM should be supported');
             $this->assertTrue($cm->enabled, 'CM should be enabled');

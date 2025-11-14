@@ -168,6 +168,11 @@ class admin_setting_managecomponents extends \admin_setting {
 
         $activityarchivingdrivers = plugin_util::get_activity_archiving_drivers();
 
+        // Handle case of no sub-plugins of this type installed.
+        if (empty($activityarchivingdrivers)) {
+            return $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+        }
+
         // Prepare table structure.
         $table = new \html_table();
         $table->id = "{$this->name}table";
@@ -248,6 +253,11 @@ class admin_setting_managecomponents extends \admin_setting {
         global $OUTPUT, $PAGE;
 
         $storagedrivers = plugin_util::get_storage_drivers();
+
+        // Handle case of no sub-plugins of this type installed.
+        if (empty($storagedrivers)) {
+            return $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+        }
 
         // Prepare table structure.
         $table = new \html_table();
@@ -366,6 +376,11 @@ class admin_setting_managecomponents extends \admin_setting {
 
         $triggers = plugin_util::get_archiving_triggers();
 
+        // Handle case of no sub-plugins of this type installed.
+        if (empty($triggers)) {
+            return $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+        }
+
         // Prepare table structure.
         $table = new \html_table();
         $table->id = "{$this->name}table";
@@ -436,6 +451,11 @@ class admin_setting_managecomponents extends \admin_setting {
         global $OUTPUT, $PAGE;
 
         $eventconnectors = plugin_util::get_event_connectors();
+
+        // Handle case of no sub-plugins of this type installed.
+        if (empty($eventconnectors)) {
+            return $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+        }
 
         // Prepare table structure.
         $table = new \html_table();

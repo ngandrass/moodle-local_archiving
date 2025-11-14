@@ -6,6 +6,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 
 ### Archiving Core (`local_archiving`)
 
+- Display info message when no sup-plugins of a certain type are installed on manage components admin page
 - Remove alpha sub-plugins from core distribution
 - Adapt unit tests to detect optional sub-plugins
 

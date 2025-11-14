@@ -166,11 +166,23 @@ class admin_setting_managecomponents extends \admin_setting {
     protected function define_activity_archiving_drivers_table() {
         global $OUTPUT, $PAGE;
 
+        $html = '';
         $activityarchivingdrivers = plugin_util::get_activity_archiving_drivers();
 
         // Handle case of no sub-plugins of this type installed.
         if (empty($activityarchivingdrivers)) {
-            return $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+            $html .= $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+            return $html;
+        }
+
+        // Display a warning if no activity archiving driver is enabled.
+        $enableddrivers = count(array_filter($activityarchivingdrivers, fn ($driver) => $driver['enabled']));
+        if ($enableddrivers < 1) {
+            $html .= $OUTPUT->notification(
+                get_string('warning_no_activity_archiving_driver_enabled', 'local_archiving'),
+                'warning',
+                false
+            );
         }
 
         // Prepare table structure.
@@ -239,7 +251,9 @@ class admin_setting_managecomponents extends \admin_setting {
             $table->data[] = $row;
         }
 
-        return \html_writer::table($table);
+        $html .= \html_writer::table($table);
+
+        return $html;
     }
 
     /**
@@ -252,11 +266,23 @@ class admin_setting_managecomponents extends \admin_setting {
     protected function define_storage_drivers_table() {
         global $OUTPUT, $PAGE;
 
+        $html = '';
         $storagedrivers = plugin_util::get_storage_drivers();
 
         // Handle case of no sub-plugins of this type installed.
         if (empty($storagedrivers)) {
-            return $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+            $html .= $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+            return $html;
+        }
+
+        // Display a warning if no storage driver is enabled.
+        $enableddrivers = count(array_filter($storagedrivers, fn ($driver) => $driver['enabled']));
+        if ($enableddrivers < 1) {
+            $html .= $OUTPUT->notification(
+                get_string('warning_no_storage_driver_enabled', 'local_archiving'),
+                'warning',
+                false
+            );
         }
 
         // Prepare table structure.
@@ -361,7 +387,9 @@ class admin_setting_managecomponents extends \admin_setting {
             $table->data[] = $row;
         }
 
-        return \html_writer::table($table);
+        $html .= \html_writer::table($table);
+
+        return $html;
     }
 
     /**
@@ -374,11 +402,23 @@ class admin_setting_managecomponents extends \admin_setting {
     protected function define_archiving_triggers_table() {
         global $OUTPUT, $PAGE;
 
+        $html = '';
         $triggers = plugin_util::get_archiving_triggers();
 
         // Handle case of no sub-plugins of this type installed.
         if (empty($triggers)) {
-            return $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+            $html .= $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
+            return $html;
+        }
+
+        // Display a warning if no archiving trigger is enabled.
+        $enableddrivers = count(array_filter($triggers, fn ($driver) => $driver['enabled']));
+        if ($enableddrivers < 1) {
+            $html .= $OUTPUT->notification(
+                get_string('warning_no_archiving_triggers_enabled', 'local_archiving'),
+                'warning',
+                false
+            );
         }
 
         // Prepare table structure.
@@ -437,7 +477,9 @@ class admin_setting_managecomponents extends \admin_setting {
             $table->data[] = $row;
         }
 
-        return \html_writer::table($table);
+        $html .= \html_writer::table($table);
+
+        return $html;
     }
 
     /**

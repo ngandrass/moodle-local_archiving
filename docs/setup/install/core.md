@@ -8,8 +8,8 @@ by uploading it as a ZIP archive via the website administration. Both methods ar
 
 ## Installing via uploaded ZIP file
 
-1. Log in to your Moodle site as an admin and go to _Site administration >
-   Plugins > Install plugins_.
+1. Log in to your Moodle site as an admin and go to {{ moodle_nav_path('Site administration', 'Plugins', 'Install
+   plugins') }}.
 2. Upload the ZIP file with the plugin code.
 3. Check the plugin validation report and finish the installation.
 
@@ -22,14 +22,19 @@ The plugin can be also installed by putting its source code into:
 {your/moodle/dirroot}/local/archiving
 ```
 
-Afterward, log in to your Moodle site as an admin and go to _Site administration > Notifications_ to complete the
-installation. Alternatively, you can run `php admin/cli/upgrade.php` to complete the installation from the command line.
+Afterward, log in to your Moodle site as an admin and go to {{ moodle_nav_path('Site administration', 'Notifications') }}
+to complete the installation. Alternatively, you can run `php admin/cli/upgrade.php` to complete the installation from
+the command line.
+
+!!! note
+    Starting with **Moodle 5.1**, the plugins must be placed within the `public` directory. Please refer to the
+    [official migration guide](https://moodledev.io/docs/5.1/guides/restructure) for more information.
 
 
 ## Verifying installation
 
-After the installation is complete, you should see the plugins settings listed under: _Site administration > Plugins >
-Local Plugins > Archiving_.
+After the installation is complete, you should see the plugins settings listed under: {{ moodle_nav_path('Site
+administration', 'Plugins', 'Local Plugins', 'Archiving') }}.
 
 
 ## Uninstalling
@@ -41,7 +46,8 @@ drivers.
 
 To remove the plugin perform the following steps:
 
-1. Log in to your Moodle site as an admin and go to _Site administration > Plugins > Plugin overview_.
+1. Log in to your Moodle site as an admin and go to {{ moodle_nav_path('Site administration', 'Plugins', 'Plugin
+   overview') }}.
 2. Find `local_archiving` and click on _Uninstall_ next to it.
 3. Let the uninstallation process run.
 4. Delete the plugin files from your Moodle folder.

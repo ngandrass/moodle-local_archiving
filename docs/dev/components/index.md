@@ -52,6 +52,16 @@ allow to handle complex transformations, such as rendering and exporting a quiz 
 [:fontawesome-solid-cubes: Component Details](worker-services.md){ .md-button }
 
 
+## Archiving Triggers
+
+Archiving triggers are responsible for creating new archive jobs based on specific events or conditions. This can, for
+example, be a manual trigger by a user or an automatic trigger that is based on a configurable schedule. Multiple
+archiving triggers can be used simultaneously, e.g., to allow both manual on-demand archive creation but also initiate
+archiving for all activities that have unarchived changes every night.
+
+[:fontawesome-solid-cubes: Component Details](archiving-triggers.md){ .md-button }
+
+
 ## External Event Connectors
 
 External event connectors allow forwarding of specific events within the archiving system to external services, such as

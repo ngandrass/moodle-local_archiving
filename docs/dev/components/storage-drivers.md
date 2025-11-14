@@ -54,17 +54,11 @@ reads. Changes of data that was once written is prohibited.
 
 ### Moodledata Storage
 
-!!! warning "TODO"
-    This section is still work in progress (WIP) and might contain incomplete, incorrect, or outdated information.
-
 - Stores archived data in the Moodle storage system
 - Archived data is stored in the file area of a specific course
 
 
 ### File System Storage
-
-!!! warning "TODO"
-    This section is still work in progress (WIP) and might contain incomplete, incorrect, or outdated information.
 
 - Copies archived data to a given filesystem path
 - Filepath can be configured in the driver settings

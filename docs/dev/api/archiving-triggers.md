@@ -3,9 +3,6 @@
 This document defines the interface that [archiving trigger](../components/archiving-triggers.md)
 implementations must adhere to.
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
-
 
 ## Overview
 
@@ -42,14 +39,14 @@ classDiagram
     class archivingtrigger_cron {
     }
 
-    class archivingtrigger_state {
+    class archivingtrigger_other {
     }
     
     %% Relationships
     base  <|--  archivingtrigger
     archivingtrigger <|-- archivingtrigger_manual
     archivingtrigger <|-- archivingtrigger_cron
-    archivingtrigger <|-- archivingtrigger_state
+    archivingtrigger <|-- archivingtrigger_other
     
     %% style
 ```
@@ -60,3 +57,6 @@ classDiagram
 Each archiving trigger must implement the {{ source_file('classes/driver/archivingtrigger.php', '\\local_archiving\\driver\\archivingtrigger') }}
 interface with a class, placed at the following location: `/local/archiving/driver/trigger/<pluginname>/classes/archivingtrigger.php`,
 where `<pluginname>` is the name of the archiving trigger (e.g., `manual`, `cron`, ...).
+
+Due to the flexible nature of archiving triggers, there are no common methods each trigger implementation must adhere to
+besides the ones inherited from the base class.

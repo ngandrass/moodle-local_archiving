@@ -76,7 +76,6 @@ theme:
   features:
     - content.action.edit
     - content.code.copy
-    - navigation.expand
     - navigation.indexes
     - navigation.sections
     - navigation.tracking
@@ -117,10 +116,18 @@ nav:
         - setup/install/plugins.md
     - "Configuration":
       - setup/config/index.md
+      - setup/config/general.md
+      - setup/config/components.md
+      - setup/config/job-presets.md
     - setup/index.md
 
   - "Usage":
       - usage/index.md
+      - usage/overview.md
+      - usage/archive-creation.md
+      - usage/download.md
+      - usage/logs.md
+      - usage/archive-signing.md
 
   - "Developer Documentation":
     - dev/index.md

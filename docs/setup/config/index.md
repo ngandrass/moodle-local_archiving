@@ -1,10 +1,13 @@
 # Configuration
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
+The archiving subsystem can be configured through the Moodle site administration interface like any other Moodle plugin.
+You can find all archiving-related settings under {{ moodle_nav_path('Site administration', 'Plugins', 'Local plugins',
+'Archiving') }}.
 
-This plugin is currently under very active development. Describing each configuration step here in detail is not
-feasible at this point in time. Instead, please go to _Site administration > Plugins > Local plugins > Archiving_ to
-see all available configuration options including descriptions and help texts.
+You can find information about the different configuration options and settings in the subsections:
 
-This part of the documentation will be updated once a stable version is released!
+[:material-cog: General Settings](general.md){ .md-button }
+
+[:fontawesome-solid-cubes: Manage Components](components.md){ .md-button }
+
+[:material-clipboard-text-multiple-outline: Job Presets](job-presets.md){ .md-button }

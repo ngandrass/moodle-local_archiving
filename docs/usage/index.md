@@ -1,32 +1,25 @@
 # Usage
 
-!!! warning "Work in Progress (WIP)"
-    This section is still under active development. Information and specifications can still be changed in the future.
-
-Please note that this plugin is still under very active development. Therefore this section only contains the most basic
-descriptions to get started and find your way around. More detailed documentation will be added when a stable release is
-available.
+This section describes the usage of the archiving subsystem from a course creator's or teacher's perspective. If you are
+looking for information on the initial setup and configuration of the archiving subsystem, please refer to the
+[setup](../setup/index.md) section.
 
 
-## Course archiving overview
+## Quickstart
 
-This plugin provides a comprehensive archiving overview page that lists all archivable activities within a Moodle
-course. To access this page, navigate to a Moodle course in that you have manager rights and click on _More > Archiving_
-to open the archiving overview page.
+If you just want to get started, follow the link below to see how to create an archive of an existing Moodle activity: 
 
-
-## Creating an archive job
-
-Archive jobs can be created from the archiving overview page. To create a new archive job, click on the activity you
-want to archive. This will take you to the archive creation page. There you can adjust the archive settings and finally
-create a new archive job by clicking the _Create archive_ button.
-
-You should now see a confirmation message and a newly created job in the table at the bottom of the page. You can
-monitor the progress of the archive job by clicking on the refresh button in the top right corner of the table or by
-navigating to the job logs page of the respective archive job.
+[:material-archive-plus: Archive Creation](archive-creation.md){ .md-button }
 
 
-## Downloading archived data
+## Further Reading
 
-Once a job finished successfully, you can use the download button in the job table to list and access all artifacts that
-have been created during the archive job.
+For more in-depth information and advanced topics, refer to the other subsections of this chapter:
+
+[:fontawesome-solid-cubes: Course Overview](overview.md){ .md-button }
+
+[:material-download: Downloading Archived Files](download.md){ .md-button }
+
+[:material-file-search-outline: Inspecting Job Logs](logs.md){ .md-button }
+
+[:material-file-certificate-outline: Archive Signing (TSP)](archive-signing.md){ .md-button }

@@ -187,7 +187,7 @@ The state of each Milestone is depicted by the respective icon and color:
 
     [:material-book-open-page-variant: View Documentation Index](index.md){.md-button}
 
-!!! abstract "Implementing additional activities, storage backens, ..."
+!!! abstract "Implementing additional activities, storage backends, ..."
     Implementing support for additional Moodle activities, storage backends, and other customizations.
 
 !!! abstract "Release within the Moodle Plugin Directory"

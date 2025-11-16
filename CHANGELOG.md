@@ -13,29 +13,6 @@ Listed changes are split into categories, reflecting the affected component / (s
 - Adapt unit tests to detect optional sub-plugins
 
 
-### Sub-Plugins
-
-#### Activity Archiving Driver: Quiz (`archivingmod_quiz`)
-
--
-
-#### Storage Driver: Local Directory (`archivingstore_localdir`)
-
-- 
-
-#### Storage Driver: Moodle Filestore (`archivingstore_moodle`)
-
-- 
-
-#### Archiving Trigger: Manual (`archivingtrigger_manual`)
-
-- 
-
-#### Archiving Trigger: Scheduled (`archivingtrigger_cron`)
-
-- 
-
-
 ## Version 0.5.0 (2025102700)
 
 Listed changes are split into categories, reflecting the affected component / (sub-) plugin.

@@ -25,13 +25,6 @@ More information about the project, its features, screenshots, and installation 
 [![Archiving Subsystem: Official Documentation](docs/assets/images/docs-button.png)](https://archiving.gandrass.de/)
 
 
-# WARNING: DO NOT USE THIS PLUGIN YET!
-
-This plugin is currently under active development. Please do **not use this plugin in production environments** yet!
-
-Once a stable version is released, this warning will be removed.
-
-
 ## Installation and Configuration
 
 You can find detailed installation and configuration instructions within the

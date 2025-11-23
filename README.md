@@ -22,8 +22,6 @@ such as the Moodle file store or external storage systems.
 More information about the project, its features, screenshots, and installation instructions can be found in the
 [official documentation](https://archiving.gandrass.de/).
 
-[![Archiving Subsystem: Official Documentation](docs/assets/images/docs-button.png)](https://archiving.gandrass.de/)
-
 
 ## Installation and Configuration
 

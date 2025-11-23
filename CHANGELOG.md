@@ -1,6 +1,8 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.0.0 (2025112300)
+
+This is the first stable release of the archiving subsystem including all shipped sub-plugins 🎉
 
 Listed changes are split into categories, reflecting the affected component / (sub-) plugin.
 
@@ -9,6 +11,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 - Display warning message when sub-plugins are configured in a way that no archiving can be performed (e.g., no storage
   driver is enabled)
 - Display info message when no sup-plugins of a certain type are installed on manage components admin page
+- Show archiving core plugin version on manage components admin page
 - Remove alpha sub-plugins from core distribution
 - Adapt unit tests to detect optional sub-plugins
 

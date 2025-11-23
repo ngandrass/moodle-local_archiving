@@ -129,24 +129,41 @@ class admin_setting_managecomponents extends \admin_setting {
 
         $html = '';
 
+        // Archiving core.
+        $coreinfo = \core_plugin_manager::instance()->get_plugin_info('local_archiving');
+
+        $html .= $OUTPUT->box_start('generalbox');
+        $html .= $OUTPUT->heading(get_string('archiving_manager', 'local_archiving'), 3, 'border-0 mb-n2');
+        $html .= $OUTPUT->paragraph(get_string('manage_components_archiving_manager_desc', 'local_archiving'));
+        $html .= '<div class="card d-inline-flex"><div class="card-header px-3 py-2">';
+        $html .= '<h6 class="m-0">' . get_string('plugin_version', 'local_archiving') . '</h6>';
+        $html .= '</div><div class="card-body px-3 py-2">';
+        $html .= "{$coreinfo->release} <span class=\"text-muted\">({$coreinfo->versiondb})</span>";
+        $html .= '</div></div>';
+        $html .= $OUTPUT->box_end();
+
+        // Activity archiving drivers.
         $html .= $OUTPUT->box_start('generalbox');
         $html .= $OUTPUT->heading(get_string('subplugintype_archivingmod_plural', 'local_archiving'), 3, 'border-0 mb-n2');
         $html .= $OUTPUT->paragraph(get_string('manage_components_archivingmod_desc', 'local_archiving'));
         $html .= $this->define_activity_archiving_drivers_table();
         $html .= $OUTPUT->box_end();
 
+        // Storage drivers.
         $html .= $OUTPUT->box_start('generalbox');
         $html .= $OUTPUT->heading(get_string('subplugintype_archivingstore_plural', 'local_archiving'), 3, 'border-0 mb-n2');
         $html .= $OUTPUT->paragraph(get_string('manage_components_archivingstore_desc', 'local_archiving'));
         $html .= $this->define_storage_drivers_table();
         $html .= $OUTPUT->box_end();
 
+        // Archiving triggers.
         $html .= $OUTPUT->box_start('generalbox');
         $html .= $OUTPUT->heading(get_string('subplugintype_archivingtrigger_plural', 'local_archiving'), 3, 'border-0 mb-n2');
         $html .= $OUTPUT->paragraph(get_string('manage_components_archivingtrigger_desc', 'local_archiving'));
         $html .= $this->define_archiving_triggers_table();
         $html .= $OUTPUT->box_end();
 
+        // Event connectors.
         $html .= $OUTPUT->box_start('generalbox');
         $html .= $OUTPUT->heading(get_string('subplugintype_archivingevent_plural', 'local_archiving'), 3, 'border-0 mb-n2');
         $html .= $OUTPUT->paragraph(get_string('manage_components_archivingevent_desc', 'local_archiving'));

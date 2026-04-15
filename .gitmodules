@@ -1,21 +1,21 @@
 [submodule "driver/mod/quiz"]
 	path = driver/mod/quiz
-	url = git@github.com:ngandrass/moodle-archivingmod_quiz.git
+	url = https://github.com/ngandrass/moodle-archivingmod_quiz.git
 [submodule "driver/store/localdir"]
 	path = driver/store/localdir
-	url = git@github.com:ngandrass/moodle-archivingstore_localdir.git
+	url = https://github.com/ngandrass/moodle-archivingstore_localdir.git
 [submodule "driver/store/moodle"]
 	path = driver/store/moodle
-	url = git@github.com:ngandrass/moodle-archivingstore_moodle.git
+	url = https://github.com/ngandrass/moodle-archivingstore_moodle.git
 [submodule "driver/mod/assign"]
 	path = driver/mod/assign
-	url = git@github.com:ngandrass/moodle-archivingmod_assign.git
+	url = https://github.com/ngandrass/moodle-archivingmod_assign.git
 [submodule "driver/event/apistub"]
 	path = driver/event/apistub
-	url = git@github.com:ngandrass/moodle-archivingevent_apistub.git
+	url = https://github.com/ngandrass/moodle-archivingevent_apistub.git
 [submodule "driver/trigger/manual"]
 	path = driver/trigger/manual
-	url = git@github.com:ngandrass/moodle-archivingtrigger_manual.git
+	url = https://github.com/ngandrass/moodle-archivingtrigger_manual.git
 [submodule "driver/trigger/cron"]
 	path = driver/trigger/cron
-	url = git@github.com:ngandrass/moodle-archivingtrigger_cron.git
+	url = https://github.com/ngandrass/moodle-archivingtrigger_cron.git

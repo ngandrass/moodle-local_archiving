@@ -64,8 +64,8 @@ class plugin_util {
         // Iterate over all plugins and collect their metadata.
         foreach ($plugins as $plugin) {
             if (!isset($plugin->rootdir) || !file_exists($plugin->rootdir . '/version.php')) {
-                // Skip plugins with missing sources.
-                continue;
+                // Plugin is not correclty insalled, abort.
+                throw new \moodle_exception('detectedbrokenplugin', a: $plugin->name);
             }
 
             /** @var archivingmod $pluginclass */

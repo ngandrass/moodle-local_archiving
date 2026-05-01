@@ -27,7 +27,7 @@ namespace archivingmod_quiz\external;
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-
+use archivingmod_quiz\file_reassembler;
 use archivingmod_quiz\type\webservice_status;
 use core_external\external_api;
 use core_external\external_function_parameters;
@@ -100,6 +100,15 @@ class process_uploaded_artifact extends external_api {
                 'SHA256 checksum of the file',
                 VALUE_REQUIRED
             ),
+            // NOTE: We use an `external_value` type instead of a
+            // NOTE: `external_multiple_structure` type because of its request
+            // NOTE: overhead. Having a comma seperated value list reduces the
+            // NOTE: characters required for encoding the request in the URL.
+            'artifact_chunks' => new external_value(
+                PARAM_TEXT,
+                'filenames of individually uploaded chunks as comma seperated value list',
+                VALUE_OPTIONAL
+            ),
         ]);
     }
 
@@ -131,6 +140,7 @@ class process_uploaded_artifact extends external_api {
      * @param string $artifactfilepathraw
      * @param int $artifactitemidraw
      * @param string $artifactsha256sumraw
+     * @param string $artifactchunksraw
      * @return array
      * @throws \coding_exception
      * @throws \dml_exception
@@ -147,7 +157,8 @@ class process_uploaded_artifact extends external_api {
         string $artifactfilenameraw,
         string $artifactfilepathraw,
         int $artifactitemidraw,
-        string $artifactsha256sumraw
+        string $artifactsha256sumraw,
+        string $artifactchunksraw,
     ): array {
         // Validate request.
         $params = self::validate_parameters(self::execute_parameters(), [
@@ -161,6 +172,7 @@ class process_uploaded_artifact extends external_api {
             'artifact_filepath' => $artifactfilepathraw,
             'artifact_itemid' => $artifactitemidraw,
             'artifact_sha256sum' => $artifactsha256sumraw,
+            'artifact_chunks' => $artifactchunksraw,
         ]);
 
         // Find the task.
@@ -181,20 +193,37 @@ class process_uploaded_artifact extends external_api {
             return ['status' => webservice_status::E_NO_UPLOAD_EXPECTED->name]; // @codeCoverageIgnore
         }
 
-        // Find uploaded file (draftfile).
-        $draftfile = get_file_storage()->get_file(
-            contextid: $params['artifact_contextid'],
-            component: 'user',
-            filearea: 'draft',
-            itemid: $params['artifact_itemid'],
-            filepath: $params['artifact_filepath'],
-            filename: $params['artifact_filename']
-        );
-        if (!$draftfile) {
-            $task->set_status(activity_archiving_task_status::FAILED);
-            return ['status' => webservice_status::E_FILE_NOT_FOUND->name];
+        // Get or reconstruct uploaded file/-s.
+        $draftfile = null;
+        if (!isset($artifactchunks) || $artifactchunks != "") {
+            // Reassabmle orgininal file.
+            $chunkfilenames = explode(",", $artifactchunksraw);
+            $draftfile = file_reassembler::reassamble_chunked_file(
+                $params['artifact_contextid'],
+                $params['artifact_itemid'],
+                $params['artifact_filepath'],
+                $params['artifact_filename'],
+                $chunkfilenames,
+            );
+            if (!$draftfile) {
+                $task->set_status(activity_archiving_task_status::FAILED);
+                return [ 'status' => 'E_CHUNK_REASAMBLY_FAILED' ];
+            }
+        } else {
+            // Find uploaded file (draftfile).
+            $draftfile = get_file_storage()->get_file(
+                contextid: $params['artifact_contextid'],
+                component: 'user',
+                filearea: 'draft',
+                itemid: $params['artifact_itemid'],
+                filepath: $params['artifact_filepath'],
+                filename: $params['artifact_filename']
+            );
+            if (!$draftfile) {
+                $task->set_status(activity_archiving_task_status::FAILED);
+                return ['status' => webservice_status::E_FILE_NOT_FOUND->name];
+            }
         }
-
         // Validate uploaded file.
         // Note: We use SHA256 instead of Moodle sha1, since SHA1 is prone to hash collisions!
         if ($params['artifact_sha256sum'] != storage::hash_file($draftfile)) {

@@ -1,6 +1,3 @@
-[submodule "driver/mod/quiz"]
-	path = driver/mod/quiz
-	url = https://github.com/ngandrass/moodle-archivingmod_quiz.git
 [submodule "driver/store/localdir"]
 	path = driver/store/localdir
 	url = https://github.com/ngandrass/moodle-archivingstore_localdir.git

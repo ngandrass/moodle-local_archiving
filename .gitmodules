@@ -1,6 +1,3 @@
-[submodule "driver/store/localdir"]
-	path = driver/store/localdir
-	url = https://github.com/ngandrass/moodle-archivingstore_localdir.git
 [submodule "driver/store/moodle"]
 	path = driver/store/moodle
 	url = https://github.com/ngandrass/moodle-archivingstore_moodle.git

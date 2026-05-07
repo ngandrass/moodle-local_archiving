@@ -1,6 +1,3 @@
-[submodule "driver/store/moodle"]
-	path = driver/store/moodle
-	url = https://github.com/ngandrass/moodle-archivingstore_moodle.git
 [submodule "driver/mod/assign"]
 	path = driver/mod/assign
 	url = https://github.com/ngandrass/moodle-archivingmod_assign.git

@@ -30,7 +30,7 @@ use stored_file;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 /**
- * Manages reassambly of chunked uploads to its original file.
+ * Manages reassembly of chunked uploads to its original file.
  */
 class file_reassembler {
     /**
@@ -42,9 +42,9 @@ class file_reassembler {
      * @param string $originalfilename Name of original file to reasamble.
      * @param int $artifactcount Number of chunks original file was split into.
      * @return stored_file|null
-     * @throws \file_exception If chunk data can not be appended while reassambly.
+     * @throws \file_exception If chunk data can not be appended while reassembly.
      */
-    public static function reassamble_chunked_file(
+    public static function reassemble_chunked_file(
         int $contextid,
         int $itemid,
         string $filepath,

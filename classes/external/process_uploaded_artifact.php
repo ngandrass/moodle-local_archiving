@@ -192,8 +192,8 @@ class process_uploaded_artifact extends external_api {
         // Get or reconstruct uploaded file/-s.
         $draftfile = null;
         if ($params['artifact_count'] > 1) {
-            // Reassabmle orgininal file.
-            $draftfile = file_reassembler::reassamble_chunked_file(
+            // Reassebmle orgininal file.
+            $draftfile = file_reassembler::reassemble_chunked_file(
                 $params['artifact_contextid'],
                 $params['artifact_itemid'],
                 $params['artifact_filepath'],

@@ -361,6 +361,63 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
     }
 
     /**
+     * Data provider for test_rejection_of_invalid_artifact_count
+     *
+     * @return array[] Test data
+     */
+    public static function artifact_count_data_provider(): array {
+        // Define test datasets.
+        return [
+            'Is zero' => ['artifactcount' => 0],
+            'Is negative' => ['artifactcount' => -1],
+        ];
+    }
+
+    /**
+     * Tests rejection of invalid artifact counts
+     *
+     * @dataProvider artifact_count_data_provider
+     * @covers \quiz_archiver\external\process_uploaded_artifact::execute
+     *
+     * @param int $artifactcount Number of individually uploaded files
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \required_capability_exception
+     */
+    public function test_rejection_of_invalid_artifact_count(int $artifactcount): void {
+        // Create job and draft artifact.
+        $this->resetAfterTest();
+        $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
+
+        // Gain access.
+        $_GET['wstoken'] = 'TEST-WS-TOKEN';
+        $this->setAdminUser();
+
+        // Execute test call.
+        $r = $this->generate_valid_request('12345678-1234-5678-abcd-ef0123456789', $mocks->task, $artifactcount);
+        $res = process_uploaded_artifact::execute(
+            $r['uuid'],
+            $r['taskid'],
+            $r['artifact_component'],
+            $r['artifact_contextid'],
+            $r['artifact_userid'],
+            $r['artifact_filearea'],
+            $r['artifact_filename'],
+            $r['artifact_filepath'],
+            $r['artifact_itemid'],
+            $r['artifact_sha256sum'],
+            $r['artifact_count']
+        );
+        $this->assertSame(
+            webservice_status::E_INVALID_ARTIFACT_COUNT->name,
+            $res['status'],
+            'Invalid wstoken was falsely accepted'
+        );
+    }
+
+    /**
      * Test that missing files are reported correctly
      *
      * @covers \archivingmod_quiz\external\process_uploaded_artifact::execute

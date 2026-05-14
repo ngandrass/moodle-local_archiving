@@ -83,6 +83,9 @@ enum webservice_status {
     /** @var self File could not be found */
     case E_FILE_NOT_FOUND;
 
+    /** @var self Failed to reassemble individually uploaded chunks to original file */
+    case E_CHUNK_REASSEMBLY_FAILED;
+
     /** @var self Checksum validation failed */
     case E_CHECKSUM_MISMATCH;
 

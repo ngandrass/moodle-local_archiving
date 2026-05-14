@@ -202,7 +202,7 @@ class process_uploaded_artifact extends external_api {
             );
             if (!$draftfile) {
                 $task->set_status(activity_archiving_task_status::FAILED);
-                return [ 'status' => 'E_CHUNK_REASAMBLY_FAILED' ];
+                return [ 'status' => webservice_status::E_CHUNK_REASSEMBLY_FAILED->name ];
             }
         } else {
             // Find uploaded file (draftfile).

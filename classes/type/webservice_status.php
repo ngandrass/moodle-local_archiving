@@ -86,6 +86,9 @@ enum webservice_status {
     /** @var self Failed to reassemble individually uploaded chunks to original file */
     case E_CHUNK_REASSEMBLY_FAILED;
 
+    /** @var self Expected an artifact count of one or greater, got negative or zero value */
+    case E_INVALID_ARTIFACT_COUNT;
+
     /** @var self Checksum validation failed */
     case E_CHECKSUM_MISMATCH;
 

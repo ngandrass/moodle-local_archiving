@@ -191,20 +191,7 @@ class process_uploaded_artifact extends external_api {
 
         // Get or reconstruct uploaded file/-s.
         $draftfile = null;
-        if ($params['artifact_count'] > 1) {
-            // Reassebmle orgininal file.
-            $draftfile = file_reassembler::reassemble_chunked_file(
-                $params['artifact_contextid'],
-                $params['artifact_itemid'],
-                $params['artifact_filepath'],
-                $params['artifact_filename'],
-                $params['artifact_count']
-            );
-            if (!$draftfile) {
-                $task->set_status(activity_archiving_task_status::FAILED);
-                return [ 'status' => webservice_status::E_CHUNK_REASSEMBLY_FAILED->name ];
-            }
-        } else {
+        if ($params['artifact_count'] == 1) {
             // Find uploaded file (draftfile).
             $draftfile = get_file_storage()->get_file(
                 contextid: $params['artifact_contextid'],
@@ -218,7 +205,24 @@ class process_uploaded_artifact extends external_api {
                 $task->set_status(activity_archiving_task_status::FAILED);
                 return ['status' => webservice_status::E_FILE_NOT_FOUND->name];
             }
+        } else if ($params['artifact_count'] > 1) {
+            // Reassebmle orgininal file.
+            $draftfile = file_reassembler::reassemble_chunked_file(
+                $params['artifact_contextid'],
+                $params['artifact_itemid'],
+                $params['artifact_filepath'],
+                $params['artifact_filename'],
+                $params['artifact_count']
+            );
+            if (!$draftfile) {
+                $task->set_status(activity_archiving_task_status::FAILED);
+                return ['status' => webservice_status::E_CHUNK_REASSEMBLY_FAILED->name];
+            }
+        } else {
+            $task->set_status(activity_archiving_task_status::FAILED);
+            return ['status' => webservice_status::E_INVALID_ARTIFACT_COUNT->name];
         }
+
         // Validate uploaded file.
         // Note: We use SHA256 instead of Moodle sha1, since SHA1 is prone to hash collisions!
         if ($params['artifact_sha256sum'] != storage::hash_file($draftfile)) {

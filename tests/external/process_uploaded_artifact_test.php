@@ -48,9 +48,10 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
      *
      * @param string $uuid UUID assigned to this task by the worker service
      * @param activity_archiving_task $task The task to generate the request for
+     * @param int $artifactcount Number of individually uploaded artifacts
      * @return array Valid request parameters
      */
-    protected function generate_valid_request(string $uuid, activity_archiving_task $task): array {
+    protected function generate_valid_request(string $uuid, activity_archiving_task $task, int $artifactcount): array {
         return [
             'uuid' => $uuid,
             'taskid' => $task->get_id(),
@@ -62,6 +63,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             'artifact_filepath' => '/',
             'artifact_itemid' => 1,
             'artifact_sha256sum' => '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+            'artifact_count' => $artifactcount,
         ];
     }
 
@@ -115,7 +117,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
         $this->setAdminUser();
         $wstoken = 'TEST-WS-TOKEN-VALID';
         $mocks = $this->getDataGenerator()->create_mock_task($wstoken);
-        $r = $this->generate_valid_request('10000000-0000-0000-0000-000000000000', $mocks->task);
+        $r = $this->generate_valid_request('10000000-0000-0000-0000-000000000000', $mocks->task, 1);
 
         // Check that correct wstoken allows access.
         $_GET['wstoken'] = $wstoken;
@@ -129,7 +131,8 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             $r['artifact_filename'],
             $r['artifact_filepath'],
             $r['artifact_itemid'],
-            $r['artifact_sha256sum']
+            $r['artifact_sha256sum'],
+            $r['artifact_count']
         );
         $this->assertNotSame(
             webservice_status::E_ACCESS_DENIED->name,
@@ -149,7 +152,8 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             $r['artifact_filename'],
             $r['artifact_filepath'],
             $r['artifact_itemid'],
-            $r['artifact_sha256sum']
+            $r['artifact_sha256sum'],
+            $r['artifact_count']
         );
         $this->assertSame(
             webservice_status::E_ACCESS_DENIED->name,
@@ -175,6 +179,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
      * @param string|null $artifactfilepath File path
      * @param int|null $artifactitemid Item ID
      * @param string|null $artifactsha256sum SHA256 checksum
+     * @param int|null $artifactcount Number of individually uploaded files
      * @param bool $shouldfail Whether a failure is expected
      * @return void
      * @throws \coding_exception
@@ -193,12 +198,13 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
         ?string $artifactfilepath,
         ?int $artifactitemid,
         ?string $artifactsha256sum,
+        ?int $artifactcount,
         bool $shouldfail
     ): void {
         // Create mock quiz.
         $this->resetAfterTest();
         $mocks = $this->getDataGenerator()->create_mock_task();
-        $base = $this->generate_valid_request('20000000-0000-0000-0000-000000000000', $mocks->task);
+        $base = $this->generate_valid_request('20000000-0000-0000-0000-000000000000', $mocks->task, 1);
 
         if ($shouldfail) {
             $this->expectException(\invalid_parameter_exception::class);
@@ -214,7 +220,8 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             $artifactfilename === null ? $base['artifact_filename'] : $artifactfilename,
             $artifactfilepath === null ? $base['artifact_filepath'] : $artifactfilepath,
             $artifactitemid === null ? $base['artifact_itemid'] : $artifactitemid,
-            $artifactsha256sum === null ? $base['artifact_sha256sum'] : $artifactsha256sum
+            $artifactsha256sum === null ? $base['artifact_sha256sum'] : $artifactsha256sum,
+            $artifactcount === null ? $base['artifact_count'] : $artifactcount
         );
     }
 
@@ -236,6 +243,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             "artifactfilepath" => null,
             "artifactitemid" => null,
             "artifactsha256sum" => null,
+            "artifactcount" => null,
         ];
 
         // Define test datasets.
@@ -288,7 +296,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
         $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
 
         // Execute test call.
-        $r = $this->generate_valid_request('30000000-0000-0000-0000-000000000000', $mocks->task);
+        $r = $this->generate_valid_request('30000000-0000-0000-0000-000000000000', $mocks->task, 1);
         $_GET['wstoken'] = 'TEST-WS-TOKEN';
         $res = process_uploaded_artifact::execute(
             $r['uuid'],
@@ -300,7 +308,8 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             $r['artifact_filename'],
             $r['artifact_filepath'],
             $r['artifact_itemid'],
-            $r['artifact_sha256sum']
+            $r['artifact_sha256sum'],
+            $r['artifact_count']
         );
         $this->assertSame(
             webservice_status::E_TASK_NOT_FOUND->name,
@@ -330,7 +339,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
 
         // Execute test call.
         $_GET['wstoken'] = $wstoken;
-        $r = $this->generate_valid_request('30000000-0000-0000-0000-000000000000', $mocks->task);
+        $r = $this->generate_valid_request('30000000-0000-0000-0000-000000000000', $mocks->task, 1);
         $res = process_uploaded_artifact::execute(
             $r['uuid'],
             $r['taskid'],
@@ -341,7 +350,8 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             $r['artifact_filename'],
             $r['artifact_filepath'],
             $r['artifact_itemid'],
-            $r['artifact_sha256sum']
+            $r['artifact_sha256sum'],
+            $r['artifact_count']
         );
         $this->assertSame(
             webservice_status::E_ACCESS_DENIED->name,
@@ -368,7 +378,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
         $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
 
         // Execute test call.
-        $r = $this->generate_valid_request('42000000-0000-0000-0000-000000000000', $mocks->task);
+        $r = $this->generate_valid_request('42000000-0000-0000-0000-000000000000', $mocks->task, 1);
         $_GET['wstoken'] = 'TEST-WS-TOKEN';
         $res = process_uploaded_artifact::execute(
             $r['uuid'],
@@ -380,7 +390,8 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             $r['artifact_filename'],
             $r['artifact_filepath'],
             $r['artifact_itemid'],
-            $r['artifact_sha256sum']
+            $r['artifact_sha256sum'],
+            $r['artifact_count']
         );
         $this->assertSame(
             webservice_status::E_FILE_NOT_FOUND->name,
@@ -410,7 +421,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
         $artifact = $this->getDataGenerator()->create_draft_file('testartifact.tar.gz');
 
         // Execute test call.
-        $r = $this->generate_valid_request('10000000-1337-0000-0000-000000000000', $mocks->task);
+        $r = $this->generate_valid_request('10000000-1337-0000-0000-000000000000', $mocks->task, 1);
         $_GET['wstoken'] = 'TEST-WS-TOKEN';
         $res = process_uploaded_artifact::execute(
             $r['uuid'],
@@ -422,7 +433,8 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             $artifact->get_filename(),
             $artifact->get_filepath(),
             $artifact->get_itemid(),
-            '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+            '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+            $r['artifact_count']
         );
         $this->assertSame(
             webservice_status::E_CHECKSUM_MISMATCH->name,

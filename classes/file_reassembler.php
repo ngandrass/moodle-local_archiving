@@ -60,8 +60,9 @@ class file_reassembler {
 
         // Create temporary file on disk to append chunks to one by one.
         // This is required because you can not write inside the file storage.
-        $temporaryfile = tmpfile();
-        $temporaryfilepath = stream_get_meta_data($temporaryfile)['uri']; // See php manual.
+        $temporarydirectory = make_request_directory();
+        $temporaryfilepath = tempnam($temporarydirectory, 'reassembly');
+        $temporaryfile = fopen($temporaryfilepath, 'w');
 
         foreach ($chunkfilenames as $i => $chunkfilename) {
             $chunkfile = get_file_storage()->get_file($contextid, 'user', 'draft', $itemid, $filepath, $chunkfilename);
@@ -79,6 +80,7 @@ class file_reassembler {
             } catch (\file_exception $e) {
                 // Clean up temporary file and rethrow fatal exception.
                 fclose($temporaryfile);
+                unlink($temporaryfilepath);
                 throw $e;
             } finally {
                 fclose($chunkfilehandle);
@@ -90,6 +92,7 @@ class file_reassembler {
 
         // Ensure changes are written to disk.
         fflush($temporaryfile);
+        fclose($temporaryfile);
 
         // Import temporary file into file storage.
         $originalfile = null;
@@ -104,8 +107,8 @@ class file_reassembler {
             ];
             $originalfile = get_file_storage()->create_file_from_pathname($fileinfo, $temporaryfilepath);
         } finally {
-            // Clean up temporaray file by closing its handle.
-            fclose($temporaryfile);
+            // Clean up temporaray file.
+            unlink($temporaryfilepath);
         }
 
         return $originalfile;

@@ -245,7 +245,7 @@ class attempt_report {
             $quizheaderdata = array_merge($quizheaderdata, $attemptobj->get_additional_summary_data($options));
 
             // Feedback if there is any, and the user is allowed to see it now.
-            if (in_array(attempt_report_section::GENERAL_FEEDBACK, $sections)) {
+            if (in_array(attempt_report_section::OVERALL_FEEDBACK, $sections)) {
                 $feedback = $attemptobj->get_overall_feedback($grade);
                 $quizheaderdata['feedback'] = [
                     'title' => get_string('feedback', 'quiz'),

@@ -2,6 +2,7 @@
 
 ## Version X.Y.Z (YYYYMMDDXX)
 
+- Fix rendering of overall quiz feedback
 - Force wrapping of long lines in code boxes to prevent overflowing out of page boundaries
 - Reduce padding of comment boxes within code boxes to prevent them from overlapping student code
 

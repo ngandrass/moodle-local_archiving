@@ -213,7 +213,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate report without quiz feedback.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
-            attempt_report_section::GENERAL_FEEDBACK,
+            attempt_report_section::OVERALL_FEEDBACK,
             attempt_report_section::QUESTION,
         ]));
         $html = $report->generate($rc->attemptids[0], $sections);

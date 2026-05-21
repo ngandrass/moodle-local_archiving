@@ -170,6 +170,12 @@ class remote_archive_worker {
             $sections[$section->value] = $settings->{"report_section_{$section->value}"};
         }
 
+        // Determine maximal upload byte size.
+        $maxbytes = intval(get_config('core', 'maxbytes'));
+        if ($maxbytes == 0) {
+            $maxbytes = get_max_upload_file_size();
+        }
+
         // Build job creation request payload.
         return [
             "api_version" => self::API_VERSION,
@@ -179,6 +185,7 @@ class remote_archive_worker {
                 "base_url" => $this->moodlebaseurl,
                 "webservice_url" => $this->moodlebaseurl . '/webservice/rest/server.php',
                 "upload_url" => $this->moodlebaseurl . '/webservice/upload.php',
+                "max_upload_bytes" => $maxbytes,
             ],
             "job" => [
                 "attemptids" => $attemptids,

@@ -92,6 +92,13 @@ final class attempt_report_test extends \advanced_testcase {
             'Overall feedback header not found'
         );
 
+        // Verify quiz grade.
+        $this->assertMatchesRegularExpression(
+            '/<th[^<>]*>\s*' . preg_quote(get_string('gradenoun'), '/') . '\s*<\/th>/',
+            $html,
+            'Quiz grade header not found'
+        );
+
         // Verify questions.
         foreach ($this->getDataGenerator()::QUESTION_TYPES_IN_REFERENCE_QUIZ as $qtype) {
             $this->assertMatchesRegularExpression(
@@ -100,6 +107,16 @@ final class attempt_report_test extends \advanced_testcase {
                 'Question of type ' . $qtype . ' not found'
             );
         }
+
+        // Verify correctness indicators.
+        // TODO (MDL-0): Add marks to reference quiz.
+
+        // Verify question marks.
+        $this->assertStringContainsString(
+            get_string('mark', 'question'),
+            $html,
+            'Question marks not found'
+        );
 
         // Verify individual question feedback.
         $this->assertMatchesRegularExpression(
@@ -233,6 +250,44 @@ final class attempt_report_test extends \advanced_testcase {
     }
 
     /**
+     * Tests generation of a report without showing the quiz grade
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_report_no_quiz_grade(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without quiz grade.
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::QUIZ_GRADE,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Verify that quiz header is still present.
+        $this->assertMatchesRegularExpression(
+            '/<table[^<>]*quizreviewsummary[^<>]*>/',
+            $html,
+            'Quiz header table not found'
+        );
+
+        // Verify that quiz grade is absent.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<th[^<>]*>\s*' . preg_quote(get_string('gradenoun'), '/') . '\s*<\/th>/',
+            $html,
+            'Quiz grade found when it should be absent'
+        );
+    }
+
+    /**
      * Tests generation of a report with no questions
      *
      * @covers \archivingmod_quiz\attempt_report::generate
@@ -286,6 +341,84 @@ final class attempt_report_test extends \advanced_testcase {
     }
 
     /**
+     * Tests generation of a report without showing question correctness
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_report_no_question_correctness(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without question correctness.
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::HEADER,
+            attempt_report_section::QUESTION_CORRECTNESS,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Questions should still be present.
+        $this->assertMatchesRegularExpression(
+            '/<[^<>]*class="[^"<>]*que[^"<>]*"[^<>]*>/',
+            $html,
+            'Questions not found'
+        );
+
+        // Verify that question correctness state classes are absent.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<[^<>]*class="[^"<>]*que[^"<>]*(correct|incorrect|partiallycorrect)[^"<>]*"[^<>]*>/',
+            $html,
+            'Question correctness state found when it should be absent'
+        );
+    }
+
+    /**
+     * Tests generation of a report without showing question marks
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_report_no_question_marks(): void {
+        $this->resetAfterTest();
+        $rc = $this->getDataGenerator()->import_reference_course();
+
+        // Generate report without question marks.
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
+        $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::HEADER,
+            attempt_report_section::QUESTION_MARKS,
+        ]));
+        $html = $report->generate($rc->attemptids[0], $sections);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+
+        // Questions should still be present.
+        $this->assertMatchesRegularExpression(
+            '/<[^<>]*class="[^"<>]*que[^"<>]*"[^<>]*>/',
+            $html,
+            'Questions not found'
+        );
+
+        // Verify that question marks are absent.
+        $this->assertStringNotContainsString(
+            get_string('mark', 'question'),
+            $html,
+            'Question marks found when they should be absent'
+        );
+    }
+
+    /**
      * Tests generation of a report with no individual question feedback
      *
      * @covers \archivingmod_quiz\attempt_report::generate
@@ -303,6 +436,7 @@ final class attempt_report_test extends \advanced_testcase {
         // Generate report without question feedback.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $sections = array_filter(attempt_report_section::cases(), fn ($s) => !in_array($s, [
+            attempt_report_section::HEADER,
             attempt_report_section::QUESTION_FEEDBACK,
         ]));
         $html = $report->generate($rc->attemptids[0], $sections);

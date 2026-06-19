@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 $plugin->component = 'archivingmod_quiz';
 $plugin->release = '1.0.0';
-$plugin->version = 2025102700;
+$plugin->version = 2025102701;
 $plugin->requires = 2024100700;
 $plugin->supported = [405, 501]; // X meta-supported-moodle{4.5 - 5.1} meta-supported-php{8.1 - 8.4}.
 $plugin->maturity = MATURITY_STABLE;

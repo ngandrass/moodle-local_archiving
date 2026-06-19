@@ -2,8 +2,13 @@
 
 ## Version X.Y.Z (YYYYMMDDXX)
 
+- Add attempt report setting for showing / hiding overall quiz grade
+- Add attempt report setting for showing / hiding question correctness indicators
+- Add attempt report setting for showing / hiding raw marks for questions
+- Fix rendering of overall quiz feedback
 - Force wrapping of long lines in code boxes to prevent overflowing out of page boundaries
 - Reduce padding of comment boxes within code boxes to prevent them from overlapping student code
+- Migrate quiz attempt renderer to new quiz attempt summary API
 
 
 ## Version 1.0.0 (2025102700)

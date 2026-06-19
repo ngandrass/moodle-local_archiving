@@ -45,8 +45,17 @@ enum attempt_report_section: string {
     /** @var string Overall quiz feedback */
     case OVERALL_FEEDBACK = 'quiz_feedback';
 
+    /** @var string Globala quiz grade */
+    case QUIZ_GRADE = 'quiz_grade';
+
     /** @var string Quiz questions */
     case QUESTION = 'question';
+
+    /** @var string Correctness indicators for question answers */
+    case QUESTION_CORRECTNESS = 'question_correctness';
+
+    /** @var string Marks for question answers */
+    case QUESTION_MARKS = 'question_marks';
 
     /** @var string Feedback for individual questions */
     case QUESTION_FEEDBACK = 'question_feedback';
@@ -74,6 +83,9 @@ enum attempt_report_section: string {
     public function dependencies(): array {
         return match ($this) {
             self::OVERALL_FEEDBACK => [self::HEADER],
+            self::QUIZ_GRADE => [self::HEADER],
+            self::QUESTION_CORRECTNESS => [self::QUESTION],
+            self::QUESTION_MARKS => [self::QUESTION],
             self::QUESTION_FEEDBACK => [self::QUESTION],
             self::GENERAL_FEEDBACK => [self::QUESTION],
             self::CORRECT_ANSWER => [self::QUESTION],

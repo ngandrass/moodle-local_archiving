@@ -1,20 +1,5 @@
 # Moodle Archiving Storage Driver: Moodle Filestore
 
-[![Latest Version](https://img.shields.io/github/v/release/ngandrass/moodle-archivingstore_moodle?include_prereleases)](https://github.com/ngandrass/moodle-archivingstore_moodle/releases)
-[![PHP Support](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2Fngandrass%2Fmoodle-archivingstore_moodle%2Frefs%2Fheads%2Fmaster%2Fversion.php&search=meta-supported-php%7B(%3F%3Cdata%3E%5B%5E%7D%5D%2B)%7D&replace=%24%3Cdata%3E&label=PHP&color=blue)](https://github.com/ngandrass/moodle-archivingstore_moodle)
-[![Moodle Support](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2Fngandrass%2Fmoodle-archivingstore_moodle%2Frefs%2Fheads%2Fmaster%2Fversion.php&search=meta-supported-moodle%7B(%3F%3Cdata%3E%5B%5E%7D%5D%2B)%7D&replace=%24%3Cdata%3E&label=Moodle&color=orange)](https://github.com/ngandrass/moodle-archivingstore_moodle)
-[![GitHub Workflow Status: Moodle Plugin CI](https://img.shields.io/github/actions/workflow/status/ngandrass/moodle-archivingstore_moodle/moodle-plugin-ci.yml?label=Moodle%20Plugin%20CI)](https://github.com/ngandrass/moodle-archivingstore_moodle/actions/workflows/moodle-plugin-ci.yml)
-[![Code Coverage](https://img.shields.io/coverallsCoverage/github/ngandrass/moodle-archivingstore_moodle)](https://coveralls.io/github/ngandrass/moodle-archivingstore_moodle)
-[![GitHub Issues](https://img.shields.io/github/issues/ngandrass/moodle-archivingstore_moodle)](https://github.com/ngandrass/moodle-archivingstore_moodle/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/ngandrass/moodle-archivingstore_moodle)](https://github.com/ngandrass/moodle-archivingstore_moodle/pulls)
-[![Maintenance Status](https://img.shields.io/maintenance/yes/9999)](https://github.com/ngandrass/moodle-archivingstore_moodle/)
-[![License](https://img.shields.io/github/license/ngandrass/moodle-archivingstore_moodle)](https://github.com/ngandrass/moodle-archivingstore_moodle/blob/master/LICENSE)
-[![Donate with PayPal](https://img.shields.io/badge/PayPal-donate-d85fa0)](https://www.paypal.me/ngandrass)
-[![Sponsor with GitHub](https://img.shields.io/badge/GitHub-sponsor-d85fa0)](https://github.com/sponsors/ngandrass)
-[![GitHub Stars](https://img.shields.io/github/stars/ngandrass/moodle-archivingstore_moodle?style=social)](https://github.com/ngandrass/moodle-archivingstore_moodle/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/ngandrass/moodle-archivingstore_moodle?style=social)](https://github.com/ngandrass/moodle-archivingstore_moodle/network/members)
-[![GitHub Contributors](https://img.shields.io/github/contributors/ngandrass/moodle-archivingstore_moodle?style=social)](https://github.com/ngandrass/moodle-archivingstore_moodle/graphs/contributors)
-
 Archiving storage driver for storing archived data inside the Moodle file store.
 
 This plugin is part of the [Moodle archiving framework](https://github.com/ngandrass/moodle-local_archiving/).

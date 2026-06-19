@@ -1,20 +1,5 @@
 # Moodle Archiving Trigger: Manual
 
-[![Latest Version](https://img.shields.io/github/v/release/ngandrass/moodle-archivingtrigger_manual?include_prereleases)](https://github.com/ngandrass/moodle-archivingtrigger_manual/releases)
-[![PHP Support](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2Fngandrass%2Fmoodle-archivingtrigger_manual%2Frefs%2Fheads%2Fmaster%2Fversion.php&search=meta-supported-php%7B(%3F%3Cdata%3E%5B%5E%7D%5D%2B)%7D&replace=%24%3Cdata%3E&label=PHP&color=blue)](https://github.com/ngandrass/moodle-archivingtrigger_manual/blob/master/version.php)
-[![Moodle Support](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2Fngandrass%2Fmoodle-archivingtrigger_manual%2Frefs%2Fheads%2Fmaster%2Fversion.php&search=meta-supported-moodle%7B(%3F%3Cdata%3E%5B%5E%7D%5D%2B)%7D&replace=%24%3Cdata%3E&label=Moodle&color=orange)](https://github.com/ngandrass/moodle-archivingtrigger_manual/blob/master/version.php)
-[![GitHub Workflow Status: Moodle Plugin CI](https://img.shields.io/github/actions/workflow/status/ngandrass/moodle-archivingtrigger_manual/moodle-plugin-ci.yml?label=Moodle%20Plugin%20CI)](https://github.com/ngandrass/moodle-archivingtrigger_manual/actions/workflows/moodle-plugin-ci.yml)
-[![Code Coverage](https://img.shields.io/coverallsCoverage/github/ngandrass/moodle-archivingtrigger_manual)](https://coveralls.io/github/ngandrass/moodle-archivingtrigger_manual)
-[![GitHub Issues](https://img.shields.io/github/issues/ngandrass/moodle-archivingtrigger_manual)](https://github.com/ngandrass/moodle-archivingtrigger_manual/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/ngandrass/moodle-archivingtrigger_manual)](https://github.com/ngandrass/moodle-archivingtrigger_manual/pulls)
-[![Maintenance Status](https://img.shields.io/maintenance/yes/9999)](https://github.com/ngandrass/moodle-archivingtrigger_manual/)
-[![License](https://img.shields.io/github/license/ngandrass/moodle-archivingtrigger_manual)](https://github.com/ngandrass/moodle-archivingtrigger_manual/blob/master/LICENSE)
-[![Donate with PayPal](https://img.shields.io/badge/PayPal-donate-d85fa0)](https://www.paypal.me/ngandrass)
-[![Sponsor with GitHub](https://img.shields.io/badge/GitHub-sponsor-d85fa0)](https://github.com/sponsors/ngandrass)
-[![GitHub Stars](https://img.shields.io/github/stars/ngandrass/moodle-archivingtrigger_manual?style=social)](https://github.com/ngandrass/moodle-archivingtrigger_manual/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/ngandrass/moodle-archivingtrigger_manual?style=social)](https://github.com/ngandrass/moodle-archivingtrigger_manual/network/members)
-[![GitHub Contributors](https://img.shields.io/github/contributors/ngandrass/moodle-archivingtrigger_manual?style=social)](https://github.com/ngandrass/moodle-archivingtrigger_manual/graphs/contributors)
-
 Manual archiving trigger plugin for the [Moodle archiving subsystem](https://github.com/ngandrass/moodle-local_archiving/).
 
 You can find more information about the archiving subsystem in the [official documentation](https://archiving.gandrass.de/).

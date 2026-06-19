@@ -248,7 +248,7 @@ class attempt_report {
             }
 
             // Add export date.
-            $summaryinfo->add_item('exportdate', get_string('archived', 'quiz_archiver'), userdate(time()));
+            $summaryinfo->add_item('exportdate', get_string('archived', 'archivingmod_quiz'), userdate(time()));
 
             $html .= $renderer->review_attempt_summary($summaryinfo, 0);
         }

@@ -57,7 +57,7 @@ final class file_reassembler_test extends \advanced_testcase {
         $usercontext = \context_user::instance($userreference->id);
         $originalfilename = 'testfile.tar.gz';
         // NOTE: This SHA256 hash is precomputed based on the per file mock data,
-        // defined in `create_draft_file` of the `quiz_archiver_generator` class.
+        // defined in `create_draft_file` of the `archivingmod_quiz_generator` class.
         // Because we concatinate three dummy files, the expected value should be,
         // the SHA256 hash of the dummy data repeated three times.
         $expectedfilehash = 'b6b34e2b8247c3ff64a1cc6793c663bdb7226ffd801859549462bbd20b563f9a';

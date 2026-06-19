@@ -377,7 +377,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
      * Tests rejection of invalid artifact counts
      *
      * @dataProvider artifact_count_data_provider
-     * @covers \quiz_archiver\external\process_uploaded_artifact::execute
+     * @covers \archivingmod_quiz\external\process_uploaded_artifact::execute
      *
      * @param int $artifactcount Number of individually uploaded files
      * @return void

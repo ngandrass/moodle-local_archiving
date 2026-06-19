@@ -3,6 +3,7 @@
 ## Version X.Y.Z (YYYYMMDDXX)
 
 - Update Moodle plugin CI to include Moodle 5.2 and all supported PHP versions
+- Add sub-plugin PHPUnit test execution stage to Moodle plugin CI pipeline
 
 
 ## Version 1.0.0 (2025112300)

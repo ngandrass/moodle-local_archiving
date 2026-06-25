@@ -2,7 +2,7 @@ name: Moodle Plugin CI
 
 on:
   push:
-    branches: [ "master", "develop" ]
+    branches: [ "master", "develop", "refactor/monorepo" ] # FIXME: Remove "refactor/monorepo" before merge!
   pull_request:
     branches: [ "master", "develop" ]
 
@@ -12,7 +12,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:16
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -58,6 +58,12 @@ jobs:
           - {moodle-branch: 'MOODLE_501_STABLE', php: '8.3', database: 'mariadb'}
           - {moodle-branch: 'MOODLE_501_STABLE', php: '8.4', database: 'pgsql'}
           - {moodle-branch: 'MOODLE_501_STABLE', php: '8.4', database: 'mariadb'}
+
+          # Moodle 5.2, PHP 8.3 to 8.4, PostgreSQL and MariaDB
+          - {moodle-branch: 'MOODLE_502_STABLE', php: '8.3', database: 'pgsql'}
+          - {moodle-branch: 'MOODLE_502_STABLE', php: '8.3', database: 'mariadb'}
+          - {moodle-branch: 'MOODLE_502_STABLE', php: '8.4', database: 'pgsql'}
+          - {moodle-branch: 'MOODLE_502_STABLE', php: '8.4', database: 'mariadb'}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -88,7 +94,6 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-          IGNORE_PATHS: 'driver'
           # Uncomment this to run Behat tests using the Moodle App.
           # MOODLE_APP: 'true'
 
@@ -129,6 +134,35 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           moodle-plugin-ci phpunit --fail-on-warning --coverage-text --coverage-clover
+
+      # Execution of PHPUnit tests for subplugins. Credits to @PhMemmel for the step below.
+      # See: https://github.com/moodlehq/moodle-plugin-ci/issues/369
+      - name: PHPUnit tests for subplugins
+        if: ${{ !cancelled() }}
+        run: |
+          fail=0
+          failures=()
+          for base in $(jq -r '.subplugintypes[]' ./plugin/db/subplugins.json); do
+            for dir in $(find "./plugin/$base" -mindepth 1 -maxdepth 1 -type d); do
+              if [ -d "$dir/tests" ]; then
+                echo "Running PHPUnit for $dir"
+                if moodle-plugin-ci phpunit --fail-on-warning "$dir"; then
+                  echo "OK: $dir"
+                else
+                  rc=$?
+                  echo "WARNING: PHPUnit failed for $dir (rc=$rc)"
+                  failures+=("$dir: returncode: $rc")
+                  fail=1
+                fi
+              fi
+            done
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "Some PHPUnit runs failed:"
+            printf '%s\n' "${failures[@]}"
+            echo "Marking step as failed, because at least one PHPUnit run failed."
+            exit 1
+          fi
 
       - name: Behat features
         if: ${{ !cancelled() }}

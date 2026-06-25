@@ -1,21 +1,6 @@
-[submodule "driver/mod/quiz"]
-	path = driver/mod/quiz
-	url = https://github.com/ngandrass/moodle-archivingmod_quiz.git
-[submodule "driver/store/localdir"]
-	path = driver/store/localdir
-	url = https://github.com/ngandrass/moodle-archivingstore_localdir.git
-[submodule "driver/store/moodle"]
-	path = driver/store/moodle
-	url = https://github.com/ngandrass/moodle-archivingstore_moodle.git
 [submodule "driver/mod/assign"]
 	path = driver/mod/assign
 	url = https://github.com/ngandrass/moodle-archivingmod_assign.git
 [submodule "driver/event/apistub"]
 	path = driver/event/apistub
 	url = https://github.com/ngandrass/moodle-archivingevent_apistub.git
-[submodule "driver/trigger/manual"]
-	path = driver/trigger/manual
-	url = https://github.com/ngandrass/moodle-archivingtrigger_manual.git
-[submodule "driver/trigger/cron"]
-	path = driver/trigger/cron
-	url = https://github.com/ngandrass/moodle-archivingtrigger_cron.git

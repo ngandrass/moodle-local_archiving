@@ -1,0 +1,66 @@
+{
+	"courseid": "28",
+	"cmid": "86",
+	"mform_isexpanded_id_header_settings": "1",
+	"mform_isexpanded_id_header_advanced_settings": "0",
+	"sesskey": "0",
+	"_qf__archivingmod_quiz_form_job_create_form": "1",
+	"export_attempts": "1",
+	"report_section_header": [
+		"0",
+		"1"
+	],
+	"report_section_quiz_feedback": [
+		"0",
+		"1"
+	],
+	"report_section_question": [
+		"0",
+		"1"
+	],
+	"report_section_question_feedback": [
+		"0",
+		"1"
+	],
+	"report_section_general_feedback": [
+		"0",
+		"1"
+	],
+	"report_section_rightanswer": [
+		"0",
+		"1"
+	],
+	"report_section_history": [
+		"0",
+		"1"
+	],
+	"report_section_attachments": [
+		"0",
+		"1"
+	],
+	"export_cm_backup": "0",
+	"export_course_backup": "0",
+	"storage_driver": "moodle",
+	"paper_format": "A4",
+	"keep_html_files": [
+		"0",
+		"1"
+	],
+	"image_optimize": [
+		"0",
+		"1"
+	],
+	"image_optimize_width": "1280",
+	"image_optimize_height": "1280",
+	"image_optimize_quality": "85",
+	"attempt_foldername_pattern": "${username}/${attemptid}-${date}_${time}",
+	"attempt_filename_pattern": "attempt-${attemptid}-${username}_${date}-${time}",
+	"archive_filename_pattern": "archive-${courseshortname}-${courseid}-${cmtype}-${cmname}-${cmid}_${date}-${time}",
+	"archive_autodelete": [
+		"0",
+		"1"
+	],
+	"archive_retention_time[number]": "1095",
+	"archive_retention_time[timeunit]": "86400",
+	"submitbutton": "Create+archive"
+}

@@ -49,6 +49,7 @@ $PAGE->set_url(new \moodle_url(
 $PAGE->set_pagelayout('incourse');
 
 // Build context for page template.
+$cancreate = has_capability('local/archiving:create', $ctx);
 $archivingenabled = course_util::archiving_enabled_for_course($courseid);
 $archivingenableforced = false;
 if (!$archivingenabled && has_capability('local/archiving:bypasscourserestrictions', $ctx)) {
@@ -58,6 +59,7 @@ if (!$archivingenabled && has_capability('local/archiving:bypasscourserestrictio
 }
 
 $tplctx = [
+    'cancreate' => $cancreate,
     'archivingenabled' => $archivingenabled,
     'archivingenableforced' => $archivingenableforced,
     'hidedisabledcms' => $excludedisabledcms,
@@ -67,7 +69,7 @@ $tplctx = [
     ]),
 ];
 
-if ($archivingenabled) {
+if ($archivingenabled && $cancreate) {
     foreach (mod_util::get_cms_with_metadata($courseid, $excludedisabledcms) as $obj) {
         $tplctx['cms'][] = [
             'id' => $obj->cm->id,

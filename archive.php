@@ -55,38 +55,47 @@ $PAGE->set_pagelayout('incourse');
 
 $html = '';
 
-// Get job create form for this activity.
-$driver = \local_archiving\driver\factory::activity_archiving_driver($cm->modname, $ctx);
-$form = $driver->get_job_create_form($cm->modname, $cm);
+// Check capabilities.
+$cancreate = has_capability('local/archiving:create', $ctx);
 
-// Handle form submission.
-if ($form->is_cancelled()) {
-    redirect(new \moodle_url('/local/archiving/index.php', ['courseid' => $courseid]));
-}
+// Only build and process the job create form if the user is allowed to create archives.
+$jobcreateformhtml = '';
+if ($cancreate) {
+    // Get job create form for this activity.
+    $driver = \local_archiving\driver\factory::activity_archiving_driver($cm->modname, $ctx);
+    $form = $driver->get_job_create_form($cm->modname, $cm);
 
-if ($form->is_submitted() && $form->is_validated()) {
-    require_capability('local/archiving:create', $ctx);
-
-    // Ensure that manual archive job creation is enabled.
-    if (!\local_archiving\driver\factory::archiving_trigger('manual')->is_enabled()) {
-        // We should never get here if nobody messes with the form. But who knows how creative people might get ;) ...
-        throw new \moodle_exception('manual_job_creation_disabled', 'local_archiving');
+    // Handle form submission.
+    if ($form->is_cancelled()) {
+        redirect(new \moodle_url('/local/archiving/index.php', ['courseid' => $courseid]));
     }
 
-    $jobsettings = $form->get_data();
-    if (!$jobsettings) {
-        throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
-    }
-    $job = \local_archiving\archive_job::create($ctx, $USER->id, 'manual', $jobsettings);
-    $job->enqueue();
+    if ($form->is_submitted() && $form->is_validated()) {
+        require_capability('local/archiving:create', $ctx);
 
-    $html .= $OUTPUT->notification(
-        get_string('archive_job_created_details', 'local_archiving', [
-            'jobid' => $job->get_id(),
-            'cmname' => $cm->name,
-        ]),
-        'success'
-    );
+        // Ensure that manual archive job creation is enabled.
+        if (!\local_archiving\driver\factory::archiving_trigger('manual')->is_enabled()) {
+            // We should never get here if nobody messes with the form. But who knows how creative people might get ;) ...
+            throw new \moodle_exception('manual_job_creation_disabled', 'local_archiving');
+        }
+
+        $jobsettings = $form->get_data();
+        if (!$jobsettings) {
+            throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
+        }
+        $job = \local_archiving\archive_job::create($ctx, $USER->id, 'manual', $jobsettings);
+        $job->enqueue();
+
+        $html .= $OUTPUT->notification(
+            get_string('archive_job_created_details', 'local_archiving', [
+                'jobid' => $job->get_id(),
+                'cmname' => $cm->name,
+            ]),
+            'success'
+        );
+    }
+
+    $jobcreateformhtml = $form->render();
 }
 
 // Prepare template context for page.
@@ -98,7 +107,7 @@ $jobtablehtml = ob_get_contents();
 ob_end_clean();
 
 $tplctx = [
-    'jobcreateformhtml' => $form->render(),
+    'jobcreateformhtml' => $jobcreateformhtml,
     'jobtablehtml' => $jobtablehtml,
     'modfullname' => $cm->modfullname,
     'urls' => [

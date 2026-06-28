@@ -9,6 +9,7 @@
 - Fix rendering of overall quiz feedback
 - Force wrapping of long lines in code boxes to prevent overflowing out of page boundaries
 - Reduce padding of comment boxes within code boxes to prevent them from overlapping student code
+- Optimize main report container spacing to reduce the amount of whitespace in the generated PDF
 - Migrate quiz attempt renderer to new quiz attempt summary API
 
 

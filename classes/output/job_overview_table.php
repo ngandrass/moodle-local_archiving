@@ -209,14 +209,17 @@ class job_overview_table extends \table_sql {
         $html .= '<a href="'.$logurl.'" class="btn btn-info mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('logs').'" alt="'.get_string('logs').'"><i class="fa fa-file-waveform"></i></a>';
 
         // Action: Delete.
-        $deleteurl = new \moodle_url('/local/archiving/manage.php', [
-            'action' => 'jobdelete',
-            'contextid' => $values->contextid,
-            'jobid' => $values->id,
-            'wantsurl' => $PAGE->url->out(true),
-        ]);
-        // phpcs:ignore
-        $html .= '<a href="'.$deleteurl.'" class="btn btn-danger mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('delete').'" alt="'.get_string('delete').'"><i class="fa fa-trash"></i></a>';
+        // Only shown to users that are allowed to delete archives in the job's context.
+        if (has_capability('local/archiving:delete', \context::instance_by_id($values->contextid))) {
+            $deleteurl = new \moodle_url('/local/archiving/manage.php', [
+                'action' => 'jobdelete',
+                'contextid' => $values->contextid,
+                'jobid' => $values->id,
+                'wantsurl' => $PAGE->url->out(true),
+            ]);
+            // phpcs:ignore
+            $html .= '<a href="'.$deleteurl.'" class="btn btn-danger mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('delete').'" alt="'.get_string('delete').'"><i class="fa fa-trash"></i></a>';
+        }
 
         return $html;
     }

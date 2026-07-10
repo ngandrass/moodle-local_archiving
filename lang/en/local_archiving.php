@@ -80,7 +80,8 @@ $string['archiving:bypasscourserestrictions'] = 'Bypass course category restrict
 // Archiving overview.
 $string['activity_archiving_list_desc'] = 'Below you can find a list of all activities in this course. Supported activities can be archived by clicking the respective entry in the list. If an activity is not supported, it will be disabled.';
 $string['archive_jobs_course_table_desc'] = 'This table lists all archive jobs that have been created for any of the activities in this course.';
-$string['archiving_course_overview_desc'] = 'This page is allows to create and access archives for all supported activities in this course.';
+$string['archiving_course_overview_desc'] = 'This page allows to create and access archives for all supported activities in this course.';
+$string['archiving_course_overview_readonly_desc'] = 'This page allows to access archives for all supported activities in this course.';
 $string['badge_archived_help'] = 'This activity was successfully archived at the given time.';
 $string['badge_cannot_be_archived_help'] = 'This activity can currently not be archived due to an unknown reason.';
 $string['badge_disabled_help'] = 'Archiving this activity type is currently disabled by the system administrator.';

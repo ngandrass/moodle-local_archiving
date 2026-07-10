@@ -57,6 +57,9 @@ $PAGE->set_heading($course->fullname);
 // Handle POSTed data.
 $outhtml = '';
 if ($action === 'jobdelete') {
+    // Deleting archives requires the delete capability, even for displaying the confirmation form.
+    require_capability('local/archiving:delete', $ctx);
+
     $jobid = required_param('jobid', PARAM_INT);
     $PAGE->set_url(new moodle_url(
         '/local/archiving/manage.php',
@@ -73,8 +76,6 @@ if ($action === 'jobdelete') {
     if ($form->is_cancelled()) {
         redirect($wantsurl);
     } else if ($form->is_submitted() && $form->is_validated()) {
-        require_capability('local/archiving:delete', $ctx);
-
         // Perform deletion.
         $job = archive_job::get_by_id($jobid);
         $job->delete();
@@ -84,6 +85,9 @@ if ($action === 'jobdelete') {
         $outhtml .= $form->render();
     }
 } else if ($action === 'filedelete') {
+    // Deleting archive files requires the delete capability, even for displaying the confirmation form.
+    require_capability('local/archiving:delete', $ctx);
+
     $filehandleid = required_param('filehandleid', PARAM_INT);
     $PAGE->set_url(new moodle_url(
         '/local/archiving/manage.php',
@@ -100,8 +104,6 @@ if ($action === 'jobdelete') {
     if ($form->is_cancelled()) {
         redirect($wantsurl);
     } else if ($form->is_submitted() && $form->is_validated()) {
-        require_capability('local/archiving:delete', $ctx);
-
         // Perform deletion.
         $filehandle = file_handle::get_by_id($filehandleid);
         $filehandle->archivingstore()->delete($filehandle);

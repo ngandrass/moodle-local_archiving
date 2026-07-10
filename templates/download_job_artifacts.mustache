@@ -191,13 +191,10 @@
                             </a>
                             {{#deleteurl}}
                                 <a href="{{{deleteurl}}}" class="btn btn-danger mx-1" role="button">
+                                    <i class="fa fa-trash"></i>&nbsp;
+                                    {{#str}} delete {{/str}}
+                                </a>
                             {{/deleteurl}}
-                            {{^deleteurl}}
-                                <a href="#" class="btn btn-outline-danger mx-1 disabled" role="button" aria-disabled="true">
-                            {{/deleteurl}}
-                                <i class="fa fa-trash"></i>&nbsp;
-                                {{#str}} delete {{/str}}
-                            </a>
                         {{/deleted}}
                         {{#deleted}}
                             <span class="text-muted">

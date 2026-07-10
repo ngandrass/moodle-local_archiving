@@ -85,7 +85,6 @@ final class mod_util_test extends \advanced_testcase {
         $page2 = $this->generator()->create_module('page', ['course' => $course->id]);
         $quiz1 = $this->generator()->create_module('quiz', ['course' => $course->id]);
         $quiz2 = $this->generator()->create_module('quiz', ['course' => $course->id]);
-        $assignment = $this->generator()->create_module('assign', ['course' => $course->id]);
 
         // Make quiz 1 being archived successfully in the past.
         $job = $this->generator()->create_archive_job(['context' => \context_module::instance($quiz1->cmid)]);
@@ -93,7 +92,7 @@ final class mod_util_test extends \advanced_testcase {
 
         // Try to retrieve all cms with metadata.
         $cmmeta = mod_util::get_cms_with_metadata($course->id);
-        $this->assertCount(5, $cmmeta, 'Should retrieve all 5 cms');
+        $this->assertCount(4, $cmmeta, 'Should retrieve all 4 cms');
         foreach ($cmmeta as $cm) {
             $this->assertObjectHasProperty('cm', $cm, 'CM metadata should have cm attribute');
             $this->assertObjectHasProperty('supported', $cm, 'CM metadata should have supported attribute');

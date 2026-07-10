@@ -80,7 +80,7 @@ class report_util {
         $imgsrcurl = self::ensure_absolute_url($imgsrc, $moodlebaseurl);
 
         // Make sure to only process web URLs and nothing that somehow remained a valid local filepath.
-        if (!substr($imgsrcurl, 0, 4) === "http") { // Yes, this includes https as well ;).
+        if (!str_starts_with($imgsrcurl, "http")) { // Yes, this includes https as well ;).
             $img->setAttribute('x-debug-notice', 'not a web URL');
             return false;
         }

@@ -35,7 +35,7 @@ return new class extends phpunit_coverage_info {
     protected $includelistfiles = [];
 
     /** @var array The list of folders relative to the plugin root to excludelist in coverage generation. */
-    protected $excludelistfolders = ['driver'];
+    protected $excludelistfolders = [];
 
     /** @var array The list of files relative to the plugin root to excludelist in coverage generation. */
     protected $excludelistfiles = [];

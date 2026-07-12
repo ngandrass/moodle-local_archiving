@@ -5,6 +5,7 @@
 - Update Moodle plugin CI to include Moodle 5.2 and all supported PHP versions
 - Add sub-plugin PHPUnit test execution stage to Moodle plugin CI pipeline
 - Add support for receiving chunked uploads of quiz archives
+- Include core sub-plugins in PHPUnit coverage reports
 
 
 ## Version 1.0.0 (2025112300)

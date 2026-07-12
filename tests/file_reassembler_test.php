@@ -17,34 +17,32 @@
 /**
  * Tests for the file_reassembler class
  *
- * @package   archivingmod_quiz
+ * @package   local_archiving
  * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace archivingmod_quiz;
+namespace local_archiving;
 
-use archivingmod_quiz\file_reassembler;
-use local_archiving\storage;
 
 /**
  * Tests for the file_reassembler class
  */
 final class file_reassembler_test extends \advanced_testcase {
     /**
-     * Returns the data generator for the archivingmod_quiz plugin
+     * Helper to get the test data generator for local_archiving
      *
-     * @return \archivingmod_quiz_generator The data generator for the archivingmod_quiz plugin
+     * @return \local_archiving_generator
      */
-    // phpcs:ignore
-    public static function getDataGenerator(): \archivingmod_quiz_generator {
-        return parent::getDataGenerator()->get_plugin_generator('archivingmod_quiz');
+    private function generator(): \local_archiving_generator {
+        /** @var \local_archiving_generator */ // phpcs:disable moodle.Commenting.InlineComment.DocBlock
+        return self::getDataGenerator()->get_plugin_generator('local_archiving');
     }
 
     /**
      * Test reassembly of individually uploaded files to the file storage
      *
-     * @covers \archivingmod_quiz\file_reassembler::reasemble_chunked_file
+     * @covers \local_archiving\file_reassembler::reasemble_chunked_file
      *
      * @return void
      * @throws \file_exception
@@ -53,7 +51,7 @@ final class file_reassembler_test extends \advanced_testcase {
     public function test_reasamble_chunked_file(): void {
         // Prepare mocks.
         $this->resetAfterTest();
-        $userreference = $this->getDataGenerator()->create_user();
+        $userreference = $this->generator()->create_user();
         $usercontext = \context_user::instance($userreference->id);
         $originalfilename = 'testfile.tar.gz';
         // NOTE: This SHA256 hash is precomputed based on the per file mock data,
@@ -64,9 +62,9 @@ final class file_reassembler_test extends \advanced_testcase {
 
         // Create mock chunk files.
         $chunkfiles = [
-            $this->getDataGenerator()->create_draft_file($originalfilename . '.chunk000000000.bin', userid: $userreference->id),
-            $this->getDataGenerator()->create_draft_file($originalfilename . '.chunk000000001.bin', userid: $userreference->id),
-            $this->getDataGenerator()->create_draft_file($originalfilename . '.chunk000000002.bin', userid: $userreference->id),
+            $this->generator()->create_draft_file($originalfilename . '.chunk000000000.bin', userid: $userreference->id),
+            $this->generator()->create_draft_file($originalfilename . '.chunk000000001.bin', userid: $userreference->id),
+            $this->generator()->create_draft_file($originalfilename . '.chunk000000002.bin', userid: $userreference->id),
         ];
         foreach ($chunkfiles as $file) {
             $this->assertNotNull($file, 'Failed to create mock chunk file');

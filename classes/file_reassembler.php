@@ -17,12 +17,12 @@
 /**
  * This file defines the file_reassembler class.
  *
- * @package   archivingmod_quiz
+ * @package   local_archiving
  * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace archivingmod_quiz;
+namespace local_archiving;
 
 use stored_file;
 
@@ -36,9 +36,9 @@ class file_reassembler {
     /**
      * Reassembles the individual uploaded chunks from the draft file area and stores them as the original file.
      *
-     * @param int $contextid
-     * @param int $itemid
-     * @param string $filepath
+     * @param int $contextid ID of the Moodle context the target file chunks are part of
+     * @param int $itemid Item ID of the target file chunks
+     * @param string $filepath File path of the target file chunks
      * @param string $originalfilename Name of original file to reasamble.
      * @param int $artifactcount Number of chunks original file was split into.
      * @return stored_file|null
@@ -51,7 +51,6 @@ class file_reassembler {
         string $originalfilename,
         int $artifactcount,
     ): ?stored_file {
-
         // Construct list of expected chunk file names.
         $chunkfilenames = array_map(
             fn ($x) => sprintf('%s.chunk%09d.bin', $originalfilename, $x),

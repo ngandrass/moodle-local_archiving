@@ -23,7 +23,7 @@ use local_archiving\type\filearea;
  * Tests for the unit test data generator for local_archiving
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -179,6 +179,33 @@ final class generator_test extends \advanced_testcase {
             filearea::TEMP->value,
             $file->get_filearea(),
             'The temporary file should be in the TEMP file area'
+        );
+    }
+
+    /**
+     * Tests the creation of a draft file
+     *
+     * @covers \local_archiving_generator::create_draft_file
+     *
+     * @return void
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_create_draft_file(): void {
+        // Create new draft file.
+        $generator = $this->generator();
+        $this->resetAfterTest();
+        $draftfile = $generator->create_draft_file('drafttestfile.txt');
+
+        // Verify draft file.
+        $this->assertNotEmpty($draftfile, 'The draft file was not created');
+        $this->assertEquals('drafttestfile.txt', $draftfile->get_filename(), 'The draft file has the wrong filename');
+        $this->assertEquals('user', $draftfile->get_component(), 'The draft file has the wrong component');
+        $this->assertEquals('draft', $draftfile->get_filearea(), 'The draft file has the wrong filearea');
+        $this->assertStringContainsString(
+            'Lorem ipsum dolor sit amet',
+            $draftfile->get_content(),
+            'The draft file has the wrong content'
         );
     }
 

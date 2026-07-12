@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php'); // @
  * Tests generator for the local_archiving plugin
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_archiving_generator extends \testing_data_generator {
@@ -189,6 +189,41 @@ class local_archiving_generator extends \testing_data_generator {
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' .
             'eiusmod tempor incididunt ut labore et dolore magna aliqua. ' .
             'time=' . time() . ' id=' . $uniqid
+        );
+    }
+
+    /**
+     * Generates a dummy draft file, stored in the given filearea (default: user
+     * draft filearea).
+     *
+     * @param string $filename Name of the file to create
+     * @param string $filearea Filearea to store the file in
+     * @param ?int $userid ID of user to create draft file for. Unique user is created if not provided.
+     * @return \stored_file The created file handle
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function create_draft_file(string $filename, string $filearea = 'draft', ?int $userid = null): \stored_file {
+        if ($userid === null) {
+            $userid = $this->create_user()->id;
+        }
+        $ctx = \context_user::instance($userid);
+
+        $text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' .
+            'eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+
+        return get_file_storage()->create_file_from_string(
+            [
+                'contextid' => $ctx->id,
+                'component' => 'user',
+                'filearea' => $filearea,
+                'itemid' => 0,
+                'filepath' => "/",
+                'filename' => $filename,
+                'timecreated' => time(),
+                'timemodified' => time(),
+            ],
+            $text
         );
     }
 

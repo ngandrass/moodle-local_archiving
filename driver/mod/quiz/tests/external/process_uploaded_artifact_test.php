@@ -212,7 +212,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
 
         process_uploaded_artifact::execute(
             $uuid === null ? $base['uuid'] : $uuid,
-            $taskid === null ? $base['taskid'] : $uuid,
+            $taskid === null ? $base['taskid'] : $taskid,
             $artifactcomponent === null ? $base['artifact_component'] : $artifactcomponent,
             $artifactcontextid === null ? $base['artifact_contextid'] : $artifactcontextid,
             $artifactuserid === null ? $base['artifact_userid'] : $artifactuserid,

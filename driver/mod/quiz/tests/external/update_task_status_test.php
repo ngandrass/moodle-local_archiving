@@ -374,6 +374,19 @@ final class update_task_status_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Tests that changes to an activity archiving task that belong to another
+     * activity type are rejected.
+     *
+     * @covers \archivingmod_quiz\external\update_task_status::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
     public function test_invalid_task_type_is_rejected(): void {
         global $DB;
 

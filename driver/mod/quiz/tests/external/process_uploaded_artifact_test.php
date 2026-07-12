@@ -475,7 +475,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
         // Create job and draft artifact.
         $this->resetAfterTest();
         $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
-        $artifact = $this->getDataGenerator()->create_draft_file('testartifact.tar.gz');
+        $artifact = $this->getDataGenerator()->get_plugin_generator('local_archiving')->create_draft_file('testartifact.tar.gz');
 
         // Execute test call.
         $r = $this->generate_valid_request('10000000-1337-0000-0000-000000000000', $mocks->task, 1);

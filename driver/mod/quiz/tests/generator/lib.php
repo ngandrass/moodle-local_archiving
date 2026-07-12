@@ -189,42 +189,6 @@ class archivingmod_quiz_generator extends \testing_data_generator {
     }
 
     /**
-     * Generates a dummy draft file, stored in the given filearea (default: user
-     * draft filearea).
-     *
-     * @param string $filename Name of the file to create
-     * @param string $filearea Filearea to store the file in
-     * @param ?int $userid ID of user to create draft file for. Unique user is created if not provided.
-     * @return \stored_file The created file handle
-     * @throws \file_exception
-     * @throws \stored_file_creation_exception
-     */
-    public function create_draft_file(string $filename, string $filearea = 'draft', ?int $userid = null): \stored_file {
-
-        if ($userid === null) {
-            $userid = $this->create_user()->id;
-        }
-        $ctx = \context_user::instance($userid);
-
-        $text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' .
-            'eiusmod tempor incididunt ut labore et dolore magna aliqua.';
-
-        return get_file_storage()->create_file_from_string(
-            [
-                'contextid'    => $ctx->id,
-                'component'    => 'user',
-                'filearea'     => $filearea,
-                'itemid'       => 0,
-                'filepath'     => "/",
-                'filename'     => $filename,
-                'timecreated'  => time(),
-                'timemodified' => time(),
-            ],
-            $text
-        );
-    }
-
-    /**
      * Imports the reference course into a new course and returns the reference
      * quiz, the respective cm, and the course itself.
      *

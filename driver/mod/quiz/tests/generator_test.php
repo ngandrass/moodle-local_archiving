@@ -150,33 +150,6 @@ final class generator_test extends \advanced_testcase {
     }
 
     /**
-     * Tests the creation of a draft file
-     *
-     * @covers \archivingmod_quiz_generator::create_draft_file
-     *
-     * @return void
-     * @throws \file_exception
-     * @throws \stored_file_creation_exception
-     */
-    public function test_create_draft_file(): void {
-        // Create new draft file.
-        $generator = self::getDataGenerator();
-        $this->resetAfterTest();
-        $draftfile = $generator->create_draft_file('drafttestfile.txt');
-
-        // Verify draft file.
-        $this->assertNotEmpty($draftfile, 'The draft file was not created');
-        $this->assertEquals('drafttestfile.txt', $draftfile->get_filename(), 'The draft file has the wrong filename');
-        $this->assertEquals('user', $draftfile->get_component(), 'The draft file has the wrong component');
-        $this->assertEquals('draft', $draftfile->get_filearea(), 'The draft file has the wrong filearea');
-        $this->assertStringContainsString(
-            'Lorem ipsum dolor sit amet',
-            $draftfile->get_content(),
-            'The draft file has the wrong content'
-        );
-    }
-
-    /**
      * Tests the import of the reference course
      *
      * @covers \archivingmod_quiz_generator::import_reference_course

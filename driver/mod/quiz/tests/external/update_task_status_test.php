@@ -26,6 +26,7 @@ namespace archivingmod_quiz\external;
 
 use archivingmod_quiz\type\webservice_status;
 use local_archiving\type\activity_archiving_task_status;
+use local_archiving\type\db_table;
 
 
 /**
@@ -389,7 +390,7 @@ final class update_task_status_test extends \advanced_testcase {
         );
 
         // Force task to another assignment type.
-        $DB->update_record('local_archiving_activity_task', ['id' => $mocks->task->get_id(), 'archivingmod' => 'foo']);
+        $DB->update_record(db_table::ACTIVITY_TASK->value, ['id' => $mocks->task->get_id(), 'archivingmod' => 'foo']);
 
         // Try to update the status of a task that belongs to another archivingmod.
         $_GET['wstoken'] = $wstoken;

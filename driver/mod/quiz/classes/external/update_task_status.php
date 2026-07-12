@@ -134,6 +134,11 @@ class update_task_status extends external_api {
             return ['status' => webservice_status::E_TASK_NOT_FOUND->name];
         }
 
+        // Ensure that the task type matches.
+        if ($task->get_archivingmodname() !== 'quiz') {
+            return ['status' => webservice_status::E_TASK_TYPE_INVALID->name];
+        }
+
         // Check access rights.
         if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];

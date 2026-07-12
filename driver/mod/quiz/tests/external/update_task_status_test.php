@@ -372,4 +372,39 @@ final class update_task_status_test extends \advanced_testcase {
             '-10% (invalid)' => [-10, false],
         ];
     }
+
+    public function test_invalid_task_type_is_rejected(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Prepare a new quiz archiving task.
+        $wstoken = 'TEST-WS-TOKEN-10';
+        $mocks = $this->getDataGenerator()->create_mock_task($wstoken);
+        $r = $this->generate_valid_request(
+            '40000000-0000-0000-0000-0123456789ab',
+            $mocks->task->get_id(),
+            activity_archiving_task_status::RUNNING
+        );
+
+        // Force task to another assignment type.
+        $DB->update_record('local_archiving_activity_task', ['id' => $mocks->task->get_id(), 'archivingmod' => 'foo']);
+
+        // Try to update the status of a task that belongs to another archivingmod.
+        $_GET['wstoken'] = $wstoken;
+        $this->expectOutputRegex('/.*/');
+        $res = update_task_status::execute(
+            $r['uuid'],
+            $r['taskid'],
+            $r['status'],
+            $r['progress']
+        );
+
+        $this->assertSame(
+            webservice_status::E_TASK_TYPE_INVALID->name,
+            $res['status'],
+            'Task type mismatch was not detected'
+        );
+    }
 }

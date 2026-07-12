@@ -20,7 +20,7 @@
  * Status codes a webservice function can respond with
  *
  * @package     archivingmod_quiz
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -49,6 +49,9 @@ enum webservice_status {
 
     /** @var self No task with given taskid was found */
     case E_TASK_NOT_FOUND;
+
+    /** @var self A task was found but had an invalid archivingmod associated with it */
+    case E_TASK_TYPE_INVALID;
 
     /** @var self Course could not be found */
     case E_COURSE_NOT_FOUND;

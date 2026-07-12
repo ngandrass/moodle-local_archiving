@@ -11,6 +11,7 @@
 - Reduce padding of comment boxes within code boxes to prevent them from overlapping student code
 - Optimize main report container spacing to reduce the amount of whitespace in the generated PDF
 - Migrate quiz attempt renderer to new quiz attempt summary API
+- Prevent `update_task_status` external functions from making changes to activity archiving tasks that belong to other activity types
 
 
 ## Version 1.0.0 (2025102700)

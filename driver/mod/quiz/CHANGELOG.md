@@ -10,6 +10,7 @@
 - Force wrapping of long lines in code boxes to prevent overflowing out of page boundaries
 - Reduce padding of comment boxes within code boxes to prevent them from overlapping student code
 - Optimize main report container spacing to reduce the amount of whitespace in the generated PDF
+- Prevent instance-specific modifications to Moodle header and footer from leaking into printed PDFs (thanks to @abias !)
 - Migrate quiz attempt renderer to new quiz attempt summary API
 - Prevent `update_task_status` external functions from making changes to activity archiving tasks that belong to other activity types
 

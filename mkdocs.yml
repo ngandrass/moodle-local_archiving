@@ -18,7 +18,7 @@ extra:
       link: https://github.com/ngandrass/moodle-local_archiving
       name: "GitHub Repository"
 #    - icon: simple/moodle
-#      link: https://moodle.org/plugins/quiz_archiver
+#      link: https://marketplace.moodle.com/plugins/quiz_archiver
 #      name: "Moodle Plugin Directory: quiz_archiver"
 #    - icon: fontawesome/brands/github
 #      link: https://github.com/ngandrass/moodle-quiz_archiver

@@ -53,7 +53,7 @@ archiving drivers](activity-archiving-drivers.md) that use them. However, they a
 ### Quiz Archive Worker
 
 An example of one such worker service is the [Quiz Archive Worker Service](https://github.com/ngandrass/moodle-quiz-archive-worker)
-that is used in conjunction with the [Moodle Quiz Archiver Plugin](https://moodle.org/plugins/quiz_archiver).
+that is used in conjunction with the [Moodle Quiz Archiver Plugin](https://marketplace.moodle.com/plugins/quiz_archiver).
 
 The following diagram depicts the general architecture and information flow of the Moodle plugin and the corresponding
 worker service:

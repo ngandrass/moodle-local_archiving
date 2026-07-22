@@ -60,7 +60,7 @@ archiving driver will then extract the required information, create one or more 
 - Generation of Moodle backups (.mbz) of the quiz
 - Generation of checksums for every file within the archive and the archive itself
 - Data compression and vector based MathJax formulas to preserve disk space
-- Based on the Moodle [Quiz Archiver](https://moodle.org/plugins/quiz_archiver) Plugin
+- Based on the Moodle [Quiz Archiver](https://marketplace.moodle.com/plugins/quiz_archiver) Plugin
 
 
 ### Assignment (mod_assign)

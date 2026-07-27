@@ -50,7 +50,11 @@ final class archivingtrigger_test extends \advanced_testcase {
      * @throws \coding_exception
      */
     public function test_stub(): void {
-        $mock = $this->getMockForAbstractClass(archivingtrigger::class, [], 'archivingtrigger_mock');
+        $mock = $this->getMockBuilder(archivingtrigger::class)
+            ->setMockClassName("archivingtrigger_mock")
+            ->onlyMethods([])
+            ->getMock();
+
         $this->assertSame('archivingtrigger', $mock->get_plugin_type());
     }
 }

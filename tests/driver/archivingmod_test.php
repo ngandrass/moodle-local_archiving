@@ -52,7 +52,17 @@ final class archivingmod_test extends \advanced_testcase {
      * @return archivingmod Mock instance of the archivingmod driver base class.
      */
     private function instance(\context_module $context, string $classname = 'archivingmod_mock'): archivingmod {
-        return $this->getMockForAbstractClass(archivingmod::class, [$context], $classname);
+        return $this->getMockBuilder(archivingmod::class)
+            ->setMockClassName($classname)
+            ->setConstructorArgs([$context])
+            ->onlyMethods([
+                'get_supported_activities',
+                'can_be_archived',
+                'execute_task',
+                'get_task_content_metadata',
+                'fingerprint',
+            ])
+            ->getMock();
     }
 
     /**

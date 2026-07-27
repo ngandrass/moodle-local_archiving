@@ -50,7 +50,19 @@ final class archivingstore_test extends \advanced_testcase {
      * @throws \coding_exception
      */
     public function test_stub(): void {
-        $mock = $this->getMockForAbstractClass(archivingstore::class, [], 'archivingstore_mock');
+        $mock = $this->getMockBuilder(archivingstore::class)
+            ->setMockClassName("archivingstore_mock")
+            ->onlyMethods([
+                'get_storage_tier',
+                'supports_retrieve',
+                'is_available',
+                'get_free_bytes',
+                'store',
+                'retrieve',
+                'delete',
+            ])
+            ->getMock();
+
         $this->assertSame('archivingstore', $mock->get_plugin_type());
     }
 }

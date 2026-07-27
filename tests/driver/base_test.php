@@ -52,7 +52,10 @@ final class base_test extends \advanced_testcase {
      * @throws \coding_exception
      */
     public function test_get_frankenstyle_name(string $subplugintype, bool $isvalid): void {
-        $base = $this->getMockForAbstractClass(base::class, [], $subplugintype . '_mock');
+        $base = $this->getMockBuilder(base::class)
+            ->setMockClassName("{$subplugintype}_mock")
+            ->onlyMethods([])
+            ->getMock();
 
         // Expect an exception if the sub-plugin type is not valid.
         if (!$isvalid) {
@@ -110,7 +113,12 @@ final class base_test extends \advanced_testcase {
     public function test_is_enabled(): void {
         // Prepare a base instance and enable the corresponding plugin.
         $this->resetAfterTest();
-        $base = $this->getMockForAbstractClass(base::class, [], 'archivingstore_localdir');
+
+        $base = $this->getMockBuilder(base::class)
+            ->setMockClassName("archivingstore_localdir")
+            ->onlyMethods([])
+            ->getMock();
+
         $plugininfo = \core_plugin_manager::instance()->get_plugin_info('archivingstore_localdir');
         $plugininfo::enable_plugin('archivingstore_localdir', 1);
         $this->assertTrue($plugininfo->is_enabled(), 'The archivingstore_localdir plugin should be enabled by default.');
@@ -135,7 +143,11 @@ final class base_test extends \advanced_testcase {
     public function test_is_enabled_with_invalid_plugin(): void {
         // Prepare a base instance with an invalid plugin.
         $this->resetAfterTest();
-        $base = $this->getMockForAbstractClass(base::class, [], 'archivingmod_invalidplugin');
+
+        $base = $this->getMockBuilder(base::class)
+            ->setMockClassName("archivingmod_invalidplugin")
+            ->onlyMethods([])
+            ->getMock();
 
         // Test that the invalid plugin is detected as not enabled.
         $this->assertFalse($base->is_enabled(), 'Base driver should return false for is_enabled() if the plugin does not exist.');
@@ -149,7 +161,10 @@ final class base_test extends \advanced_testcase {
      * @return void
      */
     public function test_is_ready(): void {
-        $base = $this->getMockForAbstractClass(base::class);
+        $base = $this->getMockBuilder(base::class)
+            ->onlyMethods([])
+            ->getMock();
+
         $this->assertTrue($base->is_ready(), 'Base driver should always be ready.');
     }
 }

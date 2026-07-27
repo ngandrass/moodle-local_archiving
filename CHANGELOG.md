@@ -6,6 +6,7 @@
 - Add sub-plugin PHPUnit test execution stage to Moodle plugin CI pipeline
 - Add support for receiving chunked uploads of quiz archives
 - Include core sub-plugins in PHPUnit coverage reports
+- Adapt unit tests to Moodle upstream permission checks
 
 
 ## Version 1.0.0 (2025112300)

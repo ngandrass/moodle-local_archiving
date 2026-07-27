@@ -46,8 +46,13 @@ final class admin_setting_coursecat_multiselect_test extends \advanced_testcase 
      * @return void
      */
     public function test_definition(): void {
-        // Prepare some course categories.
         $this->resetAfterTest();
+
+        // We need to be admin since newer Moodles check the capability to view
+        // course categories when building internel data structures...
+        $this->setAdminUser();
+
+        // Prepare some course categories.
         $cat1 = $this->generator()->create_category(['name' => 'Category 1']);
         $cat2 = $this->generator()->create_category(['name' => 'Category 2']);
         $cat3 = $this->generator()->create_category(['name' => 'Category 3']);
@@ -79,11 +84,14 @@ final class admin_setting_coursecat_multiselect_test extends \advanced_testcase 
      * @throws \dml_exception
      */
     public function test_detecting_emtpy_selection(): void {
-        // Prepare a course category to test.
         $this->resetAfterTest();
-        $cat = $this->generator()->create_category(['name' => 'My Category']);
 
-        // Prepare a setting instance.
+        // We need to be admin since newer Moodles check the capability to view
+        // course categories when building internel data structures...
+        $this->setAdminUser();
+
+        // Prepare a course category and a setting instance to test with.
+        $cat = $this->generator()->create_category(['name' => 'My Category']);
         $setting = new admin_setting_coursecat_multiselect(
             'local_archiving/testsetting',
             'Test setting',

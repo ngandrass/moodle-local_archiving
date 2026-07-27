@@ -1,5 +1,10 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDXX)
+
+- Adapt unit test to Moodle upstream permission check changes
+
+
 ## Version 1.0.0 (2025101300)
 
 - Automatically create archive jobs for all activities that have unarchived changes and are located within any of the

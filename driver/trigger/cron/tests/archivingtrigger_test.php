@@ -42,6 +42,7 @@ final class archivingtrigger_test extends \advanced_testcase {
     public function test_get_cms_to_archive(): void {
         // Prepare course categories, courses, and activities to archive.
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $archivingcat = $this->getDataGenerator()->create_category(['name' => 'Archiving Category']);
         $ignorecat = $this->getDataGenerator()->create_category(['name' => 'Ignore Category']);

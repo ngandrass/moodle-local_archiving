@@ -42,7 +42,7 @@ final class file_reassembler_test extends \advanced_testcase {
     /**
      * Test reassembly of individually uploaded files to the file storage
      *
-     * @covers \local_archiving\file_reassembler::reasemble_chunked_file
+     * @covers \local_archiving\file_reassembler
      *
      * @return void
      * @throws \file_exception

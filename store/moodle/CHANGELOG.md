@@ -1,5 +1,10 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDXX)
+
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+
+
 ## Version 1.1.0 (2025101300)
 
 - Ensure Moodle 5.1 compatibility

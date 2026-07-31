@@ -26,10 +26,10 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 $plugin->component = 'archivingtrigger_cron';
 $plugin->release = '1.0.0';
-$plugin->version = 2025101300;
+$plugin->version = 2025101301;
 $plugin->requires = 2024100700;
 $plugin->supported = [405, 501]; // X meta-supported-moodle{4.5 - 5.1} meta-supported-php{8.1 - 8.4}.
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [
-    'local_archiving' => 2025101200,
+    'local_archiving' => 2026073000,
 ];

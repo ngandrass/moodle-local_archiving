@@ -8,6 +8,8 @@
 - Include core sub-plugins in PHPUnit coverage reports
 - Adapt unit tests to Moodle upstream permission checks
 - Make unit tests ready for PHPUnit 12 (honor current deprecations)
+- Move sub-plugin directories to plugin root to align with Moodle core conventions
+- Restructure repository to meet Moodle coding style level 2 namespace suggestions
 
 
 ## Version 1.0.0 (2025112300)

@@ -22,7 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_archiving\local\driver\factory;
+use local_archiving\local\driver\driver_factory;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -56,7 +56,7 @@ $PAGE->set_pagelayout('incourse');
 $html = '';
 
 // Get job create form for this activity.
-$driver = factory::activity_archiving_driver($cm->modname, $ctx);
+$driver = driver_factory::activity_archiving_driver($cm->modname, $ctx);
 $form = $driver->get_job_create_form($cm->modname, $cm);
 
 // Handle form submission.
@@ -68,7 +68,7 @@ if ($form->is_submitted() && $form->is_validated()) {
     require_capability('local/archiving:create', $ctx);
 
     // Ensure that manual archive job creation is enabled.
-    if (!factory::archiving_trigger('manual')->is_enabled()) {
+    if (!driver_factory::archiving_trigger('manual')->is_enabled()) {
         // We should never get here if nobody messes with the form. But who knows how creative people might get ;) ...
         throw new \moodle_exception('manual_job_creation_disabled', 'local_archiving');
     }

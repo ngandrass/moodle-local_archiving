@@ -95,7 +95,7 @@ class mod_util {
                 // Only calculate fingerprint if the activity is supported, enabled, and ready.
                 if ($data['supported'] && $data['enabled'] && $data['ready']) {
                     // Check if this fingerprint was already seen.
-                    $driver = \local_archiving\local\driver\factory::activity_archiving_driver(
+                    $driver = \local_archiving\local\driver\driver_factory::activity_archiving_driver(
                         plugin_util::get_archiving_driver_for_cm($cm->modname),
                         $cm->context
                     );

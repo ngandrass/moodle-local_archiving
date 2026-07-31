@@ -16,7 +16,7 @@
 
 namespace local_archiving;
 
-use local_archiving\local\driver\factory;
+use local_archiving\local\driver\driver_factory;
 use local_archiving\local\exception\storage_exception;
 use local_archiving\local\type\filearea;
 
@@ -423,7 +423,7 @@ final class file_handle_test extends \advanced_testcase {
         $job = $generator->create_archive_job();
         $file = $generator->create_temp_file();
 
-        $archivingstore = factory::storage_driver('localdir');
+        $archivingstore = driver_factory::storage_driver('localdir');
         $filehandle = $archivingstore->store($job->get_id(), $file, '/');
 
         // Try to retrieve not yet cached local file.
@@ -461,7 +461,7 @@ final class file_handle_test extends \advanced_testcase {
         $job = $generator->create_archive_job();
         $file = $generator->create_temp_file();
 
-        $archivingstore = factory::storage_driver('localdir');
+        $archivingstore = driver_factory::storage_driver('localdir');
         $filehandle = $archivingstore->store($job->get_id(), $file, '/');
 
         // Retrieve the file initially.

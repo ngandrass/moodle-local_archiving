@@ -41,7 +41,7 @@ final class factory_test extends \advanced_testcase {
     /**
      * Tests that the sub-plugin class resolver returns correct mocks during unit tests
      *
-     * @covers \local_archiving\local\driver\factory
+     * @covers \local_archiving\local\driver\driver_factory
      * @dataProvider get_subplugin_class_mock_data_provider
      *
      * @param string $plugintype
@@ -50,7 +50,7 @@ final class factory_test extends \advanced_testcase {
      * @throws \coding_exception
      */
     public function test_get_subplugin_class_mock(string $plugintype, string $pluginname): void {
-        $this->assertEquals("\\{$plugintype}_{$pluginname}", factory::get_subplugin_class($plugintype, $pluginname));
+        $this->assertEquals("\\{$plugintype}_{$pluginname}", driver_factory::get_subplugin_class($plugintype, $pluginname));
     }
 
     /**
@@ -70,7 +70,7 @@ final class factory_test extends \advanced_testcase {
     /**
      * Tests creation of a mocked activity archiving driver instance.
      *
-     * @covers \local_archiving\local\driver\factory
+     * @covers \local_archiving\local\driver\driver_factory
      *
      * @return void
      * @throws \coding_exception
@@ -83,46 +83,46 @@ final class factory_test extends \advanced_testcase {
         $context = \context_module::instance($cm->cmid);
 
         // Get a new mock driver instance.
-        $instance = factory::activity_archiving_driver('quiz', $context);
+        $instance = driver_factory::activity_archiving_driver('quiz', $context);
         $this->assertInstanceOf(\archivingmod_quiz_mock::class, $instance, 'Expected mocked driver instance');
     }
 
     /**
      * Tests creation of a mocked storag driver instance.
      *
-     * @covers \local_archiving\local\driver\factory
+     * @covers \local_archiving\local\driver\driver_factory
      *
      * @return void
      * @throws \coding_exception
      */
     public function test_storage_driver_mock(): void {
-        $instance = factory::storage_driver('localdir');
+        $instance = driver_factory::storage_driver('localdir');
         $this->assertInstanceOf(\archivingstore_localdir_mock::class, $instance, 'Expected mocked storage driver instance');
     }
 
     /**
      * Tests creation of a mocked event connector instance.
      *
-     * @covers \local_archiving\local\driver\factory
+     * @covers \local_archiving\local\driver\driver_factory
      *
      * @return void
      * @throws \coding_exception
      */
     public function test_event_connector_mock(): void {
-        $instance = factory::event_connector('stub');
+        $instance = driver_factory::event_connector('stub');
         $this->assertInstanceOf(\archivingevent_stub_mock::class, $instance, 'Expected mocked event connector instance');
     }
 
     /**
      * Tests creation of a mocked archiving trigger instance.
      *
-     * @covers \local_archiving\local\driver\factory
+     * @covers \local_archiving\local\driver\driver_factory
      *
      * @return void
      * @throws \coding_exception
      */
     public function test_archiving_trigger_mock(): void {
-        $instance = factory::archiving_trigger('manual');
+        $instance = driver_factory::archiving_trigger('manual');
         $this->assertInstanceOf(\archivingtrigger_manual_mock::class, $instance, 'Expected mocked archiving trigger instance');
     }
 }

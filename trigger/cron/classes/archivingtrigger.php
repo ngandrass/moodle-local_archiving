@@ -110,7 +110,7 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
         $PAGE->set_url('/');  // Set page URL to dummy value to prevent errors from mform.
 
         // Get appropriate job create form and retrieve default settings.
-        $driver = \local_archiving\local\driver\factory::activity_archiving_driver($cm->modname, $cm->context);
+        $driver = \local_archiving\local\driver\driver_factory::activity_archiving_driver($cm->modname, $cm->context);
         $form = $driver->get_job_create_form($cm->modname, $cm);
         $jobsettings = $form->export_raw_data();
 

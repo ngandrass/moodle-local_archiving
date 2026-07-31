@@ -25,7 +25,7 @@
 namespace local_archiving;
 
 use local_archiving\local\driver\archivingmod;
-use local_archiving\local\driver\factory;
+use local_archiving\local\driver\driver_factory;
 use local_archiving\local\exception\yield_exception;
 use local_archiving\local\logging\task_logger;
 use local_archiving\local\type\activity_archiving_task_status;
@@ -236,7 +236,7 @@ final class activity_archiving_task {
             return $this->archivingmod;
         }
 
-        $this->archivingmod = factory::activity_archiving_driver(
+        $this->archivingmod = driver_factory::activity_archiving_driver(
             $this->archivingmodname,
             $this->context
         );

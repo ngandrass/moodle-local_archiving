@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Factory for all sub-plugins.
  */
-class factory {
+class driver_factory {
     /**
      * Creates a new instance of the requested archivingmod driver
      *

@@ -25,7 +25,7 @@
 
 namespace local_archiving\form;
 
-use local_archiving\local\driver\factory;
+use local_archiving\local\driver\driver_factory;
 use local_archiving\local\type\archive_filename_variable;
 use local_archiving\local\util\course_util;
 use local_archiving\local\util\plugin_util;
@@ -103,7 +103,7 @@ class job_create_form extends \moodleform {
         }
 
         // Prevent form from being displayed if manual archiving is disabled.
-        if (!factory::archiving_trigger('manual')->is_enabled()) {
+        if (!driver_factory::archiving_trigger('manual')->is_enabled()) {
             $this->_form->addElement(
                 'html',
                 '<div class="alert alert-warning">' .

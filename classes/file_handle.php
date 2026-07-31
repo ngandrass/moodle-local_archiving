@@ -25,7 +25,7 @@
 namespace local_archiving;
 
 use local_archiving\local\driver\archivingstore;
-use local_archiving\local\driver\factory;
+use local_archiving\local\driver\driver_factory;
 use local_archiving\local\exception\storage_exception;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\filearea;
@@ -411,7 +411,7 @@ final class file_handle {
             return $this->archivingstore;
         }
 
-        $this->archivingstore = factory::storage_driver($this->archivingstorename);
+        $this->archivingstore = driver_factory::storage_driver($this->archivingstorename);
 
         return $this->archivingstore;
     }

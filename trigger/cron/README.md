@@ -18,7 +18,7 @@ You can find more information about the archiving subsystem in the [official doc
 
 Archiving triggers (`archivingtrigger`) are sub-plugins of the archiving subsystem core (`local_archiving`) and
 therefore require the core plugin to be installed. They then must be placed inside your Moodle directory under
-`local/archiving/driver/trigger`.
+`local/archiving/trigger`.
 
 You can find detailed installation instructions within the [official documentation](https://archiving.gandrass.de/).
 If you have problems installing this plugin or have further questions, please feel free to open an issue within the

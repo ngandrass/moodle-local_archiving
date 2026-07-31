@@ -46,7 +46,7 @@ class plugin_util {
      * @throws \coding_exception
      */
     public static function is_subplugin_installed(string $type, string $name): bool {
-        return \local_archiving\local\driver\factory::get_subplugin_class($type, $name, strict: false) !== null;
+        return \local_archiving\local\driver\driver_factory::get_subplugin_class($type, $name, strict: false) !== null;
     }
 
     /**
@@ -69,7 +69,7 @@ class plugin_util {
             }
 
             /** @var archivingmod $pluginclass */
-            $pluginclass = \local_archiving\local\driver\factory::get_subplugin_class('archivingmod', $plugin->name);
+            $pluginclass = \local_archiving\local\driver\driver_factory::get_subplugin_class('archivingmod', $plugin->name);
 
             $res[$plugin->name] = [
                 'component' => $plugin->component,
@@ -144,7 +144,7 @@ class plugin_util {
             }
 
             /** @var archivingstore $pluginclass */
-            $pluginclass = \local_archiving\local\driver\factory::get_subplugin_class('archivingstore', $plugin->name);
+            $pluginclass = \local_archiving\local\driver\driver_factory::get_subplugin_class('archivingstore', $plugin->name);
 
             $res[$plugin->name] = [
                 'component' => $plugin->component,
@@ -182,7 +182,7 @@ class plugin_util {
             }
 
             /** @var archivingevent $pluginclass */
-            $pluginclass = \local_archiving\local\driver\factory::get_subplugin_class('archivingevent', $plugin->name);
+            $pluginclass = \local_archiving\local\driver\driver_factory::get_subplugin_class('archivingevent', $plugin->name);
 
             $res[$plugin->name] = [
                 'component' => $plugin->component,
@@ -219,7 +219,7 @@ class plugin_util {
             }
 
             /** @var archivingtrigger $pluginclass */
-            $pluginclass = \local_archiving\local\driver\factory::get_subplugin_class('archivingtrigger', $plugin->name);
+            $pluginclass = \local_archiving\local\driver\driver_factory::get_subplugin_class('archivingtrigger', $plugin->name);
 
             $res[$plugin->name] = [
                 'component' => $plugin->component,

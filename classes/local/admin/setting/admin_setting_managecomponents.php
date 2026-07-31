@@ -20,8 +20,9 @@ namespace local_archiving\local\admin\setting;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 use core\exception\moodle_exception;
+use local_archiving\local\driver\factory;
+use local_archiving\local\util\plugin_util;
 use local_archiving\storage;
-use local_archiving\util\plugin_util;
 
 require_once($CFG->libdir . '/adminlib.php'); // @codeCoverageIgnore
 
@@ -347,7 +348,7 @@ class admin_setting_managecomponents extends \admin_setting {
             $usagehtml = '';
             if ($storagedriver['enabled']) {
                 // From this point on, we need a proper instance of the storage driver.
-                $driver = \local_archiving\driver\factory::storage_driver($storagedrivername);
+                $driver = factory::storage_driver($storagedrivername);
 
                 // Calculate usage.
                 $usage = storage::calculate_archivingstore_stats($storagedrivername);

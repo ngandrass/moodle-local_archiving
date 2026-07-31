@@ -16,7 +16,7 @@
 
 namespace local_archiving\task;
 
-use local_archiving\type\archive_job_status;
+use local_archiving\local\type\archive_job_status;
 
 /**
  * Tests for the process_archive_job ad-hoc task.

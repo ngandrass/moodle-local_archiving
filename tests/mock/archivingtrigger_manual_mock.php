@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Manual archiving trigger mock for unit tests
  */
-class archivingtrigger_manual_mock extends \local_archiving\driver\archivingtrigger {
+class archivingtrigger_manual_mock extends \local_archiving\local\driver\archivingtrigger {
     #[\Override]
     public static function is_ready(): bool {
         return true;

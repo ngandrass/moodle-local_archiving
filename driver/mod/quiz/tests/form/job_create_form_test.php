@@ -17,7 +17,7 @@
 namespace archivingmod_quiz\form;
 
 
-use archivingmod_quiz\type\attempt_report_section;
+use archivingmod_quiz\local\type\attempt_report_section;
 
 /**
  * Tests for the job_create_form class

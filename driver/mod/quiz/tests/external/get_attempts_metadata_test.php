@@ -24,7 +24,7 @@
 
 namespace archivingmod_quiz\external;
 
-use archivingmod_quiz\type\webservice_status;
+use archivingmod_quiz\local\type\webservice_status;
 
 
 /**

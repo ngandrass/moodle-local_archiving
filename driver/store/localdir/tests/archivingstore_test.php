@@ -65,7 +65,7 @@ final class archivingstore_test extends \advanced_testcase {
      */
     public function test_get_storage_tier(): void {
         $this->assertEquals(
-            \local_archiving\type\storage_tier::LOCAL,
+            \local_archiving\local\type\storage_tier::LOCAL,
             archivingstore::get_storage_tier(),
             'Storage tier should be LOCAL.'
         );
@@ -144,7 +144,7 @@ final class archivingstore_test extends \advanced_testcase {
      * @return void
      * @throws \dml_exception
      * @throws \file_exception
-     * @throws \local_archiving\exception\storage_exception
+     * @throws \local_archiving\local\exception\storage_exception
      * @throws \moodle_exception
      * @throws \stored_file_creation_exception
      */
@@ -211,7 +211,7 @@ final class archivingstore_test extends \advanced_testcase {
      * @return void
      * @throws \dml_exception
      * @throws \file_exception
-     * @throws \local_archiving\exception\storage_exception
+     * @throws \local_archiving\local\exception\storage_exception
      * @throws \moodle_exception
      * @throws \stored_file_creation_exception
      */
@@ -242,7 +242,7 @@ final class archivingstore_test extends \advanced_testcase {
             $store->delete($handle, strict: false);
 
             // Try to delete a non-existing file in strict mode (should throw an error).
-            $this->expectException(\local_archiving\exception\storage_exception::class);
+            $this->expectException(\local_archiving\local\exception\storage_exception::class);
             $store->delete($handle, strict: true);
         } finally {
             // Clean up temp dir and input file.

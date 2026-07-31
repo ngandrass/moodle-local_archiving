@@ -16,8 +16,8 @@
 
 namespace local_archiving;
 
-use local_archiving\type\db_table;
-use local_archiving\type\filearea;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\filearea;
 
 /**
  * Tests for the tsp_manager class.

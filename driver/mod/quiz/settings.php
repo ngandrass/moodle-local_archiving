@@ -22,12 +22,12 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use archivingmod_quiz\type\attempt_filename_variable;
-use archivingmod_quiz\type\attempt_report_section;
+use archivingmod_quiz\local\type\attempt_filename_variable;
+use archivingmod_quiz\local\type\attempt_report_section;
 use local_archiving\local\admin\setting\admin_setting_configcheckbox_alwaystrue;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
 use local_archiving\local\admin\setting\admin_setting_webservice_enabler;
-use local_archiving\type\paper_format;
+use local_archiving\local\type\paper_format;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 

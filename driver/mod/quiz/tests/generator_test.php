@@ -25,7 +25,7 @@
 
 namespace archivingmod_quiz;
 
-use local_archiving\type\filearea;
+use local_archiving\local\type\filearea;
 
 
 /**

@@ -31,5 +31,5 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Manual archiving trigger plugin
  */
-class archivingtrigger extends \local_archiving\driver\archivingtrigger {
+class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
 }

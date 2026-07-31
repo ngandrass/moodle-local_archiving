@@ -25,7 +25,6 @@
 namespace local_archiving\form;
 
 use local_archiving\archive_job;
-use local_archiving\type\archive_job_status;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 

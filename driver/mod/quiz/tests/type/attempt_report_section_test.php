@@ -17,6 +17,8 @@
 namespace archivingmod_quiz\type;
 
 
+use archivingmod_quiz\local\type\attempt_report_section;
+
 /**
  * Tests for the attempt_report_section type
  *
@@ -32,7 +34,7 @@ final class attempt_report_section_test extends \advanced_testcase {
     /**
      * Basic execution test for dependencies() method.
      *
-     * @covers \archivingmod_quiz\type\attempt_report_section
+     * @covers \archivingmod_quiz\local\type\attempt_report_section
      *
      * @return void
      */

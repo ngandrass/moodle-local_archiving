@@ -24,10 +24,10 @@
 
 namespace archivingmod_quiz\form;
 
-use archivingmod_quiz\type\attempt_filename_variable;
-use archivingmod_quiz\type\attempt_report_section;
+use archivingmod_quiz\local\type\attempt_filename_variable;
+use archivingmod_quiz\local\type\attempt_report_section;
+use local_archiving\local\type\paper_format;
 use local_archiving\storage;
-use local_archiving\type\paper_format;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 

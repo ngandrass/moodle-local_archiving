@@ -17,7 +17,7 @@
 namespace local_archiving\form;
 
 
-use local_archiving\util\course_util;
+use local_archiving\local\util\course_util;
 
 /**
  * Tests for the job_create_form class

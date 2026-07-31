@@ -16,8 +16,8 @@
 
 use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
-use local_archiving\type\db_table;
-use local_archiving\type\filearea;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\filearea;
 use mod_quiz\quiz_settings;
 
 // phpcs:ignore
@@ -143,7 +143,7 @@ class archivingmod_quiz_generator extends \testing_data_generator {
         $task = activity_archiving_task::create(
             $job->get_id(),
             $mocks->context,
-            \local_archiving\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
             get_admin()->id,
             'quiz'
         );

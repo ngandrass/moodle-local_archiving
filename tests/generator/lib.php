@@ -16,8 +16,8 @@
 
 use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
-use local_archiving\type\activity_archiving_task_status;
-use local_archiving\type\cm_state_fingerprint;
+use local_archiving\local\type\activity_archiving_task_status;
+use local_archiving\local\type\cm_state_fingerprint;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -178,8 +178,8 @@ class local_archiving_generator extends \testing_data_generator {
         return get_file_storage()->create_file_from_string(
             [
                 'contextid'    => context_user::instance(get_admin()->id)->id,
-                'component'    => \local_archiving\type\filearea::TEMP->get_component(),
-                'filearea'     => \local_archiving\type\filearea::TEMP->value,
+                'component'    => \local_archiving\local\type\filearea::TEMP->get_component(),
+                'filearea'     => \local_archiving\local\type\filearea::TEMP->value,
                 'itemid'       => 0,
                 'filepath'     => "/{$uniqid}/",
                 'filename'     => "testfile-{$uniqid}.txt",
@@ -249,8 +249,8 @@ class local_archiving_generator extends \testing_data_generator {
         return get_file_storage()->create_file_from_string(
             [
                 'contextid'    => context_user::instance(get_admin()->id)->id,
-                'component'    => \local_archiving\type\filearea::FILESTORE_CACHE->get_component(),
-                'filearea'     => \local_archiving\type\filearea::FILESTORE_CACHE->value,
+                'component'    => \local_archiving\local\type\filearea::FILESTORE_CACHE->get_component(),
+                'filearea'     => \local_archiving\local\type\filearea::FILESTORE_CACHE->value,
                 'itemid'       => $filehandleid,
                 'filepath'     => '/',
                 'filename'     => "testfile-{$uniqid}.txt",

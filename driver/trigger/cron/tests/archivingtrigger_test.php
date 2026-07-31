@@ -145,7 +145,7 @@ final class archivingtrigger_test extends \advanced_testcase {
         $trigger->create_archive_job($cminfo2);
 
         // Check that one job was created for each quiz.
-        $jobs = $DB->get_records(\local_archiving\type\db_table::JOB->value);
+        $jobs = $DB->get_records(\local_archiving\local\type\db_table::JOB->value);
         $this->assertCount(2, $jobs, 'Expected two archive jobs to be created.');
         foreach ($jobs as $job) {
             $this->assertContains(

@@ -27,8 +27,8 @@ namespace archivingmod_quiz;
 
 // phpcs:ignore
 use local_archiving\activity_archiving_task;
-use local_archiving\exception\yield_exception;
-use local_archiving\type\activity_archiving_task_status;
+use local_archiving\local\exception\yield_exception;
+use local_archiving\local\type\activity_archiving_task_status;
 
 /**
  * Tests for the archivingmod class

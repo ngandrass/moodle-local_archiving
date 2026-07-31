@@ -23,8 +23,7 @@
  */
 
 use local_archiving\archive_job;
-use local_archiving\logging\logger;
-use local_archiving\type\archive_job_status;
+use local_archiving\local\logging\logger;
 
 require_once(__DIR__ . '/../../config.php');
 

@@ -28,10 +28,10 @@ namespace archivingmod_quiz\external;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
+use archivingmod_quiz\local\type\attempt_filename_variable;
+use archivingmod_quiz\local\type\attempt_report_section;
+use archivingmod_quiz\local\type\webservice_status;
 use archivingmod_quiz\quiz_manager;
-use archivingmod_quiz\type\attempt_filename_variable;
-use archivingmod_quiz\type\attempt_report_section;
-use archivingmod_quiz\type\webservice_status;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;

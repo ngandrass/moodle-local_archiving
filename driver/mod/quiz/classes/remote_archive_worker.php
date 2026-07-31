@@ -24,11 +24,11 @@
 
 namespace archivingmod_quiz;
 
-use archivingmod_quiz\type\attempt_report_section;
-use archivingmod_quiz\type\worker_status;
+use archivingmod_quiz\local\type\attempt_report_section;
+use archivingmod_quiz\local\type\worker_status;
 use curl;
 use local_archiving\activity_archiving_task;
-use local_archiving\type\activity_archiving_task_status;
+use local_archiving\local\type\activity_archiving_task_status;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore

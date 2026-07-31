@@ -17,7 +17,7 @@
 namespace local_archiving;
 
 
-use local_archiving\type\filearea;
+use local_archiving\local\type\filearea;
 
 /**
  * Tests for the unit test data generator for local_archiving

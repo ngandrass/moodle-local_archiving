@@ -24,11 +24,11 @@
 
 namespace archivingmod_quiz;
 
-use archivingmod_quiz\type\attempt_filename_variable;
-use archivingmod_quiz\type\attempt_report_section;
+use archivingmod_quiz\local\type\attempt_filename_variable;
+use archivingmod_quiz\local\type\attempt_report_section;
+use local_archiving\local\util\course_util;
+use local_archiving\local\util\report_util;
 use local_archiving\storage;
-use local_archiving\util\course_util;
-use local_archiving\util\report_util;
 use mod_quiz\output\attempt_summary_information;
 use mod_quiz\quiz_attempt;
 

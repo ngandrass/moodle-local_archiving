@@ -24,7 +24,7 @@
 
 namespace local_archiving;
 
-use local_archiving\type\db_table;
+use local_archiving\local\type\db_table;
 use stored_file;
 
 // phpcs:ignore

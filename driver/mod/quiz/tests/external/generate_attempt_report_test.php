@@ -24,9 +24,8 @@
 
 namespace archivingmod_quiz\external;
 
-use archivingmod_quiz\type\attempt_report_section;
-use archivingmod_quiz\type\webservice_status;
-use function DI\create;
+use archivingmod_quiz\local\type\attempt_report_section;
+use archivingmod_quiz\local\type\webservice_status;
 
 /**
  * Tests for the generate_attempt_report external service

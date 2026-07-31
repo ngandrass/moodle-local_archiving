@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Cron-based archiving trigger plugin
  */
-class archivingtrigger extends \local_archiving\driver\archivingtrigger {
+class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
     /**
      * Retrieves all course modules that should be archived
      *
@@ -44,7 +44,7 @@ class archivingtrigger extends \local_archiving\driver\archivingtrigger {
      * @throws \moodle_exception
      */
     public function get_cms_to_archive(bool $includeunchanged = false): array {
-        $targetcatids = \local_archiving\util\course_util::get_archivable_course_category_ids();
+        $targetcatids = \local_archiving\local\util\course_util::get_archivable_course_category_ids();
 
         $res = [];
         foreach ($targetcatids as $catid) {
@@ -93,7 +93,7 @@ class archivingtrigger extends \local_archiving\driver\archivingtrigger {
      * @throws \moodle_exception
      */
     protected function get_course_cms_with_metadata(int $courseid): array {
-        return \local_archiving\util\mod_util::get_cms_with_metadata($courseid);
+        return \local_archiving\local\util\mod_util::get_cms_with_metadata($courseid);
     }
 
     /**
@@ -110,7 +110,7 @@ class archivingtrigger extends \local_archiving\driver\archivingtrigger {
         $PAGE->set_url('/');  // Set page URL to dummy value to prevent errors from mform.
 
         // Get appropriate job create form and retrieve default settings.
-        $driver = \local_archiving\driver\factory::activity_archiving_driver($cm->modname, $cm->context);
+        $driver = \local_archiving\local\driver\factory::activity_archiving_driver($cm->modname, $cm->context);
         $form = $driver->get_job_create_form($cm->modname, $cm);
         $jobsettings = $form->export_raw_data();
 

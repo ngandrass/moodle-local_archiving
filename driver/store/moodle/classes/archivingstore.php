@@ -25,10 +25,10 @@
 namespace archivingstore_moodle;
 
 use local_archiving\archive_job;
-use local_archiving\exception\storage_exception;
 use local_archiving\file_handle;
+use local_archiving\local\exception\storage_exception;
+use local_archiving\local\type\storage_tier;
 use local_archiving\storage;
-use local_archiving\type\storage_tier;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -37,7 +37,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Driver for storing archive data inside via the Moodle File API
  */
-class archivingstore extends \local_archiving\driver\archivingstore {
+class archivingstore extends \local_archiving\local\driver\archivingstore {
     /** @var string Name of the component passed to the Moodle file API */
     public const FS_COMPONENT = 'archivingstore_moodle';
 

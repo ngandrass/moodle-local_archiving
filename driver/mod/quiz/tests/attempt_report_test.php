@@ -27,8 +27,8 @@ namespace archivingmod_quiz;
 // phpcs:ignore
 global $CFG;
 
-use archivingmod_quiz\type\attempt_filename_variable;
-use archivingmod_quiz\type\attempt_report_section;
+use archivingmod_quiz\local\type\attempt_filename_variable;
+use archivingmod_quiz\local\type\attempt_report_section;
 
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 

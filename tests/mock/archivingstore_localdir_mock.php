@@ -23,10 +23,9 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_archiving\exception\storage_exception;
 use local_archiving\file_handle;
+use local_archiving\local\type\storage_tier;
 use local_archiving\storage;
-use local_archiving\type\storage_tier;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -35,7 +34,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Driver for storing archive data inside a directory on the local filesystem
  */
-class archivingstore_localdir_mock extends \local_archiving\driver\archivingstore {
+class archivingstore_localdir_mock extends \local_archiving\local\driver\archivingstore {
     #[\Override]
     public function is_enabled(): bool {
         return true;

@@ -73,7 +73,7 @@ class trigger_archiving extends \core\task\scheduled_task {
 
             // Handle actual archive job creation.
             try {
-                $driver = \local_archiving\driver\factory::activity_archiving_driver($cmmeta->cm->modname, $cmmeta->cm->context);
+                $driver = \local_archiving\local\driver\factory::activity_archiving_driver($cmmeta->cm->modname, $cmmeta->cm->context);
                 if ($driver->can_be_archived()) {
                     // Handle dry-run.
                     if ($dryrun) {

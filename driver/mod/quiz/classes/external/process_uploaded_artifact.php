@@ -27,15 +27,15 @@ namespace archivingmod_quiz\external;
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-use archivingmod_quiz\type\webservice_status;
+use archivingmod_quiz\local\type\webservice_status;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 use local_archiving\activity_archiving_task;
 use local_archiving\file_reassembler;
+use local_archiving\local\type\activity_archiving_task_status;
 use local_archiving\storage;
-use local_archiving\type\activity_archiving_task_status;
 
 
 /**

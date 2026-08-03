@@ -6,8 +6,8 @@ implementations must adhere to.
 
 ## Overview
 
-The abstract driver base class for archiving triggers is {{ source_file('classes/driver/archivingtrigger.php',
-'\\local_archiving\\driver\\archivingtrigger') }}.
+The abstract driver base class for archiving triggers is {{ source_file('classes/local/driver/archivingtrigger.php',
+'\\local_archiving\\local\\driver\\archivingtrigger') }}.
 
 !!! notice "Overview reduced for bravery"
     For bravery, the following overview diagram is reduced to the most important classes and members. Therefore, some
@@ -54,9 +54,10 @@ classDiagram
 
 ## Implementation
 
-Each archiving trigger must implement the {{ source_file('classes/driver/archivingtrigger.php', '\\local_archiving\\driver\\archivingtrigger') }}
-interface with a class, placed at the following location: `/local/archiving/driver/trigger/<pluginname>/classes/archivingtrigger.php`,
-where `<pluginname>` is the name of the archiving trigger (e.g., `manual`, `cron`, ...).
+Each archiving trigger must implement the {{ source_file('classes/local/driver/archivingtrigger.php',
+'\\local_archiving\\local\\driver\\archivingtrigger') }} interface with a class, placed at the following location:
+`/local/archiving/local/driver/trigger/<pluginname>/classes/archivingtrigger.php`, where `<pluginname>` is the name of
+the archiving trigger (e.g., `manual`, `cron`, ...).
 
 Due to the flexible nature of archiving triggers, there are no common methods each trigger implementation must adhere to
 besides the ones inherited from the base class.

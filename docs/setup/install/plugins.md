@@ -12,17 +12,17 @@ You can find an overview of available sub-plugins types as well as a list of ava
 
 ## Installing sub-plugins
 
-All sub-plugins must be installed inside a plugin-type specific subfolder inside the `local/archiving/driver` directory
+All sub-plugins must be installed inside a plugin-type specific subfolder inside the `local/archiving` directory
 of your Moodle installation. The table below lists the different installation locations.
 
-| Sub-plugin type                                                             | Component          | Installation directory           |
-|-----------------------------------------------------------------------------|--------------------|----------------------------------|
-| [Activity archiving driver](../../components.md#activity-archiving-drivers) | `archivingmod`     | `local/archiving/driver/mod`     |
-| [Storage driver](../../components.md#storage-drivers)                       | `archivingstore`   | `local/archiving/driver/store`   |
-| [Archiving trigger](../../components.md#archiving-triggers)                 | `archivingtrigger` | `local/archiving/driver/trigger` |
-| [External event connector](../../components.md#external-event-connectors)   | `archivingevent`   | `local/archiving/driver/event`   |
+| Sub-plugin type                                                             | Component          | Installation directory    |
+|-----------------------------------------------------------------------------|--------------------|---------------------------|
+| [Activity archiving driver](../../components.md#activity-archiving-drivers) | `archivingmod`     | `local/archiving/mod`     |
+| [Storage driver](../../components.md#storage-drivers)                       | `archivingstore`   | `local/archiving/store`   |
+| [Archiving trigger](../../components.md#archiving-triggers)                 | `archivingtrigger` | `local/archiving/trigger` |
+| [External event connector](../../components.md#external-event-connectors)   | `archivingevent`   | `local/archiving/event`   |
 
-After placing the sub-plugins code inside the correct directory (e.g., `local/archiving/driver/mod/quiz` for
+After placing the sub-plugins code inside the correct directory (e.g., `local/archiving/mod/quiz` for
 `archivingmod_quiz`), log into your Moodle site as an admin and go to {{ moodle_nav_path('Site administration') }} to
 complete the installation.
 

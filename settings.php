@@ -23,11 +23,11 @@
  */
 
 use local_archiving\local\admin\setting\admin_setting_coursecat_multiselect;
-use local_archiving\local\admin\setting\admin_setting_managecomponents;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
+use local_archiving\local\admin\setting\admin_setting_managecomponents;
+use local_archiving\local\type\log_level;
+use local_archiving\local\util\plugin_util;
 use local_archiving\storage;
-use local_archiving\type\log_level;
-use local_archiving\util\plugin_util;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -143,7 +143,7 @@ if ($hassiteconfig) {
             get_string('archive_filename_pattern', 'local_archiving'),
             get_string('archive_filename_pattern_help', 'local_archiving', [
                 'variables' => array_reduce(
-                    \local_archiving\type\archive_filename_variable::values(),
+                    \local_archiving\local\type\archive_filename_variable::values(),
                     fn ($res, $varname) => $res . "<li><code>\${" . $varname . "}</code>: " .
                         get_string('archive_filename_pattern_variable_' . $varname, 'local_archiving') .
                         "</li>",
@@ -152,7 +152,7 @@ if ($hassiteconfig) {
                 'forbiddenchars' => implode('', storage::FILENAME_FORBIDDEN_CHARACTERS),
             ]),
             'archive-${courseshortname}-${courseid}-${cmtype}-${cmname}-${cmid}_${date}-${time}',
-            \local_archiving\type\archive_filename_variable::values(),
+            \local_archiving\local\type\archive_filename_variable::values(),
             storage::FILENAME_FORBIDDEN_CHARACTERS,
             PARAM_TEXT,
         );

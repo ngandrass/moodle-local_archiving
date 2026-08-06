@@ -16,10 +16,10 @@
 
 namespace local_archiving;
 
-use local_archiving\exception\yield_exception;
-use local_archiving\type\archive_job_status;
-use local_archiving\type\db_table;
-use local_archiving\type\log_level;
+use local_archiving\local\exception\yield_exception;
+use local_archiving\local\type\archive_job_status;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\log_level;
 
 /**
  * Tests for the archive_job class
@@ -780,7 +780,7 @@ final class archive_job_test extends \advanced_testcase {
             ],
             'All allowed variables' => [
                 'pattern' => array_reduce(
-                    \local_archiving\type\archive_filename_variable::values(),
+                    \local_archiving\local\type\archive_filename_variable::values(),
                     function ($carry, $item) {
                         return $carry . '${' . $item . '}';
                     },

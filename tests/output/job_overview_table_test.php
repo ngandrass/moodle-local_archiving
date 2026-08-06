@@ -16,7 +16,7 @@
 
 namespace local_archiving\output;
 
-use local_archiving\type\archive_job_status;
+use local_archiving\local\type\archive_job_status;
 
 /**
  * Tests for the job_overview_table class.

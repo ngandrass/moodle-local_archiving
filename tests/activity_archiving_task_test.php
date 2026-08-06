@@ -16,12 +16,12 @@
 
 namespace local_archiving;
 
-use local_archiving\type\activity_archiving_task_status;
-use local_archiving\type\cm_state_fingerprint;
-use local_archiving\type\db_table;
-use local_archiving\type\filearea;
-use local_archiving\type\task_content_metadata;
-use mod_lti\search\activity;
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\type\activity_archiving_task_status;
+use local_archiving\local\type\cm_state_fingerprint;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\filearea;
+use local_archiving\local\type\task_content_metadata;
 
 /**
  * Tests for the archive_job class
@@ -669,7 +669,7 @@ final class activity_archiving_task_test extends \advanced_testcase {
         $course = $this->generator()->create_course();
         $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
         $ctx = \context_module::instance($cm->cmid);
-        $driver = \local_archiving\driver\factory::activity_archiving_driver('quiz', $ctx);
+        $driver = driver_factory::activity_archiving_driver('quiz', $ctx);
 
         // There should be no fingerprint for a freshly created cm.
         $this->assertFalse(

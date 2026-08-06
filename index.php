@@ -22,8 +22,8 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_archiving\util\course_util;
-use local_archiving\util\mod_util;
+use local_archiving\local\util\course_util;
+use local_archiving\local\util\mod_util;
 
 require_once(__DIR__ . '/../../config.php');
 

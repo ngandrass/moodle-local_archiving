@@ -24,15 +24,16 @@
 
 namespace local_archiving;
 
-use local_archiving\driver\archivingmod;
-use local_archiving\exception\yield_exception;
-use local_archiving\logging\job_logger;
-use local_archiving\type\archive_filename_variable;
-use local_archiving\type\archive_job_status;
-use local_archiving\type\db_table;
-use local_archiving\type\log_level;
-use local_archiving\util\mod_util;
-use local_archiving\util\plugin_util;
+use local_archiving\local\driver\archivingmod;
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\exception\yield_exception;
+use local_archiving\local\logging\job_logger;
+use local_archiving\local\type\archive_filename_variable;
+use local_archiving\local\type\archive_job_status;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\log_level;
+use local_archiving\local\util\mod_util;
+use local_archiving\local\util\plugin_util;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -501,7 +502,7 @@ class archive_job {
                 $tasks = activity_archiving_task::get_by_jobid($this->id);
                 $storagepath = "job-{$this->id}";
 
-                $driver = \local_archiving\driver\factory::storage_driver($this->get_setting('storage_driver') ?? 'null');
+                $driver = driver_factory::storage_driver($this->get_setting('storage_driver') ?? 'null');
                 $this->set_metadata_entry('storage_driver', $driver->get_plugin_name());
 
                 if (!$driver->is_enabled()) {
@@ -652,7 +653,7 @@ class archive_job {
             throw new \moodle_exception('no_supported_activity_archiving_driver_found', 'local_archiving');
         }
 
-        return \local_archiving\driver\factory::activity_archiving_driver($drivername, $this->context);
+        return driver_factory::activity_archiving_driver($drivername, $this->context);
     }
 
     /**

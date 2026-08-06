@@ -26,7 +26,6 @@ use local_archiving\archive_job;
 use local_archiving\file_handle;
 use local_archiving\form\file_delete_form;
 use local_archiving\form\job_delete_form;
-use local_archiving\util\plugin_util;
 
 require_once(__DIR__ . '/../../config.php');
 

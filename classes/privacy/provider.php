@@ -31,7 +31,7 @@ use core_privacy\local\request\context;
 use core_privacy\local\request\contextlist;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
-use local_archiving\type\db_table;
+use local_archiving\local\type\db_table;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore

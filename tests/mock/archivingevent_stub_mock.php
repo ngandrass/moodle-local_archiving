@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Empty event connector mock for unit tests
  */
-class archivingevent_stub_mock extends \local_archiving\driver\archivingevent {
+class archivingevent_stub_mock extends \local_archiving\local\driver\archivingevent {
     #[\Override]
     public static function is_ready(): bool {
         return true;

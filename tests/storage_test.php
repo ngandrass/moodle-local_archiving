@@ -16,9 +16,7 @@
 
 namespace local_archiving;
 
-use local_archiving\exception\storage_exception;
-use local_archiving\type\archive_filename_variable;
-use local_archiving\type\filearea;
+use local_archiving\local\type\archive_filename_variable;
 
 /**
  * Tests for the storage helper class.

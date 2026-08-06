@@ -24,11 +24,12 @@
 
 namespace local_archiving;
 
-use local_archiving\driver\archivingstore;
-use local_archiving\exception\storage_exception;
-use local_archiving\type\db_table;
-use local_archiving\type\filearea;
-use local_archiving\util\plugin_util;
+use local_archiving\local\driver\archivingstore;
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\exception\storage_exception;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\filearea;
+use local_archiving\local\util\plugin_util;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -410,7 +411,7 @@ final class file_handle {
             return $this->archivingstore;
         }
 
-        $this->archivingstore = \local_archiving\driver\factory::storage_driver($this->archivingstorename);
+        $this->archivingstore = driver_factory::storage_driver($this->archivingstorename);
 
         return $this->archivingstore;
     }

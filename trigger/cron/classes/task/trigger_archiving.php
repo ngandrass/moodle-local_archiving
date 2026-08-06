@@ -27,6 +27,8 @@ namespace archivingtrigger_cron\task;
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+use local_archiving\local\driver\driver_factory;
+
 
 /**
  * Scheduled task for triggering new activities to archive.
@@ -73,7 +75,7 @@ class trigger_archiving extends \core\task\scheduled_task {
 
             // Handle actual archive job creation.
             try {
-                $driver = \local_archiving\local\driver\driver_factory::activity_archiving_driver($cmmeta->cm->modname, $cmmeta->cm->context);
+                $driver = driver_factory::activity_archiving_driver($cmmeta->cm->modname, $cmmeta->cm->context);
                 if ($driver->can_be_archived()) {
                     // Handle dry-run.
                     if ($dryrun) {

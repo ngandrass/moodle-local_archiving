@@ -151,8 +151,6 @@ final class attempt_report_test extends \advanced_testcase {
      * Tests generation of a full page report with all sections
      *
      * @covers \archivingmod_quiz\attempt_report::generate_full_page
-     * @covers \archivingmod_quiz\attempt_report::convert_image_to_base64
-     * @covers \archivingmod_quiz\attempt_report::ensure_absolute_url
      *
      * @return void
      * @throws \DOMException

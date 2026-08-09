@@ -352,6 +352,42 @@ final class report_util_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that an assignsubmission_onlinetext pluginfile URL with a non-zero itemid (submission id)
+     * is resolved and the correct file is inlined.
+     *
+     * @covers \local_archiving\local\util\report_util
+     * @return void
+     * @throws \DOMException
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_convert_assignsubmission_onlinetext_pluginfile_success(): void {
+        $this->resetAfterTest();
+
+        $context = \context_system::instance();
+        $imgdata = 'FAKE_ONLINETEXT_PNG_DATA';
+        get_file_storage()->create_file_from_string([
+            'contextid' => $context->id,
+            'component' => 'assignsubmission_onlinetext',
+            'filearea'  => 'submissions_onlinetext',
+            'itemid'    => 42,
+            'filepath'  => '/',
+            'filename'  => 'test.png',
+        ], $imgdata);
+
+        $url = new \moodle_url("/pluginfile.php/{$context->id}/assignsubmission_onlinetext/submissions_onlinetext/42/test.png");
+        $img = $this->make_img($url);
+
+        $this->assertTrue(report_util::convert_image_to_base64($img));
+        $this->assertEquals('MOODLE_URL_PLUGINFILE', $img->getAttribute('x-url-type'));
+        $this->assertEquals(
+            'data:image/png;base64,' . base64_encode($imgdata),
+            $img->getAttribute('src')
+        );
+    }
+
+    /**
      * Tests that a STACK plot URL for an existing plot file on disk is inlined as base64.
      *
      * @covers \local_archiving\local\util\report_util

@@ -462,6 +462,6 @@ class attempt_report {
             );
         }
 
-        return $isfoldername ? storage::sanitize_filename($filename) : storage::sanitize_foldername($filename);
+        return $isfoldername ? storage::sanitize_foldername($filename) : storage::sanitize_filename($filename);
     }
 }

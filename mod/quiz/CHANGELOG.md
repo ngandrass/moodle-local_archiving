@@ -14,6 +14,7 @@
 - Migrate quiz attempt renderer to new quiz attempt summary API
 - Prevent `update_task_status` external functions from making changes to activity archiving tasks that belong to other activity types
 - Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+- Fix bug in dynamic file and folder name validation
 
 
 ## Version 1.0.0 (2025102700)

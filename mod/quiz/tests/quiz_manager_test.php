@@ -56,7 +56,8 @@ final class quiz_manager_test extends \advanced_testcase {
      */
     public function test_creation(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         $quiz = quiz_manager::from_context(\context_module::instance($rc->cm->id));
         $this->assertSame($rc->quiz->id, $quiz->get_quiz()->id, 'Quiz ID does not match');
@@ -76,7 +77,8 @@ final class quiz_manager_test extends \advanced_testcase {
      */
     public function test_get_attempts(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
         $attempts = $quiz->get_attempts();
@@ -97,7 +99,8 @@ final class quiz_manager_test extends \advanced_testcase {
      */
     public function test_get_attempts_metadata(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
         $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
 
         // Test without filters.
@@ -142,7 +145,9 @@ final class quiz_manager_test extends \advanced_testcase {
      */
     public function test_attempt_exists(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
+
         $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
 
         $this->assertTrue($quiz->attempt_exists($rc->attemptids[0]), 'Existing attempt not found');
@@ -161,7 +166,9 @@ final class quiz_manager_test extends \advanced_testcase {
      */
     public function test_get_attempt_attachments(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
+
         $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
         $attachments = $quiz->get_attempt_attachments($rc->attemptids[0]);
         $this->assertNotEmpty($attachments, 'No attachments found');

@@ -60,7 +60,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_full_report(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate full report with all sections.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -161,7 +162,9 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_full_page_stub(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
+
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
         $html = $report->generate_full_page(
             $rc->attemptids[0],
@@ -185,7 +188,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_header(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without a header.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -223,7 +227,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_quiz_feedback(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without quiz feedback.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -260,7 +265,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_quiz_grade(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without quiz grade.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -298,7 +304,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_questions(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without questions.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -351,7 +358,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_question_correctness(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without question correctness.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -390,7 +398,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_question_marks(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without question marks.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -429,7 +438,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_question_feedback(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without question feedback.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -461,7 +471,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_general_feedback(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without general feedback.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -492,7 +503,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_rightanswers(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without right answers.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -523,7 +535,8 @@ final class attempt_report_test extends \advanced_testcase {
      */
     public function test_generate_report_no_history(): void {
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         // Generate report without answer history.
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
@@ -554,7 +567,8 @@ final class attempt_report_test extends \advanced_testcase {
     public function test_generate_attempt_foldername(): void {
         // Generate data.
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Full pattern.
@@ -600,7 +614,8 @@ final class attempt_report_test extends \advanced_testcase {
     public function test_generate_attempt_foldername_without_variables(): void {
         // Generate data.
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         $foldername = $report->generate_attempt_filename(
@@ -624,7 +639,8 @@ final class attempt_report_test extends \advanced_testcase {
     public function test_generate_attempt_foldername_invalid_pattern(): void {
         // Generate data.
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Test filename generation.
@@ -649,7 +665,8 @@ final class attempt_report_test extends \advanced_testcase {
     public function test_generate_attempt_foldername_invalid_variables(): void {
         // Generate data.
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Test filename generation.
@@ -674,7 +691,8 @@ final class attempt_report_test extends \advanced_testcase {
     public function test_generate_attempt_filename(): void {
         // Generate data.
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Full pattern.
@@ -720,7 +738,8 @@ final class attempt_report_test extends \advanced_testcase {
     public function test_generate_attempt_filename_without_variables(): void {
         // Generate data.
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         $filename = $report->generate_attempt_filename(
@@ -744,7 +763,8 @@ final class attempt_report_test extends \advanced_testcase {
     public function test_generate_attempt_filename_invalid_pattern(): void {
         // Generate data.
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Test filename generation.
@@ -769,7 +789,8 @@ final class attempt_report_test extends \advanced_testcase {
     public function test_generate_attempt_filename_invalid_variables(): void {
         // Generate data.
         $this->resetAfterTest();
-        $rc = $this->getDataGenerator()->import_reference_course();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Test filename generation.

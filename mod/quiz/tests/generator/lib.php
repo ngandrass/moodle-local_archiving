@@ -59,6 +59,10 @@ class archivingmod_quiz_generator extends \testing_data_generator {
             'backupfile' => '/../fixtures/referencequiz.mbz',
             'quizname' => 'Reference Quiz (standard question types)',
         ],
+        'qtype_jack' => [
+            'backupfile' => '/../fixtures/referencequiz-qtype_jack.mbz',
+            'quizname' => 'qType JACK Reference Quiz',
+        ],
     ];
 
 

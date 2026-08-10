@@ -52,6 +52,11 @@ stages:
     - composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
     #- locale-gen en_AU.UTF-8
     - export PATH="$PATH:$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd)"
+
+    # Add plugin dependencies
+    - moodle-plugin-ci add-plugin Wunderbyte-GmbH/moodle_qtype_jack
+
+    # Install moodle
     - moodle-plugin-ci install --plugin ./plugin --db-host=postgres
 
     # Output color helpers

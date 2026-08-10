@@ -19,7 +19,8 @@ webserver. It can easily be [deployed using Docker](https://github.com/ngandrass
   - Allows creation of reduced reports, e.g., without example solutions, for handing out to students during inspection
 - Support for complex content and question types, including Drag and Drop, MathJax formulas, STACK plots, and other
   question / content types that require JavaScript processing
-- Quiz attempt reports are fully text-searchable, including mathematical formulas 
+- Support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack)
+- Quiz attempt reports are fully text-searchable, including mathematical formulas
 - Generation of checksums for every file within the archive and the archive itself
 - Attempt report names are fully customizable and support dynamic variables (e.g., course name, quiz name, username, ...)
 - Allows definition of global archiving defaults as well as forced archiving policies (i.e., locked archive job presets

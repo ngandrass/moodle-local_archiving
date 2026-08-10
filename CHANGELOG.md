@@ -5,6 +5,7 @@
 - Update Moodle plugin CI to include Moodle 5.2 and all supported PHP versions
 - Add sub-plugin PHPUnit test execution stage to Moodle plugin CI pipeline
 - Add support for receiving chunked uploads of quiz archives
+- Add support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack) in quizes.
 - Include core sub-plugins in PHPUnit coverage reports
 - Adapt unit tests to Moodle upstream permission checks
 - Make unit tests ready for PHPUnit 12 (honor current deprecations)

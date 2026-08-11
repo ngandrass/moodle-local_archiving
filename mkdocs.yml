@@ -24,8 +24,8 @@ extra:
 #      link: https://github.com/ngandrass/moodle-quiz_archiver
 #      name: "GitHub: moodle-quiz_archiver"
 #    - icon: fontawesome/brands/github
-#      link: https://github.com/ngandrass/moodle-quiz-archive-worker
-#      name: "GitHub: moodle-quiz-archive-worker"
+#      link: https://github.com/ngandrass/moodle-archiving-worker
+#      name: "GitHub: moodle-archiving-worker"
   demand_mandatory: "<span style='float:right; font-weight: 400;'>Mandatory <span style='color:#C62828;'>:material-alert:</span></span>"
   demand_high: "<span style='float:right; font-weight: 400;'>High Demand <span style='color:#FF5722;'>:material-circle:</span></span>"
   demand_medium: "<span style='float:right; font-weight: 400;'>Medium Demand <span style='color:#FFC107;'>:material-circle:</span></span>"

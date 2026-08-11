@@ -5,9 +5,9 @@ Activity archiving driver for Moodle quizzes.
 This plugin is part of the [Moodle archiving subsystem](https://github.com/ngandrass/moodle-local_archiving/).
 You can find more information about the archiving subsystem in the [official documentation](https://archiving.gandrass.de/).
 
-Quiz archives are created by an external [quiz archive worker](https://github.com/ngandrass/moodle-quiz-archive-worker)
+Quiz archives are created by an external [archiving worker](https://github.com/ngandrass/moodle-archiving-worker)
 service to remove load from Moodle and to eliminate the need to install a large number of software dependencies on the
-webserver. It can easily be [deployed using Docker](https://github.com/ngandrass/moodle-quiz-archive-worker#installation).
+webserver. It can easily be [deployed using Docker](https://github.com/ngandrass/moodle-archiving-worker#installation).
 
 
 ## Features

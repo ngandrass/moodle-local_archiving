@@ -118,7 +118,7 @@ $string['setting_internal_wwwroot_desc'] = 'Overwrites the default Moodle base U
 $string['setting_webservice_enabler'] = 'Moodle web services';
 $string['setting_webservice_enabler_desc'] = 'This plugin uses Moodle web services to communicate with the worker service. Therefore, web services and the REST protocol must be enabled for this plugin to work. You can check the current status below. If everything reads green, you are ready to go.';
 $string['setting_worker_url'] = 'Archive worker URL';
-$string['setting_worker_url_desc'] = 'URL of the archive worker service to call for quiz archive task execution. If you only want to try the Quiz Archiver, you can use the <a href="https://quizarchiver.gandrass.de/installation/archiveworker/#using-the-free-public-demo-service" target="_blank">free public demo quiz archive worker service</a>, eliminating the need to set up your own worker service right away.<br/>Example: <code>http://127.0.0.1:8080</code> or <code>http://moodle-quiz-archive-worker:8080</code>';
+$string['setting_worker_url_desc'] = 'URL of the archive worker service to call for quiz archive task execution. If you only want to try the Quiz Archiver, you can use the <a href="https://quizarchiver.gandrass.de/installation/archiveworker/#using-the-free-public-demo-service" target="_blank">free public demo quiz archive worker service</a>, eliminating the need to set up your own worker service right away.<br/>Example: <code>http://127.0.0.1:8080</code> or <code>http://moodle-archiving-worker:8080</code>';
 
 // Remote archive worker.
 $string['remote_worker_enqueue_job_failed'] = 'Failed to enqueue archive job at the remote archive worker service.';

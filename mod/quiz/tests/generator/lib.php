@@ -53,6 +53,19 @@ class archivingmod_quiz_generator extends \testing_data_generator {
         'gapselect',
     ];
 
+    /** @var array<string, array{backupfile: string, quizname: string}> Available quiz fixtures for testing */
+    public const QUIZ_FIXTURES = [
+        'default' => [
+            'backupfile' => '/../fixtures/referencequiz.mbz',
+            'quizname' => 'Reference Quiz (standard question types)',
+        ],
+        'qtype_jack' => [
+            'backupfile' => '/../fixtures/referencequiz-qtype_jack.mbz',
+            'quizname' => 'qType JACK Reference Quiz',
+        ],
+    ];
+
+
     /**
      * Creates a course that contains a quiz module as a new user.
      *
@@ -192,6 +205,8 @@ class archivingmod_quiz_generator extends \testing_data_generator {
      * Imports the reference course into a new course and returns the reference
      * quiz, the respective cm, and the course itself.
      *
+     * @param string $backupfile Path of reference quiz backup to import (.mbz)
+     * @param string $quizname Name of quiz to import from backup
      * @return \stdClass Object with keys 'quiz' (the reference quiz), 'cm' (the
      * respective cm), 'course' (the course itself), 'attemptids' (array of all
      * attempt ids inside the reference quiz), 'userids' (array of all user ids
@@ -201,14 +216,14 @@ class archivingmod_quiz_generator extends \testing_data_generator {
      * @throws \restore_controller_exception
      * @throws Exception
      */
-    public function import_reference_course(): \stdClass {
+    public function import_reference_course(string $backupfile, string $quizname): \stdClass {
         global $DB;
 
         // Prepare backup of reference course for restore.
         $backupid = 'referencequiz';
         $backuppath = make_backup_temp_directory($backupid);
         get_file_packer('application/vnd.moodle.backup')->extract_to_pathname(
-            __DIR__ . "/../fixtures/referencequiz.mbz",
+            __DIR__ . $backupfile,
             $backuppath
         );
 
@@ -252,7 +267,7 @@ class archivingmod_quiz_generator extends \testing_data_generator {
         $cms = $modinfo->get_cms();
         $cm = null;
         foreach ($cms as $curcm) {
-            if ($curcm->modname == 'quiz' && strpos($curcm->name, 'Reference Quiz') === 0) {
+            if ($curcm->modname == 'quiz' && $curcm->name == $quizname) {
                 $cm = $curcm;
                 break;
             }

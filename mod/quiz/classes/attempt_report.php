@@ -381,6 +381,14 @@ class attempt_report {
                 code .token.comment {
                     padding: 0.5rem !important;
                 }
+
+                /* Expand qtype JACK text areas to dynamically fit content */
+                .que.jack textarea.qtype_jack_response[class*='qtype_jack_'] {
+                    field-sizing: content !important;
+                    white-space: pre-wrap !important;
+                    overflow: hidden !important;
+                    resize: none !important;
+                }
             ");
             $dom->getElementsByTagName('head')[0]->appendChild($csshacksnode);
         }

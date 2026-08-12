@@ -199,7 +199,7 @@ class remote_archive_worker {
                     "height" => $settings->image_optimize_height,
                     "quality" => $settings->image_optimize_quality,
                 ] : false,
-                "fetch_metadata" => true,
+                "fetch_metadata" => (bool) $settings->export_attempts_metadata,
                 "fetch_attachments" => (bool) $settings->{'report_section_' . attempt_report_section::ATTACHMENTS->value},
                 "keep_html_files" => (bool) $settings->keep_html_files,
             ],

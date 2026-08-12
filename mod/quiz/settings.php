@@ -101,6 +101,16 @@ if ($hassiteconfig) {
             '1',
         ));
 
+        // Job preset: Export attempts metadata.
+        $set = new admin_setting_configcheckbox(
+            'archivingmod_quiz/job_preset_export_attempts_metadata',
+            get_string('task_export_attempts_metadata', 'archivingmod_quiz'),
+            get_string('task_export_attempts_metadata_help', 'archivingmod_quiz'),
+            '1',
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $settings->add($set);
+
         // Job preset: Attempt report sections.
         foreach (attempt_report_section::cases() as $section) {
             $set = new admin_setting_configcheckbox(

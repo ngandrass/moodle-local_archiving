@@ -52,6 +52,16 @@ class job_create_form extends \local_archiving\form\job_create_form {
         $this->_form->addHelpButton('export_attempts', 'task_export_attempts', 'archivingmod_quiz');
         $this->_form->setDefault('export_attempts', true);
 
+        $this->_form->addElement(
+            'advcheckbox',
+            'export_attempts_metadata',
+            '&nbsp;',
+            get_string('task_export_attempts_metadata', 'archivingmod_quiz'),
+            $this->config->handler->{'job_preset_export_attempts_metadata_locked'} ? 'disabled' : null
+        );
+        $this->_form->addHelpButton('export_attempts_metadata', 'task_export_attempts_metadata', 'archivingmod_quiz');
+        $this->_form->setDefault('export_attempts_metadata', $this->config->handler->{'job_preset_export_attempts_metadata'});
+
         foreach (attempt_report_section::cases() as $section) {
             $this->_form->addElement(
                 'advcheckbox',

@@ -247,4 +247,69 @@ final class job_create_form_test extends \advanced_testcase {
             ]
         );
     }
+
+    /**
+     * Tests that a report section is forced disabled if one of its dependencies
+     * is not enabled, even if it was posted as enabled.
+     *
+     * @covers \archivingmod_quiz\form\job_create_form
+     * @dataProvider dependent_sections_are_disabled_data_provider
+     *
+     * @param string $sectionname Value of the section that has dependencies
+     * @param string $dependencyname Value of one of that section's dependencies
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_dependent_sections_are_disabled_when_dependency_is_unchecked(
+        string $sectionname,
+        string $dependencyname
+    ): void {
+        // Prepare a course module.
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $cm = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $cminfo = get_fast_modinfo($course->id)->get_cm($cm->cmid);
+
+        // Prepare POST data: section checked, its dependency unchecked.
+        $validpostdata = json_decode(
+            file_get_contents(__DIR__ . '/../fixtures/job_create_form_request_valid.json'),
+            true
+        );
+        foreach ($validpostdata as $key => $value) {
+            $_POST[$key] = $value;
+        }
+        $_POST["report_section_{$sectionname}"] = 1;
+        $_POST["report_section_{$dependencyname}"] = 0;
+        $_POST['sesskey'] = sesskey();
+
+        $form = new job_create_form('quiz', $cminfo);
+
+        // Verify that the dependent section was forced disabled.
+        $formdata = $form->get_data();
+        $this->assertNotFalse($formdata, 'Form data must be returned.');
+        $this->assertEquals(
+            0,
+            $formdata->{"report_section_{$sectionname}"},
+            "The section {$sectionname} must be disabled since its dependency {$dependencyname} is disabled."
+        );
+    }
+
+    /**
+     * Data provider for test_dependent_sections_are_disabled_when_dependency_is_unchecked
+     *
+     * @return array Test data
+     */
+    public static function dependent_sections_are_disabled_data_provider(): array {
+        $testcases = [];
+        foreach (attempt_report_section::cases() as $section) {
+            foreach ($section->dependencies() as $dependency) {
+                $testcases["{$section->value} depends on {$dependency->value}"] = [
+                    $section->value,
+                    $dependency->value,
+                ];
+            }
+        }
+        return $testcases;
+    }
 }

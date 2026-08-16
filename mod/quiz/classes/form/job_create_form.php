@@ -332,6 +332,26 @@ class job_create_form extends \local_archiving\form\job_create_form {
     public function get_data(): \stdClass {
         $data = parent::get_data();
 
+        // Force sections whose dependencies are not (or no longer) satisfied to be disabled too.
+        do {
+            $changed = false;
+            foreach (attempt_report_section::cases() as $section) {
+                $field = 'report_section_' . $section->value;
+                if (empty($data->{$field})) {
+                    continue;
+                }
+                foreach ($section->dependencies() as $dependency) {
+                    if (empty($data->{'report_section_' . $dependency->value})) {
+                        $data->{$field} = 0;
+                        $changed = true;
+                        break;
+                    }
+                }
+            }
+        } while ($changed);
+
+        // ATTENTION: Locked status takes precedence. Always keep forcing locked field values at the bottom of this function!
+
         // Force locked fields to their preset values.
         foreach ($this->config->handler as $key => $value) {
             if (str_starts_with($key, 'job_preset_') && strrpos($key, '_locked') === strlen($key) - 7) {

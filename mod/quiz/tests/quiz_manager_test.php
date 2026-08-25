@@ -77,7 +77,7 @@ final class quiz_manager_test extends \advanced_testcase {
     }
 
     /**
-     * Tests to get the attempts of a quiz
+     * Tests to get all the attempts of a quiz
      *
      * @covers \archivingmod_quiz\quiz_manager
      *
@@ -86,13 +86,13 @@ final class quiz_manager_test extends \advanced_testcase {
      * @throws \moodle_exception
      * @throws \restore_controller_exception
      */
-    public function test_get_attempts(): void {
+    public function test_get_all_attempts(): void {
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
         $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
-        $attempts = $quiz->get_attempts();
+        $attempts = $quiz->get_all_attempts();
 
         $this->assertNotEmpty($attempts, 'No attempts found');
         $this->assertCount(count($rc->attemptids), $attempts, 'Incorrect number of attempts found');

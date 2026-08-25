@@ -24,6 +24,7 @@
 
 use archivingmod_quiz\local\type\attempt_filename_variable;
 use archivingmod_quiz\local\type\attempt_report_section;
+use archivingmod_quiz\local\type\attempts_filter;
 use local_archiving\local\admin\setting\admin_setting_configcheckbox_alwaystrue;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
 use local_archiving\local\admin\setting\admin_setting_webservice_enabler;
@@ -110,6 +111,18 @@ if ($hassiteconfig) {
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);
+
+        // Job preset: Attempt filters.
+        foreach (attempts_filter::cases() as $filter) {
+            $set = new admin_setting_configcheckbox(
+                'archivingmod_quiz/job_preset_attempts_filter_' . $filter->value,
+                get_string('task_attempts_filter_' . $filter->value, 'archivingmod_quiz'),
+                get_string('task_attempts_filter_' . $filter->value . '_help', 'archivingmod_quiz'),
+                '0',
+            );
+            $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+            $settings->add($set);
+        }
 
         // Job preset: Attempt report sections.
         foreach (attempt_report_section::cases() as $section) {

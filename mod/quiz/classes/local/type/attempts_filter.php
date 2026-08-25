@@ -14,22 +14,31 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// phpcs:disable moodle.Commenting.InlineComment.DocBlock
+
 /**
- * Plugin version and other meta-data are defined here
+ * Filter that can be applied to select certain quiz attempts for a export
  *
  * @package     archivingmod_quiz
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace archivingmod_quiz\local\type;
+
+use local_archiving\local\trait\enum_listable;
+
+
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-$plugin->component = 'archivingmod_quiz';
-$plugin->release = '1.0.0';
-$plugin->version = 2025102703;
-$plugin->requires = 2024100700;
-$plugin->supported = [405, 501]; // X meta-supported-moodle{4.5 - 5.1} meta-supported-php{8.1 - 8.4}.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = [
-    'local_archiving' => 2026073000,
-];
+
+/**
+ * Filters that can be used to select certain attempts
+ */
+enum attempts_filter: string {
+    use enum_listable;
+
+    /** @var string Filter selecting only the latest attempt of any user */
+    case LATEST = 'latest';
+}

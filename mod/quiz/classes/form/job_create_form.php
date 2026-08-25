@@ -26,6 +26,7 @@ namespace archivingmod_quiz\form;
 
 use archivingmod_quiz\local\type\attempt_filename_variable;
 use archivingmod_quiz\local\type\attempt_report_section;
+use archivingmod_quiz\local\type\attempts_filter;
 use local_archiving\local\type\paper_format;
 use local_archiving\storage;
 
@@ -62,6 +63,27 @@ class job_create_form extends \local_archiving\form\job_create_form {
         $this->_form->addHelpButton('export_attempts_metadata', 'task_export_attempts_metadata', 'archivingmod_quiz');
         $this->_form->setDefault('export_attempts_metadata', $this->config->handler->{'job_preset_export_attempts_metadata'});
 
+        // Options: Filters.
+        foreach (attempts_filter::cases() as $i => $filter) {
+            $this->_form->addElement(
+                'advcheckbox',
+                'attempts_filter_' . $filter->value,
+                '&nbsp;', /* phpcs:ignore $i == 0 ? get_string('task_attempts_filter', 'archivingmod_quiz') : '&nbsp;', */
+                get_string('task_attempts_filter_' . $filter->value, 'archivingmod_quiz'),
+                $this->config->handler->{'job_preset_attempts_filter_' . $filter->value . '_locked'} ? 'disabled' : null
+            );
+            $this->_form->addHelpButton(
+                'attempts_filter_' . $filter->value,
+                'task_attempts_filter_' . $filter->value,
+                'archivingmod_quiz'
+            );
+            $this->_form->setDefault(
+                'attempts_filter_' . $filter->value,
+                $this->config->handler->{'job_preset_attempts_filter_' . $filter->value}
+            );
+        }
+
+        // Options: Report sections.
         foreach (attempt_report_section::cases() as $section) {
             $this->_form->addElement(
                 'advcheckbox',

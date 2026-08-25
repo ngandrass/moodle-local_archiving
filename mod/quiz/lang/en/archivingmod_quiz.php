@@ -45,6 +45,13 @@ $string['task_keep_html_files_help'] = 'Save HTML source files in addition to th
 $string['task_paper_format'] = 'Paper size';
 $string['task_paper_format_help'] = 'The paper size to use for the PDF export. This does not not affect HTML exports.';
 
+// Task settings: Attempt filters
+$string['task_attempts_filter'] = 'Filters';
+$string['task_attempts_filter_latest'] = 'Export only latest attempts';
+$string['task_attempts_filter_latest_help'] = 'If selected, only the most recent attempt will be exported for each user. Older attempts will automatically be omitted.';
+$string['error_no_attempts_left_after_filtering'] = 'No quiz attempts were left for export after the selected filters were applied.';
+
+
 // Task settings: Attempt report sections
 $string['task_report_section_header'] = 'Include quiz header';
 $string['task_report_section_header_help'] = 'Display quiz metadata (e.g., user, time taken, grade, ...) inside the attempt report.';

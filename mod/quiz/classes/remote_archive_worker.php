@@ -193,6 +193,7 @@ class remote_archive_worker {
                 "paper_format" => $settings->paper_format,
                 "archive_filename" => $task->get_job()->generate_archive_name_prefix(),
                 "archive_flatten" => (bool) $settings->archive_flat_export,
+                "archive_filehashes" => true,
                 "foldername_pattern" => $settings->attempt_foldername_pattern,
                 "filename_pattern" => $settings->attempt_filename_pattern,
                 "image_optimize" => $settings->image_optimize ? [

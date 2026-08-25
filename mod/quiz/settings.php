@@ -159,6 +159,7 @@ if ($hassiteconfig) {
             PARAM_TEXT,
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $set->add_dependent_on('local_archiving/job_preset_archive_flat_export');
         $settings->add($set);
 
         // Job preset: Attempt filename pattern.

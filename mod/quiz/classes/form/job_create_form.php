@@ -263,6 +263,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
         $this->_form->setType('attempt_foldername_pattern', PARAM_TEXT);
         $this->_form->setDefault('attempt_foldername_pattern', $this->config->handler->job_preset_attempt_foldername_pattern);
         $this->_form->addRule('attempt_foldername_pattern', null, 'maxlength', 255, 'client');
+        $this->_form->hideIf('attempt_foldername_pattern', 'archive_flat_export', 'checked');
 
         // Advanced options: Attempts filename pattern.
         $this->_form->addElement(

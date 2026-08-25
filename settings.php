@@ -137,6 +137,16 @@ if ($hassiteconfig) {
         );
         $commonpage->add($set);
 
+        // Common - Job preset: Flat archive export.
+        $set = new admin_setting_configcheckbox(
+            'local_archiving/job_preset_archive_flat_export',
+            get_string('archive_flat_export', 'local_archiving'),
+            get_string('archive_flat_export_help', 'local_archiving'),
+            '0',
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $commonpage->add($set);
+
         // Common - Job Preset: Archive filename pattern.
         $set = new admin_setting_filename_pattern(
             'local_archiving/job_preset_archive_filename_pattern',

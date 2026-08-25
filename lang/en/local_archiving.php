@@ -180,6 +180,10 @@ $string['job_create_form_header_typed'] = 'Create {$a} Archive';
 $string['storage_location'] = 'Storage location';
 $string['storage_location_help'] = 'Select where the archived data should be stored.';
 
+// Job settings: Flat archive export
+$string['archive_flat_export'] = 'Flatten archive';
+$string['archive_flat_export_help'] = 'If enabled, all directories inside the exported archive will be omitted. All files will be placed in the root directory of the generated archive. Please make sure to <b>choose a unique attempt filename!</b>';
+
 // Job settings: Filename pattern.
 $string['archive_filename_pattern'] = 'Archive name';
 $string['archive_filename_pattern_help'] = 'Name of the generated archive. Variables <b>must</b> follow the <code>${variablename}</code> pattern. The file extension will be added automatically.<br><br><b>Available variables</b>: <ul>{$a->variables}</ul><b>Forbidden characters</b>: <code>{$a->forbiddenchars}</code>';

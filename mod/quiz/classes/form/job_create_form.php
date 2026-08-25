@@ -44,17 +44,6 @@ class job_create_form extends \local_archiving\form\job_create_form {
         // Options: Attempts.
         $this->_form->addElement(
             'advcheckbox',
-            'export_attempts',
-            get_string('attempts', 'mod_quiz'),
-            get_string('task_export_attempts', 'archivingmod_quiz'),
-            ['disabled' => 'disabled'],
-            ['1', '1']
-        );
-        $this->_form->addHelpButton('export_attempts', 'task_export_attempts', 'archivingmod_quiz');
-        $this->_form->setDefault('export_attempts', true);
-
-        $this->_form->addElement(
-            'advcheckbox',
             'export_attempts_metadata',
             '&nbsp;',
             get_string('task_export_attempts_metadata', 'archivingmod_quiz'),

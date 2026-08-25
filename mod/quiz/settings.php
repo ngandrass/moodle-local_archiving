@@ -25,7 +25,6 @@
 use archivingmod_quiz\local\type\attempt_filename_variable;
 use archivingmod_quiz\local\type\attempt_report_section;
 use archivingmod_quiz\local\type\attempts_filter;
-use local_archiving\local\admin\setting\admin_setting_configcheckbox_alwaystrue;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
 use local_archiving\local\admin\setting\admin_setting_webservice_enabler;
 use local_archiving\local\type\paper_format;
@@ -92,14 +91,6 @@ if ($hassiteconfig) {
             'archivingmod_quiz/header_job_presets',
             get_string('setting_header_job_presets', 'local_archiving'),
             get_string('setting_header_job_presets_desc', 'local_archiving'),
-        ));
-
-        // Job preset: Export Attempts.
-        $settings->add(new admin_setting_configcheckbox_alwaystrue(
-            'archivingmod_quiz/job_preset_export_attempts',
-            get_string('task_export_attempts', 'archivingmod_quiz'),
-            get_string('task_export_attempts_help', 'archivingmod_quiz'),
-            '1',
         ));
 
         // Job preset: Export attempts metadata.

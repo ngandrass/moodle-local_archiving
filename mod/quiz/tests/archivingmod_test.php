@@ -29,6 +29,7 @@ namespace archivingmod_quiz;
 use local_archiving\activity_archiving_task;
 use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\activity_archiving_task_status;
+use archivingmod_quiz\local\type\attempts_filter;
 
 /**
  * Tests for the archivingmod class
@@ -42,6 +43,19 @@ final class archivingmod_test extends \advanced_testcase {
     // phpcs:ignore
     public static function getDataGenerator(): \archivingmod_quiz_generator {
         return parent::getDataGenerator()->get_plugin_generator('archivingmod_quiz');
+    }
+
+    /**
+     * Generates an (incomplete) job settings object with all filters enabled
+     *
+     * @return \stdClass That emulates the filter related data received from the job_create_form
+     */
+    protected static function get_formdata_all_filters_enabled(): object {
+        $formdata = new \stdClass();
+        foreach (attempts_filter::cases() as $filter) {
+            $formdata->{'attempts_filter_' . $filter->value} = 1;
+        }
+        return $formdata;
     }
 
     /**
@@ -252,5 +266,23 @@ final class archivingmod_test extends \advanced_testcase {
         $this->assertNotEquals($fingerprint2, $fingerprint3, 'Fingerprint should change when an attempt is modified.');
         $this->assertNotEquals($fingerprint1, $fingerprint3, 'Fingerprint should change when an attempt is modified.');
         $this->assertEquals($fingerprint3, $driver->fingerprint(), 'Fingerprint should be stable if nothing changes.');
+    }
+
+    /**
+     * Tests conversion job settings to attempts filterkey list
+     *
+     * @covers \archivingmod_quiz\archivingmod::build_attempts_filters_from_formdata
+     *
+     * @return void
+     */
+    public function test_build_attempts_filters_from_formdata(): void {
+        // Test all filters enabled.
+        $settings = self::get_formdata_all_filters_enabled();
+        $filters = archivingmod::build_attempts_filters_from_formdata($settings);
+        $this->assertEquals(
+            array_map(fn ($x) => $x->value, attempts_filter::cases()),
+            $filters,
+            'Settings filter selection not correctly converted to filterkey list'
+        );
     }
 }

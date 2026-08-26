@@ -1,0 +1,65 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template archivingstore_s3/setting_connection_status
+
+    S3 connection/configuration status template.
+
+    Example context (json):
+    {
+        "title": "Setting title",
+        "description": "Description goes here",
+        "rows": [
+            { "label": "Endpoint is reachable", "ok": true, "detail": null },
+            { "label": "Bucket is accessible", "ok": false, "detail": "HTTP 403: Access Denied" }
+        ]
+    }
+}}
+{{!
+    Setting connection status.
+}}
+<div class="form-item row">
+    <div class="form-label col-sm-3 text-sm-end">
+        <label>
+            {{{title}}}
+        </label>
+    </div>
+    <div class="form-setting col-sm-9">
+        <div class="form-description">{{{description}}}</div>
+        <ul class="list-group mt-2 mb-1 d-inline-flex">
+            {{#rows}}
+            <li class="list-group-item d-flex justify-content-between align-items-center {{^ok}} list-group-item-danger {{/ok}}">
+                {{#ok}}
+                    <span>
+                        <i class="fa-solid fa-square-check text-success fa-xl"></i>&nbsp;
+                        {{{label}}}
+                    </span>
+                {{/ok}}
+                {{^ok}}
+                    <span>
+                        <i class="fa-solid fa-square-xmark text-danger fa-xl"></i>&nbsp;
+                        {{{label}}}
+                        {{#detail}}
+                        <div class="text-muted small mt-1">{{{detail}}}</div>
+                        {{/detail}}
+                    </span>
+                {{/ok}}
+            </li>
+            {{/rows}}
+        </ul>
+    </div>
+</div>

@@ -23,6 +23,7 @@
  */
 
 use archivingstore_s3\local\admin\setting\admin_setting_s3_bucket_path;
+use archivingstore_s3\local\admin\setting\admin_setting_s3_connection_status;
 use archivingstore_s3\local\admin\setting\admin_setting_s3_endpoint;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -41,6 +42,13 @@ if ($hassiteconfig) {
             get_string('setting_enabled', 'archivingstore_s3'),
             get_string('setting_enabled_desc', 'archivingstore_s3'),
             '0'
+        ));
+
+        // Connection status.
+        $settings->add(new admin_setting_s3_connection_status(
+            'archivingstore_s3/connection_status',
+            get_string('setting_connection_status', 'archivingstore_s3'),
+            get_string('setting_connection_status_desc', 'archivingstore_s3')
         ));
 
         // Connection.

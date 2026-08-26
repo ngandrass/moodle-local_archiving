@@ -54,6 +54,12 @@ $string['setting_secret_key_desc'] = 'The secret key used to authenticate with t
 $string['setting_connection_status'] = 'Connection status';
 $string['setting_connection_status_desc'] = 'Shows whether the settings below are complete and whether the configured endpoint and bucket are reachable. This check is performed live whenever this page is loaded, using the settings as of the last save.';
 
+// Connection status.
+$string['status_configured'] = 'S3 storage is fully configured';
+$string['status_reachable'] = 'S3 endpoint is reachable';
+$string['status_accessible'] = 'Bucket is accessible with the given credentials';
+$string['status_check_skipped'] = 'Check skipped';
+
 // Errors.
 $string['error_s3_not_configured'] = 'The S3 storage driver is not fully configured. Please fill in all required settings.';
 $string['error_s3_object_too_large'] = 'The file is larger than the maximum supported single-upload size of 5 GiB.';

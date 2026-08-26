@@ -273,15 +273,9 @@ class archivingmod_quiz_generator extends \testing_data_generator {
             }
         }
         $quiz = $DB->get_record('quiz', ['id' => $cm->instance], '*', MUST_EXIST);
-        $attemptids = array_values(array_map(
-            fn($r): int => $r->id,
-            $DB->get_records('quiz_attempts', ['quiz' => $quiz->id], '', 'id')
-        ));
-
-        $userids = array_values(array_map(
-            fn($r): int => $r->userid,
-            $DB->get_records('quiz_attempts', ['quiz' => $quiz->id], '', 'userid')
-        ));
+        $attempts = $DB->get_records('quiz_attempts', ['quiz' => $quiz->id], '', 'id, userid');
+        $attemptids = array_values(array_map(fn($r): int => $r->id, $attempts));
+        $userids = array_values(array_map(fn($r): int => $r->userid, $attempts));
 
         return (object) [
             'course' => $course,

@@ -54,3 +54,14 @@ $string['setting_secret_key_desc'] = 'The secret key used to authenticate with t
 $string['setting_connection_status'] = 'Connection status';
 $string['setting_connection_status_desc'] = 'Shows whether the settings below are complete and whether the configured endpoint and bucket are reachable. This check is performed live whenever this page is loaded, using the settings as of the last save.';
 
+// Errors.
+$string['error_s3_not_configured'] = 'The S3 storage driver is not fully configured. Please fill in all required settings.';
+$string['error_s3_object_too_large'] = 'The file is larger than the maximum supported single-upload size of 5 GiB.';
+$string['error_s3_object_store_failed'] = 'Failed to store the file object: {$a}';
+$string['error_s3_object_retrieve_failed'] = 'Failed to retrieve the file object from storage: {$a}';
+$string['error_s3_object_delete_failed'] = 'Failed to delete the file object from storage: {$a}';
+$string['error_s3_endpoint_must_not_contain_scheme'] = 'The endpoint must not include a scheme (http:// or https://). Set the "Use TLS" setting instead.';
+$string['error_s3_endpoint_must_not_contain_path'] = 'The endpoint must not include a path. Enter only the hostname, optionally followed by a port.';
+$string['error_s3_endpoint_invalid_port'] = 'The port must be a number between 1 and 65535.';
+$string['error_s3_bucket_path_invalid_bucket_name'] = 'Invalid bucket name. Bucket names must be 3-63 characters long string, consisting of only lowercase letters, digits, dots, and hyphens. It must not start or end with a dot or hyphen.';
+$string['error_s3_bucket_path_invalid_prefix'] = 'Invalid key prefix. The prefix must not start with a slash, must not contain consecutive slashes or ".." segments, and must not contain control characters.';

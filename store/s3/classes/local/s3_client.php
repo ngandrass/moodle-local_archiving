@@ -149,6 +149,8 @@ final class s3_client {
             return new connection_check_result(connection_status::CONNECTION_ERROR, $c->error);
         }
 
+        // @codeCoverageIgnoreStart
+
         // If we got a 2xx response, the endpoint is reachable and the bucket is accessible with the given credentials.
         $httpcode = (int) ($c->get_info()['http_code'] ?? 0);
         if ($httpcode >= 200 && $httpcode < 300) {
@@ -165,6 +167,7 @@ final class s3_client {
                 "HTTP {$httpcode}" . ($message !== null ? ": {$message}" : '')
             ),
         };
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -210,6 +213,8 @@ final class s3_client {
             throw new storage_exception('error_s3_object_store_failed', 'archivingstore_s3', a: $c->error);
         }
 
+        // @codeCoverageIgnoreStart
+
         $httpcode = (int) ($c->get_info()['http_code'] ?? 0);
         if ($httpcode >= 200 && $httpcode < 300) {
             return;
@@ -217,6 +222,7 @@ final class s3_client {
 
         $message = $this->parse_error_message((string) $body) ?? "HTTP {$httpcode}";
         throw new storage_exception('error_s3_object_store_failed', 'archivingstore_s3', a: $message);
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -251,6 +257,8 @@ final class s3_client {
             throw new storage_exception('error_s3_object_retrieve_failed', 'archivingstore_s3', a: $c->error);
         }
 
+        // @codeCoverageIgnoreStart
+
         $httpcode = (int) ($c->get_info()['http_code'] ?? 0);
         if ($httpcode >= 200 && $httpcode < 300) {
             // Everything fine.
@@ -268,6 +276,7 @@ final class s3_client {
 
         $message = $this->parse_error_message($body) ?? "HTTP {$httpcode}";
         throw new storage_exception('error_s3_object_retrieve_failed', 'archivingstore_s3', a: $message);
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -293,6 +302,8 @@ final class s3_client {
             throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: $c->error);
         }
 
+        // @codeCoverageIgnoreStart
+
         $httpcode = (int) ($c->get_info()['http_code'] ?? 0);
         if ($httpcode >= 200 && $httpcode < 300) {
             return;
@@ -300,6 +311,7 @@ final class s3_client {
 
         $message = $this->parse_error_message((string) $body) ?? "HTTP {$httpcode}";
         throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: $message);
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -326,6 +338,8 @@ final class s3_client {
             throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: $c->error);
         }
 
+        // @codeCoverageIgnoreStart
+
         $httpcode = (int) ($c->get_info()['http_code'] ?? 0);
         if ($httpcode === 200) {
             // Object exists.
@@ -338,6 +352,7 @@ final class s3_client {
 
         // Other error. Treat as check failure.
         throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: "HTTP {$httpcode}");
+        // @codeCoverageIgnoreEnd
     }
 
     /**

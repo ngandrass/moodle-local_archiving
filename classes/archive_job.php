@@ -515,6 +515,8 @@ class archive_job {
                     throw new \moodle_exception('artifact_storing_failed', 'local_archiving');
                 }
 
+                $this->get_logger()->debug("Using storage driver: {$driver->get_plugin_name()}");
+
                 // Activity archiving tasks.
                 foreach ($tasks as $task) {
                     foreach ($task->get_linked_artifacts() as $artifact) {

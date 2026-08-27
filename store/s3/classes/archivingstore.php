@@ -27,6 +27,7 @@ namespace archivingstore_s3;
 use archivingstore_s3\local\s3_client;
 use local_archiving\file_handle;
 use local_archiving\local\exception\storage_exception;
+use local_archiving\local\logging\job_logger;
 use local_archiving\local\type\storage_tier;
 use local_archiving\storage;
 
@@ -68,6 +69,50 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
             && !empty($config->bucket_path)
             && !empty($config->access_key)
             && !empty($config->secret_key);
+    }
+
+    /**
+     * Builds a progress callback for put_object() that reports upload progress to the job log
+     *
+     * Always logs the first observed progress tick and the final 100% completion tick; every
+     * update inbetween is throttled to at most one log entry every 10 seconds.
+     *
+     * @param int $jobid ID of the job to log progress for
+     * @return callable A callback with signature function(int $bytessent, int $bytestotal): void
+     * @throws \dml_exception
+     */
+    private function upload_progress_callback(int $jobid): callable {
+        // Prepare inherited state for the closure.
+        $logger = new job_logger($jobid);
+        $lastlogtime = 0;
+        $loggedcomplete = false;
+
+        // Create progress reporting closure.
+        return function (int $bytessent, int $bytestotal) use ($logger, &$lastlogtime, &$loggedcomplete): void {
+            if ($bytestotal <= 0) {
+                return;
+            }
+
+            // Ensure we log 0% and 100% progress, but everything inbetween only every 10 seconds.
+            $iscomplete = $bytessent >= $bytestotal;
+            $now = time();
+
+            if ($iscomplete) {
+                if ($loggedcomplete) {
+                    return;
+                }
+                $loggedcomplete = true;
+            } else if ($now - $lastlogtime < 10) {
+                return;
+            }
+
+            // Log current progress.
+            $lastlogtime = $now;
+            $percent = (int) floor(($bytessent / $bytestotal) * 100);
+            $logger->info(
+                " -> Uploading: {$percent}% (" . display_size($bytessent) . ' / ' . display_size($bytestotal) . ')'
+            );
+        };
     }
 
     #[\Override]
@@ -119,7 +164,8 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
         s3_client::instance()->put_object(
             $this->s3_object_key($filepath, $filename),
             $localpath,
-            $sha256
+            $sha256,
+            $this->upload_progress_callback($jobid)
         );
 
         // @codeCoverageIgnoreStart

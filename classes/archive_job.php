@@ -520,9 +520,12 @@ class archive_job {
                 // Activity archiving tasks.
                 foreach ($tasks as $task) {
                     foreach ($task->get_linked_artifacts() as $artifact) {
+                        $this->get_logger()->info(
+                            "Storing activity artifact: {$artifact->get_filename()} " .
+                            "(size: " . display_size($artifact->get_filesize()) . ") (id: {$artifact->get_id()})"
+                        );
                         $filehandle = $driver->store($this->id, $artifact, $storagepath);
-                        $this->get_logger()->info('Stored activity artifact: ' .
-                            "{$filehandle->filename} (size: " . display_size($filehandle->filesize) . ") (id: {$filehandle->id})");
+                        $this->get_logger()->info(' -> Success. File handle ID: ' . $filehandle->id);
                         $task->unlink_artifact($artifact, true);
                     }
                 }
@@ -543,9 +546,12 @@ class archive_job {
                             );
                         }
 
+                        $this->get_logger()->info(
+                            "Storing Moodle backup: {$backupfile->get_filename()} " .
+                            "(size: " . display_size($backupfile->get_filesize()) . ") (id: {$artifact->get_id()})"
+                        );
                         $filehandle = $driver->store($this->id, $backupfile, $storagepath);
-                        $this->get_logger()->info('Stored backup: ' .
-                            "{$filehandle->filename} (size: " . display_size($filehandle->filesize) . ") (id: {$filehandle->id})");
+                        $this->get_logger()->info(' -> Success. File handle ID: ' . $filehandle->id);
                         $bm->cleanup();
                     } else {
                         $this->get_logger()->debug("No {$backupidkey} found.");

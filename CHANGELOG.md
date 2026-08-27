@@ -12,6 +12,7 @@
 - Move sub-plugin directories to plugin root to align with Moodle core conventions
 - Restructure repository to meet Moodle coding style level 2 namespace suggestions
 - Improve Moodle "pluginfile image" inlining logic in report generators
+- Improve archive job logging in storing stage
 
 
 ## Version 1.0.0 (2025112300)

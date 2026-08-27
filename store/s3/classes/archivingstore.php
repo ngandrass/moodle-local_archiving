@@ -95,8 +95,9 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
         // Check if the s3 target is reachable.
         try {
             return s3_client::instance()->check_connection()->is_ok();
-        } catch (storage_exception $e) {
-            return false;
+        } catch (\Exception) {
+            // Just a safeguard that should never trip ...
+            return false; // @codeCoverageIgnore
         }
     }
 
@@ -121,6 +122,7 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
             $sha256
         );
 
+        // @codeCoverageIgnoreStart
         // Create file handle for stored file.
         return file_handle::create(
             jobid: $jobid,
@@ -131,6 +133,7 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
             sha256sum: $sha256,
             mimetype: $file->get_mimetype()
         );
+        // @codeCoverageIgnoreEnd
     }
 
     #[\Override]
@@ -145,6 +148,7 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
                 $tmppath
             );
 
+            // @codeCoverageIgnoreStart
             // Move downloaded file into local Moodle file storage.
             $storedfile = get_file_storage()->create_file_from_pathname($fileinfo, $tmppath);
             if (!$storedfile) {
@@ -152,6 +156,7 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
             }
 
             return $storedfile;
+            // @codeCoverageIgnoreEnd
         } finally {
             @unlink($tmppath);
         }

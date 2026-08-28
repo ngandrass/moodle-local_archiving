@@ -67,13 +67,15 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
     }
 
     #[\Override]
-    public function store(int $jobid, \stored_file $file, string $path): file_handle {
+    public function store(int $jobid, \stored_file $file, string $path, ?callable $progresscallback = null): file_handle {
         // Get job.
         $job = archive_job::get_by_id($jobid);
 
         // Store the file inside the permanent Moodle file storage.
         try {
             $fs = get_file_storage();
+
+            is_callable($progresscallback) && $progresscallback(0, $file->get_filesize());
             $moodlestorefile = $fs->create_file_from_storedfile([
                 'contextid' => $job->get_context()->id,
                 'component' => self::FS_COMPONENT,
@@ -84,6 +86,7 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
                 'timecreated' => $file->get_timecreated(),
                 'timemodified' => time(),
             ], $file);
+            is_callable($progresscallback) && $progresscallback($file->get_filesize(), $file->get_filesize());
         } catch (\Exception) {
             throw new storage_exception('filestorefailed', 'archivingstore_moodle');
         }
@@ -102,7 +105,7 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
     }
 
     #[\Override]
-    public function retrieve(file_handle $handle, \stdClass $fileinfo): \stored_file {
+    public function retrieve(file_handle $handle, \stdClass $fileinfo, ?callable $progresscallback = null): \stored_file {
         // Retrieve the file from Moodle file storage.
         $fs = get_file_storage();
         $moodlestorefile = $fs->get_file_by_id($handle->filekey);
@@ -113,7 +116,9 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
 
         // Copy the file to the desired location.
         try {
+            is_callable($progresscallback) && $progresscallback(0, $handle->filesize);
             $retrievedfile = $fs->create_file_from_storedfile($fileinfo, $moodlestorefile);
+            is_callable($progresscallback) && $progresscallback($handle->filesize, $handle->filesize);
         } catch (\Exception) {
             throw new storage_exception('filestorefailed', 'archivingstore_moodle');
         }

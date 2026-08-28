@@ -78,10 +78,19 @@ abstract class archivingstore extends base {
      * @param int $jobid ID of the archive job this file is associated with
      * @param \stored_file $file The Moodle file to be stored
      * @param string $path The path to store the file under
+     * @param callable|null $progresscallback Optional callback invoked with
+     * (int $bytessent, int $bytestotal) to report storing progress. The
+     * callback may throw a storage_exception to request cancellation of the
+     * store operation, in which case implementations must catch it, abort
+     * the transfer, perform any necessary cleanup, and re-throw it to the
+     * caller (rather than swallowing it or replacing it with a different
+     * exception). Drivers that store data nearly instant (e.g., LOCAL tier)
+     * may ignore this parameter entirely, since there is no meaningful
+     * transfer to cancel.
      * @return file_handle Handle of the stored file
      * @throws storage_exception
      */
-    abstract public function store(int $jobid, \stored_file $file, string $path): file_handle;
+    abstract public function store(int $jobid, \stored_file $file, string $path, ?callable $progresscallback = null): file_handle;
 
     /**
      * Retrieves the file stored for the given file handle
@@ -95,10 +104,18 @@ abstract class archivingstore extends base {
      *
      * @param file_handle $handle Handle of the file to retrieve
      * @param \stdClass $fileinfo The file info object to use for storing the file
+     * @param callable|null $progresscallback Optional callback invoked with
+     * (int $bytesreceived, int $bytestotal) to report retrieval progress. The
+     * callback may throw a storage_exception to request cancellation of the
+     * retrieval, in which case implementations must catch it, abort the
+     * transfer, perform any necessary cleanup, and re-throw it to the caller
+     * (rather than swallowing it or replacing it with a different exception).
+     * Drivers that retrieve data neraly instant (e.g., LOCAL tier) may ignore
+     * this parameter entirely, since there is no meaningful transfer to cancel.
      * @return \stored_file The retrieved file
      * @throws storage_exception
      */
-    abstract public function retrieve(file_handle $handle, \stdClass $fileinfo): \stored_file;
+    abstract public function retrieve(file_handle $handle, \stdClass $fileinfo, ?callable $progresscallback = null): \stored_file;
 
     /**
      * Deletes the given file from storage if possible

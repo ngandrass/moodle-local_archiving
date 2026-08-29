@@ -376,7 +376,7 @@ final class file_handle {
     public function retrieve_file(): \stored_file {
         // Do not retrieve deleted if deleted previously.
         if ($this->deleted) {
-            throw new storage_exception('deleted_file_can_not_be_retrieved.', 'local_archiving');
+            throw new storage_exception('deleted_file_can_not_be_retrieved', 'local_archiving');
         }
 
         // Check if the file is already present in the local filestore cache.

@@ -18,8 +18,6 @@ namespace archivingstore_s3;
 
 
 use local_archiving\local\exception\storage_exception;
-use local_archiving\local\logging\job_logger;
-use local_archiving\local\type\log_level;
 
 /**
  * Tests for the archivingstore_s3 implementation.
@@ -189,7 +187,9 @@ final class archivingstore_test extends \advanced_testcase {
     }
 
     /**
-     * Tests that store() propagates a storage_exception when the S3 endpoint is unreachable.
+     * Tests that store() propagates a storage_exception when the S3 endpoint is unreachable, and
+     * that a given progress callback is accepted without error (and never invoked, since the
+     * connection fails before any data can be transferred).
      *
      * @covers \archivingstore_s3\archivingstore
      *
@@ -206,13 +206,26 @@ final class archivingstore_test extends \advanced_testcase {
         $job = $this->generator()->create_archive_job();
         $inputfile = $this->generator()->create_temp_file();
 
+        $callbackinvoked = false;
+        $callback = function () use (&$callbackinvoked): void {
+            $callbackinvoked = true;
+        };
+
         $store = new archivingstore();
-        $this->expectException(storage_exception::class);
-        $store->store($job->get_id(), $inputfile, '/foo/bar');
+        try {
+            $store->store($job->get_id(), $inputfile, '/foo/bar', $callback);
+            $this->fail('Expected a storage_exception to be thrown.');
+        } catch (storage_exception) { // phpcs:ignore
+            // Expected.
+        }
+
+        $this->assertFalse($callbackinvoked, 'Progress callback should not be invoked on immediate connection failure.');
     }
 
     /**
-     * Tests that retrieve() propagates a storage_exception when the S3 endpoint is unreachable.
+     * Tests that retrieve() propagates a storage_exception when the S3 endpoint is unreachable, and
+     * that a given progress callback is accepted without error (and never invoked, since the
+     * connection fails before any data can be transferred).
      *
      * @covers \archivingstore_s3\archivingstore
      *
@@ -234,9 +247,20 @@ final class archivingstore_test extends \advanced_testcase {
             'filename' => $handle->filename,
         ];
 
+        $callbackinvoked = false;
+        $callback = function () use (&$callbackinvoked): void {
+            $callbackinvoked = true;
+        };
+
         $store = new archivingstore();
-        $this->expectException(storage_exception::class);
-        $store->retrieve($handle, $fileinfo);
+        try {
+            $store->retrieve($handle, $fileinfo, $callback);
+            $this->fail('Expected a storage_exception to be thrown.');
+        } catch (storage_exception) { // phpcs:ignore
+            // Expected.
+        }
+
+        $this->assertFalse($callbackinvoked, 'Progress callback should not be invoked on immediate connection failure.');
     }
 
     /**
@@ -277,174 +301,6 @@ final class archivingstore_test extends \advanced_testcase {
         $store = new archivingstore();
         $this->expectException(storage_exception::class);
         $store->delete($handle, strict: true);
-    }
-
-    /**
-     * Invokes the private upload_progress_callback() method to obtain a progress callback
-     *
-     * @param archivingstore $store Store instance to invoke the method on
-     * @param int $jobid Job ID to build the callback for
-     * @return callable The built progress callback
-     * @throws \ReflectionException
-     */
-    private function invoke_upload_progress_callback(archivingstore $store, int $jobid): callable {
-        $method = new \ReflectionMethod(archivingstore::class, 'upload_progress_callback');
-        $method->setAccessible(true);
-        return $method->invoke($store, $jobid);
-    }
-
-    /**
-     * Tests that no log entry is written when the reported total size is zero or negative.
-     *
-     * @covers \archivingstore_s3\archivingstore
-     *
-     * @return void
-     * @throws \ReflectionException
-     * @throws \dml_exception
-     * @throws \moodle_exception
-     */
-    public function test_upload_progress_callback_zero_total(): void {
-        $this->resetAfterTest();
-        set_config('log_level', log_level::TRACE->value, 'local_archiving');
-        $job = $this->generator()->create_archive_job();
-
-        $callback = $this->invoke_upload_progress_callback(new archivingstore(), $job->get_id());
-        $callback(0, 0);
-
-        $this->assertCount(0, (new job_logger($job->get_id()))->get_logs(), 'No log entry should be written.');
-    }
-
-    /**
-     * Tests that the first observed progress tick is always logged.
-     *
-     * @covers \archivingstore_s3\archivingstore
-     *
-     * @return void
-     * @throws \ReflectionException
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \moodle_exception
-     */
-    public function test_upload_progress_callback_logs_first_tick(): void {
-        $this->resetAfterTest();
-        set_config('log_level', log_level::TRACE->value, 'local_archiving');
-        $job = $this->generator()->create_archive_job();
-
-        $callback = $this->invoke_upload_progress_callback(new archivingstore(), $job->get_id());
-        $callback(50, 200);
-
-        $logs = array_values((new job_logger($job->get_id()))->get_logs());
-        $this->assertCount(1, $logs, 'Expected exactly one log entry after the first progress tick.');
-        $this->assertEquals(log_level::INFO->value, $logs[0]->level, 'Progress should be logged at INFO level.');
-        $this->assertEquals($job->get_id(), $logs[0]->jobid, 'Log entry should be linked to the job.');
-        $this->assertStringContainsString('25%', $logs[0]->message, 'Log message does not include percentage.');
-    }
-
-    /**
-     * Tests that intermediate progress ticks are throttled to at most one log entry every 10 seconds.
-     *
-     * @covers \archivingstore_s3\archivingstore
-     *
-     * @return void
-     * @throws \ReflectionException
-     * @throws \dml_exception
-     * @throws \moodle_exception
-     */
-    public function test_upload_progress_callback_throttles_intermediate_ticks(): void {
-        $this->resetAfterTest();
-        set_config('log_level', log_level::TRACE->value, 'local_archiving');
-        $job = $this->generator()->create_archive_job();
-
-        $callback = $this->invoke_upload_progress_callback(new archivingstore(), $job->get_id());
-        $callback(50, 200);
-        $callback(100, 200);
-
-        $this->assertCount(
-            1,
-            (new job_logger($job->get_id()))->get_logs(),
-            'A second intermediate progress tick within 10 seconds should not be logged again.'
-        );
-    }
-
-    /**
-     * Tests that the final 100% completion tick is always logged, even within the throttle window.
-     *
-     * @covers \archivingstore_s3\archivingstore
-     *
-     * @return void
-     * @throws \ReflectionException
-     * @throws \dml_exception
-     * @throws \moodle_exception
-     */
-    public function test_upload_progress_callback_always_logs_completion(): void {
-        $this->resetAfterTest();
-        set_config('log_level', log_level::TRACE->value, 'local_archiving');
-        $job = $this->generator()->create_archive_job();
-
-        $callback = $this->invoke_upload_progress_callback(new archivingstore(), $job->get_id());
-        $callback(50, 200);
-        $callback(200, 200);
-
-        $logs = array_values((new job_logger($job->get_id()))->get_logs());
-        $this->assertCount(2, $logs, 'Completion should be logged even though it is within the throttle window.');
-        $this->assertStringContainsString('100%', $logs[1]->message, 'Second log entry should report 100% completion.');
-    }
-
-    /**
-     * Tests that the completion tick is only logged once, even if reported multiple times.
-     *
-     * @covers \archivingstore_s3\archivingstore
-     *
-     * @return void
-     * @throws \ReflectionException
-     * @throws \dml_exception
-     * @throws \moodle_exception
-     */
-    public function test_upload_progress_callback_completion_logged_once(): void {
-        $this->resetAfterTest();
-        set_config('log_level', log_level::TRACE->value, 'local_archiving');
-        $job = $this->generator()->create_archive_job();
-
-        $callback = $this->invoke_upload_progress_callback(new archivingstore(), $job->get_id());
-        $callback(200, 200);
-        $callback(200, 200);
-
-        $this->assertCount(
-            1,
-            (new job_logger($job->get_id()))->get_logs(),
-            'A repeated completion tick should not be logged again.'
-        );
-    }
-
-    /**
-     * Tests that separate calls to upload_progress_callback() produce independent closures that do not share state.
-     *
-     * @covers \archivingstore_s3\archivingstore
-     *
-     * @return void
-     * @throws \ReflectionException
-     * @throws \dml_exception
-     */
-    public function test_upload_progress_callback_independent_instances(): void {
-        $this->resetAfterTest();
-        set_config('log_level', log_level::TRACE->value, 'local_archiving');
-        $job1 = $this->generator()->create_archive_job();
-        $job2 = $this->generator()->create_archive_job();
-
-        $store = new archivingstore();
-        $callback1 = $this->invoke_upload_progress_callback($store, $job1->get_id());
-        $callback2 = $this->invoke_upload_progress_callback($store, $job2->get_id());
-
-        $callback1(50, 200);
-        $callback2(100, 400);
-
-        $logs1 = array_values((new job_logger($job1->get_id()))->get_logs());
-        $logs2 = array_values((new job_logger($job2->get_id()))->get_logs());
-
-        $this->assertCount(1, $logs1, 'First job should have exactly one log entry.');
-        $this->assertCount(1, $logs2, 'Second job should have exactly one log entry.');
-        $this->assertStringContainsString('25%', $logs1[0]->message, 'First job log should report its own progress.');
-        $this->assertStringContainsString('25%', $logs2[0]->message, 'Second job log should report its own progress.');
     }
 
     /**

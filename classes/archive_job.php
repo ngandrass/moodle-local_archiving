@@ -524,7 +524,7 @@ class archive_job {
                             "Storing activity artifact: {$artifact->get_filename()} " .
                             "(size: " . display_size($artifact->get_filesize()) . ") (id: {$artifact->get_id()})"
                         );
-                        $filehandle = $driver->store($this->id, $artifact, $storagepath);
+                        $filehandle = $driver->store($this->id, $artifact, $storagepath, $this->store_progress_callback());
                         $this->get_logger()->info(' -> Success. File handle ID: ' . $filehandle->id);
                         $task->unlink_artifact($artifact, true);
                     }
@@ -550,7 +550,7 @@ class archive_job {
                             "Storing Moodle backup: {$backupfile->get_filename()} " .
                             "(size: " . display_size($backupfile->get_filesize()) . ") (id: {$artifact->get_id()})"
                         );
-                        $filehandle = $driver->store($this->id, $backupfile, $storagepath);
+                        $filehandle = $driver->store($this->id, $backupfile, $storagepath, $this->store_progress_callback());
                         $this->get_logger()->info(' -> Success. File handle ID: ' . $filehandle->id);
                         $bm->cleanup();
                     } else {
@@ -901,6 +901,52 @@ class archive_job {
             default:
                 return null; // @codeCoverageIgnore
         }
+    }
+
+    /**
+     * Builds a progress callback for artifact store and retrieve operations that reports storing
+     * progress to the job log.
+     *
+     * Always logs the first observed progress tick and the final 100% completion tick; every
+     * update inbetween is throttled to at most one log entry every 10 seconds. A fresh instance
+     * must be built for each store() call so that each file's transfer gets its own independent
+     * throttle state.
+     *
+     * @return callable A callback with signature function(int $bytesdone, int $bytestotal): void
+     * @throws \dml_exception
+     */
+    protected function store_progress_callback(): callable {
+        // Prepare inherited state for the closure.
+        $logger = $this->get_logger();
+        $lastlogtime = 0;
+        $loggedcomplete = false;
+
+        // Create progress reporting closure.
+        return function (int $bytesdone, int $bytestotal) use ($logger, &$lastlogtime, &$loggedcomplete): void {
+            if ($bytestotal <= 0) {
+                return;
+            }
+
+            // Ensure we log 0% and 100% progress, but everything inbetween only every 10 seconds.
+            $iscomplete = $bytesdone >= $bytestotal;
+            $now = time();
+
+            if ($iscomplete) {
+                if ($loggedcomplete) {
+                    return;
+                }
+                $loggedcomplete = true;
+            } else if ($now - $lastlogtime < 10) {
+                return;
+            }
+
+            // Log current progress.
+            $lastlogtime = $now;
+            $percent = (int) floor(($bytesdone / $bytestotal) * 100);
+            $logger->info(
+                " -> Progress: {$percent}% (" . display_size($bytesdone) . ' / ' . display_size($bytestotal) . ')'
+            );
+        };
     }
 
     /**

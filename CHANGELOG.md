@@ -4,6 +4,9 @@
 
 - Update Moodle plugin CI to include Moodle 5.2 and all supported PHP versions
 - Add sub-plugin PHPUnit test execution stage to Moodle plugin CI pipeline
+- Asynchronously retrieve files from remote storages (e.g., S3 object store) to allow downloading via the Moodle UI
+- Add callback hooks to store and retrieve functions of storage drivers to allow for progress tracking
+- Harden file retrieval logic
 - Add support for receiving chunked uploads of quiz archives
 - Add support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack) in quizzes.
 - Include core sub-plugins in PHPUnit coverage reports

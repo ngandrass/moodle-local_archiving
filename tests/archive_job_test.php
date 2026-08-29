@@ -20,6 +20,7 @@ use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
+use local_archiving\task\retrieve_remote_file;
 
 /**
  * Tests for the archive_job class
@@ -410,10 +411,18 @@ final class archive_job_test extends \advanced_testcase {
             activity_archiving_task::get_by_jobid($jobid),
             'Job should create at least one activity archiving task'
         );
+        $filehandles = file_handle::get_by_jobid($jobid);
         $this->assertNotEmpty(
-            file_handle::get_by_jobid($jobid),
+            $filehandles,
             'Job should create at least one file handle for the archived content'
         );
+
+        // Queue an outstanding on-demand retrieval for one of the file handles, simulating a
+        // fetch that was started but not yet processed by cron when the job gets deleted.
+        $filehandleid = reset($filehandles)->id;
+        $task = retrieve_remote_file::create(file_handle::get_by_id($filehandleid), get_admin()->id);
+        \core\task\manager::queue_adhoc_task($task);
+        remote_file_fetcher::mark_queued($filehandleid);
 
         // Delete the job and check that everything was cleaned up correctly.
         $job->delete();
@@ -440,6 +449,14 @@ final class archive_job_test extends \advanced_testcase {
         $this->assertEmpty(
             $DB->get_records(db_table::LOG->value, ['jobid' => $jobid]),
             'Job logs should be deleted from the database'
+        );
+        $this->assertEmpty(
+            \core\task\manager::get_adhoc_tasks(retrieve_remote_file::class),
+            'Outstanding retrieve_remote_file tasks should be cancelled when the job is deleted'
+        );
+        $this->assertNull(
+            remote_file_fetcher::get($filehandleid),
+            'Outstanding remote_file_fetcher tracking records should be purged when the job is deleted'
         );
     }
 
@@ -573,6 +590,160 @@ final class archive_job_test extends \advanced_testcase {
             $job->set_status($state);
             $this->assertSame(100, $job->get_progress(), "Progress should be 100% after {$state->name} state");
         }
+    }
+
+    /**
+     * Tests that no log entry is written when the reported total size is zero or negative.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_zero_total(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(0, 0);
+
+        $this->assertCount(0, $job->get_logger()->get_logs(), 'No log entry should be written.');
+    }
+
+    /**
+     * Tests that the first observed progress tick is always logged.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_logs_first_tick(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(50, 200);
+
+        $logs = array_values($job->get_logger()->get_logs());
+        $this->assertCount(1, $logs, 'Expected exactly one log entry after the first progress tick.');
+        $this->assertEquals(log_level::INFO->value, $logs[0]->level, 'Progress should be logged at INFO level.');
+        $this->assertEquals($job->get_id(), $logs[0]->jobid, 'Log entry should be linked to the job.');
+        $this->assertStringContainsString('25%', $logs[0]->message, 'Log message does not include percentage.');
+    }
+
+    /**
+     * Tests that intermediate progress ticks are throttled.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_throttles_intermediate_ticks(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(50, 200);
+        $callback(100, 200);
+
+        $this->assertCount(
+            1,
+            $job->get_logger()->get_logs(),
+            'A second intermediate progress tick within 10 seconds should not be logged again.'
+        );
+    }
+
+    /**
+     * Tests that the final 100% completion tick is always logged, even within the throttle window.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_always_logs_completion(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(50, 200);
+        $callback(200, 200);
+
+        $logs = array_values($job->get_logger()->get_logs());
+        $this->assertCount(2, $logs, 'Completion should be logged even though it is within the throttle window.');
+        $this->assertStringContainsString('100%', $logs[1]->message, 'Second log entry should report 100% completion.');
+    }
+
+    /**
+     * Tests that the completion tick is only logged once, even if reported multiple times.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_completion_logged_once(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(200, 200);
+        $callback(200, 200);
+
+        $this->assertCount(
+            1,
+            $job->get_logger()->get_logs(),
+            'A repeated completion tick should not be logged again.'
+        );
+    }
+
+    /**
+     * Tests that separate calls to store_progress_callback() produce independent closures that do not share state.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_independent_instances(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job1 = $this->generator()->create_archive_job();
+        $job2 = $this->generator()->create_archive_job();
+
+        $callback1 = self::call_protected_archive_job_method($job1, 'store_progress_callback');
+        $callback2 = self::call_protected_archive_job_method($job2, 'store_progress_callback');
+
+        $callback1(50, 200);
+        $callback2(100, 400);
+
+        $logs1 = array_values($job1->get_logger()->get_logs());
+        $logs2 = array_values($job2->get_logger()->get_logs());
+
+        $this->assertCount(1, $logs1, 'First job should have exactly one log entry.');
+        $this->assertCount(1, $logs2, 'Second job should have exactly one log entry.');
+        $this->assertStringContainsString('25%', $logs1[0]->message, 'First job log should report its own progress.');
+        $this->assertStringContainsString('25%', $logs2[0]->message, 'Second job log should report its own progress.');
     }
 
     /**

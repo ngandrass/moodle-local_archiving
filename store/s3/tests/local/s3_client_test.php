@@ -307,7 +307,7 @@ final class s3_client_test extends \advanced_testcase {
      * @throws \coding_exception
      * @throws storage_exception
      */
-    public function test_put_object_network_failure(): void {
+    public function test_put_object(): void {
         $client = $this->create_client();
         $path = $this->create_temp_file_with_content('hello world');
 
@@ -326,7 +326,7 @@ final class s3_client_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_get_object_network_failure(): void {
+    public function test_get_object(): void {
         $client = $this->create_client();
         $destpath = sys_get_temp_dir() . '/archivingstore_s3_test_get_' . uniqid();
 
@@ -345,7 +345,7 @@ final class s3_client_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_delete_object_network_failure(): void {
+    public function test_delete_object(): void {
         $client = $this->create_client();
 
         $this->expectException(storage_exception::class);
@@ -359,7 +359,7 @@ final class s3_client_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_object_exists_network_failure(): void {
+    public function test_object_exists(): void {
         $client = $this->create_client();
 
         $this->expectException(storage_exception::class);
@@ -665,25 +665,70 @@ final class s3_client_test extends \advanced_testcase {
      */
     public function test_progress_curl_option(): void {
         $client = $this->create_client();
+        $capture = (object) ['exception' => null];
 
         // No callback given: no options should be set.
-        $this->assertSame([], $this->invoke_private_method($client, 'progress_curl_option', [null, true]));
+        $this->assertSame([], $this->invoke_private_method($client, 'progress_curl_option', [null, true, $capture]));
 
         // Upload progress should report (uploadnow, uploadtotal).
         $captured = null;
         $callback = function (int $current, int $total) use (&$captured) {
             $captured = [$current, $total];
         };
-        $options = $this->invoke_private_method($client, 'progress_curl_option', [$callback, true]);
+        $options = $this->invoke_private_method($client, 'progress_curl_option', [$callback, true, $capture]);
         $this->assertFalse($options['CURLOPT_NOPROGRESS']);
         $returnvalue = ($options['CURLOPT_XFERINFOFUNCTION'])(null, 1000, 200, 500, 300);
         $this->assertSame(0, $returnvalue, 'Progress callback must return 0 to keep the transfer going.');
         $this->assertSame([300, 500], $captured, 'Upload progress should report (uploadnow, uploadtotal).');
+        $this->assertNull($capture->exception);
 
         // Download progress should report (downloadnow, downloadtotal).
         $captured = null;
-        $options = $this->invoke_private_method($client, 'progress_curl_option', [$callback, false]);
+        $options = $this->invoke_private_method($client, 'progress_curl_option', [$callback, false, $capture]);
         ($options['CURLOPT_XFERINFOFUNCTION'])(null, 1000, 200, 500, 300);
         $this->assertSame([200, 1000], $captured, 'Download progress should report (downloadnow, downloadtotal).');
+    }
+
+    /**
+     * Tests that a progress callback throwing is translated into the libcurl abort signal
+     * (non-zero) with the exception stashed in $capture, and that a non-throwing callback returns
+     * "continue" (0) and leaves $capture untouched, for both upload and download.
+     *
+     * @covers \archivingstore_s3\local\s3_client
+     *
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function test_progress_curl_option_propagates_abort(): void {
+        $client = $this->create_client();
+
+        foreach ([true, false] as $upload) {
+            // Non-throwing callback: continue, nothing captured.
+            $capture = (object) ['exception' => null];
+            $callback = fn (int $current, int $total) => null;
+            $options = $this->invoke_private_method($client, 'progress_curl_option', [$callback, $upload, $capture]);
+            $returnvalue = ($options['CURLOPT_XFERINFOFUNCTION'])(null, 1000, 200, 500, 300);
+            $this->assertSame(
+                0,
+                $returnvalue,
+                ($upload ? 'Upload' : 'Download') . ' xferinfo function should return 0 when the callback does not throw'
+            );
+            $this->assertNull($capture->exception);
+
+            // Throwing callback: abort, exception captured unchanged.
+            $capture = (object) ['exception' => null];
+            $exception = new storage_exception('error_retrieval_cancelled', 'local_archiving');
+            $callback = function (int $current, int $total) use ($exception) {
+                throw $exception;
+            };
+            $options = $this->invoke_private_method($client, 'progress_curl_option', [$callback, $upload, $capture]);
+            $returnvalue = ($options['CURLOPT_XFERINFOFUNCTION'])(null, 1000, 200, 500, 300);
+            $this->assertSame(
+                1,
+                $returnvalue,
+                ($upload ? 'Upload' : 'Download') . ' xferinfo function should return 1 when the callback throws'
+            );
+            $this->assertSame($exception, $capture->exception);
+        }
     }
 }

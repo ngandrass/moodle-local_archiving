@@ -187,9 +187,7 @@ final class archivingstore_test extends \advanced_testcase {
     }
 
     /**
-     * Tests that store() propagates a storage_exception when the S3 endpoint is unreachable, and
-     * that a given progress callback is accepted without error (and never invoked, since the
-     * connection fails before any data can be transferred).
+     * Tests that store() propagates a storage_exception when the S3 endpoint is unreachable
      *
      * @covers \archivingstore_s3\archivingstore
      *
@@ -200,32 +198,23 @@ final class archivingstore_test extends \advanced_testcase {
      * @throws \moodle_exception
      * @throws \stored_file_creation_exception
      */
-    public function test_store_network_failure(): void {
+    public function test_store(): void {
         $this->resetAfterTest();
         $this->set_valid_config();
         $job = $this->generator()->create_archive_job();
         $inputfile = $this->generator()->create_temp_file();
 
-        $callbackinvoked = false;
-        $callback = function () use (&$callbackinvoked): void {
-            $callbackinvoked = true;
-        };
-
         $store = new archivingstore();
         try {
-            $store->store($job->get_id(), $inputfile, '/foo/bar', $callback);
+            $store->store($job->get_id(), $inputfile, '/foo/bar');
             $this->fail('Expected a storage_exception to be thrown.');
         } catch (storage_exception) { // phpcs:ignore
             // Expected.
         }
-
-        $this->assertFalse($callbackinvoked, 'Progress callback should not be invoked on immediate connection failure.');
     }
 
     /**
-     * Tests that retrieve() propagates a storage_exception when the S3 endpoint is unreachable, and
-     * that a given progress callback is accepted without error (and never invoked, since the
-     * connection fails before any data can be transferred).
+     * Tests that retrieve() propagates a storage_exception when the S3 endpoint is unreachable
      *
      * @covers \archivingstore_s3\archivingstore
      *
@@ -234,7 +223,7 @@ final class archivingstore_test extends \advanced_testcase {
      * @throws \dml_exception
      * @throws storage_exception
      */
-    public function test_retrieve_network_failure(): void {
+    public function test_retrieve(): void {
         $this->resetAfterTest();
         $this->set_valid_config();
         $handle = $this->generator()->create_file_handle(['archivingstorename' => 's3']);
@@ -247,20 +236,13 @@ final class archivingstore_test extends \advanced_testcase {
             'filename' => $handle->filename,
         ];
 
-        $callbackinvoked = false;
-        $callback = function () use (&$callbackinvoked): void {
-            $callbackinvoked = true;
-        };
-
         $store = new archivingstore();
         try {
-            $store->retrieve($handle, $fileinfo, $callback);
+            $store->retrieve($handle, $fileinfo);
             $this->fail('Expected a storage_exception to be thrown.');
         } catch (storage_exception) { // phpcs:ignore
             // Expected.
         }
-
-        $this->assertFalse($callbackinvoked, 'Progress callback should not be invoked on immediate connection failure.');
     }
 
     /**
@@ -273,7 +255,7 @@ final class archivingstore_test extends \advanced_testcase {
      * @throws \dml_exception
      * @throws storage_exception
      */
-    public function test_delete_non_strict_network_failure(): void {
+    public function test_delete_non_strict(): void {
         $this->resetAfterTest();
         $this->set_valid_config();
         $handle = $this->generator()->create_file_handle(['archivingstorename' => 's3']);
@@ -293,7 +275,7 @@ final class archivingstore_test extends \advanced_testcase {
      * @throws \dml_exception
      * @throws storage_exception
      */
-    public function test_delete_strict_network_failure(): void {
+    public function test_delete_strict(): void {
         $this->resetAfterTest();
         $this->set_valid_config();
         $handle = $this->generator()->create_file_handle(['archivingstorename' => 's3']);

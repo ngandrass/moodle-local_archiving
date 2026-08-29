@@ -176,7 +176,9 @@ final class s3_client {
      * @param string $key Object key to store the file under (relative to the configured key prefix)
      * @param string $localpath Absolute path of the local file to upload
      * @param string $sha256 SHA-256 checksum of the local file
-     * @param callable|null $progresscallback Optional callback invoked with (int $bytessent, int $bytestotal)
+     * @param callable|null $progresscallback Optional callback invoked with (int $bytessent,
+     * int $bytestotal), optionally throwing a storage_exception to cancel the upload - the same
+     * exception is re-thrown unchanged, same as any other storage_exception
      * @throws storage_exception
      * @throws \coding_exception
      */
@@ -198,15 +200,21 @@ final class s3_client {
         $path = $this->canonical_path($key);
         $headers = $this->build_signed_headers('PUT', $path, [], $sha256);
 
+        $callbackcapture = (object) ['exception' => null];
         $options = array_merge(
             $this->base_curl_options(timeout: HOURSECS),
-            $this->progress_curl_option($progresscallback, upload: true),
+            $this->progress_curl_option($progresscallback, upload: true, capture: $callbackcapture),
             ['CURLOPT_HTTPHEADER' => $this->format_http_headers($headers)]
         );
 
         // Perform the upload.
         $c = new curl(['ignoresecurity' => true]);
         $body = $c->put($this->request_url($path), ['file' => $localpath], $options);
+
+        // If the progress callback requested cancellation, re-throw it unchanged.
+        if ($callbackcapture->exception !== null) {
+            throw $callbackcapture->exception;
+        }
 
         // Error handling.
         if (!empty($c->error)) {
@@ -230,7 +238,9 @@ final class s3_client {
      *
      * @param string $key Object key to retrieve (relative to the configured key prefix)
      * @param string $localpath Absolute path to write the downloaded file to
-     * @param callable|null $progresscallback Optional callback invoked with (int $bytesreceived, int $bytestotal)
+     * @param callable|null $progresscallback Optional callback invoked with (int $bytesreceived,
+     * int $bytestotal), optionally throwing a storage_exception to cancel the download - the same
+     * exception is re-thrown unchanged, same as any other storage_exception
      * @throws storage_exception
      */
     public function get_object(string $key, string $localpath, ?callable $progresscallback = null): void {
@@ -238,9 +248,10 @@ final class s3_client {
         $path = $this->canonical_path($key);
         $headers = $this->build_signed_headers('GET', $path, [], self::EMPTY_PAYLOAD_SHA256);
 
+        $callbackcapture = (object) ['exception' => null];
         $options = array_merge(
             $this->base_curl_options(timeout: 0),
-            $this->progress_curl_option($progresscallback, upload: false),
+            $this->progress_curl_option($progresscallback, upload: false, capture: $callbackcapture),
             [
                 'CURLOPT_HTTPHEADER' => $this->format_http_headers($headers),
                 'filepath' => $localpath,
@@ -250,6 +261,11 @@ final class s3_client {
         // Download requested file.
         $c = new curl(['ignoresecurity' => true]);
         $c->download_one($this->request_url($path), null, $options);
+
+        // If the progress callback requested cancellation, re-throw it unchanged.
+        if ($callbackcapture->exception !== null) {
+            throw $callbackcapture->exception;
+        }
 
         // Error handling.
         if (!empty($c->error)) {
@@ -525,11 +541,21 @@ final class s3_client {
     /**
      * Builds the curl progress-callback options for an upload or download, if requested
      *
-     * @param callable|null $progresscallback Callback invoked with (int $current, int $total), or null for none
+     * If the progress callback throws, the transfer is aborted: libcurl calls
+     * CURLOPT_XFERINFOFUNCTION periodically during a transfer, and aborts it with
+     * CURLE_ABORTED_BY_CALLBACK if the callback's return value is non-zero.
+     *
+     * We need to use the $capture object to pass throwables to the PHP logic because
+     * libcurl would swallow them otherwise ...
+     *
+     * @param callable|null $progresscallback Callback invoked with (int $current, int $total),
+     * optionally throwing a storage_exception to abort the transfer, or null for none
      * @param bool $upload True to report upload progress, false to report download progress
+     * @param \stdClass $capture Mutable object whose `exception` property is set to whatever
+     * $progresscallback threw, if anything
      * @return array<string, mixed> Curl options, empty if no callback was given
      */
-    private function progress_curl_option(?callable $progresscallback, bool $upload): array {
+    private function progress_curl_option(?callable $progresscallback, bool $upload, \stdClass $capture): array {
         if ($progresscallback === null) {
             return [];
         }
@@ -544,12 +570,16 @@ final class s3_client {
                 $uploadnow
             ) use (
                 $progresscallback,
-                $upload
+                $upload,
+                $capture
             ) {
-                if ($upload) {
-                    $progresscallback((int) $uploadnow, (int) $uploadtotal);
-                } else {
-                    $progresscallback((int) $downloadnow, (int) $downloadtotal);
+                try {
+                    $upload
+                        ? $progresscallback((int) $uploadnow, (int) $uploadtotal)
+                        : $progresscallback((int) $downloadnow, (int) $downloadtotal);
+                } catch (\Throwable $e) {
+                    $capture->exception = $e;
+                    return 1;
                 }
 
                 return 0;

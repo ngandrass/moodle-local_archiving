@@ -2,7 +2,8 @@
 
 ## Version X.Y.Z (YYYYMMDDXX)
 
-- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026082900` or higher.
+- Implement store and retrieve callback hooks.
 
 
 ## Version 1.1.0 (2025101300)

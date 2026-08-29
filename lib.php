@@ -18,11 +18,14 @@
  * Legacy lib definitions
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_archiving\archive_job;
+use local_archiving\file_handle;
 use local_archiving\local\type\filearea;
+use local_archiving\local\type\storage_tier;
 use local_archiving\tsp_manager;
 
 // phpcs:ignore
@@ -156,10 +159,39 @@ function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $f
         filename: $filename
     );
 
+    // Handle cache misses.
     if (!$file || $file->is_directory()) {
-        send_file_not_found();
+        if ($filearea === filearea::FILESTORE_CACHE) {
+            // Ensure the file we are looking for still exists.
+            try {
+                $filehandle = file_handle::get_by_id($itemid);
+            } catch (\dml_exception) {
+                $filehandle = null;
+            }
+
+            if ($filehandle !== null && !$filehandle->deleted) {
+                // Transparently copy LOCAL tier files to the cache and serve the copy synchronously.
+                if ($filehandle->archivingstore()::get_storage_tier() === storage_tier::LOCAL) {
+                    $filehandle->retrieve_file();
+                    $file = $fs->get_file(
+                        contextid: $context->id,
+                        component: $filearea->get_component(),
+                        filearea: $filearea->value,
+                        itemid: $itemid,
+                        filepath: $filepath,
+                        filename: $filename
+                    );
+                }
+            }
+        }
+
+        // The users want's something we can do nothing about ...
+        if (!$file || $file->is_directory()) {
+            send_file_not_found();
+        }
     }
 
+    // File exists: serve it!
     send_stored_file($file, 0, 0, $forcedownload, $options);
     return true;
 

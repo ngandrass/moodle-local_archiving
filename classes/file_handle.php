@@ -326,6 +326,32 @@ final class file_handle {
     }
 
     /**
+     * Builds the download URL for this file's local cached copy
+     *
+     * This works whether or not the file is actually cached yet. Presence of
+     * the file is checked at access time inside the pluginfile handler in
+     * lib.php. This may seem counter-intuitive at first, but it eliminates a
+     * race condition between file-caching and the actual file access by the
+     * user.
+     *
+     * @return \moodle_url Download URL for this file handle
+     * @throws \dml_exception
+     */
+    public function get_local_download_url(): \moodle_url {
+        $fileinfo = $this->generate_retrieval_fileinfo_record();
+
+        return \moodle_url::make_pluginfile_url(
+            $fileinfo->contextid,
+            $fileinfo->component,
+            $fileinfo->filearea,
+            $fileinfo->itemid,
+            $fileinfo->filepath,
+            $fileinfo->filename,
+            forcedownload: true
+        );
+    }
+
+    /**
      * Retrieves the local stored_file for this file handle if currently present
      * in the filestore cache
      *
@@ -364,9 +390,9 @@ final class file_handle {
      * already present in the filestore cache, it will be retrieved from the
      * storage driver and stored in the local filestore cache.
      *
-     * Note: The retrieval process currently is a synchronous operation and
-     * may take some time, depending on the size of the file and the storage
-     * tier.
+     * This blocks SYNCHRONOUSLY until the file is retrieved, so it is only suitable for cheap /
+     * instant retrievals (LOCAL tier). REMOTE tier files should be retrieved asynchronously via
+     * an retrieve_remote_file task instead.
      *
      * @return \stored_file The stored_file object
      * @throws \dml_exception
@@ -389,10 +415,6 @@ final class file_handle {
         }
 
         // File not found in the local filestore cache, retrieve it from the storage driver.
-        // This is handled fully synchronously right now. When having storage
-        // drivers that write to external storage this will most likely need to
-        // be handled asynchronously. But lets focus on the more important parts
-        // first and do not drown into premature optimizations..
         return $this->archivingstore()->retrieve(
             $this,
             $this->generate_retrieval_fileinfo_record()

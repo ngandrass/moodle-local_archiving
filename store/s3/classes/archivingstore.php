@@ -152,7 +152,11 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
 
             // @codeCoverageIgnoreStart
             // Move downloaded file into local Moodle file storage.
-            $storedfile = get_file_storage()->create_file_from_pathname($fileinfo, $tmppath);
+            try {
+                $storedfile = get_file_storage()->create_file_from_pathname($fileinfo, $tmppath);
+            } catch (\file_exception $e) {
+                throw new storage_exception('filestorefailed', 'local_archiving');
+            }
             if (!$storedfile) {
                 throw new storage_exception('filestorefailed', 'local_archiving');
             }

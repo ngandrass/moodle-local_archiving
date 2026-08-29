@@ -34,6 +34,7 @@ use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
 use local_archiving\local\util\mod_util;
 use local_archiving\local\util\plugin_util;
+use local_archiving\task\retrieve_remote_file;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -711,6 +712,9 @@ class archive_job {
         // Delete job artifacts.
         $files = file_handle::get_by_jobid($this->id);
         foreach ($files as $filehandle) {
+            // Cancel/purge any outstanding on-demand retrieval for this file handle before it's gone.
+            retrieve_remote_file::cancel_and_purge($filehandle->id);
+
             // Remove local cache copy if present.
             if ($cachedfile = $filehandle->get_local_file()) {
                 $cachedfile->delete();

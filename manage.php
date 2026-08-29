@@ -26,6 +26,7 @@ use local_archiving\archive_job;
 use local_archiving\file_handle;
 use local_archiving\form\file_delete_form;
 use local_archiving\form\job_delete_form;
+use local_archiving\remote_file_fetcher;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -105,6 +106,7 @@ if ($action === 'jobdelete') {
         $filehandle = file_handle::get_by_id($filehandleid);
         $filehandle->archivingstore()->delete($filehandle);
         $filehandle->mark_as_deleted();
+        remote_file_fetcher::delete($filehandleid);
 
         redirect($wantsurl);
     } else {

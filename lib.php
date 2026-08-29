@@ -181,6 +181,13 @@ function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $f
                         filepath: $filepath,
                         filename: $filename
                     );
+                } else {
+                    // Redirect users for REMOTE tier files that are not yet available in the cache to the fecthing UI.
+                    $job = archive_job::get_by_id($filehandle->jobid);
+                    redirect(new moodle_url('/local/archiving/fetch.php', [
+                        'filehandleid' => $filehandle->id,
+                        'contextid' => $job->get_context()->id,
+                    ]));
                 }
             }
         }

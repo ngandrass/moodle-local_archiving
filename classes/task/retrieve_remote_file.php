@@ -24,6 +24,7 @@
 
 namespace local_archiving\task;
 
+use core\exception\coding_exception;
 use local_archiving\file_handle;
 use local_archiving\local\exception\storage_exception;
 use local_archiving\remote_file_fetcher;
@@ -81,12 +82,30 @@ class retrieve_remote_file extends \core\task\adhoc_task {
      *
      * @param int $filehandleid ID of the file handle to cancel and purge retrieval state for
      * @return void
+     * @throws coding_exception
+     * @throws \dml_exception
      */
     public static function cancel_and_purge(int $filehandleid): void {
+        global $CFG, $DB;
+
         // Handle pending tasks.
         foreach (\core\task\manager::get_adhoc_tasks(self::class, skiprunning: true) as $task) {
             if ($task->get_custom_data()->filehandleid === $filehandleid) {
-                \core\task\manager::delete_adhoc_task($task->get_id());
+                // Delete the pending ad-hoc task from the queue.
+                if (method_exists(\core\task\manager::class, 'delete_adhoc_task')) {
+                    // Moodle >= 5.0: Use core API.
+                    \core\task\manager::delete_adhoc_task($task->get_id());
+                } else if ($CFG->branch < 500) {
+                    // Moodle <= 4.5: delete_adhoc_task() was only added in Moodle 5.0.
+                    // This is the exact way delete_adhoc_task() is implemented at the time of writing. Future uses default to the
+                    // Moodle core API to prevent missing changes to this logic.
+                    $DB->delete_records('task_adhoc', ['id' => $task->get_id()]);
+                } else {
+                    throw new coding_exception('Missing \core\task\manager::delete_adhoc_task() method.
+                    But we are not on Moodle < 5.0? This should never happen.');
+                }
+
+                // Purge the cache entry.
                 remote_file_fetcher::delete($filehandleid);
             }
         }

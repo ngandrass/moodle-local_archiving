@@ -590,7 +590,7 @@ final class s3_client {
     /**
      * Builds the canonical (sorted and encoded) query string for the given query parameters
      *
-     * @param array<string, string> $query Query parameters
+     * @param array $query Query parameters
      * @return string Canonical query string
      */
     private function canonical_query_string(array $query): string {
@@ -608,7 +608,7 @@ final class s3_client {
      * Builds the full request URL for the given canonical path and query parameters
      *
      * @param string $path Canonical request path
-     * @param array<string, string> $query Query parameters
+     * @param array $query Query parameters
      * @return string Full request URL
      */
     private function request_url(string $path, array $query = []): string {
@@ -625,7 +625,7 @@ final class s3_client {
      *
      * @param string $method HTTP method, e.g. "GET"
      * @param string $path Canonical request path
-     * @param array<string, string> $query Query parameters
+     * @param array $query Query parameters
      * @param string $payloadsha256hex Hexadecimal SHA-256 hash of the request payload
      * @return array<string, string> Headers to send with the request, including "Authorization"
      * @throws \Exception
@@ -695,7 +695,7 @@ final class s3_client {
     /**
      * Formats an associative array of headers into curl's "Name: Value" list format
      *
-     * @param array<string, string> $headers Associative array of headers
+     * @param array $headers Associative array of headers
      * @return string[] Headers formatted as "Name: Value" strings
      */
     private function format_http_headers(array $headers): array {

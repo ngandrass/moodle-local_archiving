@@ -44,19 +44,19 @@
             {{#rows}}
             <li class="list-group-item d-flex justify-content-between align-items-center {{^ok}} list-group-item-danger {{/ok}}">
                 {{#ok}}
-                    <span>
+                    <div>
                         <i class="fa-solid fa-square-check text-success fa-xl"></i>&nbsp;
                         {{{label}}}
-                    </span>
+                    </div>
                 {{/ok}}
                 {{^ok}}
-                    <span>
+                    <div>
                         <i class="fa-solid fa-square-xmark text-danger fa-xl"></i>&nbsp;
                         {{{label}}}
                         {{#detail}}
                         <div class="text-muted small mt-1">{{{detail}}}</div>
                         {{/detail}}
-                    </span>
+                    </div>
                 {{/ok}}
             </li>
             {{/rows}}

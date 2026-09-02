@@ -1,0 +1,207 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template archigindmod_assign/submissionreport
+
+    Assignment submission report.
+
+    Example context (json):
+    {
+        "sections": {
+            "header": true,
+            "instructions": true
+        },
+        "course": {
+            "id": 1,
+            "name": "My course"
+        },
+        "assignment": {
+            "title": "My assignment",
+            "description": "<p>Description of the assignment</p>",
+            "activityinstructions": "<p>Instructions for the assignment</p>",
+            "introattachments": "<p>Additional files for the assignment</p>",
+            "icon": "<img ...>",
+            "dates": {
+                "opened": 123456789,
+                "due": 123456789,
+                "cutoff": 123456789,
+                "gradingdue": 123456789
+            }
+        },
+        "submission": {
+            "id": 42,
+            "user": {
+                "id": 1,
+                "picture": "<img ...>",
+                "profilelink": "https://example.com/user/profile.php?id=1",
+                "idnumber": 123456789
+            },
+            "report": "<div>My awesome generated submission report</div>"
+        },
+        "archivingdate": 123456789
+    }
+}}
+
+
+<div class="container-fluid path-mod-assign">
+    {{#sections.header}}
+    <div class="row mb-2">
+        <div class="col-12 d-flex flex-wrap align-items-center">
+            <div class="page-header-image">
+                <div class="assessment activityiconcontainer me-2 modicon_assign">
+                    {{{ assignment.icon }}}
+                </div>
+            </div>
+            <div class="page-header-headings">
+                <h1 class="h1">
+                    {{ assignment.title }} ({{#str}} submission, mod_assign {{/str}} #{{ submission.id }})
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-12">
+            <table class="generaltable table table-striped table-bordered">
+                <tbody>
+                    <tr>
+                        <th>{{#str}} user, core {{/str}}</th>
+                        <td>{{{ submission.user.picture }}}&nbsp;{{{ submission.user.profilelink }}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{#str}} idnumber, core {{/str}}</th>
+                        <td>
+                            {{#submission.user.idnumber}}
+                                {{ submission.user.idnumber }}
+                            {{/submission.user.idnumber}}
+                            {{^submission.user.idnumber}}
+                                <i class="text-muted">{{#str}} notset, local_archiving {{/str}}</i>
+                            {{/submission.user.idnumber}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{{#str}} course, core {{/str}}</th>
+                        <td>{{ course.name }} (#{{course.id}})</td>
+                    </tr>
+                    <tr>
+                        <th>{{#str}} openingdate, archivingmod_assign {{/str}}</th>
+                        <td>
+                            {{#assignment.dates.opened}}
+                                {{#userdate}}
+                                    {{ assignment.dates.opened }},
+                                    {{#str}} strftimedaydatetime, core_langconfig {{/str}}
+                                {{/userdate}}
+                            {{/assignment.dates.opened}}
+                            {{^assignment.dates.opened}}
+                                <i class="text-muted">{{#str}} disabled, admin {{/str}}</i>
+                            {{/assignment.dates.opened}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{{#str}} duedate, archivingmod_assign {{/str}}</th>
+                        <td>
+                            {{#assignment.dates.due}}
+                                {{#userdate}}
+                                    {{ assignment.dates.due }},
+                                    {{#str}} strftimedaydatetime, core_langconfig {{/str}}
+                                {{/userdate}}
+                            {{/assignment.dates.due}}
+                            {{^assignment.dates.due}}
+                                <i class="text-muted">{{#str}} disabled, admin {{/str}}</i>
+                            {{/assignment.dates.due}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{{#str}} cutoffdate, archivingmod_assign {{/str}}</th>
+                        <td>
+                            {{#assignment.dates.cutoff}}
+                                {{#userdate}}
+                                    {{ assignment.dates.cutoff }},
+                                    {{#str}} strftimedaydatetime, core_langconfig {{/str}}
+                                {{/userdate}}
+                            {{/assignment.dates.cutoff}}
+                            {{^assignment.dates.cutoff}}
+                                <i class="text-muted">{{#str}} disabled, admin {{/str}}</i>
+                            {{/assignment.dates.cutoff}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{{#str}} gradingduedate, archivingmod_assign {{/str}}</th>
+                        <td>
+                            {{#assignment.dates.gradingdue}}
+                                {{#userdate}}
+                                    {{ assignment.dates.gradingdue }},
+                                    {{#str}} strftimedaydatetime, core_langconfig {{/str}}
+                                {{/userdate}}
+                            {{/assignment.dates.gradingdue}}
+                            {{^assignment.dates.gradingdue}}
+                                <i class="text-muted">{{#str}} disabled, admin {{/str}}</i>
+                            {{/assignment.dates.gradingdue}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{{#str}} description, mod_assign {{/str}}</th>
+                        <td>{{{ assignment.description }}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{#str}} archiving_date, local_archiving {{/str}}</th>
+                        <td>
+                            {{#userdate}}
+                                {{ archivingdate }},
+                                {{#str}} strftimedaydatetime, core_langconfig {{/str}}
+                            {{/userdate}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{/sections.header}}
+
+    {{#sections.instructions}}
+    <div class="row mb-2">
+        <div class="col-12">
+            <h3 class="h3">
+                {{#str}} modulename, mod_assign {{/str}}
+            </h3>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-12">
+            <table class="generaltable table table-striped table-bordered">
+                <tr>
+                    <th>{{#str}} activityeditor, mod_assign {{/str}}</th>
+                    <td>{{{ assignment.activityinstructions }}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} introattachments, mod_assign {{/str}}</th>
+                    <td>{{{ assignment.introattachments }}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {{/sections.instructions}}
+
+    <div class="row mb-2">
+        <div class="col-12">
+            <div>
+                {{{ submission.report }}}
+            </div>
+        </div>
+    </div>
+</div>

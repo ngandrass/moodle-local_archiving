@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 $plugin->component = 'archivingmod_assign';
 $plugin->release = '0.0.3';
-$plugin->version = 2025102708;
+$plugin->version = 2025102709;
 $plugin->requires = 2024100700;
 $plugin->supported = [405, 502]; // X meta-supported-moodle{4.5 - 5.2} meta-supported-php{8.1 - 8.4}.
 $plugin->maturity = MATURITY_ALPHA;

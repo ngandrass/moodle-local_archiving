@@ -312,6 +312,7 @@ final class assignment_manager_test extends \advanced_testcase {
         $this->assertEquals($testdata->student->username, $record->username);
         $this->assertEquals($testdata->student->firstname, $record->firstname);
         $this->assertEquals($testdata->student->lastname, $record->lastname);
+        $this->assertEquals($testdata->student->email, $record->email);
         $this->assertEquals($testdata->student->idnumber, $record->idnumber);
     }
 

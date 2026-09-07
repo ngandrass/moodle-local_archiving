@@ -134,6 +134,7 @@ class submission_report {
                 'user' => [
                     'id' => $submittinguser->id,
                     'idnumber' => $submittinguser->idnumber,
+                    'email' => $submittinguser->email,
                     'picture' => $OUTPUT->render(new \user_picture($submittinguser)),
                     'profilelink' => $OUTPUT->render(new \action_link(
                         new \moodle_url('/user/view.php', ['id' => $submittinguser->id]),
@@ -448,6 +449,7 @@ class submission_report {
             'coursename' => $this->course->fullname ?: 'null',
             'courseshortname' => $this->course->shortname ?: 'null',
             'date' => date('Y-m-d'),
+            'email' => str_replace('.', '_', $userinfo->email) ?: 'null',
             'firstname' => $userinfo->firstname ?: 'null',
             'groupidnumbers' => join('-', array_map(fn($group) => $group->idnumber ?: 'null', $usergroups)) ?: 0,
             'groupids' => join('-', array_map(fn($group) => $group->id, $usergroups)) ?: 0,

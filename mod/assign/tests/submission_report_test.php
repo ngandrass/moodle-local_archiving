@@ -162,6 +162,11 @@ final class submission_report_test extends \advanced_testcase {
             $html,
             'Student user ID not found in rendered HTML'
         );
+        $this->assertStringContainsString(
+            $testdata->student->email,
+            $html,
+            'Student email not found in rendered HTML'
+        );
     }
 
     /**
@@ -246,6 +251,38 @@ final class submission_report_test extends \advanced_testcase {
 
         $this->assertSame(
             "submission-{$testdata->submission->id}-{$testdata->student->username}-{$testdata->assignment->id}",
+            $filename
+        );
+    }
+
+    /**
+     * Tests that generate_submission_filename() correctly substitutes the email
+     * variable, replacing dots with underscores.
+     *
+     * @covers \archivingmod_assign\submission_report
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \moodle_exception
+     */
+    public function test_generate_submission_filename_substitutes_email_variable(): void {
+        $this->resetAfterTest();
+        $testdata = $this::getDataGenerator()->create_assignment_with_text_submission();
+
+        $ctx = \context_module::instance($testdata->cm->id);
+        $assign = new \assign($ctx, $testdata->cm, $testdata->course);
+        $report = new submission_report($testdata->course, $testdata->cm, $assign);
+
+        $filename = $report->generate_submission_filename(
+            $testdata->submission->id,
+            'submission-${email}',
+            false
+        );
+
+        $this->assertSame(
+            'submission-' . str_replace('.', '_', $testdata->student->email),
             $filename
         );
     }

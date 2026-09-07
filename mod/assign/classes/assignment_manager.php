@@ -185,7 +185,7 @@ class assignment_manager {
         return $DB->get_records_sql(
             "SELECT s.id AS submissionid, s.userid, s.attemptnumber, s.status,
                     s.timecreated, s.timemodified, s.timestarted,
-                    u.username, u.firstname, u.lastname, u.idnumber
+                    u.username, u.firstname, u.lastname, u.email, u.idnumber
              FROM {assign_submission} s LEFT JOIN {user} u ON s.userid = u.id
              WHERE status = :status AND s.assignment = :assignmentid " . ($filterwhereclause ?? ''),
             [

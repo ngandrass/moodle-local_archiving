@@ -48,7 +48,8 @@
                 "id": 1,
                 "picture": "<img src='http://example.com/picture.png' alt='User picture'>",
                 "profilelink": "https://example.com/user/profile.php?id=1",
-                "idnumber": 123456789
+                "idnumber": 123456789,
+                "email": "student@example.com"
             },
             "report": "<div>My awesome generated submission report</div>"
         },
@@ -81,6 +82,17 @@
                     <tr>
                         <th>{{#str}} user, core {{/str}}</th>
                         <td>{{{ submission.user.picture }}}&nbsp;{{{ submission.user.profilelink }}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{#str}} email, core {{/str}}</th>
+                        <td>
+                            {{#submission.user.email}}
+                                {{ submission.user.email }}
+                            {{/submission.user.email}}
+                            {{^submission.user.email}}
+                                <i class="text-muted">{{#str}} notset, local_archiving {{/str}}</i>
+                            {{/submission.user.email}}
+                        </td>
                     </tr>
                     <tr>
                         <th>{{#str}} idnumber, core {{/str}}</th>

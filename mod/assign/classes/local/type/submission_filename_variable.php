@@ -80,6 +80,9 @@ enum submission_filename_variable: string {
     /** @var string Last name of the submission user */
     case LASTNAME = 'lastname';
 
+    /** @var string Email address of the submission user (dots replaced with underscores) */
+    case EMAIL = 'email';
+
     /** @var string ID number of the submission user (NOT userid!) */
     case IDNUMBER = 'idnumber';
 

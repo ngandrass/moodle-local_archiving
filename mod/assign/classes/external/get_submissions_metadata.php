@@ -125,6 +125,11 @@ class get_submissions_metadata extends external_api {
                         'Last name for this submission',
                         VALUE_REQUIRED
                     ),
+                    'email' => new external_value(
+                        PARAM_TEXT,
+                        'Email address for this assignment submission',
+                        VALUE_REQUIRED
+                    ),
                     'idnumber' => new external_value(
                         PARAM_TEXT,
                         'ID number of the user for this submission',

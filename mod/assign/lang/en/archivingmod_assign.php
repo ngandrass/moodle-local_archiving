@@ -104,6 +104,7 @@ $string['task_submission_filename_pattern_variable_courseid'] = 'Course ID';
 $string['task_submission_filename_pattern_variable_coursename'] = 'Course name';
 $string['task_submission_filename_pattern_variable_courseshortname'] = 'Course short name';
 $string['task_submission_filename_pattern_variable_date'] = 'Current date <small>(YYYY-MM-DD)</small>';
+$string['task_submission_filename_pattern_variable_email'] = 'Student email (dots replaced with underscores)';
 $string['task_submission_filename_pattern_variable_firstname'] = 'Student first name';
 $string['task_submission_filename_pattern_variable_groupidnumbers'] = 'Group ID numbers';
 $string['task_submission_filename_pattern_variable_groupids'] = 'Group IDs';

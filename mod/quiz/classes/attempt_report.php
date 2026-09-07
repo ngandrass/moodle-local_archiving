@@ -143,6 +143,13 @@ class attempt_report {
                 $OUTPUT->render($userpicture) . '&nbsp;' . $OUTPUT->render($userlink)
             );
 
+            // User email.
+            $summaryinfo->add_item(
+                'useremail',
+                get_string('email'),
+                $attemptuser->email ?: '<i>' . get_string('none') . '</i>'
+            );
+
             // User ID number.
             $summaryinfo->add_item(
                 'useridnumber',
@@ -457,6 +464,7 @@ class attempt_report {
             'username' => $userinfo->username ?: 'null',
             'firstname' => $userinfo->firstname ?: 'null',
             'lastname' => $userinfo->lastname ?: 'null',
+            'email' => str_replace('.', '_', $userinfo->email) ?: 'null',
             'idnumber' => $userinfo->idnumber ?: 'null',
         ];
 

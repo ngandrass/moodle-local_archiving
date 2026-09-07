@@ -95,6 +95,7 @@ $string['task_attempt_filename_pattern_variable_attemptid'] = 'Attempt ID';
 $string['task_attempt_filename_pattern_variable_username'] = 'Student username';
 $string['task_attempt_filename_pattern_variable_firstname'] = 'Student first name';
 $string['task_attempt_filename_pattern_variable_lastname'] = 'Student last name';
+$string['task_attempt_filename_pattern_variable_email'] = 'Student email (dots replaced with underscores)';
 $string['task_attempt_filename_pattern_variable_idnumber'] = 'Student ID number';
 $string['task_attempt_filename_pattern_variable_timestart'] = 'Attempt start unix timestamp';
 $string['task_attempt_filename_pattern_variable_timefinish'] = 'Attempt finish unix timestamp';

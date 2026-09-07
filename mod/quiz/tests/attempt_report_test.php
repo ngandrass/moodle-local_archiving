@@ -591,6 +591,13 @@ final class attempt_report_test extends \advanced_testcase {
         $this->assertStringContainsString('nogroup', $foldername, 'Group name placeholder was not found in folder name');
         $this->assertStringContainsString($rc->attemptids[0], $foldername, 'Attempt ID was not found in folder name');
 
+        // Email placeholder must be sanitized (dots replaced with underscores).
+        global $DB;
+        $attemptinfo = $DB->get_record('quiz_attempts', ['id' => $rc->attemptids[0]], '*', MUST_EXIST);
+        $userinfo = $DB->get_record('user', ['id' => $attemptinfo->userid], '*', MUST_EXIST);
+        $expectedemail = str_replace('.', '_', $userinfo->email);
+        $this->assertStringContainsString($expectedemail, $foldername, 'Email was not found in folder name');
+
         // Check that no unsubstituted variables are left.
         foreach (attempt_filename_variable::values() as $var) {
             $this->assertStringNotContainsString(
@@ -714,6 +721,13 @@ final class attempt_report_test extends \advanced_testcase {
         // TODO: (MDL-0) Update reference course to cover groups and check for these.
         $this->assertStringContainsString('nogroup', $filename, 'Group name placeholder was not found in filename');
         $this->assertStringContainsString($rc->attemptids[0], $filename, 'Attempt ID was not found in filename');
+
+        // Email placeholder must be sanitized (dots replaced with underscores).
+        global $DB;
+        $attemptinfo = $DB->get_record('quiz_attempts', ['id' => $rc->attemptids[0]], '*', MUST_EXIST);
+        $userinfo = $DB->get_record('user', ['id' => $attemptinfo->userid], '*', MUST_EXIST);
+        $expectedemail = str_replace('.', '_', $userinfo->email);
+        $this->assertStringContainsString($expectedemail, $filename, 'Email was not found in filename');
 
         // Check that no unsubstituted variables are left.
         foreach (attempt_filename_variable::values() as $var) {

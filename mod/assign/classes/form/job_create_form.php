@@ -74,13 +74,13 @@ class job_create_form extends \local_archiving\form\job_create_form {
         }
 
         // Attachment types.
-        $sectionidx = 0;
+        $attechmenttypeidx = 0;
         foreach (attachment_type::cases() as $section) {
-            $sectionidx++;
+            $attechmenttypeidx++;
             $this->_form->addElement(
                 'advcheckbox',
                 'attachment_type_' . $section->value,
-                $sectionidx === 1 ? get_string('submission_files', 'archivingmod_assign') : '&nbsp;',
+                $attechmenttypeidx === 1 ? get_string('submission_files', 'archivingmod_assign') : '&nbsp;',
                 get_string('task_attachment_type_' . $section->value, 'archivingmod_assign'),
                 $this->config->handler->{'job_preset_attachment_type_' . $section->value . '_locked'} ? 'disabled' : null
             );

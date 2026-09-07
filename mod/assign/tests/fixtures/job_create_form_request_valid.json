@@ -41,19 +41,19 @@
 		"0",
 		"1"
 	],
-	"attachment_assignment": [
+	"attachment_type_assignment": [
 		"0",
 		"1"
 	],
-	"attachment_submission": [
+	"attachment_type_submission": [
 		"0",
 		"1"
 	],
-	"attachment_feedback": [
+	"attachment_type_feedback": [
 		"0",
 		"1"
 	],
-	"attachment_annotation": [
+	"attachment_type_annotation": [
 		"0",
 		"1"
 	],

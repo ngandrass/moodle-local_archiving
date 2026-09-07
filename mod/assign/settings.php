@@ -113,9 +113,9 @@ if ($hassiteconfig) {
         // Job preset: Submission attachments.
         foreach (attachment_type::cases() as $section) {
             $set = new admin_setting_configcheckbox(
-                'archivingmod_assign/job_preset_attachment_' . $section->value,
-                get_string('task_attachment_' . $section->value, 'archivingmod_assign'),
-                get_string('task_attachment_' . $section->value . '_help', 'archivingmod_assign'),
+                'archivingmod_assign/job_preset_attachment_type_' . $section->value,
+                get_string('task_attachment_type_' . $section->value, 'archivingmod_assign'),
+                get_string('task_attachment_type_' . $section->value . '_help', 'archivingmod_assign'),
                 '1',
             );
             $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);

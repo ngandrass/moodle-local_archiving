@@ -85,10 +85,10 @@ class archivingmod_assign_generator extends \testing_data_generator {
             'report_section_gradedetails' => 1,
 
             // Attachments (one key per attachment_type case).
-            'attachment_assignment' => 1,
-            'attachment_submission' => 1,
-            'attachment_feedback' => 1,
-            'attachment_annotation' => 1,
+            'attachment_type_assignment' => 1,
+            'attachment_type_submission' => 1,
+            'attachment_type_feedback' => 1,
+            'attachment_type_annotation' => 1,
 
             // Report / rendering settings.
             'paper_format' => 'A4',

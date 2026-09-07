@@ -495,10 +495,10 @@ final class generator_test extends \advanced_testcase {
                 'report_section_feedbackcomments',
                 'report_section_grade',
                 'report_section_gradedetails',
-                'attachment_assignment',
-                'attachment_submission',
-                'attachment_feedback',
-                'attachment_annotation',
+                'attachment_type_assignment',
+                'attachment_type_submission',
+                'attachment_type_feedback',
+                'attachment_type_annotation',
             ] as $key
         ) {
             $this->assertObjectHasProperty($key, $settings, "The job settings should have a '{$key}' property");

@@ -158,7 +158,7 @@ class remote_archive_worker {
             fn($section) => "report_section_{$section->value}",
             submission_report_section::cases()
         ), array_map(
-            fn($section) => "attachment_{$section->value}",
+            fn($section) => "attachment_type_{$section->value}",
             attachment_type::cases()
         ));
 
@@ -174,9 +174,9 @@ class remote_archive_worker {
             $sections[$section->value] = (bool) $settings->{"report_section_{$section->value}"};
         }
 
-        $attachments = [];
+        $attachmenttypes = [];
         foreach (attachment_type::cases() as $attachment) {
-            $attachments[$attachment->value] = (bool) $settings->{"attachment_{$attachment->value}"};
+            $attachmenttypes[$attachment->value] = (bool) $settings->{"attachment_type_{$attachment->value}"};
         }
 
         // Determine maximal upload byte size.
@@ -199,7 +199,7 @@ class remote_archive_worker {
             "job" => [
                 "submissionids" => $submissionids,
                 "report_sections" => $sections,
-                "attachments" => $attachments,
+                "attachment_types" => $attachmenttypes,
                 "paper_format" => $settings->paper_format,
                 "archive_filename" => $task->get_job()->generate_archive_name_prefix(),
                 "foldername_pattern" => $settings->submission_foldername_pattern,

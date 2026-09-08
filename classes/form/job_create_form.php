@@ -211,18 +211,6 @@ class job_create_form extends \moodleform {
      * @throws \coding_exception
      */
     protected function definition_advanced_settings(): void {
-        // Flat archive export.
-        $this->_form->addElement(
-            'advcheckbox',
-            'archive_flat_export',
-            get_string('archive_flat_export', 'local_archiving'),
-            get_string('enable'),
-            $this->config->core->job_preset_archive_flat_export_locked ? 'disabled' : null,
-            ['0', '1']
-        );
-        $this->_form->addHelpButton('archive_flat_export', 'archive_flat_export', 'local_archiving');
-        $this->_form->setDefault('archive_flat_export', $this->config->core->job_preset_archive_flat_export);
-
         // Archive filename pattern.
         $this->_form->addElement(
             'text',

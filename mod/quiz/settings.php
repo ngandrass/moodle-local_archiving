@@ -163,7 +163,7 @@ if ($hassiteconfig) {
             PARAM_TEXT,
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
-        $set->add_dependent_on('local_archiving/job_preset_archive_flat_export');
+        $set->add_dependent_on('archivingmod_quiz/job_preset_archive_flatten');
         $settings->add($set);
 
         // Job preset: Attempt filename pattern.
@@ -184,6 +184,16 @@ if ($hassiteconfig) {
             attempt_filename_variable::values(),
             \local_archiving\storage::FILENAME_FORBIDDEN_CHARACTERS,
             PARAM_TEXT,
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $settings->add($set);
+
+        // Job preset: Flat archive export.
+        $set = new admin_setting_configcheckbox(
+            'archivingmod_quiz/job_preset_archive_flatten',
+            get_string('task_archive_flatten', 'archivingmod_quiz'),
+            get_string('task_archive_flatten_help', 'archivingmod_quiz'),
+            '0',
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);

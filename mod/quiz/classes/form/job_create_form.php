@@ -274,7 +274,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
         $this->_form->setType('attempt_foldername_pattern', PARAM_TEXT);
         $this->_form->setDefault('attempt_foldername_pattern', $this->config->handler->job_preset_attempt_foldername_pattern);
         $this->_form->addRule('attempt_foldername_pattern', null, 'maxlength', 255, 'client');
-        $this->_form->hideIf('attempt_foldername_pattern', 'archive_flat_export', 'checked');
+        $this->_form->hideIf('attempt_foldername_pattern', 'archive_flatten', 'checked');
 
         // Advanced options: Attempts filename pattern.
         $this->_form->addElement(
@@ -304,6 +304,18 @@ class job_create_form extends \local_archiving\form\job_create_form {
         $this->_form->setType('attempt_filename_pattern', PARAM_TEXT);
         $this->_form->setDefault('attempt_filename_pattern', $this->config->handler->job_preset_attempt_filename_pattern);
         $this->_form->addRule('attempt_filename_pattern', null, 'maxlength', 255, 'client');
+
+        // Flat archive export.
+        $this->_form->addElement(
+            'advcheckbox',
+            'archive_flatten',
+            get_string('task_archive_flatten', 'archivingmod_quiz'),
+            get_string('enable'),
+            $this->config->handler->job_preset_archive_flatten_locked ? 'disabled' : null,
+            ['0', '1']
+        );
+        $this->_form->addHelpButton('archive_flatten', 'task_archive_flatten', 'archivingmod_quiz');
+        $this->_form->setDefault('archive_flatten', $this->config->handler->job_preset_archive_flatten);
 
         parent::definition_advanced_settings();
     }

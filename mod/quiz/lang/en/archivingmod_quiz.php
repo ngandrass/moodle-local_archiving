@@ -115,6 +115,10 @@ $string['task_attempt_foldername_pattern_help'] = 'Name of the folder(s) the gen
 $string['error_invalid_attempt_filename_pattern'] = 'Invalid attempt report filename pattern. Please correct your input and try again.';
 $string['error_invalid_attempt_foldername_pattern'] = 'Invalid attempt report folder name pattern. Please correct your input and try again.';
 
+// Task settings: Flat archive export
+$string['task_archive_flatten'] = 'Flatten archive';
+$string['task_archive_flatten_help'] = 'If enabled, all directories inside the exported archive will be omitted. All files will be placed in the root directory of the generated archive. Please make sure to <b>choose a unique attempt filename!</b>';
+
 // Admin settings.
 $string['setting_autoconfigure'] = 'Automatic configuration';
 $string['setting_enabled'] = 'Enabled';

@@ -148,6 +148,7 @@ class remote_archive_worker {
         $expectedkeys = array_merge([
             'paper_format',
             'keep_html_files',
+            'export_submissions_metadata',
             'image_optimize',
             'image_optimize_width',
             'image_optimize_height',
@@ -212,7 +213,7 @@ class remote_archive_worker {
                 "archive_filehashes" => true,
                 "archive_flatten" => (bool) $settings->archive_flatten,
                 "keep_html_files" => (bool) $settings->keep_html_files,
-                "fetch_metadata" => true,
+                "fetch_metadata" => (bool) $settings->export_submissions_metadata,
             ],
         ];
     }

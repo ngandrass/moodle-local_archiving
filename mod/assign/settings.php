@@ -122,6 +122,16 @@ if ($hassiteconfig) {
             $settings->add($set);
         }
 
+        // Job preset: Export submissions metadata.
+        $set = new admin_setting_configcheckbox(
+            'archivingmod_assign/job_preset_export_submissions_metadata',
+            get_string('task_export_submissions_metadata', 'archivingmod_assign'),
+            get_string('task_export_submissions_metadata_help', 'archivingmod_assign'),
+            '1',
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $settings->add($set);
+
         // Job preset: Export paper format.
         $set = new admin_setting_configselect(
             'archivingmod_assign/job_preset_paper_format',

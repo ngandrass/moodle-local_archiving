@@ -95,6 +95,17 @@ class job_create_form extends \local_archiving\form\job_create_form {
             );
         }
 
+        // Export submissions metadata.
+        $this->_form->addElement(
+            'advcheckbox',
+            'export_submissions_metadata',
+            get_string('metadata', 'archivingmod_assign'),
+            get_string('task_export_submissions_metadata', 'archivingmod_assign'),
+            $this->config->handler->job_preset_export_submissions_metadata_locked ? 'disabled' : null
+        );
+        $this->_form->addHelpButton('export_submissions_metadata', 'task_export_submissions_metadata', 'archivingmod_assign');
+        $this->_form->setDefault('export_submissions_metadata', $this->config->handler->job_preset_export_submissions_metadata);
+
         parent::definition_base_settings();
     }
 

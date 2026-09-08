@@ -90,6 +90,9 @@ class archivingmod_assign_generator extends \testing_data_generator {
             'attachment_type_feedback' => 1,
             'attachment_type_annotation' => 1,
 
+            // Metadata.
+            'export_submissions_metadata' => 1,
+
             // Report / rendering settings.
             'paper_format' => 'A4',
             'keep_html_files' => 0,

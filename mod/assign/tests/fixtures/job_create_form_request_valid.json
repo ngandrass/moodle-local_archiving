@@ -57,6 +57,10 @@
 		"0",
 		"1"
 	],
+    "export_submissions_metadata": [
+        "0",
+        "1"
+    ],
 	"export_cm_backup": [
 		"0",
 		"1"

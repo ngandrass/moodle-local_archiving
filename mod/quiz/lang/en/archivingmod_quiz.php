@@ -28,6 +28,7 @@
 $string['pluginname'] = 'Quiz';
 $string['a'] = '{$a}';
 $string['archived'] = 'Archived';
+$string['question_id'] = 'Question ID';
 
 // Privacy.
 $string['privacy:metadata'] = 'This plugin does not store any personal data directly, but passes everything to local_archiving instead.';
@@ -60,6 +61,8 @@ $string['task_report_section_question_feedback'] = 'Include individual question 
 $string['task_report_section_question_feedback_help'] = 'Display the individual feedback for each question inside the attempt report.';
 $string['task_report_section_question_marks'] = 'Include question marks';
 $string['task_report_section_question_marks_help'] = 'Shows the raw marks received for each question inside the attempt report.';
+$string['task_report_section_question_internals'] = 'Include question internals';
+$string['task_report_section_question_internals_help'] = 'Shows internal question metadata (question ID, ID number, tags, and question version) above each question inside the attempt report.';
 $string['task_report_section_general_feedback'] = 'Include general question feedback';
 $string['task_report_section_general_feedback_help'] = 'Display the general feedback for each question inside the attempt report.';
 $string['task_report_section_history'] = 'Include answer history';
@@ -95,6 +98,7 @@ $string['task_attempt_filename_pattern_variable_attemptid'] = 'Attempt ID';
 $string['task_attempt_filename_pattern_variable_username'] = 'Student username';
 $string['task_attempt_filename_pattern_variable_firstname'] = 'Student first name';
 $string['task_attempt_filename_pattern_variable_lastname'] = 'Student last name';
+$string['task_attempt_filename_pattern_variable_email'] = 'Student email (dots replaced with underscores)';
 $string['task_attempt_filename_pattern_variable_idnumber'] = 'Student ID number';
 $string['task_attempt_filename_pattern_variable_timestart'] = 'Attempt start unix timestamp';
 $string['task_attempt_filename_pattern_variable_timefinish'] = 'Attempt finish unix timestamp';

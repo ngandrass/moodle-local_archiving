@@ -57,6 +57,9 @@ enum attempt_report_section: string {
     /** @var string Marks for question answers */
     case QUESTION_MARKS = 'question_marks';
 
+    /** @var string Internal metadata (ID, ID number, tags, version) for each question */
+    case QUESTION_INTERNALS = 'question_internals';
+
     /** @var string Feedback for individual questions */
     case QUESTION_FEEDBACK = 'question_feedback';
 
@@ -86,6 +89,7 @@ enum attempt_report_section: string {
             self::QUIZ_GRADE => [self::HEADER],
             self::QUESTION_CORRECTNESS => [self::QUESTION],
             self::QUESTION_MARKS => [self::QUESTION],
+            self::QUESTION_INTERNALS => [self::QUESTION],
             self::QUESTION_FEEDBACK => [self::QUESTION],
             self::GENERAL_FEEDBACK => [self::QUESTION],
             self::CORRECT_ANSWER => [self::QUESTION],

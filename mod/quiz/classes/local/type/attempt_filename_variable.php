@@ -77,6 +77,9 @@ enum attempt_filename_variable: string {
     /** @var string Last name of the attempt user */
     case LASTNAME = 'lastname';
 
+    /** @var string Email address of the attempt user (dots replaced with underscores) */
+    case EMAIL = 'email';
+
     /** @var string ID number of the attempt user (NOT userid!) */
     case IDNUMBER = 'idnumber';
 

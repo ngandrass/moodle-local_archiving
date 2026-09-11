@@ -1,6 +1,3 @@
-[submodule "driver/mod/assign"]
-	path = driver/mod/assign
-	url = https://github.com/ngandrass/moodle-archivingmod_assign.git
 [submodule "driver/event/apistub"]
 	path = driver/event/apistub
 	url = https://github.com/ngandrass/moodle-archivingevent_apistub.git

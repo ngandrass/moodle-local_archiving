@@ -17,14 +17,14 @@
 // phpcs:disable moodle.Commenting.InlineComment.DocBlock
 
 /**
- * Valid variables for attempt filename patterns
+ * Valid variables for submission filename patterns
  *
- * @package     archivingmod_quiz
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @package     archivingmod_assign
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace archivingmod_quiz\local\type;
+namespace archivingmod_assign\local\type;
 
 use local_archiving\local\trait\enum_listable;
 
@@ -33,9 +33,9 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Valid variables for attempt filename patterns
+ * Valid variables for submission filename patterns
  */
-enum attempt_filename_variable: string {
+enum submission_filename_variable: string {
     use enum_listable;
 
     /** @var string Course ID */
@@ -50,44 +50,50 @@ enum attempt_filename_variable: string {
     /** @var string Course module ID */
     case CMID = 'cmid';
 
-    /** @var string IDs of all groups the attempt user belongs to */
+    /** @var string IDs of all groups the submission user belongs to */
     case GROUPIDS = 'groupids';
 
-    /** @var string External group ID numbers of all groups the attempt user belongs to */
+    /** @var string External group ID numbers of all groups the submission user belongs to */
     case GROUPIDNUMBERS = 'groupidnumbers';
 
-    /** @var string Names of all groups the attempt user belongs to */
+    /** @var string Names of all groups the submission user belongs to */
     case GROUPNAMES = 'groupnames';
 
-    /** @var string Quiz ID */
-    case QUIZID = 'quizid';
+    /** @var string Assignment ID */
+    case ASSIGNMENTID = 'assignmentid';
 
-    /** @var string Quiz name */
-    case QUIZNAME = 'quizname';
+    /** @var string Assignment title */
+    case ASSIGNMENTNAME = 'assignmenttitle';
 
-    /** @var string Attempt ID */
-    case ATTEMPTID = 'attemptid';
+    /** @var string Submission ID */
+    case SUBMISSIONID = 'submissionid';
 
-    /** @var string Username of the attempt user */
+    /** @var string Number of the submission attempt */
+    case ATTEMPTNUMBER = 'attemptnumber';
+
+    /** @var string Username of the submission user */
     case USERNAME = 'username';
 
-    /** @var string First name of the attempt user */
+    /** @var string First name of the submission user */
     case FIRSTNAME = 'firstname';
 
-    /** @var string Last name of the attempt user */
+    /** @var string Last name of the submission user */
     case LASTNAME = 'lastname';
 
-    /** @var string Email address of the attempt user (dots replaced with underscores) */
+    /** @var string Email address of the submission user (dots replaced with underscores) */
     case EMAIL = 'email';
 
-    /** @var string ID number of the attempt user (NOT userid!) */
+    /** @var string ID number of the submission user (NOT userid!) */
     case IDNUMBER = 'idnumber';
 
-    /** @var string Attempt start time */
+    /** @var string Submission start time */
     case TIMESTART = 'timestart';
 
-    /** @var string Attempt finish time */
-    case TIMEFINISH = 'timefinish';
+    /** @var string Submission creation time */
+    case TIMECREATED = 'timecreated';
+
+    /** @var string Submission last modification time */
+    case TIMEMODIFIED = 'timemodified';
 
     /** @var string Current date */
     case DATE = 'date';

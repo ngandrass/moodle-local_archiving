@@ -201,6 +201,7 @@ final class quiz_manager_test extends \advanced_testcase {
         $this->assertNotEmpty($attempt->username, 'Attempt metadata does not contain username');
         $this->assertNotEmpty($attempt->firstname, 'Attempt metadata does not contain firstname');
         $this->assertNotEmpty($attempt->lastname, 'Attempt metadata does not contain lastname');
+        $this->assertNotEmpty($attempt->email, 'Attempt metadata does not contain email');
         $this->assertNotNull($attempt->idnumber, 'Attempt metadata does not contain idnumber');  // ID number can be empty.
 
         // Test filtered.

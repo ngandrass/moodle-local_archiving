@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the get_attempts_metadata webservice function
+ * This file defines the get_submissions_metadata webservice function
  *
- * @package   archivingmod_quiz
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @package   archivingmod_assign
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace archivingmod_quiz\external;
+namespace archivingmod_assign\external;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
-use archivingmod_quiz\local\type\webservice_status;
-use archivingmod_quiz\quiz_manager;
+use archivingmod_assign\assignment_manager;
+use archivingmod_assign\local\type\webservice_status;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
@@ -39,9 +39,9 @@ use local_archiving\activity_archiving_task;
 
 
 /**
- * API endpoint to access quiz attempt metadata in bulk
+ * API endpoint to access assignment submission metadata in bulk
  */
-class get_attempts_metadata extends external_api {
+class get_submissions_metadata extends external_api {
     /**
      * Returns description of method parameters
      *
@@ -59,13 +59,13 @@ class get_attempts_metadata extends external_api {
                 'ID of the activity archiving task this request belongs to',
                 VALUE_REQUIRED
             ),
-            'attemptids' => new external_multiple_structure(
+            'submissionids' => new external_multiple_structure(
                 new external_value(
                     PARAM_INT,
-                    'ID of the quiz attempt',
+                    'ID of the assignment submission',
                     VALUE_REQUIRED
                 ),
-                'List of quiz attempt IDs to query',
+                'List of assignment submission IDs to query',
                 VALUE_REQUIRED
             ),
         ]);
@@ -93,81 +93,86 @@ class get_attempts_metadata extends external_api {
                 'ID of the course module',
                 VALUE_OPTIONAL
             ),
-            'quizid' => new external_value(
+            'assignmentid' => new external_value(
                 PARAM_INT,
-                'ID of the quiz',
+                'ID of the assignment',
                 VALUE_OPTIONAL
             ),
-            'attempts' => new external_multiple_structure(
+            'submissions' => new external_multiple_structure(
                 new external_single_structure([
-                    'attemptid' => new external_value(
+                    'submissionid' => new external_value(
                         PARAM_INT,
-                        'ID of the quiz attempt',
+                        'ID of the assignment submission',
                         VALUE_REQUIRED
                     ),
                     'userid' => new external_value(
                         PARAM_INT,
-                        'ID of the user for this quit attempt',
+                        'ID of the user for this submission',
                         VALUE_REQUIRED
                     ),
                     'username' => new external_value(
                         PARAM_TEXT,
-                        'Username for this quiz attempt',
+                        'Username for this submission',
                         VALUE_REQUIRED
                     ),
                     'firstname' => new external_value(
                         PARAM_TEXT,
-                        'First name for this quiz attempt',
+                        'First name for this submission',
                         VALUE_REQUIRED
                     ),
                     'lastname' => new external_value(
                         PARAM_TEXT,
-                        'Last name for this quiz attempt',
+                        'Last name for this submission',
                         VALUE_REQUIRED
                     ),
                     'email' => new external_value(
                         PARAM_TEXT,
-                        'Email address for this quiz attempt',
+                        'Email address for this assignment submission',
                         VALUE_REQUIRED
                     ),
                     'idnumber' => new external_value(
                         PARAM_TEXT,
-                        'ID number of the user for this quiz attempt',
+                        'ID number of the user for this submission',
                         VALUE_REQUIRED
                     ),
-                    'timestart' => new external_value(
+                    'attemptnumber' => new external_value(
                         PARAM_INT,
-                        'Timestamp of when the quiz attempt started',
+                        'Sequential attempt number of this submission',
                         VALUE_REQUIRED
                     ),
-                    'timefinish' => new external_value(
-                        PARAM_INT,
-                        'Timestamp of when the quiz attempt finished',
-                        VALUE_REQUIRED
-                    ),
-                    'attempt' => new external_value(
-                        PARAM_INT,
-                        'Sequential attempt number',
-                        VALUE_REQUIRED
-                    ),
-                    'state' => new external_value(
+                    'status' => new external_value(
                         PARAM_TEXT,
-                        'State of the quiz attempt',
+                        'Status of the submission',
+                        VALUE_REQUIRED
+                    ),
+                    'timecreated' => new external_value(
+                        PARAM_INT,
+                        'Timestamp of when the submission was created',
+                        VALUE_REQUIRED
+                    ),
+                    'timemodified' => new external_value(
+                        PARAM_INT,
+                        'Timestamp of when the submission was last modified',
+                        VALUE_REQUIRED
+                    ),
+                    'timestarted' => new external_value(
+                        PARAM_INT,
+                        'Timestamp of when the submission was started',
                         VALUE_REQUIRED
                     ),
                 ]),
-                'Attempt metadata for each attempt ID',
+                'Submission metadata for each submission ID',
                 VALUE_OPTIONAL
             ),
         ]);
     }
 
     /**
-     * Generate an quiz attempt report as HTML DOM
+     * Retrieves metadata for a list of assignment submissions
      *
      * @param string $uuidraw UUID assigned to this task by the worker service
      * @param int $taskidraw ID of the activity archiving task this request belongs to
-     * @param array $attemptidsraw IDs of the quiz attempts
+     * @param array $submissionidsraw IDs of the assignment submissions
      *
      * @return array According to execute_returns()
      *
@@ -178,18 +183,18 @@ class get_attempts_metadata extends external_api {
     public static function execute(
         string $uuidraw,
         int $taskidraw,
-        array $attemptidsraw
+        array $submissionidsraw
     ): array {
         // Validate request.
         $params = self::validate_parameters(self::execute_parameters(), [
             'uuid' => $uuidraw,
             'taskid' => $taskidraw,
-            'attemptids' => $attemptidsraw,
+            'submissionids' => $submissionidsraw,
         ]);
 
-        // Validate attemptids.
-        if (empty($params['attemptids'])) {
-            return ['status' => webservice_status::E_ATTEMPT_NOT_FOUND->name];
+        // Validate submissionids.
+        if (empty($params['submissionids'])) {
+            return ['status' => webservice_status::E_SUBMISSION_NOT_FOUND->name];
         }
 
         // Find the task.
@@ -204,13 +209,18 @@ class get_attempts_metadata extends external_api {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
-        // Get quiz manager and build response.
-        $quizmanager = quiz_manager::from_context($task->get_context());
+        // Ensure that we are supposed to handle this task.
+        if ($task->get_archivingmodname() !== 'assign') {
+            return ['status' => webservice_status::E_TASK_TYPE_INVALID->name];
+        }
+
+        // Get assignment manager and build response.
+        $manager = assignment_manager::from_context($task->get_context());
         return [
-            'courseid' => $quizmanager->get_course()->id,
-            'cmid' => $quizmanager->get_cm()->id,
-            'quizid' => $quizmanager->get_quiz()->id,
-            'attempts' => $quizmanager->get_attempts_metadata($params['attemptids']),
+            'courseid' => $manager->get_course()->id,
+            'cmid' => $manager->get_cm()->id,
+            'assignmentid' => $manager->get_assignment()->get_instance()->id,
+            'submissions' => $manager->get_submissions_metadata($params['submissionids']),
             'status' => webservice_status::OK->name,
         ];
     }

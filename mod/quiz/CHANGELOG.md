@@ -7,6 +7,11 @@
 - Add attempt report setting for showing / hiding raw marks for questions
 - Add an option to include or exclude the quiz attempts metadata CSV file
 - Allow exporting only the latest quiz attempt of each user in the generated archive
+- Add "Question internals" attempt report section, showing question ID, question bank version, ID number, and tags above each question
+- Display the attempting user's email address inside the attempt report header
+- Add `${email}` variable for attempt file- and folder name patterns
+- Include user email address in attempt metadata queries and the `get_attempts_metadata` web service response
+- Add support for receiving chunked uploads to enable the transfer of large quiz archives independent of the upload limit
 - Add support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack).
 - Fix rendering of overall quiz feedback
 - Force wrapping of long lines in code boxes to prevent overflowing out of page boundaries

@@ -192,6 +192,8 @@ class remote_archive_worker {
                 "report_sections" => $sections,
                 "paper_format" => $settings->paper_format,
                 "archive_filename" => $task->get_job()->generate_archive_name_prefix(),
+                "archive_flatten" => (bool) $settings->archive_flatten,
+                "archive_filehashes" => true,
                 "foldername_pattern" => $settings->attempt_foldername_pattern,
                 "filename_pattern" => $settings->attempt_filename_pattern,
                 "image_optimize" => $settings->image_optimize ? [
@@ -199,7 +201,7 @@ class remote_archive_worker {
                     "height" => $settings->image_optimize_height,
                     "quality" => $settings->image_optimize_quality,
                 ] : false,
-                "fetch_metadata" => true,
+                "fetch_metadata" => (bool) $settings->export_attempts_metadata,
                 "fetch_attachments" => (bool) $settings->{'report_section_' . attempt_report_section::ATTACHMENTS->value},
                 "keep_html_files" => (bool) $settings->keep_html_files,
             ],

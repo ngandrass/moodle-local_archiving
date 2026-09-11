@@ -29,6 +29,7 @@ use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\activity_archiving_task_status;
 use local_archiving\local\type\cm_state_fingerprint;
 use local_archiving\local\type\task_content_metadata;
+use archivingmod_quiz\local\type\attempts_filter;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -123,7 +124,14 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         if ($task->get_status(usecached: true) == activity_archiving_task_status::CREATED) {
             // Prepare access to quiz and webservice.
             $quizmanager = quiz_manager::from_context($task->get_context());
-            $attempts = $quizmanager->get_attempts();
+            $attempts = $quizmanager->get_filtered_attempts(
+                self::build_attempts_filters_from_formdata(
+                    $task->get_job()->get_settings()
+                )
+            );
+            if (count($attempts) == 0) {
+                throw new \RuntimeException(get_string('error_no_attempts_left_after_filtering', 'archivingmod_quiz'));
+            }
 
             $wstoken = $task->create_webservice_token(
                 webserviceid: self::get_webserviceid(),
@@ -157,7 +165,10 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
             $workerjob = $worker->enqueue_archive_job(
                 wstoken: $wstoken,
                 task: $task,
-                attemptids: array_keys($attempts)
+                attemptids: array_map(
+                    fn($v): int => $v->attemptid,
+                    $attempts,
+                ),
             );
             $task->get_logger()->info("Enqueued new worker job with UUID {$workerjob->uuid}");
 
@@ -183,7 +194,7 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         $quizmanager = quiz_manager::from_context($task->get_context());
 
         $res = [];
-        foreach ($quizmanager->get_attempts() as $attempt) {
+        foreach ($quizmanager->get_all_attempts() as $attempt) {
             $res[] = new task_content_metadata(
                 taskid: $task->get_id(),
                 userid: $attempt->userid,
@@ -265,5 +276,24 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
      */
     public static function is_webserviceproto_rest_enabled(): bool {
         return stripos(get_config('core', 'webserviceprotocols'), 'rest') !== false;
+    }
+
+    /**
+     * Builds the filter selection array based on the given job creation form
+     * data.
+     *
+     * @param object $settings Data object from a submitted job_create_form
+     * @return array Array containing the selected filters for attempts
+     */
+    public static function build_attempts_filters_from_formdata(object $settings): array {
+        // Extract attempt filters from form data object.
+        $attemptfilters = [];
+        foreach (attempts_filter::cases() as $filter) {
+            if ($settings->{'attempts_filter_' . $filter->value}) {
+                array_push($attemptfilters, $filter->value);
+            }
+        }
+
+        return $attemptfilters;
     }
 }

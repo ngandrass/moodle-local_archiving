@@ -8,6 +8,9 @@
 - Add callback hooks to store and retrieve functions of storage drivers to allow for progress tracking
 - Harden file retrieval logic
 - Add support for receiving chunked uploads of quiz archives
+- Add an option to flatten the archive structure, placing all files directly in the root directory of the archive.
+- Allow exporting only the latest quiz attempt of each user in the generated archive
+- Add an option to include or exclude the quiz attempts metadata CSV file
 - Add support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack) in quizzes.
 - Include core sub-plugins in PHPUnit coverage reports
 - Adapt unit tests to Moodle upstream permission checks
@@ -16,6 +19,7 @@
 - Restructure repository to meet Moodle coding style level 2 namespace suggestions
 - Improve Moodle "pluginfile image" inlining logic in report generators
 - Improve archive job logging in storing stage
+- Improve handling of duplicate files in archives
 
 
 ## Version 1.0.0 (2025112300)

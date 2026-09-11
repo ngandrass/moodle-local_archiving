@@ -44,7 +44,7 @@ stages:
     # Install Composer and Node Version Manager (nvm)
     - curl -sS https://getcomposer.org/installer | php
     - mv composer.phar /usr/local/bin/composer
-    - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+    - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.7/install.sh | bash
     - export NVM_DIR="$HOME/.nvm"
     - "$NVM_DIR/nvm.sh"
 

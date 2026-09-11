@@ -24,6 +24,8 @@
 
 namespace archivingmod_quiz;
 
+use archivingmod_quiz\local\type\attempts_filter;
+
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -133,7 +135,7 @@ class quiz_manager {
      *
      * @throws \dml_exception
      */
-    public function get_attempts(): array {
+    public function get_all_attempts(): array {
         global $DB;
 
         return $DB->get_records_sql(
@@ -143,6 +145,64 @@ class quiz_manager {
             [
                 "quizid" => $this->quiz->id,
             ]
+        );
+    }
+
+    /**
+     * Get filtered attempts for this quiz, excluding previews
+     *
+     * @param array $filterkeys List of filter keys to filter attempts by.
+     * @return array Array of all attempts IDs together with the userid that were
+     * made inside this quiz.
+     *
+     * @throws \dml_exception
+     */
+    public function get_filtered_attempts(array $filterkeys): array {
+        // Exit early if we have no filters given.
+        if (empty($filterkeys)) {
+            return array_values($this->get_all_attempts());
+        }
+
+        // Perform the actual filtering, de-duplicating requested filters.
+        $filterattempts = [];
+        foreach (array_unique($filterkeys) as $filter) {
+            switch ($filter) {
+                case attempts_filter::LATEST->value:
+                    $filterattempts[] = $this->get_latest_attempt_of_each_user();
+                    break;
+            }
+        }
+
+        // Intersect different filter results for and-operator combination.
+        // NOTE: For this to work, filter results must map their attempts id
+        // to the database row, containing at least (again) the attempts id
+        // as well as the users id.
+        // Example: `[123 => (object) ['attemptid' => 123, 'userid' => 4]]`.
+        $filteridsmerge = array_shift($filterattempts);
+        foreach ($filterattempts as $attempts) {
+            $filteridsmerge = array_intersect_key($filteridsmerge, $attempts);
+        }
+
+        return array_values($filteridsmerge);
+    }
+
+    /**
+     * Returns a list of IDs of the latest attempt for each user on this quiz,
+     * excluding previews.
+     *
+     * @return array List with IDs of each users last attempt, null if none found.
+     *
+     * @throws \dml_exception
+     */
+    public function get_latest_attempt_of_each_user(): ?array {
+        global $DB;
+
+        return $DB->get_records_sql(
+            "SELECT MAX(id) AS attemptid, userid " .
+            "FROM {quiz_attempts} " .
+            "WHERE preview = 0 AND quiz = :quizid " .
+            "GROUP BY userid",
+            [ "quizid" => $this->quiz->id ]
         );
     }
 
@@ -166,7 +226,7 @@ class quiz_manager {
         // Get all requested attempts.
         return $DB->get_records_sql(
             "SELECT qa.id AS attemptid, qa.userid, qa.attempt, qa.state, qa.timestart, qa.timefinish, " .
-            "       u.username, u.firstname, u.lastname, u.idnumber " .
+            "       u.username, u.firstname, u.lastname, u.email, u.idnumber " .
             "FROM {quiz_attempts} qa LEFT JOIN {user} u ON qa.userid = u.id " .
             "WHERE qa.preview = 0 AND qa.quiz = :quizid " . ($filterwhereclause ?? ''),
             [

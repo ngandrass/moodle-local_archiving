@@ -24,6 +24,7 @@
 
 namespace archivingmod_quiz;
 
+use archivingmod_quiz\local\type\attempts_filter;
 
 // phpcs:ignore
 global $CFG;
@@ -77,7 +78,7 @@ final class quiz_manager_test extends \advanced_testcase {
     }
 
     /**
-     * Tests to get the attempts of a quiz
+     * Tests to get all the attempts of a quiz
      *
      * @covers \archivingmod_quiz\quiz_manager
      *
@@ -86,16 +87,87 @@ final class quiz_manager_test extends \advanced_testcase {
      * @throws \moodle_exception
      * @throws \restore_controller_exception
      */
-    public function test_get_attempts(): void {
+    public function test_get_all_attempts(): void {
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
         $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
-        $attempts = $quiz->get_attempts();
+        $attempts = $quiz->get_all_attempts();
 
         $this->assertNotEmpty($attempts, 'No attempts found');
         $this->assertCount(count($rc->attemptids), $attempts, 'Incorrect number of attempts found');
+    }
+
+    /**
+     * Tests to get filtered attempts of a quiz
+     *
+     * @covers \archivingmod_quiz\quiz_manager::get_filtered_attempts
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_get_filtered_attempts(): void {
+
+        // NOTE: Because there is currently only one filter available
+        // NOTE: the combination of different filter results can not be properly
+        // NOTE: tested, without adding mock filters to business logic code.
+        // NOTE: Therefore provided combination logic was tested manually.
+        // TODO (MDL-0): Expand test suite to feature filter combinations when
+        // TODO (MDL-0): adding new filter options.
+
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
+
+        $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
+        $attempts = $quiz->get_all_attempts();
+        $filteredattempts = $quiz->get_filtered_attempts([attempts_filter::LATEST->value]);
+
+        $this->assertNotEmpty($attempts, 'No attempts found');
+        $this->assertNotEmpty($filteredattempts, 'No attempts found for filter');
+        $this->assertTrue(count($attempts) > count($filteredattempts), 'Filtering should reduce number of attempts');
+    }
+
+    /**
+     * Tests to retrieve the latest attempt's id of each user
+     *
+     * @covers \archivingmod_quiz\quiz_manager::get_latest_attempt_of_each_user
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_get_latest_attempt_of_each_user(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
+        $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
+
+        // Retrieve latest attempts and assert that we have the expected number of attempts.
+        $latestattempts = $quiz->get_latest_attempt_of_each_user();
+        $this->assertNotEmpty($latestattempts, 'No latest attempts found for users');
+        $this->assertCount(2, $latestattempts, 'Expected 2 of 3 attempts from 2 users here');
+
+        // Assert that actually the latest attempt is retrieved.
+        $latestattemptbyuserid = array_reduce($latestattempts, function ($carry, $attempt) {
+            $carry[$attempt->userid] = $attempt->attemptid;
+            return $carry;
+        }, []);
+
+        foreach ($rc->userids as $userid) {
+            $userattempts = $DB->get_records('quiz_attempts', ['userid' => $userid], 'attempt DESC', 'id, userid');
+            $this->assertSame(
+                reset($userattempts)->id,
+                $latestattemptbyuserid[$userid],
+                'Latest attempt for user ' . $userid . ' does not match expected latest attempt'
+            );
+        }
     }
 
     /**
@@ -129,6 +201,7 @@ final class quiz_manager_test extends \advanced_testcase {
         $this->assertNotEmpty($attempt->username, 'Attempt metadata does not contain username');
         $this->assertNotEmpty($attempt->firstname, 'Attempt metadata does not contain firstname');
         $this->assertNotEmpty($attempt->lastname, 'Attempt metadata does not contain lastname');
+        $this->assertNotEmpty($attempt->email, 'Attempt metadata does not contain email');
         $this->assertNotNull($attempt->idnumber, 'Attempt metadata does not contain idnumber');  // ID number can be empty.
 
         // Test filtered.

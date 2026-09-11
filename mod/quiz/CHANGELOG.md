@@ -5,6 +5,8 @@
 - Add attempt report setting for showing / hiding overall quiz grade
 - Add attempt report setting for showing / hiding question correctness indicators
 - Add attempt report setting for showing / hiding raw marks for questions
+- Add an option to include or exclude the quiz attempts metadata CSV file
+- Allow exporting only the latest quiz attempt of each user in the generated archive
 - Add "Question internals" attempt report section, showing question ID, question bank version, ID number, and tags above each question
 - Display the attempting user's email address inside the attempt report header
 - Add `${email}` variable for attempt file- and folder name patterns

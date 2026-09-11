@@ -24,7 +24,7 @@
 
 use archivingmod_quiz\local\type\attempt_filename_variable;
 use archivingmod_quiz\local\type\attempt_report_section;
-use local_archiving\local\admin\setting\admin_setting_configcheckbox_alwaystrue;
+use archivingmod_quiz\local\type\attempts_filter;
 use local_archiving\local\admin\setting\admin_setting_filename_pattern;
 use local_archiving\local\admin\setting\admin_setting_webservice_enabler;
 use local_archiving\local\type\paper_format;
@@ -93,13 +93,27 @@ if ($hassiteconfig) {
             get_string('setting_header_job_presets_desc', 'local_archiving'),
         ));
 
-        // Job preset: Export Attempts.
-        $settings->add(new admin_setting_configcheckbox_alwaystrue(
-            'archivingmod_quiz/job_preset_export_attempts',
-            get_string('task_export_attempts', 'archivingmod_quiz'),
-            get_string('task_export_attempts_help', 'archivingmod_quiz'),
+        // Job preset: Export attempts metadata.
+        $set = new admin_setting_configcheckbox(
+            'archivingmod_quiz/job_preset_export_attempts_metadata',
+            get_string('task_export_attempts_metadata', 'archivingmod_quiz'),
+            get_string('task_export_attempts_metadata_help', 'archivingmod_quiz'),
             '1',
-        ));
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $settings->add($set);
+
+        // Job preset: Attempt filters.
+        foreach (attempts_filter::cases() as $filter) {
+            $set = new admin_setting_configcheckbox(
+                'archivingmod_quiz/job_preset_attempts_filter_' . $filter->value,
+                get_string('task_attempts_filter_' . $filter->value, 'archivingmod_quiz'),
+                get_string('task_attempts_filter_' . $filter->value . '_help', 'archivingmod_quiz'),
+                '0',
+            );
+            $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+            $settings->add($set);
+        }
 
         // Job preset: Attempt report sections.
         foreach (attempt_report_section::cases() as $section) {
@@ -149,6 +163,7 @@ if ($hassiteconfig) {
             PARAM_TEXT,
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $set->add_dependent_on('archivingmod_quiz/job_preset_archive_flatten');
         $settings->add($set);
 
         // Job preset: Attempt filename pattern.
@@ -169,6 +184,16 @@ if ($hassiteconfig) {
             attempt_filename_variable::values(),
             \local_archiving\storage::FILENAME_FORBIDDEN_CHARACTERS,
             PARAM_TEXT,
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $settings->add($set);
+
+        // Job preset: Flat archive export.
+        $set = new admin_setting_configcheckbox(
+            'archivingmod_quiz/job_preset_archive_flatten',
+            get_string('task_archive_flatten', 'archivingmod_quiz'),
+            get_string('task_archive_flatten_help', 'archivingmod_quiz'),
+            '0',
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);

@@ -26,6 +26,7 @@ namespace archivingmod_quiz\form;
 
 use archivingmod_quiz\local\type\attempt_filename_variable;
 use archivingmod_quiz\local\type\attempt_report_section;
+use archivingmod_quiz\local\type\attempts_filter;
 use local_archiving\local\type\paper_format;
 use local_archiving\storage;
 
@@ -43,15 +44,35 @@ class job_create_form extends \local_archiving\form\job_create_form {
         // Options: Attempts.
         $this->_form->addElement(
             'advcheckbox',
-            'export_attempts',
-            get_string('attempts', 'mod_quiz'),
-            get_string('task_export_attempts', 'archivingmod_quiz'),
-            ['disabled' => 'disabled'],
-            ['1', '1']
+            'export_attempts_metadata',
+            '&nbsp;',
+            get_string('task_export_attempts_metadata', 'archivingmod_quiz'),
+            $this->config->handler->{'job_preset_export_attempts_metadata_locked'} ? 'disabled' : null
         );
-        $this->_form->addHelpButton('export_attempts', 'task_export_attempts', 'archivingmod_quiz');
-        $this->_form->setDefault('export_attempts', true);
+        $this->_form->addHelpButton('export_attempts_metadata', 'task_export_attempts_metadata', 'archivingmod_quiz');
+        $this->_form->setDefault('export_attempts_metadata', $this->config->handler->{'job_preset_export_attempts_metadata'});
 
+        // Options: Filters.
+        foreach (attempts_filter::cases() as $i => $filter) {
+            $this->_form->addElement(
+                'advcheckbox',
+                'attempts_filter_' . $filter->value,
+                '&nbsp;', /* phpcs:ignore $i == 0 ? get_string('task_attempts_filter', 'archivingmod_quiz') : '&nbsp;', */
+                get_string('task_attempts_filter_' . $filter->value, 'archivingmod_quiz'),
+                $this->config->handler->{'job_preset_attempts_filter_' . $filter->value . '_locked'} ? 'disabled' : null
+            );
+            $this->_form->addHelpButton(
+                'attempts_filter_' . $filter->value,
+                'task_attempts_filter_' . $filter->value,
+                'archivingmod_quiz'
+            );
+            $this->_form->setDefault(
+                'attempts_filter_' . $filter->value,
+                $this->config->handler->{'job_preset_attempts_filter_' . $filter->value}
+            );
+        }
+
+        // Options: Report sections.
         foreach (attempt_report_section::cases() as $section) {
             $this->_form->addElement(
                 'advcheckbox',
@@ -253,6 +274,7 @@ class job_create_form extends \local_archiving\form\job_create_form {
         $this->_form->setType('attempt_foldername_pattern', PARAM_TEXT);
         $this->_form->setDefault('attempt_foldername_pattern', $this->config->handler->job_preset_attempt_foldername_pattern);
         $this->_form->addRule('attempt_foldername_pattern', null, 'maxlength', 255, 'client');
+        $this->_form->hideIf('attempt_foldername_pattern', 'archive_flatten', 'checked');
 
         // Advanced options: Attempts filename pattern.
         $this->_form->addElement(
@@ -282,6 +304,18 @@ class job_create_form extends \local_archiving\form\job_create_form {
         $this->_form->setType('attempt_filename_pattern', PARAM_TEXT);
         $this->_form->setDefault('attempt_filename_pattern', $this->config->handler->job_preset_attempt_filename_pattern);
         $this->_form->addRule('attempt_filename_pattern', null, 'maxlength', 255, 'client');
+
+        // Flat archive export.
+        $this->_form->addElement(
+            'advcheckbox',
+            'archive_flatten',
+            get_string('task_archive_flatten', 'archivingmod_quiz'),
+            get_string('enable'),
+            $this->config->handler->job_preset_archive_flatten_locked ? 'disabled' : null,
+            ['0', '1']
+        );
+        $this->_form->addHelpButton('archive_flatten', 'task_archive_flatten', 'archivingmod_quiz');
+        $this->_form->setDefault('archive_flatten', $this->config->handler->job_preset_archive_flatten);
 
         parent::definition_advanced_settings();
     }

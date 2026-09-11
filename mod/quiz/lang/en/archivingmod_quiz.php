@@ -38,11 +38,20 @@ $string['task_export_attempts'] = 'Export quiz attempts';
 $string['task_export_attempts_help'] = 'Quiz attempts will always be exported';
 $string['task_export_attempts_num'] = 'Export quiz attempts ({$a})';
 $string['task_export_attempts_num_help'] = 'Quiz attempts will always be exported';
+$string['task_export_attempts_metadata'] = 'Export attempts metadata';
+$string['task_export_attempts_metadata_help'] = 'A tabular file containing the metadata of all the exported attempts will be created inside the quiz archive.';
 $string['task_keep_html_files'] = 'HTML files';
 $string['task_keep_html_files_desc'] = 'Keep HTML source files';
 $string['task_keep_html_files_help'] = 'Save HTML source files in addition to the generated PDFs during the export process. This can be useful if you want to access the raw HTML DOM the PDFs were generated from. Disabling this option can significantly reduce the archive size.';
 $string['task_paper_format'] = 'Paper size';
 $string['task_paper_format_help'] = 'The paper size to use for the PDF export. This does not not affect HTML exports.';
+
+// Task settings: Attempt filters
+$string['task_attempts_filter'] = 'Filters';
+$string['task_attempts_filter_latest'] = 'Export only latest attempts';
+$string['task_attempts_filter_latest_help'] = 'If selected, only the most recent attempt will be exported for each user. Older attempts will automatically be omitted.';
+$string['error_no_attempts_left_after_filtering'] = 'No quiz attempts were left for export after the selected filters were applied.';
+
 
 // Task settings: Attempt report sections
 $string['task_report_section_header'] = 'Include quiz header';
@@ -109,6 +118,10 @@ $string['task_attempt_foldername_pattern'] = 'Attempt folder name';
 $string['task_attempt_foldername_pattern_help'] = 'Name of the folder(s) the generated quiz attempt reports (PDF files) are stored in. Directories can be nested using slashes. Leading and trailing slashes are not allowed. Variables <b>must</b> follow the <code>${variablename}</code> pattern.<br><br><b>Available variables</b>: <ul>{$a->variables}</ul><b>Forbidden characters</b>: <code>{$a->forbiddenchars}</code>';
 $string['error_invalid_attempt_filename_pattern'] = 'Invalid attempt report filename pattern. Please correct your input and try again.';
 $string['error_invalid_attempt_foldername_pattern'] = 'Invalid attempt report folder name pattern. Please correct your input and try again.';
+
+// Task settings: Flat archive export
+$string['task_archive_flatten'] = 'Flatten archive';
+$string['task_archive_flatten_help'] = 'If enabled, all directories inside the exported archive will be omitted. All files will be placed in the root directory of the generated archive. Please make sure to <b>choose a unique attempt filename!</b>';
 
 // Admin settings.
 $string['setting_autoconfigure'] = 'Automatic configuration';

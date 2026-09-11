@@ -123,7 +123,7 @@ class archivingmod_quiz_mock extends \local_archiving\local\driver\archivingmod 
         $quizmanager = quiz_manager::from_context($task->get_context());
 
         $res = [];
-        foreach ($quizmanager->get_attempts() as $attempt) {
+        foreach ($quizmanager->get_all_attempts() as $attempt) {
             $res[] = new task_content_metadata(
                 taskid: $task->get_id(),
                 userid: $attempt->userid,

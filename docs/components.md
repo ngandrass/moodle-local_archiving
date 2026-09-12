@@ -10,9 +10,9 @@ gives a brief overview of the different components.
 ![](assets/diagrams/architecture-overview-simple.drawio)
 
 
-!!! example "Additional information"
-    You can find more information about all components and how they work in detail inside the
-    [developer section](dev/index.md) of this documentation.
+!!! example "In-depth technical information"
+    You can find more information about all components, how they work and how they interact with each other in detail 
+    inside the [developer section](dev/index.md) of this documentation.
 
 
 ## Activity Archiving Drivers
@@ -22,11 +22,11 @@ driver exists for every Moodle activity that is supported by the archiving syste
 relevant data from the activity, transform it into an archivable format, and returns the finished archive back to the
 archiving manager.
 
-!!! abstract "Quiz (`archivingmod_quiz`)"
-    Activity archiving driver for Moodle quizzes.
+The following activity archiving drivers are currently available:
 
-!!! abstract "Assignment (`archivingmod_assign`)"
-    Activity archiving driver for Moodle assignments.
+[:material-file-upload-outline: Assignment](assign.md){ .md-button }
+&nbsp;&nbsp;
+[:material-list-box-outline: Quiz](quiz.md){ .md-button }
 
 
 ## Storage Drivers
@@ -35,11 +35,13 @@ Storage drivers are responsible for safely transferring a finished archive to a 
 for example, the Moodledata storage or an S3 compatible WORM storage. Having multiple storage drivers available allows
 for a flexible adaptation to existing archiving and storage systems.
 
-!!! abstract "Local Directory (`archivingstorage_localdir`)"
-    Archiving storage driver for storing data on the local filesystem.
+The following storage drivers are currently available:
 
-!!! abstract "Moodledata (`archivingstorage_moodle`)"
-    Archiving storage driver for storing archived data inside the Moodle file store.
+[:material-folder-open: Local Directory](localdir.md){ .md-button }
+&nbsp;&nbsp;
+[:simple-moodle: Moodle Filestore](moodle.md){ .md-button }
+&nbsp;&nbsp;
+[:fontawesome-solid-cubes: S3 Object Store](s3.md){ .md-button }
 
 
 ## Archiving Triggers
@@ -49,12 +51,11 @@ for example, a manual trigger by a user or an automatic trigger that is based on
 archiving triggers can be used simultaneously, e.g., to allow both manual on-demand archive creation but also initiate
 archiving for all activities that have unarchived changes every night.
 
-!!! abstract "Manual Trigger (`archivingtrigger_manual`)"
-    This trigger allows users to manually create new archive jobs for specific activities on-demand.
+The following archiving triggers are currently available:
 
-!!! abstract "Scheduled Trigger (`archivingtrigger_cron`)"
-    This trigger automatically creates new archive jobs for all activities that have unarchived changes and are located
-    within any of the specified course categories for archiving. Archive jobs are created based on a configurable schedule.
+[:material-cursor-default-click-outline: Manual](manual.md){ .md-button }
+&nbsp;&nbsp;
+[:material-calendar-clock: Scheduled](cron.md){ .md-button }
 
 
 ## External Event Connectors
@@ -67,5 +68,5 @@ The external event connectors differ from storage drivers in the way that they d
 solely deliver information to external systems. This allows decoupling file storage from the remaining business logic of
 target institutions.
 
-!!! abstract "API Stub (`archivingevent_apistub`)"
-    A stub implementation of an external event connector.
+There are currently no external event connectors shipped with the core plugin. Developers can use this sub-plugin type
+to implement their own glue logic.

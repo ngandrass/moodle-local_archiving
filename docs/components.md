@@ -17,10 +17,10 @@ gives a brief overview of the different components.
 
 ## Activity Archiving Drivers
 
-Activity archiving drivers are responsible for the actual archiving process of a specific Moodle activity. One such
-driver exists for every Moodle activity that is supported by the archiving system. Activity archiving drivers gather all
-relevant data from the activity, transform it into an archivable format, and returns the finished archive back to the
-archiving manager.
+[Activity archiving drivers](archivingmod/index.md) are responsible for the actual archiving process of a specific
+Moodle activity. One such driver exists for every Moodle activity that is supported by the archiving system. Activity
+archiving drivers gather all relevant data from the activity, transform it into an archivable format, and returns the
+finished archive back to the archiving manager.
 
 The following activity archiving drivers are currently available:
 
@@ -31,9 +31,9 @@ The following activity archiving drivers are currently available:
 
 ## Storage Drivers
 
-Storage drivers are responsible for safely transferring a finished archive to a specific storage location. This can be,
-for example, the Moodledata storage or an S3 compatible WORM storage. Having multiple storage drivers available allows
-for a flexible adaptation to existing archiving and storage systems.
+[Storage drivers](archivingstore/index.md) are responsible for safely transferring a finished archive to a specific
+storage location. This can be, for example, the Moodledata storage or an S3 compatible WORM storage. Having multiple
+storage drivers available allows for a flexible adaptation to existing archiving and storage systems.
 
 The following storage drivers are currently available:
 
@@ -46,10 +46,10 @@ The following storage drivers are currently available:
 
 ## Archiving Triggers
 
-Archiving triggers are responsible for creating new archive jobs based on specific events or conditions. This can be,
-for example, a manual trigger by a user or an automatic trigger that is based on a configurable schedule. Multiple
-archiving triggers can be used simultaneously, e.g., to allow both manual on-demand archive creation but also initiate
-archiving for all activities that have unarchived changes every night.
+[Archiving triggers](archivingtrigger/index.md) are responsible for creating new archive jobs based on specific events
+or conditions. This can be, for example, a manual trigger by a user or an automatic trigger that is based on a
+configurable schedule. Multiple archiving triggers can be used simultaneously, e.g., to allow both manual on-demand
+archive creation but also initiate archiving for all activities that have unarchived changes every night.
 
 The following archiving triggers are currently available:
 

@@ -124,12 +124,28 @@ nav:
     - setup/index.md
 
   - "Usage":
-      - usage/index.md
-      - usage/overview.md
-      - usage/archive-creation.md
-      - usage/download.md
-      - usage/logs.md
-      - usage/archive-signing.md
+    - usage/index.md
+    - usage/overview.md
+    - usage/archive-creation.md
+    - usage/download.md
+    - usage/logs.md
+    - usage/archive-signing.md
+
+  - "Activities":
+    - archivingmod/index.md
+    - "Assignment": archivingmod/assign.md
+    - "Quiz": archivingmod/quiz.md
+
+  - "Storage Drivers":
+    - archivingstore/index.md
+    - "Local Directory": archivingstore/localdir.md
+    - "Moodle Filestore": archivingstore/moodle.md
+    - "S3 Object Store": archivingstore/s3.md
+
+  - "Archiving Triggers":
+    - archivingtrigger/index.md
+    - "Manual": archivingtrigger/manual.md
+    - "Scheduled": archivingtrigger/cron.md
 
   - "Developer Documentation":
     - dev/index.md

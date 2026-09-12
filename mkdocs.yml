@@ -134,7 +134,14 @@ nav:
   - "Activities":
     - archivingmod/index.md
     - "Assignment": archivingmod/assign.md
-    - "Quiz": archivingmod/quiz.md
+    - "Quiz":
+      - archivingmod/quiz/index.md
+      - "Archived Data": archivingmod/quiz/data.md
+      - "Worker Service": archivingmod/quiz/worker.md
+      - "Image Optimization": archivingmod/quiz/image-optimization.md
+      - "Troubleshooting": archivingmod/quiz/troubleshooting.md
+      - "Screenshots": archivingmod/quiz/screenshots.md
+      - "Changelog": archivingmod/quiz/changelog.md
 
   - "Storage Drivers":
     - archivingstore/index.md

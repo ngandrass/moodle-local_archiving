@@ -133,7 +133,13 @@ nav:
 
   - "Activities":
     - archivingmod/index.md
-    - "Assignment": archivingmod/assign.md
+    - "Assignment":
+      - archivingmod/assign/index.md
+      - "Archived Data": archivingmod/assign/data.md
+      - "Worker Service": archivingmod/assign/worker.md
+      - "Troubleshooting": archivingmod/assign/troubleshooting.md
+      - "Screenshots": archivingmod/assign/screenshots.md
+      - "Changelog": archivingmod/assign/changelog.md
     - "Quiz":
       - archivingmod/quiz/index.md
       - "Archived Data": archivingmod/quiz/data.md

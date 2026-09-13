@@ -18,11 +18,11 @@ Generated quiz archives can contain the following files:
 
 ## Naming patterns
 
-When creating a new quiz archive, the _Advanced settings_ section contains three options for naming the files inside an
-archive and the archive itself:
+When creating a new quiz archive, the {{ mform_element('Advanced settings', 'section') }} section contains three
+options for naming the files inside an archive and the archive itself:
 
 - {{ mform_element('Archive name', 'text') }} controls the name of the final archive file.
-- {{ mform_element ('Attempt folder name', 'text') }} controls the names of the folders created for each attempt
+- {{ mform_element('Attempt folder name', 'text') }} controls the names of the folders created for each attempt
   when using the hierarchical file structure.
 - {{ mform_element('Attempt name', 'text') }} controls the names of the PDF reports generated for individual
   quiz attempts. If HTML source files are enabled, they use the same base name.
@@ -31,7 +31,7 @@ Patterns can be composed of plain text and variables. Variables must use the `${
 extension is added automatically, so do not add an extension yourself.
 
 !!! info
-    {{ mform_element ('Attempt folder name', 'text') }} has no effect when {{ mform_element ('Flatten export
+    {{ mform_element('Attempt folder name', 'text') }} has no effect when {{ mform_element('Flatten export
     archive', 'checkbox') }} is enabled because all files are placed in the root of the resulting archive. See
     [File structure](#file-structure) for details.
 
@@ -68,14 +68,14 @@ The variables are available for use within the respective name patterns:
 ## File structure
 
 Archives can be created either hierarchical or flat. By default, hierarchical archives with sub-folders are created.
-The {{ mform_element ('Flatten export archive', 'checkbox') }} checkbox determines how files are placed inside the
+The {{ mform_element('Flatten export archive', 'checkbox') }} checkbox determines how files are placed inside the
 archive:
 
 - When it is **not selected**, the archive uses a hierarchical structure with separate directories. The {{
-  mform_element ('Attempt folder name', 'text') }} setting determines the directory used for each attempt.
+  mform_element('Attempt folder name', 'text') }} setting determines the directory used for each attempt.
 - When it is **selected**, the archive uses a flat structure. All files are placed directly in the root of the archive.
   Prefixes are added to file names to distinguish reports belonging to different attempts and to prevent name
-  collisions. The {{ mform_element ('Attempt folder name', 'text') }} setting is ignored.
+  collisions. The {{ mform_element('Attempt folder name', 'text') }} setting is ignored.
 
 ### Example: Hierarchical 
 

@@ -24,9 +24,9 @@ finished archive back to the archiving manager.
 
 The following activity archiving drivers are currently available:
 
-[:material-file-upload-outline: Assignment](assign.md){ .md-button }
+[:material-file-upload-outline: Assignment](archivingmod/assign/index.md){ .md-button }
 &nbsp;&nbsp;
-[:material-list-box-outline: Quiz](quiz.md){ .md-button }
+[:material-list-box-outline: Quiz](archivingmod/quiz/index.md){ .md-button }
 
 
 ## Storage Drivers
@@ -37,11 +37,11 @@ storage drivers available allows for a flexible adaptation to existing archiving
 
 The following storage drivers are currently available:
 
-[:material-folder-open: Local Directory](localdir.md){ .md-button }
+[:material-folder-open: Local Directory](archivingstore/localdir.md){ .md-button }
 &nbsp;&nbsp;
-[:simple-moodle: Moodle Filestore](moodle.md){ .md-button }
+[:simple-moodle: Moodle Filestore](archivingstore/moodle.md){ .md-button }
 &nbsp;&nbsp;
-[:fontawesome-solid-cubes: S3 Object Store](s3.md){ .md-button }
+[:fontawesome-solid-cubes: S3 Object Store](archivingstore/s3.md){ .md-button }
 
 
 ## Archiving Triggers
@@ -53,9 +53,9 @@ archive creation but also initiate archiving for all activities that have unarch
 
 The following archiving triggers are currently available:
 
-[:material-cursor-default-click-outline: Manual](manual.md){ .md-button }
+[:material-cursor-default-click-outline: Manual](archivingtrigger/manual.md){ .md-button }
 &nbsp;&nbsp;
-[:material-calendar-clock: Scheduled](cron.md){ .md-button }
+[:material-calendar-clock: Scheduled](archivingtrigger/cron.md){ .md-button }
 
 
 ## External Event Connectors

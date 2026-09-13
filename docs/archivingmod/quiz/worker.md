@@ -1,18 +1,24 @@
 # Moodle Archiving Worker
 
 This page describes the installation of the archiving worker service, that is used in conjunction with the [quiz
-activity archiving driver](index.md). It can be installed using multiple ways, though using
-[Docker Compose](#installation-using-docker-compose) is strongly recommended.
+activity archiving driver](../quiz/index.md) and the [assignment activity archiving driver](../assign/index.md). It can
+be installed using multiple ways, though using [Docker Compose](#installation-using-docker-compose) is strongly recommended.
+
+!!! success "Works for quizzes and assignments"
+    The archiving worker service is used for both the quiz and assignment activity archiving drivers. Therefore, it is
+    only necessary to **install the service once**.
+
+    Deploying two different worker instances is possible, but neither required nor advised in most deployments.
 
 
 ## Using the free public demo service
 
-If you just want to try archiving quizzes without setting up your own archiving worker service, you can use the free
-public demo worker.
+If you just want to try archiving quizzes or assignments without setting up your own archiving worker service, you can
+use the free public demo worker.
 
 !!! notice
     The public archiving worker service is running in demo mode. This means that a _DEMO MODE_ watermark will be added
-    to all generated PDFs (see screenshot below) and only a limited number of attempts will be exported.
+    to all generated PDFs (see screenshot below) and only a limited number of attempts / submissions will be exported.
 
     Setting up your own archiving worker service removes these limitations. See below for setup instructions.
 
@@ -20,7 +26,7 @@ public demo worker.
     The public archive worker service must be able to access your Moodle instance via the internet to work. Local and
     **private Moodle instances will not work** with the demo worker.
 
-To use the free public demo worker, navigate to the quiz archiving configuration page
+To use the free public demo worker, navigate to the archiving driver configuration page
 {{ moodle_nav_path('Site administration', 'Plugins', 'Local plugins', 'Archiving', 'Activity archiving drivers', 'Quiz') }}
 and enter the following worker URL into the {{ mform_element('Archive worker URL', 'text') }} field:
 
@@ -28,14 +34,17 @@ and enter the following worker URL into the {{ mform_element('Archive worker URL
 https://demoworker.quizarchiver.gandrass.de
 ```
 
+The screenshots below show an example configuration of the quiz archiving driver using the public demo worker service
+and a generated PDF with the demo mode watermark:
+
 ![Screenshot: Configuration Archive Worker URL](../../assets/screenshots/archivingmod_quiz_demoworker_url_config.png){ .img-thumbnail }
 ![Screenshot: Demo mode watermark in attempt PDF](../..//assets/screenshots/archivingmod_quiz_demomode_watermark.png){ .img-thumbnail }
 
 
 ## Installation using Docker Compose
 
-!!! success "Info"
-    This is the suggested way of installing the quiz archive worker service :thumbsup:
+!!! success "Suggested installation method"
+    This is the suggested way of installing the archiving worker service :thumbsup:
 
 1. Install [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
 2. Create a `docker-compose.yml` inside a `moodle-archiving-worker` folder with the following content:
@@ -95,7 +104,7 @@ docker compose down
 ## Installation using Docker
 
 !!! info
-    This is an alternative way of installing the quiz archive worker service using Docker directly.
+    This is an alternative way of installing the archiving worker service using Docker directly.
 
 1. Install [Docker](https://www.docker.com/)
 2. Run a new container:
@@ -161,7 +170,7 @@ directory as the build context.
 ## Resource usage guidelines
 
 The archiving worker is capable of processing multiple archive jobs in parallel. For each job, a separate browser
-context is spawned for rendering the quiz attempts. Therefore, the resource usage scales roughly with the number of
+context is spawned that renders the generated report. Therefore, the resource usage scales roughly with the number of
 parallel jobs.
 
 For reference, each archiving job uses roughly **1 CPU** and **1 GiB of RAM** while processing. By default, up to four
@@ -237,16 +246,15 @@ If you need stronger compression, you can choose between different compression a
 
 ### PDF/A Conversion
 
-The quiz archive worker can produce [PDF/A-3b compliant PDF files](https://en.wikipedia.org/wiki/PDF/A). PDF/A is an
+The archiving worker can produce [PDF/A-3b compliant PDF files](https://en.wikipedia.org/wiki/PDF/A). PDF/A is an
 ISO-standardized version of the PDF format that is designed for long-term archiving and preservation of electronic
 documents. It ensures that the PDF files can be displayed exactly the same way in the future, regardless of the software
 used to create or view them.
 
-For converting attempt PDF files into a PDF/A-3b compliant format, the external dependency
+For converting generated PDF files into a PDF/A-3b compliant format, the external dependency
 [Ghostscript](https://ghostscript.com) is required. If you are using the official Docker image, Ghostscript is already
 included and configured properly. If you are installing the worker service manually, please refer to the [Manual
 Installation](#manual-installation) section above.
-
 
 !!! info "Switching between PDF and PDF/A format"
     PDF/A conversion is enabled by default, but can be disabled by setting:
@@ -255,8 +263,8 @@ Installation](#manual-installation) section above.
     ```
 
 !!! info "Using a specific Ghostscript installation"
-    The location of your Ghostscript binary is automatically detected on startup. If automatic detection fails or you want
-    to use a specific Ghostscript distribution, you can set the path to your Ghostscript binary manually via the
+    The location of your Ghostscript binary is automatically detected on startup. If automatic detection fails, or you
+    want to use a specific Ghostscript distribution, you can set the path to your Ghostscript binary manually via the
     corresponding environment variable.
     ```text
     MOODLE_ARCHIVER_PDFA_CONVERSION_GHOSTSCRIPT_BINARY_PATH=/bin/gs
@@ -264,7 +272,7 @@ Installation](#manual-installation) section above.
 
 ### Proxy Servers
 
-Should your archive worker be required to access your Moodle instance and other resources through a proxy server, both
+Should your archiving worker be required to access your Moodle instance and other resources through a proxy server, both
 [HTTP and SOCKS proxies](https://en.wikipedia.org/wiki/Proxy_server#Implementations_of_proxies) are supported. You have
 multiple options to configure the proxy settings as described below.
 

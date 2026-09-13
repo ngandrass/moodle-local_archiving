@@ -1,6 +1,6 @@
 # Troubleshooting
 
-This section lists some common pitfalls that you might encounter when setting up or using the quiz activity archiving
+This section lists some common pitfalls that you might encounter when setting up or using this activity archiving
 driver.
 
 
@@ -42,25 +42,25 @@ If you get an error message that access to one or more webservice functions is d
 2. Ensure that webservices and the REST protocol are enabled globally.
 
 
-## Upload of the quiz archive fails
+## Upload of created archives fail
 
-If the archive worker is able to create the quiz archive but fails to upload it back to your Moodle instance, you 
-should check the following things:
+If the archive worker is able to create the archive but fails to upload it back to your Moodle instance, you should
+check the following things:
 
 1. Ensure that your Moodle is configured to file uploads. `$CFG->maxbytes` should be set to the same value as PHP 
    `upload_max_filesize` (see below).
 2. Ensure you have configured PHP to accept file uploads. The `upload_max_filesize` and `post_max_size` settings
    in your `php.ini` should be set to a value that matches `$CFG->maxbytes` from your Moodle settings.
 3. If you are using an ingress webserver and PHP-FPM via FastCGI, ensure that the `fastcgi_send_timeout` and
-   `fastcgi_read_timeout` settings are long enough to allow the upload of the largest quiz archive file that you expect.
+   `fastcgi_read_timeout` settings are long enough to allow the upload of the largest archive file that you expect.
    Nginx usually signals this problem by returning a '504 Gateway Time-out' after 60 seconds (default).
 4. Ensure that your antivirus plugin is capable of handling large files. When using ClamAV you can control maximum file
    sizes by setting `MaxFileSize`, `MaxScanSize`, and `StreamMaxLength` (when using a TCP socket) inside `clamd.conf`.
 
 !!! info "Chunked file uploads"
-    The worker service automatically detects the maximum file upload size that is configured in your Moodle instance 
-    and uses chunked file uploads to transfer the quiz archive back to Moodle whenever necessary. This allows you to
-    keep the max file upload size to a reasonable value while still being able to create large archives.
+    The worker service automatically detects the maximum file upload size that is configured in your Moodle instance
+    and uses chunked file uploads to transfer the archive back to Moodle whenever necessary. This allows you to keep the
+    max file upload size to a reasonable value while still being able to create large archives.
 
 
 ## Text is not rendered correctly
@@ -79,13 +79,13 @@ Some question types contain content that is rendered asynchronously by JavaScrip
 (e.g., MathJax, GeoGebra, ...). Therefore, the archive worker service contains a readiness probe that determines whether
 all dynamic content has been rendered and delays PDF generation until everything is ready.
 
-If your quiz contains such dynamically rendered content and your archive jobs fail after a short time, you should check
-the logs of your archive worker for messages like `Ready signal not received ` or similar.
+If your activity contains such dynamically rendered content and your archive jobs fail after a short time, you should
+check the logs of your archive worker for messages like `Ready signal not received ` or similar.
 
 At this point you can try increasing the number of seconds the archive worker waits before considering the check to have
 failed via [`MOODLE_ARCHIVER_WAIT_FOR_READY_SIGNAL_TIMEOUT_SEC`](../../installation/archiveworker.md). If desired, you
 can also make the archive worker simply continue after the timeout is reached and generating the PDF as is by setting
 [`MOODLE_ARCHIVER_CONTINUE_AFTER_READY_SIGNAL_TIMEOUT=True`](../..//installation/archiveworker.md).
 
-If you believe that the readiness probe failure is caused by a bug, please do not hesitate to [open a bug
-report](https://github.com/ngandrass/moodle-local_archiving/issues).
+If you believe that the readiness probe failure is caused by a bug, please do not hesitate to
+[open a bug report](https://github.com/ngandrass/moodle-local_archiving/issues).

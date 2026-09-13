@@ -37,7 +37,7 @@ if ($hassiteconfig) {
             'archivingtrigger_cron/enabled',
             get_string('setting_enabled', 'archivingtrigger_cron'),
             get_string('setting_enabled_desc', 'archivingtrigger_cron'),
-            '1'
+            '0'
         ));
 
         // Dryrun.
@@ -45,7 +45,7 @@ if ($hassiteconfig) {
             'archivingtrigger_cron/dryrun',
             get_string('setting_dryrun', 'archivingtrigger_cron'),
             get_string('setting_dryrun_desc', 'archivingtrigger_cron'),
-            '0'
+            '1'
         ));
 
         // Archiving schedule.

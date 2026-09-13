@@ -2,6 +2,8 @@
 
 ## Version X.Y.Z (YYYYMMDDXX)
 
+- Install trigger in a disabled state
+- Enable dry-run mode at installation
 - Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
 - Adapt unit test to Moodle upstream permission check changes
 

@@ -17,6 +17,12 @@ Assignment archives are created by an external [Moodle Archiving Worker](worker.
 and to eliminate the need to install a large number of software dependencies on the webserver. It can easily be deployed
 using Docker.
 
+[:material-archive-outline: Archived Data](data.md){ .md-button }
+&nbsp;&nbsp;
+[:material-monitor-screenshot: Screenshots](screenshots.md){ .md-button }
+&nbsp;&nbsp;
+[:material-file-document-edit-outline: Changelog](changelog.md){ .md-button }
+
 
 ## Features
 

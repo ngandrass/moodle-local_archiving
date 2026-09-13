@@ -83,9 +83,9 @@ If your activity contains such dynamically rendered content and your archive job
 check the logs of your archive worker for messages like `Ready signal not received ` or similar.
 
 At this point you can try increasing the number of seconds the archive worker waits before considering the check to have
-failed via [`MOODLE_ARCHIVER_WAIT_FOR_READY_SIGNAL_TIMEOUT_SEC`](../../installation/archiveworker.md). If desired, you
+failed via [`MOODLE_ARCHIVER_WAIT_FOR_READY_SIGNAL_TIMEOUT_SEC`](worker.md). If desired, you
 can also make the archive worker simply continue after the timeout is reached and generating the PDF as is by setting
-[`MOODLE_ARCHIVER_CONTINUE_AFTER_READY_SIGNAL_TIMEOUT=True`](../..//installation/archiveworker.md).
+[`MOODLE_ARCHIVER_CONTINUE_AFTER_READY_SIGNAL_TIMEOUT=True`](worker.md).
 
 If you believe that the readiness probe failure is caused by a bug, please do not hesitate to
 [open a bug report](https://github.com/ngandrass/moodle-local_archiving/issues).

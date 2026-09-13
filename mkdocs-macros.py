@@ -71,6 +71,8 @@ def define_env(env):
             icon = ':material-form-select:'
         elif type == 'section':
             icon = ':material-chevron-down-box-outline:'
+        elif type == 'button':
+            icon = ':material-button-cursor:'
 
         # Render the Moodle form element indicator with the icon and title
         return f'<span style="padding: 2px 6px; border-radius: 8px; background-color: #f9f9f9; border: 1px solid #cccccc;">{icon} <span style="font-size:80%;">{title}</span></span>'

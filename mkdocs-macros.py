@@ -69,6 +69,8 @@ def define_env(env):
             icon = ':material-toggle-switch-outline:'
         elif type == 'select':
             icon = ':material-form-select:'
+        elif type == 'password':
+            icon = ':material-form-textbox-password:'
         elif type == 'section':
             icon = ':material-chevron-down-box-outline:'
         elif type == 'button':

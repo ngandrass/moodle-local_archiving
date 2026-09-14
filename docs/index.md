@@ -23,12 +23,7 @@ This is the official documentation for the Moodle Archiving Subsystem project. I
 archiving data from various Moodle activities, such as quizzes and assignments, and transferring it to different storage
 locations, such as the Moodle file store or external WORM storage systems.
 
-!!! example "Beta Project"
-    This project is currently in its beta phase. Feel free to use it and provide feedback. However, please keep in mind
-    that some aspects of this plugin might still change in future releases. Consider carefully before using it during
-    this phase in production environments.
-
-If you are new here, taking a look at screenshots and the component overview is a good way to familiarize yourself with
+If you are new here, taking a look at screenshots and the component overview is a good way to get an impression of
 the project:
 
 [:material-monitor-screenshot: Screenshots](screenshots.md){ .md-button }&nbsp;&nbsp;

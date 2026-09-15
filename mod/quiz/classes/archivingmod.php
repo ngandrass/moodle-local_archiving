@@ -289,7 +289,7 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         // Extract attempt filters from form data object.
         $attemptfilters = [];
         foreach (attempts_filter::cases() as $filter) {
-            if ($settings->{'attempts_filter_' . $filter->value}) {
+            if ($settings->{'attempts_filter_' . $filter->value} ?? null) {
                 array_push($attemptfilters, $filter->value);
             }
         }

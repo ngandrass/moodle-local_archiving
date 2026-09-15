@@ -121,7 +121,7 @@ class submission_report {
                     cmid: $this->cm->id,
                 ),
                 'introattachments' => $this->assignment->render_area_files('mod_assign', ASSIGN_INTROATTACHMENT_FILEAREA, 0),
-                'icon' => $OUTPUT->render(activity_icon::from_modname('assign')),
+                'icon' => $this->render_activity_icon(),
                 'dates' => [
                     'opened' => $assigninstance->allowsubmissionsfromdate,
                     'due' => $assigninstance->duedate,
@@ -144,6 +144,32 @@ class submission_report {
                 'report' => $this->generate_submission_and_feedback_html($submittinguser, $sections),
             ],
             'archivingdate' => time(),
+        ]);
+    }
+
+    /**
+     * Renders the assignment activity icon.
+     *
+     * This includes a shim for Moodle <= 4.5 where core_course\output\activity_icon
+     * was not yet available. This method can be removed once Moodle 4.5 support is dropped.
+     *
+     * @return string HTML representation of the activity icon
+     * @throws \coding_exception
+     */
+    protected function render_activity_icon(): string {
+        global $OUTPUT;
+
+        // Moodle >= 5.0.
+        if (class_exists(activity_icon::class)) {
+            return $OUTPUT->render(activity_icon::from_modname('assign'));
+        }
+
+        // TODO (MDL-0): Delete this method in favor of the activity_icon class once Moodle 4.5 support is dropped.
+        // Moodle <= 4.5.
+        return \html_writer::empty_tag('img', [
+            'src' => $this->cm->get_icon_url(),
+            'class' => 'activityicon',
+            'alt' => '',
         ]);
     }
 

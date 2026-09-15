@@ -110,6 +110,7 @@ nav:
   - "Roadmap": roadmap.md
   - "Screenshots": screenshots.md
   - "Changelog": changelog.md
+  - "Security Policy": security.md
 
   - "Setup":
     - "Installation":

@@ -55,6 +55,27 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     public const WEB_SERVICE_SHORTNAME = 'archivingmod_assign_ws';
 
     /**
+     * Returns a list of Moodle events that are fired by the targeted activity
+     * and can be used to trigger an archiving job for this activity type.
+     *
+     * All events listed here can be used by archiving trigger sub-plugins to
+     * automatically create new archive jobs. This archivingmod sub-plugin must
+     * not do anything with those events, it just needs to provide a list of
+     * suitable events. All configuration is done by the archiving trigger sub-
+     * plugins.
+     *
+     * @return \core\event\base[] List of events that can be used to trigger an
+     * archiving job for this activity type.
+     */
+    public static function get_archiving_eventlist(): array {
+        return [
+            \mod_assign\event\submission_created::class,
+            \mod_assign\event\submission_graded::class,
+            \mod_assign\event\submission_locked::class,
+        ];
+    }
+
+    /**
      * Creates a new activity archiving driver instance.
      *
      * @param \context_module $context

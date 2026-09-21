@@ -8,6 +8,7 @@
 - Add configurable attachment handling (assignment, submission, feedback, annotation files) with per-type selection in the job creation form
 - Add folder name and file name pattern generation for archived submissions
 - Add admin settings for worker service connection and archive flattening
+- Expose Moodle events that can trigger archive jobs
 - Finalize Moodle privacy API provider
 - Rename dependency from moodle-quiz-archive-worker to moodle-archiving-worker
 

@@ -347,13 +347,25 @@ class job_create_form extends \moodleform {
     }
 
     /**
-     * Exports the current raw form data without any validation or cleaning.
+     * Exports the current raw form data without any validation.
      *
      * ATTENTION: Use this function with caution. Always use get_data() if possible!
      *
      * @return \stdClass Raw, unvalidated form data
+     * @throws \coding_exception
      */
     public function export_raw_data(): \stdClass {
-        return (object) $this->_form->exportValues();
+        // Get raw form data and remove unnecessary fields.
+        $data = $this->_form->exportValues();
+        unset($data['sesskey']);
+        unset($data['_qf__' . $this->_formname]);
+
+        // Perform cleaning of current values to ensure the returned data is cast to the correct types.
+        foreach ($data as $key => $value) {
+            $type = $this->_form->getCleanType($key, $value);
+            $data[$key] = $this->_form->getCleanedValue($value, $type);
+        }
+
+        return (object) $data;
     }
 }

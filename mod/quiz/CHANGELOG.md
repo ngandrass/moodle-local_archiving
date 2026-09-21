@@ -19,6 +19,7 @@
 - Optimize main report container spacing to reduce the amount of whitespace in the generated PDF
 - Forcefully disable unlocked attempt report sections that depend on another disabled section
 - Prevent instance-specific modifications to Moodle header and footer from leaking into printed PDFs (thanks to @abias !)
+- Expose Moodle events that can trigger archive jobs
 - Migrate quiz attempt renderer to new quiz attempt summary API
 - Prevent `update_task_status` external functions from making changes to activity archiving tasks that belong to other activity types
 - Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.

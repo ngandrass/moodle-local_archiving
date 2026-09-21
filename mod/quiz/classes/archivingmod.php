@@ -52,6 +52,37 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     public const WEB_SERVICE_SHORTNAME = 'archivingmod_quiz_ws';
 
     /**
+     * Returns a list of Moodle events that are fired by the targeted activity
+     * and can be used to trigger an archiving job for this activity type.
+     *
+     * All events listed here can be used by archiving trigger sub-plugins to
+     * automatically create new archive jobs. This archivingmod sub-plugin must
+     * not do anything with those events, it just needs to provide a list of
+     * suitable events. All configuration is done by the archiving trigger sub-
+     * plugins.
+     *
+     * @return \core\event\base[] List of events that can be used to trigger an
+     * archiving job for this activity type.
+     */
+    public static function get_archiving_eventlist(): array {
+        global $CFG;
+
+        $events = array_merge([
+            \mod_quiz\event\attempt_submitted::class,
+            \mod_quiz\event\attempt_manual_grading_completed::class,
+            \mod_quiz\event\attempt_regraded::class,
+        ], parent::get_archiving_eventlist());
+
+        // Moodle <= 4.5: attempt_submitted includes attempt_graded.
+        // Moodle >= 5.0: attempt_graded was introduced.
+        if ($CFG->branch >= 500) {
+            $events[] = \mod_quiz\event\attempt_graded::class;
+        }
+
+        return $events;
+    }
+
+    /**
      * Creates a new activity archiving driver instance.
      *
      * @param \context_module $context

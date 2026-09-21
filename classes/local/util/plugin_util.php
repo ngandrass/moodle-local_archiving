@@ -77,6 +77,7 @@ class plugin_util {
                 'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
                 'activities' => $pluginclass::get_supported_activities(),
+                'events' => $pluginclass::get_archiving_eventlist(),
                 'enabled' => $plugin->is_enabled() ?? false,
                 'ready' => $pluginclass::is_ready() ?? false,
                 'version' => $plugin->versiondb,

@@ -369,4 +369,20 @@ final class archivingmod_test extends \advanced_testcase {
             'With both tasks completed, the job should be considered completed.'
         );
     }
+
+    /**
+     * Tests that the base archivingmod class does not ship any Moodle events
+     * for now.
+     *
+     * @covers \local_archiving\local\driver\archivingmod
+     *
+     * @return void
+     */
+    public function test_get_archiving_eventlist(): void {
+        $this->assertSame(
+            [],
+            archivingmod::get_archiving_eventlist(),
+            'The base class should not provide any archiving events by default.'
+        );
+    }
 }

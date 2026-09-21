@@ -20,6 +20,7 @@
 - Improve Moodle "pluginfile image" inlining logic in report generators
 - Improve archive job logging in storing stage
 - Improve handling of duplicate files in archives
+- Fix type confusion in default archive job settings exports
 
 
 ## Version 1.0.0 (2025112300)

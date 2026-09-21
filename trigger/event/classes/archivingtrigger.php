@@ -27,9 +27,102 @@ namespace archivingtrigger_event;
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+use core\event\base;
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\util\plugin_util;
+
 
 /**
  * Event-based archiving trigger plugin
  */
 class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
+    /**
+     * Builds a list of all available events that can be configured to trigger archiving.
+     *
+     * The list will only contain events from activity archiving drivers that
+     * are enabled and expose at least one event.
+     *
+     * @return array{string, \core\event\base[]} A list of events grouped by
+     * activity archiving driver name.
+     * @throws \coding_exception
+     */
+    public static function get_eventlist(): array {
+        $res = [];
+
+        foreach (plugin_util::get_activity_archiving_drivers() as $name => $metadata) {
+            if ($metadata['enabled'] && !empty($metadata['events'])) {
+                $res[$name] = $metadata['events'];
+            }
+        }
+
+        return $res;
+    }
+
+    /**
+     * Returns a mapping of enabled events to their corresponding activity archiving driver.
+     *
+     * @return array<string, string> A mapping of event names to activity archiving driver names.
+     * @throws \dml_exception
+     */
+    public static function get_enabled_events_mapping(): array {
+        $res = [];
+
+        $config = get_config('archivingtrigger_event');
+        foreach ($config as $key => $value) {
+            if (str_starts_with($key, 'sensitivity_') && !empty($value)) {
+                $drivername = substr($key, strlen('sensitivity_'));
+                foreach (explode(',', $value) as $eventname) {
+                    $res[$eventname] = $drivername;
+                }
+            }
+        }
+
+        return $res;
+    }
+
+    /**
+     * Handles an event and triggers archiving if necessary.
+     *
+     * This method is called by the Moodle event system.
+     *
+     * @param base $event The event to handle.
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public static function handle_event(\core\event\base $event): void {
+        $eventname = $event->eventname;
+
+        // Ignore events that we are not sensitive to.
+        $eventmap = self::get_enabled_events_mapping();
+        if (!isset($eventmap[$eventname])) {
+            return;
+        }
+
+        // Validate event context.
+        $ctx = $event->get_context();
+        if (!$ctx instanceof \context_module) {
+            return;
+        }
+
+        // Ensure that the activity can be archived.
+        $drivername = $eventmap[$eventname];
+        $driver = driver_factory::activity_archiving_driver($drivername, $ctx);
+
+        if (!$driver->can_be_archived()) {
+            return;
+        }
+
+        // TODO: Limit scope to actual attempt / submission / ....
+        // TODO: Check for pre-existing archive jobs.
+
+        // Build archive job settings object and trigger archive job.
+        [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
+        $form = $driver->get_job_create_form($drivername, $cm);
+        $jobsettings = $form->export_raw_data();
+
+        $job = \local_archiving\archive_job::create($cm->context, get_admin()->id, 'event', $jobsettings);
+        $job->enqueue();
+    }
 }

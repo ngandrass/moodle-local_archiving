@@ -39,6 +39,24 @@ if ($hassiteconfig) {
             get_string('setting_enabled_desc', 'archivingtrigger_event'),
             '1'
         ));
+
+        // Event sensitivity list.
+        foreach (\archivingtrigger_event\archivingtrigger::get_eventlist() as $drivername => $eventlist) {
+            // Translate event names.
+            $options = [];
+            foreach ($eventlist as $event) {
+                $options[$event] = $event::get_name() . " (<code>{$event}</code>)";
+            }
+
+            // Build setting element.
+            $settings->add(new admin_setting_configmulticheckbox(
+                'archivingtrigger_event/sensitivity_' . $drivername,
+                get_string('setting_sensitivity', 'archivingtrigger_event', $drivername),
+                get_string('setting_sensitivity_desc', 'archivingtrigger_event', $drivername),
+                [],
+                $options
+            ));
+        }
     }
 
     // Settingpage is added to tree automatically. No need to add it manually here.

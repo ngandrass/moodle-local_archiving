@@ -15,21 +15,29 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin strings are defined here
+ * Event observers for the archivingtrigger_event plugin.
  *
  * @package     archivingtrigger_event
- * @category    string
  * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-// @codingStandardsIgnoreFile
 
-// Common
-$string['pluginname'] = 'Event-based';
-$string['privacy:metadata'] = 'This archiving trigger plugin does not store any personal data.';
+// phpcs:ignore
+defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-// Settings.
-$string['setting_enabled'] = 'Enabled';
-$string['setting_enabled_desc'] = 'Enables or disables this archiving trigger.';
-$string['setting_sensitivity'] = 'Events: {$a}';
-$string['setting_sensitivity_desc'] = 'Select the events that should trigger the archiving process. If multiple events are selected, the archiving process will be triggered if any of the selected events occur. If an archive job for the targeted activity / attempt is already running, no new archiving job will be created.';
+$observers = [];
+try {
+    foreach (\archivingtrigger_event\archivingtrigger::get_eventlist() as $archivingmod => $eventlist) {
+        foreach ($eventlist as $eventclass) {
+            $observers[] = [
+                'eventname' => $eventclass,
+                'callback' => '\archivingtrigger_event\archivingtrigger::handle_event',
+                'priority' => 0,
+                'internal' => false,
+            ];
+        }
+    }
+} catch (\Throwable $e) { // phpcs:ignore
+    // Archivingmod plugins may not be usable during install/upgrade. The observer cache is flushed
+    // at the end of install/upgrade, so this will get re-evaluated.
+}

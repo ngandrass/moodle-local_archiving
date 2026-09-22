@@ -281,7 +281,7 @@ final class s3_client {
             return;
         }
 
-        // If re reached this point, the download_one() call streamed the S3 error body straight to $localpath.
+        // If we reached this point, the download_one() call streamed the S3 error body straight to $localpath.
         // Parse the error body and unlink the local file.
         $body = is_readable($localpath) ? (string) file_get_contents($localpath) : '';
         @unlink($localpath);
@@ -501,7 +501,7 @@ final class s3_client {
     private function canonical_path(string $key = ''): string {
         $fullkey = $key !== '' ? $this->full_key($key) : '';
 
-        // Populate segemnts based on selected path-style.
+        // Populate segments based on selected path-style.
         $segments = [];
         if ($this->pathstyle) {
             $segments[] = $this->bucket;

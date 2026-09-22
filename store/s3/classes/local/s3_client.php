@@ -354,7 +354,7 @@ final class s3_client {
 
         // Generic CURL error.
         if (!empty($c->error)) {
-            throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: $c->error);
+            throw new storage_exception('error_s3_object_existence_check_failed', 'archivingstore_s3', a: $c->error);
         }
 
         // @codeCoverageIgnoreStart
@@ -370,7 +370,7 @@ final class s3_client {
         }
 
         // Other error. Treat as check failure.
-        throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: "HTTP {$httpcode}");
+        throw new storage_exception('error_s3_object_existence_check_failed', 'archivingstore_s3', a: "HTTP {$httpcode}");
         // @codeCoverageIgnoreEnd
     }
 

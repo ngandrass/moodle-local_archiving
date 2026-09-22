@@ -66,6 +66,7 @@ $string['error_s3_object_too_large'] = 'The file is larger than the maximum supp
 $string['error_s3_object_store_failed'] = 'Failed to store the file object: {$a}';
 $string['error_s3_object_retrieve_failed'] = 'Failed to retrieve the file object from storage: {$a}';
 $string['error_s3_object_delete_failed'] = 'Failed to delete the file object from storage: {$a}';
+$string['error_s3_object_existence_check_failed'] = 'Failed to check if the file object exists in storage: {$a}';
 $string['error_s3_endpoint_must_not_contain_scheme'] = 'The endpoint must not include a scheme (http:// or https://). Set the "Use TLS" setting instead.';
 $string['error_s3_endpoint_must_not_contain_path'] = 'The endpoint must not include a path. Enter only the hostname, optionally followed by a port.';
 $string['error_s3_endpoint_invalid_port'] = 'The port must be a number between 1 and 65535.';

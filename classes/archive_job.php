@@ -549,7 +549,7 @@ class archive_job {
 
                         $this->get_logger()->info(
                             "Storing Moodle backup: {$backupfile->get_filename()} " .
-                            "(size: " . display_size($backupfile->get_filesize()) . ") (id: {$artifact->get_id()})"
+                            "(size: " . display_size($backupfile->get_filesize()) . ") (id: {$backupfile->get_id()})"
                         );
                         $filehandle = $driver->store($this->id, $backupfile, $storagepath, $this->store_progress_callback());
                         $this->get_logger()->info(' -> Success. File handle ID: ' . $filehandle->id);

@@ -171,7 +171,10 @@ final class s3_client {
     }
 
     /**
-     * Uploads a local file to this storage under the given object key
+     * Uploads a local file to this storage under the given object key.
+     *
+     * Currently, only single part uploads are supported. The maximum supported
+     * file size is self::MAX_PUT_OBJECT_SIZE bytes.
      *
      * @param string $key Object key to store the file under (relative to the configured key prefix)
      * @param string $localpath Absolute path of the local file to upload

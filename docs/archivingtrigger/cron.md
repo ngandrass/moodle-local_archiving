@@ -46,6 +46,6 @@ task. Activities are checked whenever the scheduled task is executed.
 
 By default, the scheduled trigger will only create archive jobs for activities that have unarchived changes. If you want
 to force the creation of archive jobs for all activities, regardless of whether they have unarchived changes or not, you
-can enable the {{ mform_element('Force re-archiving', 'checkbox') }} setting. This will cause the scheduled trigger to
+can enable the {{ mform_element('Archive unchanged', 'checkbox') }} setting. This will cause the scheduled trigger to
 create archive jobs for all activities that are within courses marked for archiving, even if they have no unarchived
 changes.

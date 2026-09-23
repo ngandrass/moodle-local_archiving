@@ -12,13 +12,14 @@ archiving jobs for them. The trigger uses the Moodle cron system to run at a con
 
 ## Dry-run mode
 
-After installation, the plugin will be in dry-run mode by default. In this mode, the scheduled task
-`\archivingtrigger_cron\task\trigger_archiving` will analyze existing activities and log which activities need to be
-archived, but it will **not** create any archive jobs. This allows you to verify that the plugin is working correctly
-and that the correct activities are being identified for archiving.
+After installation, the plugin will be in dry-run mode by default, as controlled by the {{ mform_element('Dry
+run', 'checkbox') }} setting. In this mode, the scheduled task `\archivingtrigger_cron\task\trigger_archiving` will
+analyze existing activities and log which activities need to be archived, but it will **not** create any archive jobs.
+This allows you to verify that the plugin is working correctly and that the correct activities are being identified for
+archiving.
 
-Make sure to also **enable** the plugin so that the scheduled task is executed. If the plugin is not enabled, no dry-run
-will be performed.
+Make sure to also **enable** the plugin via the {{ mform_element ('Enabled', 'checkbox') }} checkbox, so that the
+scheduled task is executed. If the plugin is not enabled, no dry-run will be performed.
 
 
 ## Selecting the scope of activities to check

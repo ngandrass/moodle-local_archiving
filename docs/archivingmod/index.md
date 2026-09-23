@@ -7,6 +7,6 @@ archiving manager.
 
 The following activity archiving drivers are currently available:
 
-[:material-file-upload-outline: Assignment](assign.md){ .md-button }
+[:material-file-upload-outline: Assignment](assign/index.md){ .md-button }
 &nbsp;&nbsp;
 [:material-list-box-outline: Quiz](quiz/index.md){ .md-button }

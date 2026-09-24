@@ -18,7 +18,7 @@
  * Defines the job creation form
  *
  * @package    archivingmod_quiz
- * @copyright  2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright  2026 Niels Gandraß <niels@gandrass.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

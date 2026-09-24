@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/local/archiving/lib.php');
  * Tests for legacy lib definitions.
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class local_archiving_lib_test extends \advanced_testcase {

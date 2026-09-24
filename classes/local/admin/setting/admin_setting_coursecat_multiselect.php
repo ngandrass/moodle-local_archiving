@@ -24,7 +24,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  * Course category multi-selection
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_coursecat_multiselect extends \core_admin\local\settings\autocomplete {

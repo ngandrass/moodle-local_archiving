@@ -35,7 +35,7 @@ require_once($CFG->libdir . '/adminlib.php'); // @codeCoverageIgnore
  * provides a convenient way to access their settings.
  *
  * @package local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_managecomponents extends \admin_setting {

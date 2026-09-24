@@ -213,13 +213,13 @@ class archive_job {
             $lockfactory = \core\lock\lock_config::get_lock_factory('local_archiving_archive_job');
         }
 
-        $jobtimeoutmin = get_config('local_archiving', 'job_timeout_min');
+        $jobtimeoutmin = max((int) get_config('local_archiving', 'job_timeout_min') ?: HOURMINS, 1);
 
         if (
             !$lock = $lockfactory->get_lock(
                 $this->get_lock_resource(),
                 $timeoutsec,
-                ($jobtimeoutmin ?: 6 * 60) * 60
+                $jobtimeoutmin * MINSECS
             )
         ) {
             $this->get_logger()->warn("Failed to acquire lock for '{$this->get_lock_resource()}' after {$timeoutsec} seconds.");
@@ -858,7 +858,7 @@ class archive_job {
      * @throws \dml_exception
      */
     public function is_overdue(): bool {
-        $jobtimeoutsec = get_config('local_archiving', 'job_timeout_min') * 60;
+        $jobtimeoutsec = max((int) get_config('local_archiving', 'job_timeout_min') ?: HOURMINS, 1) * MINSECS;
         if (time() > $this->timecreated + $jobtimeoutsec) {
             return true;
         }

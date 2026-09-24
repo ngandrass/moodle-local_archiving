@@ -130,6 +130,24 @@ final class archivingstore_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that is_configured() rejects a non-empty but malformed bucket_path.
+     *
+     * @covers \archivingstore_s3\archivingstore
+     *
+     * @return void
+     * @throws \dml_exception
+     */
+    public function test_is_configured_rejects_malformed_bucket_path(): void {
+        $this->resetAfterTest();
+
+        $this->set_valid_config(['bucket_path' => 'x']);
+        $this->assertFalse(
+            archivingstore::is_configured(),
+            'Should not report as configured when bucket_path is present but malformed.'
+        );
+    }
+
+    /**
      * Tests that is_ready() delegates to is_configured().
      *
      * @covers \archivingstore_s3\archivingstore

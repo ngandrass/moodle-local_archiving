@@ -50,24 +50,36 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
     }
 
     /**
-     * Determines if all settings required to operate this storage driver are present
+     * Determines if all settings required to operate this storage driver are present and valid
      *
      * This is a cheap, local-only check (no network access) used to decide
      * whether this driver is ready to be used at all. It does not verify that
      * the configured endpoint is actually reachable or that the credentials
      * are valid - use is_available() for that.
      *
-     * @return bool True if all required settings are configured
+     * @return bool True if all required settings are configured and well-formed
      * @throws \dml_exception
      */
     public static function is_configured(): bool {
         $config = get_config('archivingstore_s3');
 
-        return !empty($config->endpoint)
-            && !empty($config->region)
-            && !empty($config->bucket_path)
-            && !empty($config->access_key)
-            && !empty($config->secret_key);
+        if (
+            empty($config->endpoint) ||
+            empty($config->region) ||
+            empty($config->bucket_path) ||
+            empty($config->access_key) ||
+            empty($config->secret_key)
+        ) {
+            return false;
+        }
+
+        try {
+            s3_client::parse_bucket_path($config->bucket_path);
+        } catch (\moodle_exception) {
+            return false;
+        }
+
+        return true;
     }
 
     #[\Override]

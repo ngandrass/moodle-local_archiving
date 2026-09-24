@@ -6,6 +6,7 @@
 - Enable dry-run mode at installation
 - Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
 - Adapt unit test to Moodle upstream permission check changes
+- Ensure Moodle 5.2 compatibility
 
 
 ## Version 1.0.0 (2025101300)

@@ -3,6 +3,7 @@
 ## Version X.Y.Z (YYYYMMDDXX)
 
 - Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+- Ensure Moodle 5.2 compatibility
 
 
 ## Version 1.1.0 (2025101300)

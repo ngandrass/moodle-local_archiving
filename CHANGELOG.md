@@ -21,6 +21,7 @@
 - Improve archive job logging in storing stage
 - Improve handling of duplicate files in archives
 - Protect sub-plugin enable / disable endpoint from CSRF
+- Let timed out archive jobs remain marked as "Timeout" instead of "Failed" (both are final job states)
 
 
 ## Version 1.0.0 (2025112300)

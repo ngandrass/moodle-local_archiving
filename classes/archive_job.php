@@ -358,7 +358,7 @@ class archive_job {
 
                 // Perform cleanup and die.
                 $this->cleanup();
-                throw new \moodle_exception('archive_job_timed_out', 'local_archiving');
+                throw new yield_exception();
             }
 
             // Queued -> Pre-Processing.

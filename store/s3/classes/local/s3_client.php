@@ -171,7 +171,10 @@ final class s3_client {
     }
 
     /**
-     * Uploads a local file to this storage under the given object key
+     * Uploads a local file to this storage under the given object key.
+     *
+     * Currently, only single part uploads are supported. The maximum supported
+     * file size is self::MAX_PUT_OBJECT_SIZE bytes.
      *
      * @param string $key Object key to store the file under (relative to the configured key prefix)
      * @param string $localpath Absolute path of the local file to upload
@@ -281,7 +284,7 @@ final class s3_client {
             return;
         }
 
-        // If re reached this point, the download_one() call streamed the S3 error body straight to $localpath.
+        // If we reached this point, the download_one() call streamed the S3 error body straight to $localpath.
         // Parse the error body and unlink the local file.
         $body = is_readable($localpath) ? (string) file_get_contents($localpath) : '';
         @unlink($localpath);
@@ -351,7 +354,7 @@ final class s3_client {
 
         // Generic CURL error.
         if (!empty($c->error)) {
-            throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: $c->error);
+            throw new storage_exception('error_s3_object_existence_check_failed', 'archivingstore_s3', a: $c->error);
         }
 
         // @codeCoverageIgnoreStart
@@ -367,7 +370,7 @@ final class s3_client {
         }
 
         // Other error. Treat as check failure.
-        throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: "HTTP {$httpcode}");
+        throw new storage_exception('error_s3_object_existence_check_failed', 'archivingstore_s3', a: "HTTP {$httpcode}");
         // @codeCoverageIgnoreEnd
     }
 
@@ -501,7 +504,7 @@ final class s3_client {
     private function canonical_path(string $key = ''): string {
         $fullkey = $key !== '' ? $this->full_key($key) : '';
 
-        // Populate segemnts based on selected path-style.
+        // Populate segments based on selected path-style.
         $segments = [];
         if ($this->pathstyle) {
             $segments[] = $this->bucket;

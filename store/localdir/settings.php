@@ -39,7 +39,7 @@ if ($hassiteconfig) {
             'archivingstore_localdir/enabled',
             get_string('setting_enabled', 'archivingstore_localdir'),
             get_string('setting_enabled_desc', 'archivingstore_localdir'),
-            '1'
+            '0'
         ));
 
         // Storage path.

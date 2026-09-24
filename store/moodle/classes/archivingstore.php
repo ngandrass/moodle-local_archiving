@@ -88,7 +88,7 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
             ], $file);
             is_callable($progresscallback) && $progresscallback($file->get_filesize(), $file->get_filesize());
         } catch (\Exception) {
-            throw new storage_exception('filestorefailed', 'archivingstore_moodle');
+            throw new storage_exception('filestorefailed', 'local_archiving');
         }
 
         // Create file handle for the freshly stored file.
@@ -120,11 +120,11 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
             $retrievedfile = $fs->create_file_from_storedfile($fileinfo, $moodlestorefile);
             is_callable($progresscallback) && $progresscallback($handle->filesize, $handle->filesize);
         } catch (\Exception) {
-            throw new storage_exception('filestorefailed', 'archivingstore_moodle');
+            throw new storage_exception('filestorefailed', 'local_archiving');
         }
 
         if (!$retrievedfile) {
-            throw new storage_exception('filestorefailed', 'archivingstore_moodle');
+            throw new storage_exception('filestorefailed', 'local_archiving');
         }
 
         return $retrievedfile;

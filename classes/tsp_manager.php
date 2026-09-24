@@ -299,27 +299,15 @@ class tsp_manager {
         }
 
         // Send virtual TSP file to the client.
-        \core\session\manager::write_close(); // Unlock session during file serving.
-        ob_clean();
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0, no-transform');
-        header('Pragma: no-cache');
-        header('Content-Length: ' . strlen($filecontents));
-        echo $filecontents;
-
-        // Stop at this point if we are running a unit test, so that we don't
-        // kill the test runner and can access the output buffer.
-        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
-            return;
-        }
-
-        // @codeCoverageIgnoreStart
-        ob_flush();
-        die;
-        // @codeCoverageIgnoreEnd
+        send_file(
+            path: $filecontents,
+            filename: $filename,
+            lifetime: 0,
+            filter: 0,
+            pathisstring: true,
+            forcedownload: true,
+            mimetype: 'application/octet-stream',
+            dontdie: defined('PHPUNIT_TEST') && PHPUNIT_TEST === true,
+        );
     }
 }

@@ -180,7 +180,7 @@ nav:
     - "Interfaces (APIs) and Signals":
       - dev/api/index.md
       - dev/api/archive-job-states.md
-      - dev/api/events.md
+      #- dev/api/events.md
       - dev/api/activity-archiving-drivers.md
       - dev/api/storage-drivers.md
       - dev/api/archiving-triggers.md

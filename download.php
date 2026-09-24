@@ -57,7 +57,7 @@ $renderer = $PAGE->get_renderer('local_archiving');
 $html = "";
 
 // Only allow successfully finished jobs.
-if (!$job->get_status() == archive_job_status::COMPLETED) {
+if ($job->get_status() !== archive_job_status::COMPLETED) {
     throw new \moodle_exception('job_not_completed', 'local_archiving');
 }
 

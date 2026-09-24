@@ -80,49 +80,6 @@ class remote_archive_worker {
     }
 
     /**
-     * Queries the worker service for its current status
-     *
-     * @return \stdClass Object containing 'status' and 'queue_len' properties
-     * @throws \moodle_exception If the request failed or the response was invalid
-     */
-    public function get_status(): \stdClass {
-        // Execute request.
-        // Moodle curl wrapper automatically closes curl handle after requests. No need to call curl_close() manually.
-        // Ignore URL filter since we require custom ports and the URL is only configurable by admins.
-        $c = new curl(['ignoresecurity' => true]);
-        $result = $c->get($this->serverurl . '/status', [], [
-            'CURLOPT_CONNECTTIMEOUT' => $this->connectiontimeoutsec,
-            'CURLOPT_TIMEOUT' => $this->requesttimeoutsec,
-        ]);
-
-        $httpstatus = $c->get_info()['http_code'];  // Invalid PHPDoc in Moodle curl wrapper. Array returned instead of string.
-        $data = json_decode($result);
-
-        // @codeCoverageIgnoreStart
-
-        // Handle errors.
-        if ($data === null) {
-            throw new \moodle_exception('remote_worker_get_status_failed', 'archivingmod_assign', $httpstatus);
-        }
-        if ($httpstatus != 200) {
-            throw new \moodle_exception('a', 'archivingmod_assign', $data->error);
-        }
-        foreach (['status', 'queue_len'] as $key) {
-            if (!isset($data->{$key})) {
-                throw new \moodle_exception('remote_worker_missing_return_param', 'archivingmod_assign', $key);
-            }
-        }
-
-        // Return response.
-        return (object) [
-            'status' => worker_status::from($data->status),
-            'queue_len' => (int) $data->queue_len,
-        ];
-
-        // @codeCoverageIgnoreEnd
-    }
-
-    /**
      * Generates the payload for a new job creation request based on the given task and submission IDs.
      *
      * This function also validates that all required job settings are present in the task / job settings object.

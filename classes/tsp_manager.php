@@ -248,14 +248,15 @@ class tsp_manager {
      *
      * @param string $path Path to the virtual TSP file, according to the pluginfile URL
      * @param string $filename Name of the virtual TSP file to be sent, according to the pluginfile URL
+     * @param \context $context Calling context to verify the requested TSP file is accessible in this context
      * @return void None, this method will terminate script execution after sending the file!
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    public static function send_virtual_tsp_file(string $path, string $filename): void {
+    public static function send_virtual_tsp_file(string $path, string $filename, \context $context): void {
         // Validate file path and name.
         if (!preg_match('/^\/[0-9]+\/$/', $path)) {
-            throw new \moodle_exception($path, 'local_archiving');
+            throw new \moodle_exception('invalid_tsp_file_path', 'local_archiving', '', $path);
         }
 
         if (!preg_match('/^[a-fA-F0-9]{64}\.(tsq|tsr)$/', $filename)) {
@@ -265,6 +266,17 @@ class tsp_manager {
         // Get file handle ID from path.
         $filehandleid = (int) trim($path, '/');
         $filehandle = file_handle::get_by_id($filehandleid);
+
+        // Validate calling context and file checksum.
+        $job = archive_job::get_by_id($filehandle->jobid);
+        if ($job->get_context()->id !== $context->id) {
+            throw new \moodle_exception('invalid_tsp_file_context', 'local_archiving');
+        }
+
+        $requestedsha256sum = strtolower(pathinfo($filename, PATHINFO_FILENAME));
+        if ($requestedsha256sum !== $filehandle->sha256sum) {
+            throw new \moodle_exception('invalid_tsp_file_checksum', 'local_archiving');
+        }
 
         // Retrieve TSP data for the file handle.
         $tspmanager = new self($filehandle);

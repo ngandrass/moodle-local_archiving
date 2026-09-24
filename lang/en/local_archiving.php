@@ -272,6 +272,11 @@ $string['tsp_client_error_content_type'] = 'TSP server returned unexpected conte
 $string['tsp_client_error_curl'] = 'Error while sending TSP request: {$a}';
 $string['tsp_client_error_http_code'] = 'TSP server returned HTTP status code {$a}';
 
+// TSP file serving.
+$string['invalid_tsp_file_path'] = 'Invalid TSP file path: {$a}';
+$string['invalid_tsp_file_context'] = 'The requested TSP file does not belong to the given context.';
+$string['invalid_tsp_file_checksum'] = 'The requested TSP file name does not match the checksum of the associated file.';
+
 // Privacy.
 $string['privacy:metadata:core_files'] = 'The archiving plugin stores archived data temporarily inside the Moodle file store during creation and retrieval.';
 $string['privacy:metadata:local_archiving_activity_task'] = 'Activity archiving tasks that extract activity data for archiving purposes.';

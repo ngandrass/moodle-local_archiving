@@ -141,7 +141,7 @@ function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $f
     // Catch virtual files.
     if ($filearea == filearea::TSP) {
         try {
-            tsp_manager::send_virtual_tsp_file($filepath, $filename);
+            tsp_manager::send_virtual_tsp_file($filepath, $filename, $context);
         } catch (Exception $e) {
             send_header_404();
             throw $e;

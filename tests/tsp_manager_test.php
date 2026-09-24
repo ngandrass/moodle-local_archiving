@@ -361,6 +361,7 @@ final class tsp_manager_test extends \advanced_testcase {
         $tspmanager::send_virtual_tsp_file(
             path: "/{$filehandle->id}/",
             filename: $filehandle->sha256sum . '.' . $type,
+            context: $job->get_context(),
         );
         $sentdata = ob_get_contents();
         ob_end_clean();
@@ -396,7 +397,8 @@ final class tsp_manager_test extends \advanced_testcase {
         );
         tsp_manager::send_virtual_tsp_file(
             '/../../../secret/',
-            '64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c.' . tsp_manager::TSP_QUERY_FILE_EXTENSION
+            '64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c.' . tsp_manager::TSP_QUERY_FILE_EXTENSION,
+            \context_system::instance()
         );
     }
 
@@ -413,7 +415,7 @@ final class tsp_manager_test extends \advanced_testcase {
             \moodle_exception::class,
             'Expected exception when trying to send a virtual TSP file with an invalid filename.'
         );
-        tsp_manager::send_virtual_tsp_file('/1/', 'mypasswords.txt');
+        tsp_manager::send_virtual_tsp_file('/1/', 'mypasswords.txt', \context_system::instance());
     }
 
     /**
@@ -427,7 +429,8 @@ final class tsp_manager_test extends \advanced_testcase {
     public function test_send_virtual_tsp_file_missing_data(): void {
         // Create file handle without TSP data.
         $this->resetAfterTest();
-        $filehandle = $this->generator()->create_file_handle();
+        $job = $this->generator()->create_archive_job();
+        $filehandle = $this->generator()->create_file_handle(['jobid' => $job->get_id()]);
 
         $this->expectException(
             \moodle_exception::class,
@@ -435,7 +438,92 @@ final class tsp_manager_test extends \advanced_testcase {
         );
         tsp_manager::send_virtual_tsp_file(
             path: "/{$filehandle->id}/",
-            filename: $filehandle->sha256sum . '.' . tsp_manager::TSP_QUERY_FILE_EXTENSION
+            filename: $filehandle->sha256sum . '.' . tsp_manager::TSP_QUERY_FILE_EXTENSION,
+            context: $job->get_context()
         );
+    }
+
+    /**
+     * Tests that sending a virtual TSP file from an authorized context is denied.
+     *
+     * @covers \local_archiving\tsp_manager
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_send_virtual_tsp_file_context_mismatch(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        // Create the "victim" job with TSP data.
+        $job = $this->generator()->create_archive_job();
+        $filehandle = $this->generator()->create_file_handle(['jobid' => $job->get_id()]);
+        $DB->insert_record(db_table::TSP->value, [
+            'filehandleid' => $filehandle->id,
+            'timecreated' => time(),
+            'server' => 'localhost',
+            'timestampquery' => 'sample-' . tsp_manager::TSP_QUERY_FILE_EXTENSION,
+            'timestampreply' => 'sample-' . tsp_manager::TSP_REPLY_FILE_EXTENSION,
+        ]);
+
+        // Create a second, unrelated job whose context the "attacker" legitimately has.
+        $otherjob = $this->generator()->create_archive_job();
+        $this->assertNotEquals($job->get_context()->id, $otherjob->get_context()->id);
+
+        try {
+            tsp_manager::send_virtual_tsp_file(
+                path: "/{$filehandle->id}/",
+                filename: $filehandle->sha256sum . '.' . tsp_manager::TSP_QUERY_FILE_EXTENSION,
+                context: $otherjob->get_context()
+            );
+            $this->fail('Expected a moodle_exception due to context/job mismatch.');
+        } catch (\moodle_exception $e) {
+            $this->assertEquals('invalid_tsp_file_context', $e->errorcode);
+        }
+    }
+
+    /**
+     * Tests that sending a virtual TSP file is denied if the checksum does not
+     * match the file handle's real checksum.
+     *
+     * @covers \local_archiving\tsp_manager
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_send_virtual_tsp_file_checksum_mismatch(): void {
+        global $DB;
+
+        // Prepare a file handle with TSP data.
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $filehandle = $this->generator()->create_file_handle(['jobid' => $job->get_id()]);
+        $DB->insert_record(db_table::TSP->value, [
+            'filehandleid' => $filehandle->id,
+            'timecreated' => time(),
+            'server' => 'localhost',
+            'timestampquery' => 'sample-' . tsp_manager::TSP_QUERY_FILE_EXTENSION,
+            'timestampreply' => 'sample-' . tsp_manager::TSP_REPLY_FILE_EXTENSION,
+        ]);
+
+        // Prepare a wrong checksum.
+        $wronghash = str_repeat('b', 64);
+        $this->assertNotEquals($filehandle->sha256sum, $wronghash);
+
+        try {
+            tsp_manager::send_virtual_tsp_file(
+                path: "/{$filehandle->id}/",
+                filename: $wronghash . '.' . tsp_manager::TSP_QUERY_FILE_EXTENSION,
+                context: $job->get_context()
+            );
+            $this->fail('Expected a moodle_exception due to checksum mismatch.');
+        } catch (\moodle_exception $e) {
+            $this->assertEquals('invalid_tsp_file_checksum', $e->errorcode);
+        }
     }
 }

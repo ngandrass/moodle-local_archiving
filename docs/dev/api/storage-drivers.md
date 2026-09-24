@@ -25,8 +25,8 @@ classDiagram
         +supports_retrieve()$ bool
         +is_available() bool
         +get_free_bytes() int|null
-        +store(jobid: int, file: stored_file, path: string) file_handle
-        +retrieve(handle: file_handle, fileinfo: stdClass) stored_file
+        +store(jobid: int, file: stored_file, path: string, progresscallback: callable|null) file_handle
+        +retrieve(handle: file_handle, fileinfo: stdClass, progresscallback: callable|null) stored_file
         +delete(handle: file_handle, strict: bool) void
     }
     
@@ -116,3 +116,23 @@ generate its own file record.
 If supported, existing files can be remove from the storage system via the `delete()` method. If working with previously
 stored files, make sure to also destroy the corresponding `file_handle` object. It is recommended to access referenced
 conveniently via the `file_handle` API instead of interfacing the underlaying storage driver directly.
+
+
+## Progress Reporting and Cancellation
+
+Both `store()` and `retrieve()` accept an optional `$progresscallback`, which is invoked
+periodically as data is transferred, receiving the number of bytes transferred so far and the
+total number of bytes to transfer.
+
+The callback may throw a {{ source_file('classes/local/exception/storage_exception.php',
+'\\local_archiving\\local\\exception\\storage_exception') }} at any point to request cancellation
+of the in-progress transfer. Storage drivers must catch this exception, abort the transfer,
+perform any necessary cleanup (e.g., removing partially written local or remote data), and then
+re-throw the *same* exception unchanged so it propagates to the caller. A driver must never
+swallow the exception or replace it with a different one, since callers may rely on inspecting
+the original exception (e.g., its `errorcode`) to distinguish a deliberate cancellation from a
+genuine transfer failure.
+
+Storage drivers whose transfers are effectively instant (e.g., `LOCAL` tier drivers writing
+directly to Moodledata storage) may ignore `$progresscallback` entirely, since there is no
+meaningful transfer to report progress for or cancel.

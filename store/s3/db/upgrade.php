@@ -15,21 +15,33 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here
+ * Code to be executed during the plugin's database scheme upgrade
  *
- * @package     archivingstore_moodle
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @package     archivingstore_s3
+ * @category    upgrade
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-$plugin->component = 'archivingstore_moodle';
-$plugin->release = '1.1.0';
-$plugin->version = 2026082900;
-$plugin->requires = 2024100700;
-$plugin->supported = [405, 502]; // X meta-supported-moodle{4.5 - 5.2} meta-supported-php{8.1 - 8.4}.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = [
-    'local_archiving' => 2026082800,
-];
+
+/**
+ * Custom code to be run to update the plugin database
+ *
+ * @param int $oldversion The version we are upgrading from
+ * @return true
+ * @throws ddl_exception
+ * @throws ddl_field_missing_exception
+ * @throws ddl_table_missing_exception
+ * @throws downgrade_exception
+ * @throws upgrade_exception
+ */
+function xmldb_archivingstore_s3_upgrade($oldversion) {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+
+    return true;
+}

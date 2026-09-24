@@ -18,7 +18,7 @@
  * Driver for storing archive data inside a directory on the local filesystem
  *
  * @package     archivingstore_localdir
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -62,7 +62,7 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
     }
 
     #[\Override]
-    public function store(int $jobid, \stored_file $file, string $path): file_handle {
+    public function store(int $jobid, \stored_file $file, string $path, ?callable $progresscallback = null): file_handle {
         // Prepare file handle.
         $handle = file_handle::create(
             jobid: $jobid,
@@ -82,16 +82,19 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
                 throw new storage_exception('filestorefailed', 'local_archiving');
             }
         }
+
+        is_callable($progresscallback) && $progresscallback(0, $handle->filesize);
         if (!$file->copy_content_to($abstargetpath . '/' . $file->get_filename())) {
             $handle->destroy();
             throw new storage_exception('filestorefailed', 'local_archiving');
         }
+        is_callable($progresscallback) && $progresscallback($handle->filesize, $handle->filesize);
 
         return $handle;
     }
 
     #[\Override]
-    public function retrieve(file_handle $handle, \stdClass $fileinfo): \stored_file {
+    public function retrieve(file_handle $handle, \stdClass $fileinfo, ?callable $progresscallback = null): \stored_file {
         // Find locally stored file.
         $absfilepath = $this->get_storage_path() . '/' . trim($handle->filepath, '/') . '/' . $handle->filename;
         if (!file_exists($absfilepath)) {
@@ -100,7 +103,13 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
 
         // Transfer file to Moodle file storage.
         $fs = get_file_storage();
-        $storedfile = $fs->create_file_from_pathname($fileinfo, $absfilepath);
+        try {
+            is_callable($progresscallback) && $progresscallback(0, $handle->filesize);
+            $storedfile = $fs->create_file_from_pathname($fileinfo, $absfilepath);
+            is_callable($progresscallback) && $progresscallback($handle->filesize, $handle->filesize);
+        } catch (\file_exception $e) {
+            throw new storage_exception('filestorefailed', 'local_archiving');
+        }
 
         if (!$storedfile) {
             throw new storage_exception('filestorefailed', 'local_archiving');

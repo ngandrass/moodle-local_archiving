@@ -24,7 +24,7 @@ use local_archiving\local\type\filearea;
  * Tests for the file_handle class
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -382,6 +382,62 @@ final class file_handle_test extends \advanced_testcase {
         $this->assertSame($filehandle->id, $fileinfo->itemid, 'Item ID should match file handle ID');
         $this->assertNotEmpty($fileinfo->filepath, 'Filepath should not be empty');
         $this->assertNotEmpty($fileinfo->filename, 'Filename should not be empty');
+    }
+
+    /**
+     * Tests building the download URL for a file handle whose file is not cached yet.
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_download_url_not_cached(): void {
+        $this->resetAfterTest();
+        $generator = $this->generator();
+
+        $job = $generator->create_archive_job();
+        $filehandle = $generator->create_file_handle(['jobid' => $job->get_id(), 'filename' => 'downloadme.txt']);
+
+        $this->assertNull($filehandle->get_local_file(), 'Precondition: file should not be cached yet.');
+
+        $url = $filehandle->get_local_download_url();
+        $this->assertInstanceOf(\moodle_url::class, $url);
+        $urlstring = $url->out(false);
+        $this->assertStringContainsString('local_archiving', $urlstring);
+        $this->assertStringContainsString('filestorecache', $urlstring);
+        $this->assertStringContainsString((string) $filehandle->id, $urlstring);
+        $this->assertStringContainsString('downloadme.txt', $urlstring);
+    }
+
+    /**
+     * Tests that the download URL is stable regardless of whether the file is already cached.
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_get_download_url_stable_across_cache_state(): void {
+        $this->resetAfterTest();
+        $generator = $this->generator();
+
+        $job = $generator->create_archive_job();
+        $filehandle = $generator->create_file_handle(['jobid' => $job->get_id()]);
+
+        $urlbefore = $filehandle->get_local_download_url()->out(false);
+
+        $generator->create_filestore_cache_file($filehandle->id);
+        $this->assertNotNull($filehandle->get_local_file(), 'Precondition: file should be cached now.');
+
+        $urlafter = $filehandle->get_local_download_url()->out(false);
+        $this->assertSame($urlbefore, $urlafter, 'Download URL should not depend on cache state.');
     }
 
     /**

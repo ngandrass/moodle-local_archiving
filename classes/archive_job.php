@@ -34,6 +34,7 @@ use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
 use local_archiving\local\util\mod_util;
 use local_archiving\local\util\plugin_util;
+use local_archiving\task\retrieve_remote_file;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -515,12 +516,17 @@ class archive_job {
                     throw new \moodle_exception('artifact_storing_failed', 'local_archiving');
                 }
 
+                $this->get_logger()->debug("Using storage driver: {$driver->get_plugin_name()}");
+
                 // Activity archiving tasks.
                 foreach ($tasks as $task) {
                     foreach ($task->get_linked_artifacts() as $artifact) {
-                        $filehandle = $driver->store($this->id, $artifact, $storagepath);
-                        $this->get_logger()->info('Stored activity artifact: ' .
-                            "{$filehandle->filename} (size: " . display_size($filehandle->filesize) . ") (id: {$filehandle->id})");
+                        $this->get_logger()->info(
+                            "Storing activity artifact: {$artifact->get_filename()} " .
+                            "(size: " . display_size($artifact->get_filesize()) . ") (id: {$artifact->get_id()})"
+                        );
+                        $filehandle = $driver->store($this->id, $artifact, $storagepath, $this->store_progress_callback());
+                        $this->get_logger()->info(' -> Success. File handle ID: ' . $filehandle->id);
                         $task->unlink_artifact($artifact, true);
                     }
                 }
@@ -541,9 +547,12 @@ class archive_job {
                             );
                         }
 
-                        $filehandle = $driver->store($this->id, $backupfile, $storagepath);
-                        $this->get_logger()->info('Stored backup: ' .
-                            "{$filehandle->filename} (size: " . display_size($filehandle->filesize) . ") (id: {$filehandle->id})");
+                        $this->get_logger()->info(
+                            "Storing Moodle backup: {$backupfile->get_filename()} " .
+                            "(size: " . display_size($backupfile->get_filesize()) . ") (id: {$backupfile->get_id()})"
+                        );
+                        $filehandle = $driver->store($this->id, $backupfile, $storagepath, $this->store_progress_callback());
+                        $this->get_logger()->info(' -> Success. File handle ID: ' . $filehandle->id);
                         $bm->cleanup();
                     } else {
                         $this->get_logger()->debug("No {$backupidkey} found.");
@@ -703,6 +712,9 @@ class archive_job {
         // Delete job artifacts.
         $files = file_handle::get_by_jobid($this->id);
         foreach ($files as $filehandle) {
+            // Cancel/purge any outstanding on-demand retrieval for this file handle before it's gone.
+            retrieve_remote_file::cancel_and_purge($filehandle->id);
+
             // Remove local cache copy if present.
             if ($cachedfile = $filehandle->get_local_file()) {
                 $cachedfile->delete();
@@ -893,6 +905,52 @@ class archive_job {
             default:
                 return null; // @codeCoverageIgnore
         }
+    }
+
+    /**
+     * Builds a progress callback for artifact store and retrieve operations that reports storing
+     * progress to the job log.
+     *
+     * Always logs the first observed progress tick and the final 100% completion tick; every
+     * update inbetween is throttled to at most one log entry every 10 seconds. A fresh instance
+     * must be built for each store() call so that each file's transfer gets its own independent
+     * throttle state.
+     *
+     * @return callable A callback with signature function(int $bytesdone, int $bytestotal): void
+     * @throws \dml_exception
+     */
+    protected function store_progress_callback(): callable {
+        // Prepare inherited state for the closure.
+        $logger = $this->get_logger();
+        $lastlogtime = 0;
+        $loggedcomplete = false;
+
+        // Create progress reporting closure.
+        return function (int $bytesdone, int $bytestotal) use ($logger, &$lastlogtime, &$loggedcomplete): void {
+            if ($bytestotal <= 0) {
+                return;
+            }
+
+            // Ensure we log 0% and 100% progress, but everything inbetween only every 10 seconds.
+            $iscomplete = $bytesdone >= $bytestotal;
+            $now = time();
+
+            if ($iscomplete) {
+                if ($loggedcomplete) {
+                    return;
+                }
+                $loggedcomplete = true;
+            } else if ($now - $lastlogtime < 10) {
+                return;
+            }
+
+            // Log current progress.
+            $lastlogtime = $now;
+            $percent = (int) floor(($bytesdone / $bytestotal) * 100);
+            $logger->info(
+                " -> Progress: {$percent}% (" . display_size($bytesdone) . ' / ' . display_size($bytestotal) . ')'
+            );
+        };
     }
 
     /**

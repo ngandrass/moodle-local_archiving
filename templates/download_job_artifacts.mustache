@@ -43,7 +43,8 @@
                 "tsp": null,
                 "storagedriver": "archivingstore_local",
                 "downloadurl": "https://foo.bar.baz/file1.txt",
-                "deleteurl": "https://foo.bar.baz/action/delete.php"
+                "deleteurl": "https://foo.bar.baz/action/delete.php",
+                "fetch": null
             },
             {
                 "deleted": false,
@@ -66,7 +67,20 @@
                 },
                 "storagedriver": "archivingstore_local",
                 "downloadurl": "https://foo.bar.baz/file2.txt",
-                "deleteurl": "https://foo.bar.baz/action/delete.php"
+                "deleteurl": "https://foo.bar.baz/action/delete.php",
+                "fetch": {
+                    "url": "https://foo.bar.baz/local/archiving/fetch.php?filehandleid=2&contextid=456",
+                    "cancelurl": "https://foo.bar.baz/local/archiving/fetch.php?filehandleid=2&contextid=456&action=cancel&sesskey=abc123",
+                    "queued": false,
+                    "fetching": true,
+                    "percent": 42,
+                    "bytestransferred": "5.62 MiB",
+                    "bytestotal": "13.37 MiB",
+                    "failed": false,
+                    "error": null,
+                    "showcancel": true,
+                    "cancelling": false
+                }
             }
         ],
         "urls": {
@@ -185,21 +199,99 @@
 
                     <div class="card-footer text-center">
                         {{^deleted}}
-                            <a href="{{{downloadurl}}}" class="btn btn-success mx-1" role="button">
-                                <i class="fa fa-download"></i>&nbsp;
-                                {{#str}} download {{/str}}
-                            </a>
-                            {{#deleteurl}}
-                                <a href="{{{deleteurl}}}" class="btn btn-danger mx-1" role="button">
-                            {{/deleteurl}}
-                            {{^deleteurl}}
-                                <a href="#" class="btn btn-outline-danger mx-1 disabled" role="button" aria-disabled="true">
-                            {{/deleteurl}}
-                                <i class="fa fa-trash"></i>&nbsp;
-                                {{#str}} delete {{/str}}
-                            </a>
+                            {{! Remote file fetch progress indicators }}
+                            {{#fetch.queued}}
+                                <div class="w-100 text-muted small mt-1 mb-2">
+                                    {{#str}} fetch_status_queued, local_archiving {{/str}}
+                                </div>
+                            {{/fetch.queued}}
+                            {{#fetch.fetching}}
+                                <div
+                                    class="w-100 mt-1 mb-2"
+                                    title="{{#str}} retrieving_from_remote_storage, local_archiving {{/str}}"
+                                    data-bs-toggle="tooltip"
+                                    data-toggle="tooltip"
+                                >
+                                    <div class="progress mb-1" style="height: 1.25rem;">
+                                        <div
+                                            class="progress-bar progress-bar-striped progress-bar-animated"
+                                            role="progressbar"
+                                            style="width: {{fetch.percent}}%;"
+                                            aria-valuenow="{{fetch.percent}}"
+                                            aria-valuemin="0"
+                                            aria-valuemax="100"
+                                        >{{fetch.percent}}%</div>
+                                    </div>
+                                    <div class="small text-muted">
+                                        <i class="fa-solid fa-cloud-arrow-down"></i>&nbsp;
+                                        {{fetch.bytestransferred}} / {{fetch.bytestotal}}
+                                    </div>
+                                </div>
+                            {{/fetch.fetching}}
+                            {{#fetch.failed}}
+                                <div class="alert alert-danger py-1 px-2 small mt-1 mb-2">{{fetch.error}}</div>
+                            {{/fetch.failed}}
+
+                            {{! Action buttons }}
+                            <div>
+                                {{! File download button (for available files) }}
+                                {{#downloadurl}}
+                                    <a href="{{{downloadurl}}}" class="btn btn-success mx-1" role="button">
+                                        <i class="fa fa-download"></i>&nbsp;
+                                        {{#str}} download {{/str}}
+                                    </a>
+                                {{/downloadurl}}
+
+                                {{! File fetch button (for files that need to be fetched from remote storage) }}
+                                {{^fetch.queued}}
+                                    {{^fetch.fetching}}
+                                        {{#fetch}}
+                                            <a href="{{{fetch.url}}}" class="btn btn-warning mx-1" role="button">
+                                                {{#fetch.failed}}
+                                                    <i class="fa fa-rotate-right"></i>&nbsp;
+                                                    {{#str}} fetch_retry, local_archiving {{/str}}
+                                                {{/fetch.failed}}
+                                                {{^fetch.failed}}
+                                                    <i class="fa-solid fa-cloud-arrow-down"></i>&nbsp;
+                                                    {{#str}} fetch_to_download, local_archiving {{/str}}
+                                                {{/fetch.failed}}
+                                            </a>
+                                        {{/fetch}}
+                                    {{/fetch.fetching}}
+                                {{/fetch.queued}}
+
+                                {{#fetch.cancelling}}
+                                    {{! Indicator for an ongoing fetch cancel operation }}
+                                    <span class="btn btn-outline-secondary mx-1 disabled" aria-disabled="true">
+                                        <i class="fa fa-spinner fa-spin"></i>&nbsp;
+                                        {{#str}} cancelling, local_archiving {{/str}}
+                                    </span>
+                                {{/fetch.cancelling}}
+                                {{^fetch.cancelling}}
+                                    {{#fetch.showcancel}}
+                                        {{! Fetch is running, show fetch canceling button }}
+                                        <a href="{{{fetch.cancelurl}}}" class="btn btn-outline-danger mx-1" role="button">
+                                            <i class="fa fa-ban"></i>&nbsp;
+                                            {{#str}} cancel, local_archiving {{/str}}
+                                        </a>
+                                    {{/fetch.showcancel}}
+                                    {{^fetch.showcancel}}
+                                        {{! Fetch is not running, show delete button. URL is based on whether the file can be deleted or not. }}
+                                        {{#deleteurl}}
+                                            <a href="{{{deleteurl}}}" class="btn btn-danger mx-1" role="button">
+                                        {{/deleteurl}}
+                                        {{^deleteurl}}
+                                            <a href="#" class="btn btn-outline-danger mx-1 disabled" role="button" aria-disabled="true">
+                                        {{/deleteurl}}
+                                            <i class="fa fa-trash"></i>&nbsp;
+                                            {{#str}} delete {{/str}}
+                                        </a>
+                                    {{/fetch.showcancel}}
+                                {{/fetch.cancelling}}
+                            </div>
                         {{/deleted}}
                         {{#deleted}}
+                            {{! Handler for deleted files }}
                             <span class="text-muted">
                                 {{#str}} this_file_was_deleted, local_archiving {{/str}} &ndash;
                                 {{#userdate}} {{timemodified}}, {{#str}} strftimedatetimeaccurate, core_langconfig {{/str}} {{/userdate}}

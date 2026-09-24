@@ -15,21 +15,22 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here
+ * Cache definitions
  *
- * @package     archivingstore_moodle
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @package     local_archiving
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
+defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'archivingstore_moodle';
-$plugin->release = '1.1.0';
-$plugin->version = 2026082900;
-$plugin->requires = 2024100700;
-$plugin->supported = [405, 502]; // X meta-supported-moodle{4.5 - 5.2} meta-supported-php{8.1 - 8.4}.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = [
-    'local_archiving' => 2026082800,
+$definitions = [
+    // Tracks progress of on-demand file retrievals from (remote) storages.
+    'filefetching' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'staticacceleration' => false,
+        'ttl' => 86400,
+    ],
 ];

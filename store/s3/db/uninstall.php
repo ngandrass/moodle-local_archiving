@@ -15,21 +15,22 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here
+ * Code that is executed before the tables and data are dropped during the
+ * plugin uninstallation
  *
- * @package     archivingstore_moodle
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @package     archivingstore_s3
+ * @category    upgrade
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-$plugin->component = 'archivingstore_moodle';
-$plugin->release = '1.1.0';
-$plugin->version = 2026082900;
-$plugin->requires = 2024100700;
-$plugin->supported = [405, 502]; // X meta-supported-moodle{4.5 - 5.2} meta-supported-php{8.1 - 8.4}.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = [
-    'local_archiving' => 2026082800,
-];
+
+/**
+ * Custom uninstallation procedure
+ */
+function xmldb_archivingstore_s3_uninstall() {
+    return true;
+}

@@ -115,7 +115,139 @@ generate its own file record.
 
 If supported, existing files can be remove from the storage system via the `delete()` method. If working with previously
 stored files, make sure to also destroy the corresponding `file_handle` object. It is recommended to access referenced
-conveniently via the `file_handle` API instead of interfacing the underlaying storage driver directly.
+conveniently via the `file_handle` API instead of interfacing the underlying storage driver directly.
+
+
+## Accessing stored files via the Moodle UI
+
+If a storage driver supports retrieving files, as indicated by the `supports_retrieve()` method, the Moodle UI will
+automatically offer a button to access the stored archive file via the archive job file listing page. Whenever a file is
+accessed, it is transparently cached inside a designated Moodle filearea (see {{ source_file('classes/file_handle.
+php', '\\local_archiving\\file_handle::retrieve_file()') }}). The file is then served to the user via the standard
+Moodle file serving mechanism. This allows archive files to be served in a common way, regardless of the underlying
+storage driver.
+
+!!! info "File cache cleanup"
+    The file cache is automatically cleaned by `\local_archiving\task\cleanup_file_cache`. All cached copies that
+    haven't been accessed for at least 24 hours are removed from the cache.
+
+
+### Retrieving files from local storages
+
+As local files are rapidly accessible, they are synchronously cached and served directly to the user at the time of the
+request. Access is thereby nearly instant. This applies to all storage drivers that identify themselves as
+`\storage_tier::LOCAL`.
+
+The following sequence diagram illustrates the synchronous retrieval and caching of files stored in a `LOCAL` tier
+storage.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant UI as Download Page
+    participant PF as Pluginfile Handler
+    participant FH as File Handle
+    participant SD as Storage Driver
+    participant FC as Filestore Cache
+
+    %% File listing
+    User ->> UI: Open file download page
+    activate UI
+    UI ->> SD: get_storage_tier()
+    SD -->> UI: storage_tier::LOCAL
+    UI -->> User: Show "Download" button
+    deactivate UI
+
+    %% Download request
+    User ->> PF: Click "Download" button
+    activate PF
+    PF ->> FC: Look up cached copy
+    alt Cache miss
+        FC -->> PF: No cached copy
+        PF ->> FH: retrieve_file()
+        activate FH
+        FH ->> SD: retrieve()
+        activate SD
+        SD ->> FC: Write file copy into cache
+        SD -->> FH: stored_file
+        deactivate SD
+        FH -->> PF: stored_file
+        deactivate FH
+    else Cache hit
+        FC -->> PF: Cached copy
+    end
+    PF -->> User: Serve file
+    deactivate PF
+```
+
+### Retrieving files from remote storages
+
+If a file is stored in a remote storage, it must be fetched before it can be served to the user. This applies to all
+storage drivers that identify themselves as `\storage_tier::REMOTE_*`. If a file is not yet cached, users will see a
+{{ mform_element('Fetch to download', 'button') }} button on the archive job file listing page. Clicking this button
+will spawn a background task that asynchronously fetches the file into the file cache (see
+{{ source_file ('classes/task/retrieve_remote_file.php', '\local_archiving\task\retrieve_remote_file') }}). Once
+available, users will see a {{ mform_element ('Download', 'button') }} button to download the file. The progress and
+potential errors are [periodically reported](#progress-reporting-and-cancellation) to the user while a fetch operation
+is running.
+
+The following sequence diagram illustrates the asynchronous retrieval and caching of files stored in a `REMOTE_*` tier
+storage.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant UI as Download Page
+    participant PF as Pluginfile Handler
+    participant FE as Fetch Handler
+    participant RT as Retrieval Task
+    participant SD as Storage Driver
+    participant FC as Filestore Cache
+
+    %% File listing
+    User ->> UI: Open file download page
+    activate UI
+    UI ->> SD: get_storage_tier()
+    SD -->> UI: storage_tier::REMOTE_*
+    UI ->> FC: Look up cached copy
+    FC -->> UI: No cached copy
+    UI -->> User: Show "Fetch to download" button
+    deactivate UI
+
+    %% Fetch request
+    User ->> FE: Click "Fetch to download"
+    activate FE
+    FE -) RT: Queue ad-hoc task
+    FE -->> User: Redirect to download page
+    deactivate FE
+
+    %% Asynchronous retrieval
+    activate RT
+    Note over RT: Executed asynchronously
+    RT ->> SD: retrieve()
+    activate SD
+    Note over RT,SD: Progress is updated periodically
+    SD ->> FC: Write file copy into cache
+    SD -->> RT: stored_file
+    deactivate SD
+    deactivate RT
+
+    %% Download request
+    User ->> UI: Update file download page
+    activate UI
+    UI ->> FC: Look up cached copy
+    FC -->> UI: Cached copy
+    UI -->> User: Show "Download" button
+    deactivate UI
+    User ->> PF: Click "Download" button
+    activate PF
+    PF ->> FC: Look up cached copy
+    FC -->> PF: Cached copy
+    PF -->> User: Serve file
+    deactivate PF
+```
 
 
 ## Progress Reporting and Cancellation

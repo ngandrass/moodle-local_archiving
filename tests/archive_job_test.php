@@ -615,14 +615,16 @@ final class archive_job_test extends \advanced_testcase {
      * @throws \moodle_exception
      */
     public function test_timeout(): void {
-        // Create a new job.
+        global $DB;
         $this->resetAfterTest();
-        $job = $this->generator()->create_archive_job();
 
-        // Configure timeout to be instant.
-        set_config('job_timeout_min', -1, 'local_archiving');
+        // Create a new job and backdate its creation time to simulate a timeout scenario.
+        $job = $this->generator()->create_archive_job();
+        $DB->set_field(db_table::JOB->value, 'timecreated', time() - (2 * MINSECS), ['id' => $job->get_id()]);
+        set_config('job_timeout_min', 1, 'local_archiving');
 
         // Check if the job is considered timed out.
+        $job = archive_job::get_by_id($job->get_id());
         $this->assertTrue($job->is_overdue(), 'Job should be considered overdue with instant timeout');
     }
 

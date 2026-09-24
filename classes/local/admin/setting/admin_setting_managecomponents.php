@@ -225,6 +225,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 'action' => $archivingdriver['enabled'] ? 'plugindisable' : 'pluginenable',
                 'plugin' => $archivingdriver['component'],
                 'wantsurl' => $PAGE->url,
+                'sesskey' => sesskey(),
             ]);
             if ($archivingdriver['enabled']) {
                 $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));
@@ -326,6 +327,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 'action' => $storagedriver['enabled'] ? 'plugindisable' : 'pluginenable',
                 'plugin' => $storagedriver['component'],
                 'wantsurl' => $PAGE->url,
+                'sesskey' => sesskey(),
             ]);
             if ($storagedriver['enabled']) {
                 $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));
@@ -460,6 +462,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 'action' => $trigger['enabled'] ? 'plugindisable' : 'pluginenable',
                 'plugin' => $trigger['component'],
                 'wantsurl' => $PAGE->url,
+                'sesskey' => sesskey(),
             ]);
             if ($trigger['enabled']) {
                 $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));
@@ -538,6 +541,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 'action' => $eventconnector['enabled'] ? 'plugindisable' : 'pluginenable',
                 'plugin' => $eventconnector['component'],
                 'wantsurl' => $PAGE->url,
+                'sesskey' => sesskey(),
             ]);
             if ($eventconnector['enabled']) {
                 $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));

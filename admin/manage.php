@@ -28,13 +28,14 @@ require_once(__DIR__ . '/../../../config.php');
 global $OUTPUT, $PAGE;
 
 // Parse expected params.
-$action = required_param('action', PARAM_TEXT);
-$wantsurl = required_param('wantsurl', PARAM_URL);
+$action = required_param('action', PARAM_ALPHA);
+$wantsurl = required_param('wantsurl', PARAM_LOCALURL);
 
 // Check login and capabilities.
 require_login();
 $ctx = context_system::instance();
 require_capability('moodle/site:config', $ctx);
+require_sesskey();
 
 // Setup page.
 $PAGE->set_context($ctx);
@@ -47,24 +48,26 @@ $PAGE->set_url(new \moodle_url(
 ));
 
 // Handle actions.
-if ($action === 'pluginenable') {
+if ($action === 'pluginenable' || $action === 'plugindisable') {
     $plugincomponent = required_param('plugin', PARAM_COMPONENT);
-    if ($plugin = \core_plugin_manager::instance()->get_plugin_info($plugincomponent)) {
-        $plugin->enable_plugin($plugin->name, 1);
-        redirect($wantsurl);
-    }
-}
 
-if ($action === 'plugindisable') {
-    $plugincomponent = required_param('plugin', PARAM_COMPONENT);
-    if ($plugin = \core_plugin_manager::instance()->get_plugin_info($plugincomponent)) {
-        $plugin->enable_plugin($plugin->name, 0);
-        redirect($wantsurl);
+    // Only allow enabling/disabling of archiving plugins, not arbitrary plugins.
+    if (!str_starts_with($plugincomponent, 'archiving')) {
+        throw new \moodle_exception('nopermissions', 'error', $wantsurl, $plugincomponent);
     }
+
+    $plugin = \core_plugin_manager::instance()->get_plugin_info($plugincomponent);
+    if (!$plugin) {
+        throw new \moodle_exception('nopermissions', 'error', $wantsurl, $plugincomponent);
+    }
+
+    $plugin->enable_plugin($plugin->name, $action === 'pluginenable' ? 1 : 0);
+    \core_plugin_manager::reset_caches();
+    redirect($wantsurl);
 }
 
 // Catch invalid requests / actions.
 echo $OUTPUT->header();
-echo $OUTPUT->notification('Invalid request.', \core\output\notification::NOTIFY_ERROR);
+echo $OUTPUT->notification(get_string('invalidrequest', 'error'), \core\output\notification::NOTIFY_ERROR);
 echo $OUTPUT->continue_button($wantsurl);
 echo $OUTPUT->footer();

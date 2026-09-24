@@ -61,21 +61,26 @@ class mod_util {
             $cms = array_filter($cms, function ($cm) use ($supported, $drivers) {
                 return in_array($cm->modname, $supported) && ($drivers[$cm->modname]['enabled'] ?? false);
             });
+
+            // Fail early if there are no course modules left after filtering.
+            if (empty($cms)) {
+                return [];
+            }
         }
 
         // Get latest successfull archiving job for each cm.
         $cmcontextids = array_map(fn ($cm) => $cm->context->id, $cms);
-        $cmcontextidssql = implode(',', array_map('intval', $cmcontextids));
+        [$contextidsql, $contextidparams] = $DB->get_in_or_equal($cmcontextids, SQL_PARAMS_NAMED, 'ctxid');
         $lastarchivedcms = $DB->get_records_sql(
             "
                 SELECT contextid, MAX(timecreated) AS lastarchived
                 FROM {" . db_table::JOB->value . "}
                 WHERE
                     status = :status AND
-                    contextid IN ({$cmcontextidssql})
+                    contextid {$contextidsql}
                 GROUP BY contextid
             ",
-            ['status' => archive_job_status::COMPLETED->value]
+            array_merge(['status' => archive_job_status::COMPLETED->value], $contextidparams)
         );
 
         // Build response.

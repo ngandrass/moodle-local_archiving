@@ -24,6 +24,7 @@
 - Let timed out archive jobs remain marked as "Timeout" instead of "Failed" (both are final job states)
 - Fix error reporting when forcefully accessing the archive job artifacts download page of an unfinished job
 - Fix type confusion in default archive job settings exports
+- Fix display of archiving overview pages for courses that have no supported activities
 
 
 ## Version 1.0.0 (2025112300)

@@ -20,6 +20,7 @@ use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
+use local_archiving\local\util\course_util;
 use local_archiving\task\retrieve_remote_file;
 
 /**
@@ -121,6 +122,88 @@ final class archive_job_test extends \advanced_testcase {
         $this->assertEquals(get_admin()->id, $retrievedjob->get_userid(), 'User ID should match');
         $this->assertEquals($settings, $retrievedjob->get_settings(), 'Settings should match');
         $this->assertEquals('manual', $retrievedjob->get_trigger(), 'Trigger should match');
+    }
+
+    /**
+     * Tests that archive_job::create() enforces the course category whitelist.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_create_enforces_coursecat_whitelist(): void {
+        $this->resetAfterTest();
+
+        // Prepare a course inside a category that is not part of the whitelist.
+        $category = self::getDataGenerator()->create_category();
+        $course = $this->generator()->create_course(['category' => $category->id]);
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $ctx = \context_module::instance($cm->cmid);
+
+        // Restrict archiving to a different, unrelated category.
+        $othercategory = self::getDataGenerator()->create_category();
+        set_config('coursecat_whitelist', $othercategory->id, 'local_archiving');
+        $this->assertFalse(
+            course_util::archiving_enabled_for_course($course->id),
+            'Archiving must be disabled for the course used in this test.'
+        );
+
+        // A regular user without the bypass capability must not be able to create a job.
+        $user = self::getDataGenerator()->create_and_enrol($course, 'editingteacher');
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('archiving_disabled_for_this_course_by_category', 'local_archiving'));
+        archive_job::create(
+            context: $ctx,
+            userid: $user->id,
+            trigger: 'manual',
+            settings: (object) [],
+        );
+    }
+
+    /**
+     * Tests that archive_job::create() still allows job creation for a category-restricted
+     * course as long as the acting user holds the bypass capability.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_create_coursecat_whitelist_bypass(): void {
+        $this->resetAfterTest();
+
+        // Prepare a course inside a category that is not part of the whitelist.
+        $category = self::getDataGenerator()->create_category();
+        $course = $this->generator()->create_course(['category' => $category->id]);
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $ctx = \context_module::instance($cm->cmid);
+
+        // Restrict archiving to a different, unrelated category.
+        $othercategory = self::getDataGenerator()->create_category();
+        set_config('coursecat_whitelist', $othercategory->id, 'local_archiving');
+        $this->assertFalse(
+            course_util::archiving_enabled_for_course($course->id),
+            'Archiving must be disabled for the course used in this test.'
+        );
+
+        // Grant the bypass capability to a user via a custom role.
+        $roleid = self::getDataGenerator()->create_role();
+        assign_capability('local/archiving:bypasscourserestrictions', CAP_ALLOW, $roleid, \context_system::instance());
+        $user = self::getDataGenerator()->create_and_enrol($course, 'editingteacher');
+        role_assign($roleid, $user->id, \context_system::instance());
+        accesslib_clear_all_caches_for_unit_testing();
+
+        // Creation must succeed for a user holding the bypass capability.
+        $createdjob = archive_job::create(
+            context: $ctx,
+            userid: $user->id,
+            trigger: 'manual',
+            settings: (object) [],
+        );
+        $this->assertGreaterThan(0, $createdjob->get_id(), 'Created job should have a valid ID despite the category restriction.');
     }
 
     /**

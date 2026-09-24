@@ -32,6 +32,7 @@ use local_archiving\local\type\archive_filename_variable;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
+use local_archiving\local\util\course_util;
 use local_archiving\local\util\mod_util;
 use local_archiving\local\util\plugin_util;
 use local_archiving\task\retrieve_remote_file;
@@ -134,6 +135,15 @@ class archive_job {
         // Check context.
         if (!($context instanceof \context_module)) {
             throw new \moodle_exception('invalid_context', 'local_archiving');
+        }
+
+        // Enforce the course category whitelist.
+        $coursectx = $context->get_course_context();
+        if (
+            !course_util::archiving_enabled_for_course($coursectx->instanceid) &&
+            !has_capability('local/archiving:bypasscourserestrictions', $coursectx, $userid)
+        ) {
+            throw new \moodle_exception('archiving_disabled_for_this_course_by_category', 'local_archiving');
         }
 
         // Clean settings object.

@@ -499,4 +499,49 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             'Artifact with mismatching checksum was falsely accepted'
         );
     }
+
+    /**
+     * Tests that a chunked upload with a missing chunk fails the task and reports the failure
+     *
+     * @covers \archivingmod_quiz\external\process_uploaded_artifact
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_chunk_reassembly_failure(): void {
+        // Create task. No chunks are uploaded at all.
+        $this->resetAfterTest();
+        $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
+
+        // Execute test call.
+        $r = $this->generate_valid_request('12345678-1234-5678-abcd-ef0123456789', $mocks->task, 3);
+        $_GET['wstoken'] = 'TEST-WS-TOKEN';
+        $res = process_uploaded_artifact::execute(
+            $r['uuid'],
+            $r['taskid'],
+            $r['artifact_component'],
+            $r['artifact_contextid'],
+            $r['artifact_userid'],
+            $r['artifact_filearea'],
+            $r['artifact_filename'],
+            $r['artifact_filepath'],
+            $r['artifact_itemid'],
+            $r['artifact_sha256sum'],
+            $r['artifact_count']
+        );
+        $this->assertSame(
+            webservice_status::E_CHUNK_REASSEMBLY_FAILED->name,
+            $res['status'],
+            'Missing chunks must be reported as a reassembly failure'
+        );
+        $this->assertSame(
+            activity_archiving_task_status::FAILED,
+            activity_archiving_task::get_by_id($mocks->task->get_id())->get_status(),
+            'Task must be marked as failed if a chunk is missing'
+        );
+    }
 }

@@ -34,6 +34,7 @@
 - Prevent archive job creation with negative retention time values
 - Support course module / activity level archiving capability assignments
 - Prevent log messages of long-running archive jobs from being displayed truncated
+- Gracefully fail during chunked-upload reassembly if chunks are missing
 
 
 ## Version 1.0.0 (2025112300)

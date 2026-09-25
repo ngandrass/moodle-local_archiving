@@ -103,4 +103,62 @@ final class file_reassembler_test extends \advanced_testcase {
             );
         }
     }
+
+    /**
+     * Tests that reassembly detects a missing chunk
+     *
+     * @covers \local_archiving\file_reassembler
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_reassemble_chunked_file_missing_chunk(): void {
+        // Create chunks 0 and 2 but not 1.
+        $this->resetAfterTest();
+        $user = $this->generator()->create_user();
+        $usercontext = \context_user::instance($user->id);
+        $originalfilename = 'testfile.tar.gz';
+        $this->generator()->create_draft_file($originalfilename . '.chunk000000000.bin', userid: $user->id);
+        $this->generator()->create_draft_file($originalfilename . '.chunk000000002.bin', userid: $user->id);
+
+        $this->assertNull(
+            file_reassembler::reassemble_chunked_file($usercontext->id, 0, '/', $originalfilename, 3),
+            'Reassembly must return null if a chunk is missing.'
+        );
+        $this->assertFalse(
+            get_file_storage()->get_file($usercontext->id, 'user', 'draft', 0, '/', $originalfilename),
+            'No reassembled file must be created if a chunk is missing.'
+        );
+    }
+
+    /**
+     * Tests that a non-positive chunk count is rejected
+     *
+     * @covers \local_archiving\file_reassembler
+     * @dataProvider invalid_artifact_count_data_provider
+     *
+     * @param int $artifactcount Invalid number of chunks
+     * @return void
+     * @throws \coding_exception
+     * @throws \file_exception
+     */
+    public function test_reassemble_chunked_file_invalid_count(int $artifactcount): void {
+        $this->resetAfterTest();
+        $this->expectException(\coding_exception::class);
+        file_reassembler::reassemble_chunked_file(1, 0, '/', 'testfile.tar.gz', $artifactcount);
+    }
+
+    /**
+     * Data provider for test_reassemble_chunked_file_invalid_count
+     *
+     * @return array[] Test data
+     */
+    public static function invalid_artifact_count_data_provider(): array {
+        return [
+            'Zero' => [0],
+            'Negative' => [-1],
+        ];
+    }
 }

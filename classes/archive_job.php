@@ -363,6 +363,12 @@ class archive_job {
                 throw new \moodle_exception('invalid_archive_job_state', 'local_archiving');
             }
 
+            // Do not process completed jobs.
+            if ($this->is_completed()) {
+                $this->get_logger()->debug('Job is already completed. No further processing required.');
+                return;
+            }
+
             // Timeout if required.
             if ($this->is_overdue()) {
                 $this->abort(archive_job_status::TIMEOUT);

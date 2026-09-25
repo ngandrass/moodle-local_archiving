@@ -21,6 +21,8 @@ use local_archiving\local\exception\storage_exception;
 use local_archiving\local\type\file_fetch_status;
 use local_archiving\remote_file_fetcher;
 
+require_once(__DIR__ . '/../mock/archivingstore_localdir_mock.php');
+
 /**
  * Tests for the retrieve_remote_file ad-hoc task.
  *
@@ -58,6 +60,7 @@ final class retrieve_remote_file_test extends \advanced_testcase {
         return $this->generator()->create_file_handle(array_merge([
             'jobid' => $job->get_id(),
             'archivingstorename' => 'localdir',
+            'sha256sum' => hash('sha256', \archivingstore_localdir_mock::DEFAULT_FILE_CONTENT),
         ], $params));
     }
 
@@ -188,6 +191,40 @@ final class retrieve_remote_file_test extends \advanced_testcase {
 
         $record = remote_file_fetcher::get($handle->id);
         $this->assertSame(file_fetch_status::FAILED->value, $record['status']);
+    }
+
+    /**
+     * Tests that a retrieved file that does not match the stored checksum is rejected, discarded from the cache and
+     * recorded as failed.
+     *
+     * @covers \local_archiving\task\retrieve_remote_file
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_execute_checksum_mismatch(): void {
+        $this->resetAfterTest();
+        $handle = $this->create_handle(['sha256sum' => str_repeat('b', 64)]);
+        $task = retrieve_remote_file::create($handle, get_admin()->id);
+
+        ob_start();
+        try {
+            $task->execute();
+            $this->fail('Expected a storage_exception due to the checksum mismatch.');
+        } catch (storage_exception $e) {
+            $this->assertSame('retrieved_file_checksum_mismatch', $e->errorcode);
+        } finally {
+            ob_end_clean();
+        }
+
+        $record = remote_file_fetcher::get($handle->id);
+        $this->assertSame(file_fetch_status::FAILED->value, $record['status']);
+        $this->assertNull(
+            file_handle::get_by_id($handle->id)->get_local_file(),
+            'Corrupted file must be removed from the cache.'
+        );
     }
 
     /**

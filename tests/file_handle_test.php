@@ -608,6 +608,42 @@ final class file_handle_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that a retrieved file that does not match the stored checksum is rejected and not left in the cache.
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_retrieve_file_checksum_mismatch(): void {
+        global $DB;
+
+        // Prepare a stored file with checksum mismatch.
+        $this->resetAfterTest();
+        $this->init_archivingstore();
+        $generator = $this->generator();
+
+        $job = $generator->create_archive_job();
+        $file = $generator->create_temp_file();
+        $filehandle = driver_factory::storage_driver('localdir')->store($job->get_id(), $file, '/');
+        $DB->set_field(db_table::FILE_HANDLE->value, 'sha256sum', str_repeat('b', 64), ['id' => $filehandle->id]);
+        $filehandle = file_handle::get_by_id($filehandle->id);
+
+        // Retrieve and ensure we fail with cleanup.
+        try {
+            $filehandle->retrieve_file();
+            $this->fail('Expected a storage_exception due to the checksum mismatch.');
+        } catch (storage_exception $e) {
+            $this->assertSame('retrieved_file_checksum_mismatch', $e->errorcode);
+        }
+
+        $this->assertNull($filehandle->get_local_file(), 'Corrupted file must be removed from the cache.');
+    }
+
+    /**
      * Tests that a file that was marked as deleted can not be retrieved.
      *
      * @covers \local_archiving\file_handle

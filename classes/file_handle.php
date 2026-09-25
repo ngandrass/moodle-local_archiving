@@ -422,10 +422,18 @@ final class file_handle {
         }
 
         // File not found in the local filestore cache, retrieve it from the storage driver.
-        return $this->archivingstore()->retrieve(
+        $file = $this->archivingstore()->retrieve(
             $this,
             $this->generate_retrieval_fileinfo_record()
         );
+
+        // Verify file integrity.
+        if ($this->sha256sum !== storage::hash_file($file)) {
+            $file->delete();
+            throw new storage_exception('retrieved_file_checksum_mismatch', 'local_archiving', a: $this->id);
+        }
+
+        return $file;
     }
 
     /**

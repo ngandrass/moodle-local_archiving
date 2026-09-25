@@ -258,6 +258,7 @@ $string['cannot_update_retentiontime_of_deleted_file'] = 'Cannot update retentio
 $string['file_scheduled_for_deletion'] = 'File is scheduled for deletion';
 $string['file_will_be_deleted_in'] = 'File will be deleted in';
 $string['retrieve_not_supported'] = 'This storage driver does not support retrieving files.';
+$string['retrieved_file_checksum_mismatch'] = 'The retrieved file (file handle ID: {$a}) does not match its stored SHA256 checksum and was discarded. The stored file may be corrupted.';
 $string['storage_tier'] = 'Storage tier';
 $string['storage_tier_LOCAL'] = 'Local';
 $string['storage_tier_LOCAL_help'] = 'Data is stored locally on the server or is accessible very fast.';

@@ -28,6 +28,7 @@ use core\exception\coding_exception;
 use local_archiving\file_handle;
 use local_archiving\local\exception\storage_exception;
 use local_archiving\remote_file_fetcher;
+use local_archiving\storage;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -154,11 +155,17 @@ class retrieve_remote_file extends \core\task\adhoc_task {
             mtrace("Retrieving remote file for file handle {$filehandleid} ...");
             remote_file_fetcher::mark_fetching($filehandleid, 0, $handle->filesize);
 
-            $handle->archivingstore()->retrieve(
+            $file = $handle->archivingstore()->retrieve(
                 $handle,
                 $handle->generate_retrieval_fileinfo_record(),
                 remote_file_fetcher::progress_callback($filehandleid)
             );
+
+            // Verify integrity of retrieved file.
+            if ($handle->sha256sum !== storage::hash_file($file)) {
+                $file->delete();
+                throw new storage_exception('retrieved_file_checksum_mismatch', 'local_archiving', a: $handle->id);
+            }
 
             remote_file_fetcher::mark_complete($filehandleid);
             mtrace("Retrieval for file handle {$filehandleid} complete.");

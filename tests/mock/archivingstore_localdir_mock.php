@@ -37,6 +37,16 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
  */
 class archivingstore_localdir_mock extends \local_archiving\local\driver\archivingstore {
     /**
+     * @var string Default content of files that are stored in this mock driver.
+     */
+    public const DEFAULT_FILE_CONTENT = 'Lorem ipsum dolor sit amet.';
+
+    /**
+     * @var string[] Contents of files that were explicitly passed to store(), indexed by their SHA256 checksum.
+     */
+    private static array $storage = [];
+
+    /**
      * @var bool If true, retrieve() throws a storage_exception instead of succeeding.
      * Used to test error-handling paths of callers.
      */
@@ -81,14 +91,17 @@ class archivingstore_localdir_mock extends \local_archiving\local\driver\archivi
 
     #[\Override]
     public function store(int $jobid, \stored_file $file, string $path, ?callable $progresscallback = null): file_handle {
-        // Only create file handles.
+        // Only create file handles and remember the content for later retrieval.
+        $sha256sum = storage::hash_file($file);
+        self::$storage[$sha256sum] = $file->get_content();
+
         $handle = file_handle::create(
             jobid: $jobid,
             archivingstorename: 'localdir',
             filename: $file->get_filename(),
             filepath: trim($path, '/'),
             filesize: $file->get_filesize(),
-            sha256sum: storage::hash_file($file),
+            sha256sum: $sha256sum,
             mimetype: $file->get_mimetype()
         );
 
@@ -107,7 +120,7 @@ class archivingstore_localdir_mock extends \local_archiving\local\driver\archivi
 
         return get_file_storage()->create_file_from_string(
             $fileinfo,
-            'Mock test file content for file handle with ID ' . $handle->id
+            self::$storage[$handle->sha256sum] ?? self::DEFAULT_FILE_CONTENT
         );
     }
 

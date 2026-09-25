@@ -30,6 +30,7 @@
 - Ensure proper cleanup of temporary files and data on archive job failure at every stage
 - Gracefully terminate job processing ad-hoc tasks when an archive job is deleted before it has finished
 - Fix race condition between job initialization and ad-hoc cron task execution
+- Validate file contents against stored checksum when retrieving files from storage to ensure data integrity
 
 
 ## Version 1.0.0 (2025112300)

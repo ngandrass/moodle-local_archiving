@@ -37,6 +37,7 @@ use local_archiving\local\type\log_level;
 use local_archiving\local\util\course_util;
 use local_archiving\local\util\mod_util;
 use local_archiving\local\util\plugin_util;
+use local_archiving\task\process_archive_job;
 use local_archiving\task\retrieve_remote_file;
 
 // phpcs:ignore
@@ -772,36 +773,67 @@ class archive_job {
 
     /**
      * Deletes an archive job and everything that is associated with it from the
-     * database
+     * database. Also cancels pending ad-hoc tasks associated with this job.
      *
+     * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
     public function delete(): void {
-        global $DB;
+        global $CFG, $DB;
 
-        // Handle activity archiving tasks.
-        $archivingtasks = activity_archiving_task::get_by_jobid($this->id);
-        foreach ($archivingtasks as $task) {
-            $task->cancel();
-            $task->delete();
+        $lock = $this->lock();
+
+        try {
+            // Remove pending job processing tasks.
+            if (!$this->is_completed()) {
+                foreach (\core\task\manager::get_adhoc_tasks(process_archive_job::class, skiprunning: true) as $processingtask) {
+                    // Check if the task is associated with this job.
+                    if ((int) $processingtask->get_custom_data()->jobid !== $this->id) {
+                        continue;
+                    }
+
+                    // Cancel ad-hoc task.
+                    if (method_exists(\core\task\manager::class, 'delete_adhoc_task')) {
+                        // Moodle >= 5.0: Use core API.
+                        \core\task\manager::delete_adhoc_task($processingtask->get_id());
+                    } else if ($CFG->branch < 500) {
+                        // Moodle <= 4.5: delete_adhoc_task() was only added in Moodle 5.0.
+                        // This is the exact way delete_adhoc_task() is implemented at the time of writing.
+                        // Future uses default to the Moodle core API to prevent missing changes to this logic.
+                        $DB->delete_records('task_adhoc', ['id' => $processingtask->get_id()]);
+                    } else {
+                        throw new \coding_exception('Missing \core\task\manager::delete_adhoc_task() method,
+                         but we are not on Moodle < 5.0? This should never happen.');
+                    }
+                }
+            }
+
+            // Handle activity archiving tasks.
+            $archivingtasks = activity_archiving_task::get_by_jobid($this->id);
+            foreach ($archivingtasks as $task) {
+                $task->cancel();
+                $task->delete();
+            }
+
+            // Delete job artifacts.
+            $files = file_handle::get_by_jobid($this->id);
+            foreach ($files as $filehandle) {
+                // Cancel/purge any outstanding on-demand retrieval for this file handle before it's gone.
+                retrieve_remote_file::cancel_and_purge($filehandle->id);
+
+                // Remove original file from the storage. Also clears file cache and TSP data.
+                $filehandle->destroy(removefile: true);
+            }
+
+            // Delete records from the database.
+            $DB->delete_records(db_table::METADATA->value, ['jobid' => $this->id]);
+            $DB->delete_records(db_table::TEMPFILE->value, ['jobid' => $this->id]);
+            $DB->delete_records(db_table::LOG->value, ['jobid' => $this->id]);
+            $DB->delete_records(db_table::JOB->value, ['id' => $this->id]);
+        } finally {
+            $lock->release();
         }
-
-        // Delete job artifacts.
-        $files = file_handle::get_by_jobid($this->id);
-        foreach ($files as $filehandle) {
-            // Cancel/purge any outstanding on-demand retrieval for this file handle before it's gone.
-            retrieve_remote_file::cancel_and_purge($filehandle->id);
-
-            // Remove original file from the storage. Also clears file cache and TSP data.
-            $filehandle->destroy(removefile: true);
-        }
-
-        // Delete records from the database.
-        $DB->delete_records(db_table::METADATA->value, ['jobid' => $this->id]);
-        $DB->delete_records(db_table::TEMPFILE->value, ['jobid' => $this->id]);
-        $DB->delete_records(db_table::LOG->value, ['jobid' => $this->id]);
-        $DB->delete_records(db_table::JOB->value, ['id' => $this->id]);
     }
 
     /**

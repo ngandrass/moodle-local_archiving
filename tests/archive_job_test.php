@@ -21,6 +21,7 @@ use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
 use local_archiving\local\util\course_util;
+use local_archiving\task\process_archive_job;
 use local_archiving\task\retrieve_remote_file;
 
 /**
@@ -554,6 +555,58 @@ final class archive_job_test extends \advanced_testcase {
             remote_file_fetcher::get($filehandleid),
             'Outstanding remote_file_fetcher tracking records should be purged when the job is deleted'
         );
+    }
+
+    /**
+     * Tests that deleting a job that is queued or currently running removes
+     * everything associated with it, including its pending processing task,
+     * while leaving other jobs untouched.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_delete_active_job(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create a job that is running (has an activity archiving task and an artifact) and a bystander job.
+        $settings = (object) [
+            'export_course_backup' => false,
+            'export_cm_backup' => false,
+            'storage_driver' => 'localdir',
+        ];
+        $job = $this->generator()->create_archive_job(['settings' => $settings]);
+        $job->enqueue();
+        $job->execute();
+        $jobid = $job->get_id();
+        $this->assertSame(archive_job_status::ACTIVITY_ARCHIVING, $job->get_status());
+        $this->assertNotEmpty(activity_archiving_task::get_by_jobid($jobid), 'Job should have an activity archiving task');
+        $this->generator()->create_file_handle(['jobid' => $jobid]);
+
+        $otherjob = $this->generator()->create_archive_job(['settings' => $settings]);
+        $otherjob->enqueue();
+
+        $this->assertCount(2, \core\task\manager::get_adhoc_tasks(process_archive_job::class));
+
+        // Delete the running job.
+        $job->delete();
+
+        $this->assertFalse($DB->record_exists(db_table::JOB->value, ['id' => $jobid]), 'Job should be deleted');
+        $this->assertFalse($DB->record_exists(db_table::ACTIVITY_TASK->value, ['jobid' => $jobid]), 'Tasks should be deleted');
+        $this->assertFalse($DB->record_exists(db_table::FILE_HANDLE->value, ['jobid' => $jobid]), 'File handles should be deleted');
+        $this->assertFalse($DB->record_exists(db_table::LOG->value, ['jobid' => $jobid]), 'Logs should be deleted');
+
+        // Only the pending processing task of the other job must remain.
+        $remaining = \core\task\manager::get_adhoc_tasks(process_archive_job::class);
+        $this->assertCount(1, $remaining, 'Pending processing task of the deleted job should be removed');
+        $this->assertSame($otherjob->get_id(), (int) reset($remaining)->get_custom_data()->jobid);
+        $this->assertTrue($DB->record_exists(db_table::JOB->value, ['id' => $otherjob->get_id()]), 'Other job must be kept');
     }
 
     /**

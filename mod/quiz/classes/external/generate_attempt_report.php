@@ -218,6 +218,11 @@ class generate_attempt_report extends external_api {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
+        // Ensure that the task type matches.
+        if ($task->get_archivingmodname() !== 'quiz') {
+            return ['status' => webservice_status::E_TASK_TYPE_INVALID->name];
+        }
+
         // Validate folder and filename pattern.
         if (
             !storage::is_valid_filename_pattern(

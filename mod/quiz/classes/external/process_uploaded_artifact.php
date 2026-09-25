@@ -183,6 +183,11 @@ class process_uploaded_artifact extends external_api {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
+        // Ensure that the task type matches.
+        if ($task->get_archivingmodname() !== 'quiz') {
+            return ['status' => webservice_status::E_TASK_TYPE_INVALID->name];
+        }
+
         // Do not allow uploading of artifacts for finished jobs.
         if ($task->is_completed()) {
             // This is just a safeguard since web service tokens should be invalidated once a task completes.

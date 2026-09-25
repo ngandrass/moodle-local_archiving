@@ -204,6 +204,11 @@ class get_attempts_metadata extends external_api {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
+        // Ensure that the task type matches.
+        if ($task->get_archivingmodname() !== 'quiz') {
+            return ['status' => webservice_status::E_TASK_TYPE_INVALID->name];
+        }
+
         // Get quiz manager and build response.
         $quizmanager = quiz_manager::from_context($task->get_context());
         return [

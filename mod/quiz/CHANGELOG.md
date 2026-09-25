@@ -20,8 +20,7 @@
 - Forcefully disable unlocked attempt report sections that depend on another disabled section
 - Prevent instance-specific modifications to Moodle header and footer from leaking into printed PDFs (thanks to @abias !)
 - Migrate quiz attempt renderer to new quiz attempt summary API
-- Prevent `update_task_status` external functions from making changes to activity archiving tasks that belong to other activity types
-- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher
 - Fix bug in dynamic file and folder name validation
 - Ensure Moodle 5.2 compatibility
 - Fix `taskid` parameter type (was string, now int) in `process_uploaded_artifact` web service function

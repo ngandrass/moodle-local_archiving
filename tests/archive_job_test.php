@@ -507,6 +507,15 @@ final class archive_job_test extends \advanced_testcase {
         \core\task\manager::queue_adhoc_task($task);
         remote_file_fetcher::mark_queued($filehandleid);
 
+        // Add TSP data.
+        $DB->insert_record(db_table::TSP->value, [
+            'filehandleid' => $filehandleid,
+            'timecreated' => time(),
+            'server' => 'localhost',
+            'timestampquery' => 'sample-query',
+            'timestampreply' => 'sample-reply',
+        ]);
+
         // Delete the job and check that everything was cleaned up correctly.
         $job->delete();
         $this->assertEmpty(
@@ -528,6 +537,10 @@ final class archive_job_test extends \advanced_testcase {
         $this->assertEmpty(
             $DB->get_records(db_table::FILE_HANDLE->value, ['jobid' => $jobid]),
             'Job file handles should be deleted from the database'
+        );
+        $this->assertFalse(
+            $DB->record_exists(db_table::TSP->value, ['filehandleid' => $filehandleid]),
+            'TSP data for the job\'s file handles should be removed when the job is deleted'
         );
         $this->assertEmpty(
             $DB->get_records(db_table::LOG->value, ['jobid' => $jobid]),

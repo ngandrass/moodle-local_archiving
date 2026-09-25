@@ -34,13 +34,13 @@ global $OUTPUT, $PAGE;
 
 // Parse expected params.
 $contextid = required_param('contextid', PARAM_INT);
-$action = required_param('action', PARAM_TEXT);
-$wantsurl = optional_param('wantsurl', '', PARAM_URL);
+$action = required_param('action', PARAM_ALPHA);
+$wantsurl = optional_param('wantsurl', '', PARAM_LOCALURL);
 
 // Validate context and check capabilities.
 $ctx = context::instance_by_id($contextid);
 if (!($ctx instanceof \context_course || $ctx instanceof \context_module)) {
-    throw new \moodle_exception(get_string('invalidcontext', 'local_archiving'));
+    throw new \moodle_exception('invalidcontext', 'error');
 }
 
 // Check login and capabilities.

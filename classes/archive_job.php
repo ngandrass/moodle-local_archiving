@@ -26,8 +26,10 @@ namespace local_archiving;
 
 use local_archiving\local\driver\archivingmod;
 use local_archiving\local\driver\driver_factory;
+use local_archiving\local\exception\storage_exception;
 use local_archiving\local\exception\yield_exception;
 use local_archiving\local\logging\job_logger;
+use local_archiving\local\type\activity_archiving_task_status;
 use local_archiving\local\type\archive_filename_variable;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
@@ -331,9 +333,14 @@ class archive_job {
      * @param bool $failonlocktimeout If true, an exception will be thrown if
      * the lock could not be acquired after a given timeout.
      * @return void
+     * @throws \Throwable
+     * @throws \base_setting_exception
+     * @throws \base_task_exception
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
+     * @throws storage_exception
+     * @throws yield_exception
      */
     public function execute(bool $failonlocktimeout = false): void {
         // Acquire lock for job execution.
@@ -358,16 +365,7 @@ class archive_job {
 
             // Timeout if required.
             if ($this->is_overdue()) {
-                // Update task status.
-                $this->set_status(archive_job_status::TIMEOUT);
-
-                // Stop all running tasks.
-                foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
-                    $task->cancel();
-                }
-
-                // Perform cleanup and die.
-                $this->cleanup();
+                $this->abort(archive_job_status::TIMEOUT);
                 throw new yield_exception();
             }
 
@@ -449,6 +447,22 @@ class archive_job {
                 $driver->execute_all_tasks_for_job($this->get_id());
 
                 if ($driver->is_all_tasks_for_job_completed($this->get_id())) {
+                    // Check that every task was successful and did not silently fail without throwing an exception.
+                    foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
+                        if ($task->get_status() !== activity_archiving_task_status::FINISHED) {
+                            $this->get_logger()->error(
+                                "Activity archiving task #{$task->get_id()} ({$task->get_archivingmodname()}) " .
+                                "did not finish successfully. Status: {$task->get_status()->value}"
+                            );
+                            throw new \moodle_exception('activity_archiving_task_failed', 'local_archiving');
+                        }
+
+                        $this->get_logger()->debug(
+                            "Activity archiving task #{$task->get_id()} ({$task->get_archivingmodname()}) finished successfully."
+                        );
+                    }
+
+                    // Every task finished successfully. Continue.
                     $this->set_status(archive_job_status::BACKUP_COLLECTION);
                 } else {
                     $this->get_logger()->info('Not all activity archiving tasks are finished yet. Waiting ...');
@@ -629,7 +643,7 @@ class archive_job {
             // Catch the yield silently and let everything else bubble up.
             if (!$e instanceof yield_exception) {
                 $this->get_logger()->fatal($e->getMessage());
-                $this->set_status(archive_job_status::FAILURE);
+                $this->abort();
                 throw $e;
             }
         } finally {
@@ -656,6 +670,54 @@ class archive_job {
         }
 
         $this->clear_settings(force: true);
+    }
+
+    /**
+     * Aborts this job including all associated tasks.
+     *
+     * This method ensures that all files and temporary data of this job are
+     * removed and that the job cleanup logic is executed.
+     *
+     * @param archive_job_status $status Job status to set after aborting. Defaults to FAILURE.
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    protected function abort(archive_job_status $status = archive_job_status::FAILURE): void {
+        $this->set_status($status);
+
+        // Cancel running activity archiving tasks. This also removes all linked temporary files.
+        $archivingtasks = activity_archiving_task::get_by_jobid($this->id);
+        foreach ($archivingtasks as $task) {
+            try {
+                $task->cancel();
+                $task->delete();
+            } catch (\Throwable $e) {
+                $this->get_logger()->error(
+                    "Failed to cancel and delete activity archiving task #{$task->get_id()}: {$e->getMessage()}"
+                );
+            }
+        }
+
+        // We do not cancel backup tasks here because once they are submitted to async task handler of Moodle
+        // a clean cancellation can not be guaranteed. Orphaned backups will be automatically cleaned up
+        // by \local_archiving\task\cleanup_orphaned_backups.
+
+        // Delete job artifacts.
+        $files = file_handle::get_by_jobid($this->id);
+        foreach ($files as $filehandle) {
+            try {
+                $filehandle->destroy(removefile: true);
+            } catch (\Throwable $e) {
+                $this->get_logger()->error(
+                    "Failed to destroy file handle #{$filehandle->id}: {$e->getMessage()}"
+                );
+            }
+        }
+
+        // Call internal job cleanup logic.
+        $this->cleanup();
     }
 
     /**

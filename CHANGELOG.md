@@ -27,6 +27,7 @@
 - Fix display of archiving overview pages for courses that have no supported activities
 - Remove TSP data on file handle deletion
 - Clear local artifact cache right away during artifact deletion instead of waiting for the next housekeeping task
+- Ensure proper cleanup of temporary files and data on archive job failure at every stage
 
 
 ## Version 1.0.0 (2025112300)

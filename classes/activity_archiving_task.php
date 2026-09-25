@@ -721,7 +721,7 @@ final class activity_archiving_task {
         }
 
         // Calculate sha256sum if not given.
-        if (!$sha256sum || storage::is_valid_sha256sum($sha256sum)) {
+        if (!$sha256sum || !storage::is_valid_sha256sum($sha256sum)) {
             $sha256sum = storage::hash_file($targetfile);
         }
 

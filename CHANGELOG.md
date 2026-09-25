@@ -32,6 +32,7 @@
 - Fix race condition between job initialization and ad-hoc cron task execution
 - Validate file contents against stored checksum when retrieving files from storage to ensure data integrity
 - Prevent archive job creation with negative retention time values
+- Support course module / activity level archiving capability assignments
 
 
 ## Version 1.0.0 (2025112300)

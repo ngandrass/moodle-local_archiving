@@ -45,14 +45,19 @@ if (!($ctx instanceof \context_course || $ctx instanceof \context_module)) {
 
 // Check login and capabilities.
 $courseid = $ctx->get_course_context()->instanceid;
-$course = get_course($courseid);
-require_login($courseid);
+$cm = null;
+if ($ctx instanceof \context_module) {
+    [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
+} else {
+    $course = get_course($courseid);
+}
+require_login($course, false, $cm);
 require_capability('local/archiving:view', $ctx);
 
 // Setup page.
-$PAGE->set_context($ctx->get_course_context());
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($course->fullname);
+$PAGE->activityheader->disable();
 
 // Handle POSTed data.
 $outhtml = '';

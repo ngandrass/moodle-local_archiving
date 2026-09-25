@@ -36,17 +36,17 @@ $ctx = $job->get_context();
 [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
 
 // Check login and capabilities.
-require_login($course);
-require_capability('local/archiving:view', $ctx->get_course_context());
+require_login($course, false, $cm);
+require_capability('local/archiving:view', $ctx);
 
 // Setup page.
-$PAGE->set_context($ctx->get_course_context());
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($cm->name);
 $PAGE->set_url(new moodle_url(
     '/local/archiving/logs.php',
     ['jobid' => $jobid]
 ));
+$PAGE->activityheader->disable();
 
 // Render output.
 $jobmeta = $job->get_metadata_entries();

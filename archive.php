@@ -32,16 +32,14 @@ global $OUTPUT, $PAGE, $USER;
 $courseid = required_param('courseid', PARAM_INT);
 $cmid = required_param('cmid', PARAM_INT);
 
-$coursectx = context_course::instance($courseid);
-$ctx = context_module::instance($cmid);
-[$course, $cm] = get_course_and_cm_from_cmid($cmid);
+[$course, $cm] = get_course_and_cm_from_cmid($cmid, courseorid: $courseid);
+$ctx = $cm->context;
 
 // Check login and capabilities.
-require_login($courseid);
+require_login($course, false, $cm);
 require_capability('local/archiving:view', $ctx);
 
 // Setup page.
-$PAGE->set_context($coursectx);
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($cm->name);
 $PAGE->set_url(new moodle_url(
@@ -52,6 +50,7 @@ $PAGE->set_url(new moodle_url(
     ]
 ));
 $PAGE->set_pagelayout('incourse');
+$PAGE->activityheader->disable();
 
 $html = '';
 

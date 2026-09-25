@@ -355,13 +355,16 @@ final class remote_file_fetcher_test extends \advanced_testcase {
      */
     public function test_acquire_lock_fails_while_held(): void {
         $this->resetAfterTest();
-        $this->assertTrue(remote_file_fetcher::lock(1));
 
+        // Shorten the lock wait time of the cache store (default 60 sec).
+        \cache_config_testing::instance()->phpunit_edit_store_config('default_application', ['lockwait' => 1]);
+
+        // Try to lock the same cache entry multiple times.
+        $this->assertTrue(remote_file_fetcher::lock(1));
         $this->assertFalse(
             remote_file_fetcher::lock(1),
             'A second concurrent acquire_lock() for the same file handle should fail while held.'
         );
-
         remote_file_fetcher::unlock(1);
     }
 

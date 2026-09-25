@@ -33,6 +33,7 @@
 - Validate file contents against stored checksum when retrieving files from storage to ensure data integrity
 - Prevent archive job creation with negative retention time values
 - Support course module / activity level archiving capability assignments
+- Prevent log messages of long-running archive jobs from being displayed truncated
 
 
 ## Version 1.0.0 (2025112300)

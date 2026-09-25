@@ -612,7 +612,7 @@ final class activity_archiving_task {
         ]);
 
         // Log token destruction.
-        $this->get_logger()->debug('Destroyed web service token: ' . $wstoken);
+        $this->get_logger()->debug('Destroyed web service token');
 
         return true;
     }

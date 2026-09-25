@@ -229,7 +229,7 @@ class process_uploaded_artifact extends external_api {
 
         // Validate uploaded file.
         // Note: We use SHA256 instead of Moodle sha1, since SHA1 is prone to hash collisions!
-        if ($params['artifact_sha256sum'] != storage::hash_file($draftfile)) {
+        if ($params['artifact_sha256sum'] !== storage::hash_file($draftfile)) {
             $task->set_status(activity_archiving_task_status::FAILED);
             $draftfile->delete();
             return ['status' => webservice_status::E_CHECKSUM_MISMATCH->name];

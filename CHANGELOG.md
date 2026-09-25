@@ -193,6 +193,8 @@ Listed changes are split into categories, reflecting the affected component / (s
 - Fix database field type for archive job progress
 - Add created default archive trigger plugins to plugin overview in the docs
 - Add archiving trigger sub-plugin component and API descriptions to developer docs
+- Improve speed of artifact file SHA256 hash generation
+
 
 ### Sub-Plugins
 

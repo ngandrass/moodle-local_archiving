@@ -308,11 +308,14 @@ class job_create_form extends \moodleform {
      */
     #[\Override]
     public function validation($data, $files): array {
+        // Apply presets to validate actually final values.
+        $data = $this->apply_presets($data);
+
         $errors = parent::validation($data, $files);
 
         if (
             !storage::is_valid_filename_pattern(
-                $data['archive_filename_pattern'],
+                $data['archive_filename_pattern'] ?? '',
                 archive_filename_variable::values(),
                 storage::FILENAME_FORBIDDEN_CHARACTERS
             )
@@ -320,30 +323,49 @@ class job_create_form extends \moodleform {
             $errors['archive_filename_pattern'] = get_string('error_invalid_archive_filename_pattern', 'local_archiving');
         }
 
+        if (
+            !empty($data['archive_autodelete']) &&
+            (int) ($data['archive_retention_time'] ?? 0) <= 0
+        ) {
+            $errors['archive_retention_time_group'] = get_string('retentiontime_must_be_positive', 'local_archiving');
+        }
+
         return $errors;
+    }
+
+    /**
+     * Returns the given form data with all locked fields forced to their preset values
+     *
+     * @param array $data Form data
+     * @return array Form data with locked fields set to their presets
+     */
+    private function apply_presets(array $data): array {
+        foreach ($this->config->core as $key => $value) {
+            if (str_starts_with($key, 'job_preset_') && strrpos($key, '_locked') === strlen($key) - 7) {
+                if ($value) {
+                    $data[substr($key, 11, -7)] = $this->config->core->{substr($key, 0, -7)};
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**
      * Returns the data submitted by the user but forces all locked fields to
      * their preset values
      *
-     * @return \stdClass Cleared, submitted form data
+     * @return \stdClass|null Cleared, submitted form data or null if the form was not submitted or is invalid
      * @throws \dml_exception
      */
     #[\Override]
-    public function get_data(): \stdClass {
+    public function get_data(): ?\stdClass {
         $data = parent::get_data();
-
-        // Force locked fields to their preset values.
-        foreach ($this->config->core as $key => $value) {
-            if (str_starts_with($key, 'job_preset_') && strrpos($key, '_locked') === strlen($key) - 7) {
-                if ($value) {
-                    $data->{substr($key, 11, -7)} = $this->config->core->{substr($key, 0, -7)};
-                }
-            }
+        if ($data === null) {
+            return null;
         }
 
-        return $data;
+        return (object) $this->apply_presets((array) $data);
     }
 
     /**

@@ -232,6 +232,10 @@ final class job_create_form_test extends \advanced_testcase {
         $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
         $cminfo = get_fast_modinfo($course->id)->get_cm($cm->cmid);
 
+        // Autodelete settings are locked by default. Unlock them to validate the submitted values.
+        set_config('job_preset_archive_autodelete_locked', 0, 'local_archiving');
+        set_config('job_preset_archive_retention_time_locked', 0, 'local_archiving');
+
         // Create the form and submit the data.
         $form = new job_create_form('quiz', $cminfo);
         $res = $form->validation($formdata, []);
@@ -253,16 +257,123 @@ final class job_create_form_test extends \advanced_testcase {
             'Valid data' => [
                 [
                     'archive_filename_pattern' => 'archive-${courseshortname}',
+                    'archive_autodelete' => '1',
+                    'archive_retention_time' => 3600,
                 ],
                 true,
             ],
             'Invalid archive_filename_pattern' => [
                 [
                     'archive_filename_pattern' => 'archive-${invalidplaceholder}',
+                    'archive_autodelete' => '1',
+                    'archive_retention_time' => 3600,
                 ],
                 false,
             ],
+            'Autodelete with zero retention time' => [
+                [
+                    'archive_filename_pattern' => 'archive-${courseshortname}',
+                    'archive_autodelete' => '1',
+                    'archive_retention_time' => 0,
+                ],
+                false,
+            ],
+            'Autodelete with negative retention time' => [
+                [
+                    'archive_filename_pattern' => 'archive-${courseshortname}',
+                    'archive_autodelete' => '1',
+                    'archive_retention_time' => -5,
+                ],
+                false,
+            ],
+            'Autodelete with missing retention time' => [
+                [
+                    'archive_filename_pattern' => 'archive-${courseshortname}',
+                    'archive_autodelete' => '1',
+                ],
+                false,
+            ],
+            'No autodelete with zero retention time' => [
+                [
+                    'archive_filename_pattern' => 'archive-${courseshortname}',
+                    'archive_autodelete' => '0',
+                    'archive_retention_time' => 0,
+                ],
+                true,
+            ],
         ];
+    }
+
+    /**
+     * Tests that locked fields are validated using their preset values, regardless of what was (not) submitted.
+     *
+     * @covers \local_archiving\form\job_create_form
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_validation_uses_presets_for_locked_fields(): void {
+        // Prepare a course module and lock all fields that are relevant for validation.
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $cminfo = get_fast_modinfo($course->id)->get_cm($cm->cmid);
+
+        $locked = [
+            'archive_filename_pattern' => 'archive-${courseid}',
+            'archive_autodelete' => 1,
+            'archive_retention_time' => 3600,
+        ];
+        foreach ($locked as $key => $value) {
+            set_config("job_preset_{$key}", $value, 'local_archiving');
+            set_config("job_preset_{$key}_locked", 1, 'local_archiving');
+        }
+
+        // Locked fields are not submitted by browsers (disabled attribute).
+        $form = new job_create_form('quiz', $cminfo);
+        $this->assertEmpty($form->validation([], []), 'Missing locked fields must be validated using their presets.');
+
+        // Tampered values for locked fields must not matter.
+        $this->assertEmpty(
+            $form->validation([
+                'archive_filename_pattern' => 'archive-${invalidplaceholder}',
+                'archive_autodelete' => '0',
+                'archive_retention_time' => 0,
+            ], []),
+            'Submitted values for locked fields must be ignored.'
+        );
+
+        // An invalid locked preset must be reported.
+        set_config('job_preset_archive_retention_time', 0, 'local_archiving');
+        $form = new job_create_form('quiz', $cminfo);
+        $this->assertArrayHasKey(
+            'archive_retention_time_group',
+            $form->validation([], []),
+            'A locked retention time of zero with locked autodelete must be reported.'
+        );
+    }
+
+    /**
+     * Tests that get_data() returns null instead of failing if the form was not submitted.
+     *
+     * @covers \local_archiving\form\job_create_form
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_data_not_submitted(): void {
+        // Prepare a course module.
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $cminfo = get_fast_modinfo($course->id)->get_cm($cm->cmid);
+
+        $form = new job_create_form('quiz', $cminfo);
+        $this->assertNull($form->get_data(), 'An unsubmitted form must not return any data.');
     }
 
     /**

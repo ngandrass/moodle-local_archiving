@@ -257,6 +257,7 @@ $string['web_service_rest_protocol_is_enabled'] = 'REST web service protocol is 
 $string['cannot_update_retentiontime_of_deleted_file'] = 'Cannot update retention time of deleted file';
 $string['file_scheduled_for_deletion'] = 'File is scheduled for deletion';
 $string['file_will_be_deleted_in'] = 'File will be deleted in';
+$string['retentiontime_must_be_positive'] = 'The retention time must be greater than zero if automatic deletion is enabled.';
 $string['retrieve_not_supported'] = 'This storage driver does not support retrieving files.';
 $string['retrieved_file_checksum_mismatch'] = 'The retrieved file (file handle ID: {$a}) does not match its stored SHA256 checksum and was discarded. The stored file may be corrupted.';
 $string['storage_tier'] = 'Storage tier';

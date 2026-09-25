@@ -56,7 +56,7 @@ class process_uploaded_artifact extends external_api {
                 VALUE_REQUIRED
             ),
             'taskid' => new external_value(
-                PARAM_TEXT,
+                PARAM_INT,
                 'ID of the task this artifact is associated with',
                 VALUE_REQUIRED
             ),

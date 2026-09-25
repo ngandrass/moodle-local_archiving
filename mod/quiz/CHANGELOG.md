@@ -24,6 +24,7 @@
 - Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
 - Fix bug in dynamic file and folder name validation
 - Ensure Moodle 5.2 compatibility
+- Fix `taskid` parameter type (was string, now int) in `process_uploaded_artifact` web service function
 
 
 ## Version 1.0.0 (2025102700)

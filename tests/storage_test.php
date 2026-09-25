@@ -390,6 +390,34 @@ final class storage_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that deleted files are excluded from the archiving store statistics.
+     *
+     * @covers \local_archiving\storage
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function test_calculate_archivingstore_stats_ignores_deleted_files(): void {
+        // Prepare existing and deleted file handles.
+        $this->resetAfterTest();
+        $this->generator()
+            ->create_file_handle(['archivingstorename' => 'localdir', 'jobid' => 1, 'filesize' => 100]);
+        $this->generator()
+            ->create_file_handle(['archivingstorename' => 'localdir', 'jobid' => 1, 'filesize' => 200])
+            ->mark_as_deleted();
+        $this->generator()
+            ->create_file_handle(['archivingstorename' => 'localdir', 'jobid' => 2, 'filesize' => 400])
+            ->mark_as_deleted();
+
+        // Get stats and verify them.
+        $stats = storage::calculate_archivingstore_stats('localdir');
+        $this->assertEquals(100, $stats->usagebytes, 'Deleted files must not count towards the usage bytes.');
+        $this->assertEquals(1, $stats->filecount, 'Deleted files must not count towards the file count.');
+        $this->assertEquals(1, $stats->jobcount, 'Jobs that only have deleted files must not be counted.');
+    }
+
+    /**
      * Tests checking if a directory is empty.
      *
      * @covers \local_archiving\storage

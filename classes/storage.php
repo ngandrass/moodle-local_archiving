@@ -173,7 +173,7 @@ class storage {
             '
                 SELECT SUM(filesize) AS usagebytes, COUNT(*) AS filecount, COUNT(DISTINCT jobid) AS jobcount
                 FROM {' . db_table::FILE_HANDLE->value . '}
-                WHERE archivingstore = :archivingstore;
+                WHERE archivingstore = :archivingstore AND deleted = 0;
             ',
             ['archivingstore' => $archivingstorename]
         );

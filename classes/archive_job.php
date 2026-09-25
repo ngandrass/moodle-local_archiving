@@ -993,7 +993,7 @@ class archive_job {
                     return 60;
                 } else {
                     $total = array_reduce($tasks, fn ($carry, $task) => $carry + $task->get_progress(), 0);
-                    return 0.6 * ($total / count($tasks));
+                    return (int) round(0.6 * ($total / count($tasks)));
                 }
             case archive_job_status::POST_PROCESSING:
             case archive_job_status::BACKUP_COLLECTION:

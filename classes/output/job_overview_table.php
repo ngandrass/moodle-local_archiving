@@ -213,7 +213,7 @@ class job_overview_table extends \table_sql {
             'action' => 'jobdelete',
             'contextid' => $values->contextid,
             'jobid' => $values->id,
-            'wantsurl' => $PAGE->url->out(true),
+            'wantsurl' => $PAGE->url->out(false),
         ]);
         // phpcs:ignore
         $html .= '<a href="'.$deleteurl.'" class="btn btn-danger mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('delete').'" alt="'.get_string('delete').'"><i class="fa fa-trash"></i></a>';

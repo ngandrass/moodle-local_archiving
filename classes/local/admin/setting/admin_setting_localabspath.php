@@ -95,7 +95,7 @@ class admin_setting_localabspath extends \admin_setting_configtext {
             }
 
             // If the directory does not exist, try to create it.
-            if (!@mkdir($data)) {
+            if (!@mkdir($data, $CFG->directorypermissions, true)) {
                 return get_string('error_localpath_cloud_not_be_created', 'local_archiving');
             }
         }

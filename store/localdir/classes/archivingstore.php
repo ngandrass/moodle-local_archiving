@@ -63,6 +63,8 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
 
     #[\Override]
     public function store(int $jobid, \stored_file $file, string $path, ?callable $progresscallback = null): file_handle {
+        global $CFG;
+
         // Prepare file handle.
         $handle = file_handle::create(
             jobid: $jobid,
@@ -77,7 +79,7 @@ class archivingstore extends \local_archiving\local\driver\archivingstore {
         // Create target storage path and write file to it.
         $abstargetpath = $this->get_storage_path() . '/' . $handle->filepath;
         if (!is_dir($abstargetpath)) {
-            if (!mkdir($abstargetpath, 0777, true)) {
+            if (!mkdir($abstargetpath, $CFG->directorypermissions, true)) {
                 $handle->destroy();
                 throw new storage_exception('filestorefailed', 'local_archiving');
             }

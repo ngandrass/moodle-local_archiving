@@ -29,6 +29,7 @@
 - Clear local artifact cache right away during artifact deletion instead of waiting for the next housekeeping task
 - Ensure proper cleanup of temporary files and data on archive job failure at every stage
 - Gracefully terminate job processing ad-hoc tasks when an archive job is deleted before it has finished
+- Fix race condition between job initialization and ad-hoc cron task execution
 
 
 ## Version 1.0.0 (2025112300)

@@ -273,8 +273,8 @@ class archive_job {
         }
 
         $task = \local_archiving\task\process_archive_job::create($this);
-        \core\task\manager::queue_adhoc_task($task);
         $this->set_status(archive_job_status::QUEUED);
+        \core\task\manager::queue_adhoc_task($task);
     }
 
     /**

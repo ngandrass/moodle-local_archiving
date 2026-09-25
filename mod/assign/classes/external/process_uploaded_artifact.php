@@ -155,6 +155,8 @@ class process_uploaded_artifact extends external_api {
         string $artifactsha256sumraw,
         int $artifactcountraw,
     ): array {
+        global $USER;
+
         // Validate request.
         $params = self::validate_parameters(self::execute_parameters(), [
             'uuid' => $uuidraw,
@@ -191,6 +193,12 @@ class process_uploaded_artifact extends external_api {
         if ($task->is_completed()) {
             // This is just a safeguard since web service tokens should be invalidated once a task completes.
             return ['status' => webservice_status::E_NO_UPLOAD_EXPECTED->name]; // @codeCoverageIgnore
+        }
+
+        // Only accept files from the draft area of the user this request is authenticated as.
+        $draftcontext = \context_user::instance($USER->id, IGNORE_MISSING);
+        if (!$draftcontext || $params['artifact_contextid'] !== (int) $draftcontext->id) {
+            return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
         // Get or reconstruct uploaded file/-s.

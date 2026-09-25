@@ -56,7 +56,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             'uuid' => $uuid,
             'taskid' => $task->get_id(),
             'artifact_component' => 'user',
-            'artifact_contextid' => $task->get_context()->id,
+            'artifact_contextid' => \context_user::instance(get_admin()->id)->id,
             'artifact_userid' => get_admin()->id,
             'artifact_filearea' => filearea::DRAFT->value,
             'artifact_filename' => 'artifact.zip',
@@ -432,6 +432,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
     public function test_invalid_file_metadata(): void {
         // Create task.
         $this->resetAfterTest();
+        $this->setAdminUser();
         $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
 
         // Execute test call.
@@ -474,8 +475,12 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
     public function test_rejection_of_artifacts_with_checksum_mismatch(): void {
         // Create job and draft artifact.
         $this->resetAfterTest();
+        $this->setAdminUser();
         $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
-        $artifact = $this->getDataGenerator()->get_plugin_generator('local_archiving')->create_draft_file('testartifact.tar.gz');
+        $artifact = $this->getDataGenerator()->get_plugin_generator('local_archiving')->create_draft_file(
+            'testartifact.tar.gz',
+            userid: get_admin()->id
+        );
 
         // Execute test call.
         $r = $this->generate_valid_request('10000000-1337-0000-0000-000000000000', $mocks->task, 1);
@@ -515,6 +520,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
     public function test_chunk_reassembly_failure(): void {
         // Create task. No chunks are uploaded at all.
         $this->resetAfterTest();
+        $this->setAdminUser();
         $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
 
         // Execute test call.
@@ -542,6 +548,107 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
             activity_archiving_task_status::FAILED,
             activity_archiving_task::get_by_id($mocks->task->get_id())->get_status(),
             'Task must be marked as failed if a chunk is missing'
+        );
+    }
+
+    /**
+     * Tests that files from the draft area of different users are rejected and not touched
+     *
+     * @covers \archivingmod_quiz\external\process_uploaded_artifact
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \invalid_parameter_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_rejection_of_foreign_draft_area(): void {
+        // Create task for the admin user and a draft file that belongs to another user.
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
+        $artifact = $this->getDataGenerator()->get_plugin_generator('local_archiving')->create_draft_file('foreign.tar.gz');
+        $this->assertNotEquals(get_admin()->id, $artifact->get_userid());
+
+        // Execute test call that would delete the file if accepted.
+        $r = $this->generate_valid_request('10000000-1337-0000-0000-000000000001', $mocks->task, 1);
+        $_GET['wstoken'] = 'TEST-WS-TOKEN';
+        $res = process_uploaded_artifact::execute(
+            $r['uuid'],
+            $r['taskid'],
+            $artifact->get_component(),
+            $artifact->get_contextid(),
+            (int) $artifact->get_userid(),
+            $artifact->get_filearea(),
+            $artifact->get_filename(),
+            $artifact->get_filepath(),
+            $artifact->get_itemid(),
+            '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+            $r['artifact_count']
+        );
+        $this->assertSame(
+            webservice_status::E_ACCESS_DENIED->name,
+            $res['status'],
+            'Artifact from the draft area of another user was falsely accepted'
+        );
+        $this->assertNotFalse(
+            get_file_storage()->get_file(
+                $artifact->get_contextid(),
+                $artifact->get_component(),
+                $artifact->get_filearea(),
+                $artifact->get_itemid(),
+                $artifact->get_filepath(),
+                $artifact->get_filename()
+            ),
+            'Draft file of another user must not be modified'
+        );
+    }
+
+    /**
+     * Tests that tasks that belong to another activity archiving driver are rejected
+     *
+     * @covers \archivingmod_quiz\external\process_uploaded_artifact
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \moodle_exception
+     */
+    public function test_rejection_of_wrong_task_type(): void {
+        global $DB;
+
+        // Create task and force it to another archiving module.
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
+        $DB->update_record(
+            \local_archiving\local\type\db_table::ACTIVITY_TASK->value,
+            ['id' => $mocks->task->get_id(), 'archivingmod' => 'assign']
+        );
+
+        // Execute test call.
+        $r = $this->generate_valid_request('10000000-1337-0000-0000-000000000002', $mocks->task, 1);
+        $_GET['wstoken'] = 'TEST-WS-TOKEN';
+        $res = process_uploaded_artifact::execute(
+            $r['uuid'],
+            $r['taskid'],
+            $r['artifact_component'],
+            $r['artifact_contextid'],
+            $r['artifact_userid'],
+            $r['artifact_filearea'],
+            $r['artifact_filename'],
+            $r['artifact_filepath'],
+            $r['artifact_itemid'],
+            $r['artifact_sha256sum'],
+            $r['artifact_count']
+        );
+        $this->assertSame(
+            webservice_status::E_TASK_TYPE_INVALID->name,
+            $res['status'],
+            'Task of another archiving module was falsely accepted'
         );
     }
 }

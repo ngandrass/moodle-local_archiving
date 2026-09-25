@@ -725,12 +725,7 @@ class archive_job {
             // Cancel/purge any outstanding on-demand retrieval for this file handle before it's gone.
             retrieve_remote_file::cancel_and_purge($filehandle->id);
 
-            // Remove local cache copy if present.
-            if ($cachedfile = $filehandle->get_local_file()) {
-                $cachedfile->delete();
-            }
-
-            // Remove original file from the storage.
+            // Remove original file from the storage. Also clears file cache and TSP data.
             $filehandle->destroy(removefile: true);
         }
 

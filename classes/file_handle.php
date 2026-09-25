@@ -297,6 +297,13 @@ final class file_handle {
             }
         }
 
+        // Drop cached file (if exists) and TSP data.
+        $cachedfile = $this->get_local_file();
+        if ($cachedfile) {
+            $cachedfile->delete();
+        }
+        (new tsp_manager($this))->delete_tsp_data();
+
         // Remove the file handle from the database.
         $DB->delete_records(db_table::FILE_HANDLE->value, ['id' => $this->id]);
     }
@@ -499,6 +506,14 @@ final class file_handle {
     public function mark_as_deleted(): void {
         global $DB;
 
+        // Drop cached file (if exists) and TSP data.
+        $cachedfile = $this->get_local_file();
+        if ($cachedfile) {
+            $cachedfile->delete();
+        }
+        (new tsp_manager($this))->delete_tsp_data();
+
+        // Mark file as deleted.
         $DB->update_record(db_table::FILE_HANDLE->value, [
             'id' => $this->id,
             'deleted' => true,

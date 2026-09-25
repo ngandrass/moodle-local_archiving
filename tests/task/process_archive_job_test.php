@@ -16,6 +16,8 @@
 
 namespace local_archiving\task;
 
+use local_archiving\local\exception\storage_exception;
+use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\archive_job_status;
 
 /**
@@ -185,6 +187,41 @@ final class process_archive_job_test extends \advanced_testcase {
         $this->assertNotEmpty(
             \core\task\manager::get_adhoc_tasks(process_archive_job::class),
             'There should be at least one rescheduled task after execution.'
+        );
+    }
+
+    /**
+     * Tests that executing a pending task for a job that was deleted in the meantime simply returns.
+     *
+     * @covers \local_archiving\task\process_archive_job
+     *
+     * @return void
+     * @throws \Throwable
+     * @throws \base_setting_exception
+     * @throws \base_task_exception
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws storage_exception
+     * @throws yield_exception
+     * @throws \moodle_exception
+     */
+    public function test_execute_missing_job(): void {
+        // Prepare a task and delete its job afterwards.
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $job->set_status(archive_job_status::QUEUED);
+        $task = process_archive_job::create($job);
+        $job->delete();
+
+        // Executing the task must neither throw nor reschedule itself.
+        ob_start();
+        $task->execute();
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('was deleted', $output);
+        $this->assertEmpty(
+            \core\task\manager::get_adhoc_tasks(process_archive_job::class),
+            'A task for a deleted job must not reschedule itself.'
         );
     }
 }

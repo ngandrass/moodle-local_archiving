@@ -25,6 +25,8 @@
 namespace local_archiving\task;
 
 use local_archiving\archive_job;
+use local_archiving\local\exception\storage_exception;
+use local_archiving\local\exception\yield_exception;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -104,13 +106,24 @@ class process_archive_job extends \core\task\adhoc_task {
      * yield to free up resources.
      *
      * @return void
+     * @throws \Throwable
+     * @throws \base_setting_exception
+     * @throws \base_task_exception
      * @throws \coding_exception
      * @throws \dml_exception
+     * @throws storage_exception
+     * @throws yield_exception
      * @throws \moodle_exception
      */
     #[\Override]
     public function execute(): void {
-        $job = $this->get_archive_job();
+        try {
+            $job = $this->get_archive_job();
+        } catch (\dml_missing_record_exception) {
+            mtrace('Archive job was deleted, nothing to do.');
+            return;
+        }
+
         $job->execute();
 
         if (!$job->is_completed()) {

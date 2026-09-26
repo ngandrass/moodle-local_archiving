@@ -125,7 +125,7 @@
             <p>{{#str}} archive_job_logs_desc, local_archiving {{/str}}</p>
             <div class="p-2 mb-2" style="background-color: #efefef; overflow: auto; max-height: 80vh;">
                 {{#job.logs}}
-                    <pre class="m-0" style="overflow: unset;">{{#job.logs}}{{{.}}}{{/job.logs}}</pre>
+                    <pre class="m-0" style="overflow: unset;">{{#job.logs}}{{.}}{{/job.logs}}</pre>
                 {{/job.logs}}
                 {{^job.logs}}
                     <p>{{#str}} no_logs_available_desc, local_archiving {{/str}}</p>

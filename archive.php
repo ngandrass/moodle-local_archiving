@@ -18,11 +18,11 @@
  * Activity archiving overview
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_archiving\util\plugin_util;
+use local_archiving\local\driver\driver_factory;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -32,16 +32,14 @@ global $OUTPUT, $PAGE, $USER;
 $courseid = required_param('courseid', PARAM_INT);
 $cmid = required_param('cmid', PARAM_INT);
 
-$coursectx = context_course::instance($courseid);
-$ctx = context_module::instance($cmid);
-[$course, $cm] = get_course_and_cm_from_cmid($cmid);
+[$course, $cm] = get_course_and_cm_from_cmid($cmid, courseorid: $courseid);
+$ctx = $cm->context;
 
 // Check login and capabilities.
-require_login($courseid);
+require_login($course, false, $cm);
 require_capability('local/archiving:view', $ctx);
 
 // Setup page.
-$PAGE->set_context($coursectx);
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($cm->name);
 $PAGE->set_url(new moodle_url(
@@ -52,11 +50,12 @@ $PAGE->set_url(new moodle_url(
     ]
 ));
 $PAGE->set_pagelayout('incourse');
+$PAGE->activityheader->disable();
 
 $html = '';
 
 // Get job create form for this activity.
-$driver = \local_archiving\driver\factory::activity_archiving_driver($cm->modname, $ctx);
+$driver = driver_factory::activity_archiving_driver($cm->modname, $ctx);
 $form = $driver->get_job_create_form($cm->modname, $cm);
 
 // Handle form submission.
@@ -68,7 +67,7 @@ if ($form->is_submitted() && $form->is_validated()) {
     require_capability('local/archiving:create', $ctx);
 
     // Ensure that manual archive job creation is enabled.
-    if (!\local_archiving\driver\factory::archiving_trigger('manual')->is_enabled()) {
+    if (!driver_factory::archiving_trigger('manual')->is_enabled()) {
         // We should never get here if nobody messes with the form. But who knows how creative people might get ;) ...
         throw new \moodle_exception('manual_job_creation_disabled', 'local_archiving');
     }

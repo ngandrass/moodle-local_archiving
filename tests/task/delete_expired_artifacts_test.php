@@ -17,12 +17,13 @@
 namespace local_archiving\task;
 
 use local_archiving\file_handle;
+use local_archiving\local\type\db_table;
 
 /**
  * Tests for the delete_expired_artifacts task.
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -54,7 +55,7 @@ final class delete_expired_artifacts_test extends \advanced_testcase {
     }
 
     /**
-     * Tests that expired artifacts are removed.
+     * Tests that expired artifacts are removed but active files are kept.
      *
      * @covers \local_archiving\task\delete_expired_artifacts
      *
@@ -96,6 +97,46 @@ final class delete_expired_artifacts_test extends \advanced_testcase {
             $freshhandle = file_handle::get_by_id($file->id);
             $this->assertFalse($freshhandle->deleted, 'Active file should not be marked as deleted');
         }
+    }
+
+    /**
+     * Tests that cached copies and TSP data is also removed when an expired artifact is deleted.
+     *
+     * @covers \local_archiving\task\delete_expired_artifacts
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function test_expired_artifact_removes_cache_file_and_tsp_data(): void {
+        global $DB;
+
+        // Prepare expired artifact with local cache copy and TSP data.
+        $this->resetAfterTest();
+        $generator = $this->generator();
+        $expiredfile = $generator->create_file_handle(['retentiontime' => time() - 1]);
+        $generator->create_filestore_cache_file($expiredfile->id);
+        $DB->insert_record(db_table::TSP->value, [
+            'filehandleid' => $expiredfile->id,
+            'timecreated' => time(),
+            'server' => 'localhost',
+            'timestampquery' => 'sample-query',
+            'timestampreply' => 'sample-reply',
+        ]);
+
+        // Run the cleanup task (ignore trace output).
+        $task = new delete_expired_artifacts();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+
+        // Check that the cache file and TSP data are gone.
+        $handle = file_handle::get_by_id($expiredfile->id);
+        $this->assertNull($handle->get_local_file(), 'Cache file should be removed once the artifact expires.');
+        $this->assertFalse(
+            $DB->record_exists(db_table::TSP->value, ['filehandleid' => $expiredfile->id]),
+            'TSP data should be removed once the artifact expires.'
+        );
     }
 
     /**

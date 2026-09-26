@@ -1,6 +1,6 @@
 # Python hooks for mkdocs-macros
 #
-# Copyright (C) 2025 Niels Gandraß <niels@gandrass.de>
+# Copyright (C) 2026 Niels Gandraß <niels@gandrass.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,3 +50,31 @@ def define_env(env):
         navpath = ' / '.join(args)
 
         return f'<span style="padding: 2px 6px; border-radius: 8px; background-color: #f9f9f9; border: 1px solid #cccccc;">:simple-moodle: <span style="font-size:80%;">{navpath}</span></span>'
+
+    @env.macro
+    def mform_element(title, type ='text'):
+        """
+        Renders a Moodle form element with the given name.
+
+        :param title: title of the element to render.
+        :param type: Type of the element (default is 'text').
+        :return: Rendered Moodle form element box.
+        """
+
+        # Determine icon to use
+        icon = ':material-cursor-default-click-outline:'
+        if type == 'text':
+            icon = ':material-form-textbox:'
+        elif type == 'checkbox':
+            icon = ':material-toggle-switch-outline:'
+        elif type == 'select':
+            icon = ':material-form-select:'
+        elif type == 'password':
+            icon = ':material-form-textbox-password:'
+        elif type == 'section':
+            icon = ':material-chevron-down-box-outline:'
+        elif type == 'button':
+            icon = ':material-button-cursor:'
+
+        # Render the Moodle form element indicator with the icon and title
+        return f'<span style="padding: 2px 6px; border-radius: 8px; background-color: #f9f9f9; border: 1px solid #cccccc;">{icon} <span style="font-size:80%;">{title}</span></span>'

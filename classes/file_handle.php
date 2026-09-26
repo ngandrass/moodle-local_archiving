@@ -18,17 +18,18 @@
  * Handle for files stored by storage drivers
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_archiving;
 
-use local_archiving\driver\archivingstore;
-use local_archiving\exception\storage_exception;
-use local_archiving\type\db_table;
-use local_archiving\type\filearea;
-use local_archiving\util\plugin_util;
+use local_archiving\local\driver\archivingstore;
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\exception\storage_exception;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\filearea;
+use local_archiving\local\util\plugin_util;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -296,6 +297,13 @@ final class file_handle {
             }
         }
 
+        // Drop cached file (if exists) and TSP data.
+        $cachedfile = $this->get_local_file();
+        if ($cachedfile) {
+            $cachedfile->delete();
+        }
+        (new tsp_manager($this))->delete_tsp_data();
+
         // Remove the file handle from the database.
         $DB->delete_records(db_table::FILE_HANDLE->value, ['id' => $this->id]);
     }
@@ -322,6 +330,32 @@ final class file_handle {
             'filepath' => '/',
             'filename' => $this->filename,
         ];
+    }
+
+    /**
+     * Builds the download URL for this file's local cached copy
+     *
+     * This works whether or not the file is actually cached yet. Presence of
+     * the file is checked at access time inside the pluginfile handler in
+     * lib.php. This may seem counter-intuitive at first, but it eliminates a
+     * race condition between file-caching and the actual file access by the
+     * user.
+     *
+     * @return \moodle_url Download URL for this file handle
+     * @throws \dml_exception
+     */
+    public function get_local_download_url(): \moodle_url {
+        $fileinfo = $this->generate_retrieval_fileinfo_record();
+
+        return \moodle_url::make_pluginfile_url(
+            $fileinfo->contextid,
+            $fileinfo->component,
+            $fileinfo->filearea,
+            $fileinfo->itemid,
+            $fileinfo->filepath,
+            $fileinfo->filename,
+            forcedownload: true
+        );
     }
 
     /**
@@ -363,9 +397,9 @@ final class file_handle {
      * already present in the filestore cache, it will be retrieved from the
      * storage driver and stored in the local filestore cache.
      *
-     * Note: The retrieval process currently is a synchronous operation and
-     * may take some time, depending on the size of the file and the storage
-     * tier.
+     * This blocks SYNCHRONOUSLY until the file is retrieved, so it is only suitable for cheap /
+     * instant retrievals (LOCAL tier). REMOTE tier files should be retrieved asynchronously via
+     * an retrieve_remote_file task instead.
      *
      * @return \stored_file The stored_file object
      * @throws \dml_exception
@@ -375,7 +409,7 @@ final class file_handle {
     public function retrieve_file(): \stored_file {
         // Do not retrieve deleted if deleted previously.
         if ($this->deleted) {
-            throw new storage_exception('deleted_file_can_not_be_retrieved.', 'local_archiving');
+            throw new storage_exception('deleted_file_can_not_be_retrieved', 'local_archiving');
         }
 
         // Check if the file is already present in the local filestore cache.
@@ -388,14 +422,18 @@ final class file_handle {
         }
 
         // File not found in the local filestore cache, retrieve it from the storage driver.
-        // This is handled fully synchronously right now. When having storage
-        // drivers that write to external storage this will most likely need to
-        // be handled asynchronously. But lets focus on the more important parts
-        // first and do not drown into premature optimizations..
-        return $this->archivingstore()->retrieve(
+        $file = $this->archivingstore()->retrieve(
             $this,
             $this->generate_retrieval_fileinfo_record()
         );
+
+        // Verify file integrity.
+        if ($this->sha256sum !== storage::hash_file($file)) {
+            $file->delete();
+            throw new storage_exception('retrieved_file_checksum_mismatch', 'local_archiving', a: $this->id);
+        }
+
+        return $file;
     }
 
     /**
@@ -410,7 +448,7 @@ final class file_handle {
             return $this->archivingstore;
         }
 
-        $this->archivingstore = \local_archiving\driver\factory::storage_driver($this->archivingstorename);
+        $this->archivingstore = driver_factory::storage_driver($this->archivingstorename);
 
         return $this->archivingstore;
     }
@@ -476,6 +514,14 @@ final class file_handle {
     public function mark_as_deleted(): void {
         global $DB;
 
+        // Drop cached file (if exists) and TSP data.
+        $cachedfile = $this->get_local_file();
+        if ($cachedfile) {
+            $cachedfile->delete();
+        }
+        (new tsp_manager($this))->delete_tsp_data();
+
+        // Mark file as deleted.
         $DB->update_record(db_table::FILE_HANDLE->value, [
             'id' => $this->id,
             'deleted' => true,

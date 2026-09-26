@@ -16,15 +16,16 @@
 
 namespace local_archiving;
 
-use local_archiving\exception\storage_exception;
-use local_archiving\type\filearea;
-use local_archiving\util\plugin_util;
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\exception\storage_exception;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\filearea;
 
 /**
  * Tests for the file_handle class
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -64,8 +65,7 @@ final class file_handle_test extends \advanced_testcase {
     /**
      * Tests the creation of a file_handle
      *
-     * @covers \local_archiving\file_handle::create
-     * @covers \local_archiving\file_handle::__construct
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception
@@ -169,7 +169,7 @@ final class file_handle_test extends \advanced_testcase {
     /**
      * Tests loading a file_handle test data object by ID
      *
-     * @covers \local_archiving\file_handle::get_by_id
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception
@@ -190,7 +190,7 @@ final class file_handle_test extends \advanced_testcase {
     /**
      * Tests retrieving file_handles by their referenced job ID
      *
-     * @covers \local_archiving\file_handle::get_by_jobid
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception
@@ -283,7 +283,7 @@ final class file_handle_test extends \advanced_testcase {
     /**
      * Tests destroying a file_handle without removing the referenced file
      *
-     * @covers \local_archiving\file_handle::destroy
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception
@@ -308,7 +308,7 @@ final class file_handle_test extends \advanced_testcase {
     /**
      * Tests destroying a file_handle and removing the referenced file
      *
-     * @covers \local_archiving\file_handle::destroy
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception
@@ -332,9 +332,46 @@ final class file_handle_test extends \advanced_testcase {
     }
 
     /**
+     * Tests destroying a file_handle removes the filestore cache copy and associated TSP data.
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_destroy_removes_cache_file_and_tsp_data(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->init_archivingstore();
+        $generator = $this->generator();
+
+        // Create a file_handle with cache copy and TSP data.
+        $filehandle = $generator->create_file_handle();
+        $generator->create_filestore_cache_file($filehandle->id);
+        $DB->insert_record(db_table::TSP->value, [
+            'filehandleid' => $filehandle->id,
+            'timecreated' => time(),
+            'server' => 'localhost',
+            'timestampquery' => 'sample-query',
+            'timestampreply' => 'sample-reply',
+        ]);
+
+        // Assert that the cache file and TSP data are gone.
+        $filehandle->destroy(removefile: true);
+        $this->assertNull($filehandle->get_local_file(), 'Cache file should be removed when the file_handle is destroyed.');
+        $this->assertFalse(
+            $DB->record_exists(db_table::TSP->value, ['filehandleid' => $filehandle->id]),
+            'TSP data should be removed when the file_handle is destroyed.'
+        );
+    }
+
+    /**
      * Tests marking a referenced file within a file_handle as deleted
      *
-     * @covers \local_archiving\file_handle::mark_as_deleted
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception
@@ -357,11 +394,51 @@ final class file_handle_test extends \advanced_testcase {
     }
 
     /**
-     * Tests generating a retrieval fileinfo record from a file_handle
+     * Tests marking a file_handle as deleted clears the filestore cache copy and associated TSP data.
      *
-     * @covers \local_archiving\file_handle::generate_retrieval_fileinfo_record
+     * @covers \local_archiving\file_handle
      *
      * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_mark_as_deleted_removes_cache_file_and_tsp_data(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $generator = $this->generator();
+
+        // Create a file_handle with cache copy and TSP data.
+        $filehandle = $generator->create_file_handle();
+        $generator->create_filestore_cache_file($filehandle->id);
+        $DB->insert_record(db_table::TSP->value, [
+            'filehandleid' => $filehandle->id,
+            'timecreated' => time(),
+            'server' => 'localhost',
+            'timestampquery' => 'sample-query',
+            'timestampreply' => 'sample-reply',
+        ]);
+
+        // Assert that the cache file and TSP data are gone.
+        $filehandle->mark_as_deleted();
+        $this->assertNull($filehandle->get_local_file(), 'Cache file should be removed when the file_handle is marked deleted.');
+        $this->assertFalse(
+            $DB->record_exists(db_table::TSP->value, ['filehandleid' => $filehandle->id]),
+            'TSP data should be removed when the file_handle is marked deleted.'
+        );
+    }
+
+    /**
+     * Tests generating a retrieval fileinfo record from a file_handle
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function test_generate_retrieval_fileinfo_record(): void {
         $this->resetAfterTest();
@@ -385,9 +462,65 @@ final class file_handle_test extends \advanced_testcase {
     }
 
     /**
+     * Tests building the download URL for a file handle whose file is not cached yet.
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_download_url_not_cached(): void {
+        $this->resetAfterTest();
+        $generator = $this->generator();
+
+        $job = $generator->create_archive_job();
+        $filehandle = $generator->create_file_handle(['jobid' => $job->get_id(), 'filename' => 'downloadme.txt']);
+
+        $this->assertNull($filehandle->get_local_file(), 'Precondition: file should not be cached yet.');
+
+        $url = $filehandle->get_local_download_url();
+        $this->assertInstanceOf(\moodle_url::class, $url);
+        $urlstring = $url->out(false);
+        $this->assertStringContainsString('local_archiving', $urlstring);
+        $this->assertStringContainsString('filestorecache', $urlstring);
+        $this->assertStringContainsString((string) $filehandle->id, $urlstring);
+        $this->assertStringContainsString('downloadme.txt', $urlstring);
+    }
+
+    /**
+     * Tests that the download URL is stable regardless of whether the file is already cached.
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_get_download_url_stable_across_cache_state(): void {
+        $this->resetAfterTest();
+        $generator = $this->generator();
+
+        $job = $generator->create_archive_job();
+        $filehandle = $generator->create_file_handle(['jobid' => $job->get_id()]);
+
+        $urlbefore = $filehandle->get_local_download_url()->out(false);
+
+        $generator->create_filestore_cache_file($filehandle->id);
+        $this->assertNotNull($filehandle->get_local_file(), 'Precondition: file should be cached now.');
+
+        $urlafter = $filehandle->get_local_download_url()->out(false);
+        $this->assertSame($urlbefore, $urlafter, 'Download URL should not depend on cache state.');
+    }
+
+    /**
      * Tries to retrieve a file that is not locally cached right now.
      *
-     * @covers \local_archiving\file_handle::get_local_file
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception
@@ -406,7 +539,7 @@ final class file_handle_test extends \advanced_testcase {
     /**
      * Tries to retrieve a file that is already cached locally.
      *
-     * @covers \local_archiving\file_handle::get_local_file
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception
@@ -423,7 +556,7 @@ final class file_handle_test extends \advanced_testcase {
         $job = $generator->create_archive_job();
         $file = $generator->create_temp_file();
 
-        $archivingstore = \local_archiving\driver\factory::storage_driver('localdir');
+        $archivingstore = driver_factory::storage_driver('localdir');
         $filehandle = $archivingstore->store($job->get_id(), $file, '/');
 
         // Try to retrieve not yet cached local file.
@@ -443,7 +576,7 @@ final class file_handle_test extends \advanced_testcase {
     /**
      * Tests retrieving a local cache copy of a referenced file.
      *
-     * @covers \local_archiving\file_handle::retrieve_file
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \dml_exception
@@ -461,7 +594,7 @@ final class file_handle_test extends \advanced_testcase {
         $job = $generator->create_archive_job();
         $file = $generator->create_temp_file();
 
-        $archivingstore = \local_archiving\driver\factory::storage_driver('localdir');
+        $archivingstore = driver_factory::storage_driver('localdir');
         $filehandle = $archivingstore->store($job->get_id(), $file, '/');
 
         // Retrieve the file initially.
@@ -475,9 +608,45 @@ final class file_handle_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that a retrieved file that does not match the stored checksum is rejected and not left in the cache.
+     *
+     * @covers \local_archiving\file_handle
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_retrieve_file_checksum_mismatch(): void {
+        global $DB;
+
+        // Prepare a stored file with checksum mismatch.
+        $this->resetAfterTest();
+        $this->init_archivingstore();
+        $generator = $this->generator();
+
+        $job = $generator->create_archive_job();
+        $file = $generator->create_temp_file();
+        $filehandle = driver_factory::storage_driver('localdir')->store($job->get_id(), $file, '/');
+        $DB->set_field(db_table::FILE_HANDLE->value, 'sha256sum', str_repeat('b', 64), ['id' => $filehandle->id]);
+        $filehandle = file_handle::get_by_id($filehandle->id);
+
+        // Retrieve and ensure we fail with cleanup.
+        try {
+            $filehandle->retrieve_file();
+            $this->fail('Expected a storage_exception due to the checksum mismatch.');
+        } catch (storage_exception $e) {
+            $this->assertSame('retrieved_file_checksum_mismatch', $e->errorcode);
+        }
+
+        $this->assertNull($filehandle->get_local_file(), 'Corrupted file must be removed from the cache.');
+    }
+
+    /**
      * Tests that a file that was marked as deleted can not be retrieved.
      *
-     * @covers \local_archiving\file_handle::retrieve_file
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception
@@ -492,14 +661,14 @@ final class file_handle_test extends \advanced_testcase {
         $filehandle->mark_as_deleted();
 
         // Try to retrieve the file and expect an exception.
-        $this->expectException(\local_archiving\exception\storage_exception::class);
+        $this->expectException(storage_exception::class);
         $filehandle->retrieve_file();
     }
 
     /**
      * Tests retrieving the corresponding archiving store instance for a file_handle
      *
-     * @covers \local_archiving\file_handle::archivingstore
+     * @covers \local_archiving\file_handle
      *
      * @return void
      * @throws \coding_exception

@@ -33,7 +33,7 @@ See: [https://moodledev.io/general/development/tools/phpunit](https://moodledev.
 
 ### Running tests
 
-After you have successfully [created a PHPUnit envirnoment](#creating-a-phpunit-test-environment),
+After you have successfully [created a PHPUnit environment](#creating-a-phpunit-test-environment),
 you can run the tests using the following commands:
 
 - Running all tests:
@@ -42,16 +42,20 @@ you can run the tests using the following commands:
   ```
 - Running all tests for a single component:
   ```text
-  vendor/bin/phpunit --colors --testdox -v --filter "local_archiving"
+  vendor/bin/phpunit --colors --testdox --filter "local_archiving"
+  ```
+- Running all tests for the main plugin and all sub-plugins (recommended):
+  ```text
+  vendor/bin/phpunit --configuration phpunit.xml --test-suffix _test.php --colors --testdox local/archiving
   ```
 - Running a single test suite:
   ```text
-  vendor/bin/phpunit --colors --testdox -v local/archiving/tests/archive_job_test.php
+  vendor/bin/phpunit --colors --testdox local/archiving/tests/archive_job_test.php
   ```
 
 - Running data privacy compliance test suites:
   ```text
-  vendor/bin/phpunit --colors --testdox -v --testsuite tool_dataprivacy_testsuite,tool_policy_testsuite,core_privacy_testsuite
+  vendor/bin/phpunit --colors --testdox --testsuite tool_dataprivacy_testsuite,tool_policy_testsuite,core_privacy_testsuite
   ```
   
 **Attention:** All commands must be run from inside your Moodle root directory.
@@ -65,7 +69,7 @@ the PHPUnit runner invocation.
 Example:
 
 ```text
-XDEBUG_CONFIG="idekey=PHPSTORM" XDEBUG_MODE=debug vendor/bin/phpunit --colors --testdox -v --filter "local_archiving"
+XDEBUG_CONFIG="idekey=FOOBARBAZ" XDEBUG_MODE=debug vendor/bin/phpunit --colors --testdox --filter "local_archiving"
 ```
 
 
@@ -85,7 +89,7 @@ To generate code coverage reports, follow these steps:
 
 1. Run PHPUnit with coverage report:
    ```text
-   XDEBUG_MODE=coverage vendor/bin/phpunit --colors --testdox -v --coverage-html /tmp/coverage --filter "local_archiving"
+   XDEBUG_MODE=coverage vendor/bin/phpunit --configuration phpunit.xml --test-suffix _test.php --colors --testdox --coverage-html /tmp/coverage local/archiving
    ```
 2. Open the report in your browser:
    ```text

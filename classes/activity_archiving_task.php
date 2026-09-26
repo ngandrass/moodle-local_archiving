@@ -18,21 +18,22 @@
  * An asynchronous activity archiving task
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_archiving;
 
-use local_archiving\driver\archivingmod;
-use local_archiving\exception\yield_exception;
-use local_archiving\logging\task_logger;
-use local_archiving\type\activity_archiving_task_status;
-use local_archiving\type\cm_state_fingerprint;
-use local_archiving\type\db_table;
-use local_archiving\type\filearea;
-use local_archiving\type\task_content_metadata;
-use local_archiving\util\plugin_util;
+use local_archiving\local\driver\archivingmod;
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\exception\yield_exception;
+use local_archiving\local\logging\task_logger;
+use local_archiving\local\type\activity_archiving_task_status;
+use local_archiving\local\type\cm_state_fingerprint;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\filearea;
+use local_archiving\local\type\task_content_metadata;
+use local_archiving\local\util\plugin_util;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -235,7 +236,7 @@ final class activity_archiving_task {
             return $this->archivingmod;
         }
 
-        $this->archivingmod = \local_archiving\driver\factory::activity_archiving_driver(
+        $this->archivingmod = driver_factory::activity_archiving_driver(
             $this->archivingmodname,
             $this->context
         );
@@ -583,7 +584,7 @@ final class activity_archiving_task {
         ]);
 
         // Log token creation.
-        $this->get_logger()->debug('Created token for web service with ID ' . $webserviceid . ': ' . $wstoken);
+        $this->get_logger()->debug('Created token for web service with ID ' . $webserviceid);
 
         return $wstoken;
     }
@@ -611,7 +612,7 @@ final class activity_archiving_task {
         ]);
 
         // Log token destruction.
-        $this->get_logger()->debug('Destroyed web service token: ' . $wstoken);
+        $this->get_logger()->debug('Destroyed web service token');
 
         return true;
     }
@@ -720,7 +721,7 @@ final class activity_archiving_task {
         }
 
         // Calculate sha256sum if not given.
-        if (!$sha256sum || storage::is_valid_sha256sum($sha256sum)) {
+        if (!$sha256sum || !storage::is_valid_sha256sum($sha256sum)) {
             $sha256sum = storage::hash_file($targetfile);
         }
 

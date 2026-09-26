@@ -19,14 +19,14 @@
  * filesystem during unit tests.
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_archiving\exception\storage_exception;
 use local_archiving\file_handle;
+use local_archiving\local\exception\storage_exception;
+use local_archiving\local\type\storage_tier;
 use local_archiving\storage;
-use local_archiving\type\storage_tier;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -35,7 +35,29 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Driver for storing archive data inside a directory on the local filesystem
  */
-class archivingstore_localdir_mock extends \local_archiving\driver\archivingstore {
+class archivingstore_localdir_mock extends \local_archiving\local\driver\archivingstore {
+    /**
+     * @var string Default content of files that are stored in this mock driver.
+     */
+    public const DEFAULT_FILE_CONTENT = 'Lorem ipsum dolor sit amet.';
+
+    /**
+     * @var string[] Contents of files that were explicitly passed to store(), indexed by their SHA256 checksum.
+     */
+    private static array $storage = [];
+
+    /**
+     * @var bool If true, retrieve() throws a storage_exception instead of succeeding.
+     * Used to test error-handling paths of callers.
+     */
+    public static bool $forcefailretrieve = false;
+
+    /**
+     * @var bool If true, retrieve() throws the same "cancelled" storage_exception a real driver's
+     * progress callback would throw mid-transfer, simulating a cancellation noticed during the transfer.
+     */
+    public static bool $cancelduringretrieve = false;
+
     #[\Override]
     public function is_enabled(): bool {
         return true;
@@ -68,15 +90,18 @@ class archivingstore_localdir_mock extends \local_archiving\driver\archivingstor
     }
 
     #[\Override]
-    public function store(int $jobid, \stored_file $file, string $path): file_handle {
-        // Only create file handles.
+    public function store(int $jobid, \stored_file $file, string $path, ?callable $progresscallback = null): file_handle {
+        // Only create file handles and remember the content for later retrieval.
+        $sha256sum = storage::hash_file($file);
+        self::$storage[$sha256sum] = $file->get_content();
+
         $handle = file_handle::create(
             jobid: $jobid,
             archivingstorename: 'localdir',
             filename: $file->get_filename(),
             filepath: trim($path, '/'),
             filesize: $file->get_filesize(),
-            sha256sum: storage::hash_file($file),
+            sha256sum: $sha256sum,
             mimetype: $file->get_mimetype()
         );
 
@@ -84,10 +109,18 @@ class archivingstore_localdir_mock extends \local_archiving\driver\archivingstor
     }
 
     #[\Override]
-    public function retrieve(file_handle $handle, \stdClass $fileinfo): \stored_file {
+    public function retrieve(file_handle $handle, \stdClass $fileinfo, ?callable $progresscallback = null): \stored_file {
+        if (self::$cancelduringretrieve) {
+            throw new storage_exception('error_retrieval_cancelled', 'local_archiving');
+        }
+
+        if (self::$forcefailretrieve) {
+            throw new storage_exception('filenotfound', 'error');
+        }
+
         return get_file_storage()->create_file_from_string(
             $fileinfo,
-            'Mock test file content for file handle with ID ' . $handle->id
+            self::$storage[$handle->sha256sum] ?? self::DEFAULT_FILE_CONTENT
         );
     }
 

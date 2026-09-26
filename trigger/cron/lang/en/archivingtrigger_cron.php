@@ -24,20 +24,15 @@
  */
 // @codingStandardsIgnoreFile
 
-// Common
 $string['pluginname'] = 'Scheduled';
 $string['privacy:metadata'] = 'This archiving trigger plugin does not store any personal data.';
-
-// Settings.
-$string['setting_enabled'] = 'Enabled';
-$string['setting_enabled_desc'] = 'Enables or disables this archiving trigger.';
 $string['setting_archive_unchanged'] = 'Archive unchanged';
 $string['setting_archive_unchanged_desc'] = 'If enabled, activities will be archived again, even if they have not changed since the last archiving run.';
 $string['setting_cronschedule'] = 'Archiving schedule';
-$string['setting_cronschedule_desc'] = 'Defines when targeted activities are archived automatically.<br>Next archiving run starts in {$a}.';
 $string['setting_cronschedule_button'] = 'Edit schedule';
+$string['setting_cronschedule_desc'] = 'Defines when targeted activities are archived automatically.<br>Next archiving run starts in {$a}.';
 $string['setting_dryrun'] = 'Dry run';
 $string['setting_dryrun_desc'] = 'If enabled, no actual archive jobs are created. This can be used to see which activities would be archived and to validate the configuration.';
-
-// Tasks.
+$string['setting_enabled'] = 'Enabled';
+$string['setting_enabled_desc'] = 'Enables or disables this archiving trigger.';
 $string['task_trigger_archiving'] = 'Trigger archiving';

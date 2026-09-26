@@ -24,10 +24,7 @@
  */
 // @codingStandardsIgnoreFile
 
-// Common
 $string['pluginname'] = 'Moodle Filestore';
 $string['privacy:metadata'] = 'All data stored via this storage driver remains owned by local_archiving and will be handled directly by its privacy API instead.';
-
-// Settings.
 $string['setting_enabled'] = 'Enabled';
 $string['setting_enabled_desc'] = 'Enables or disables this storage driver. If disabled, no archives can be sent to or retrieved from this storage.';

@@ -261,7 +261,7 @@ class logger {
      * @return string Formatted log entry
      */
     public static function format_log_entry(\stdClass $logentry): string {
-        return date('Y-m-d H:i:s', $logentry->timecreated) .
+        return userdate($logentry->timecreated, '%Y-%m-%d %H:%M:%S') .
             ' [' . str_pad(log_level::from($logentry->level)->name, 5, ' ', STR_PAD_LEFT) . '] ' .
             ($logentry->taskid ? ' -> ' : '') .
             $logentry->message;

@@ -119,9 +119,12 @@ class job_overview_table extends \table_sql {
      *
      * @param \stdClass $values Values of the current row
      * @return string HTML code to be displayed
+     * @throws \coding_exception
      */
     public function col_timecreated($values) {
-        return date('Y-m-d\<\b\r\\>H:i:s', $values->timecreated);
+        return userdate($values->timecreated, '%Y-%m-%d') .
+            \html_writer::empty_tag('br') .
+            userdate($values->timecreated, '%H:%M:%S');
     }
 
     /**

@@ -149,7 +149,7 @@ class job_create_form extends \moodleform {
                     <div class="d-inline activity-icon activityiconcontainer ' . $modpurpose . ' pl-0">
                         <img src="' . $this->cminfo->get_icon_url() . '" class="activityicon mr-1" alt=""/>
                     </div>
-                    <div class="d-inline">' . $this->cminfo->name . '</div>
+                    <div class="d-inline">' . $this->cminfo->get_formatted_name() . '</div>
                 </a>
             </ul>
         </div>';

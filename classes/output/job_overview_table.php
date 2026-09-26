@@ -136,7 +136,7 @@ class job_overview_table extends \table_sql {
         $modctx = \context::instance_by_id($values->contextid);
         $cm = $this->coursemodinfo->get_cm($modctx->instanceid);
 
-        return '<a href="' . $cm->get_url() . '">' . $cm->name . '</a>';
+        return \html_writer::link($cm->get_url(), $cm->get_formatted_name());
     }
 
     /**

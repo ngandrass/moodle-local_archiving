@@ -74,7 +74,7 @@ if (count($filehandles) == 0) {
             "timecreated" => $job->get_timecreated(),
             "cm" => [
                 "id" => $cm->id,
-                "name" => $cm->name,
+                "name" => $cm->get_formatted_name(),
                 "url" => $cm->url,
             ],
         ],

@@ -37,6 +37,7 @@
 - Gracefully fail during chunked-upload reassembly if chunks are missing
 - Prevent archiving path admin settings from accepting paths inside the Moodle web root directory
 - Resolve symlinks during archiving path admin setting validation to always validate the real path
+- Apply enabled filters to course module names during rendering
 
 
 ## Version 1.0.0 (2025112300)

@@ -193,8 +193,14 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     public function get_task_content_metadata(activity_archiving_task $task): array {
         $quizmanager = quiz_manager::from_context($task->get_context());
 
+        $attempts = $quizmanager->get_filtered_attempts(
+            self::build_attempts_filters_from_formdata(
+                $task->get_job()->get_settings()
+            )
+        );
+
         $res = [];
-        foreach ($quizmanager->get_all_attempts() as $attempt) {
+        foreach ($attempts as $attempt) {
             $res[] = new task_content_metadata(
                 taskid: $task->get_id(),
                 userid: $attempt->userid,

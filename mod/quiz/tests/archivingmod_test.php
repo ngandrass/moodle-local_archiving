@@ -25,8 +25,8 @@
 namespace archivingmod_quiz;
 
 
-// phpcs:ignore
 use local_archiving\activity_archiving_task;
+use local_archiving\archive_job;
 use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\activity_archiving_task_status;
 use archivingmod_quiz\local\type\attempts_filter;
@@ -229,6 +229,49 @@ final class archivingmod_test extends \advanced_testcase {
         $this->assertEquals($mocks->attempts[0]->attemptid, $metadata[0]->refid, 'Metadata refid should match the attempt ID.');
         $this->assertEquals($mocks->attempts[0]->userid, $metadata[0]->userid, 'Metadata user ID should match the user ID.');
         $this->assertEquals('quiz_attempts', $metadata[0]->reftable, 'Metadata reftable should be "quiz_attempts".');
+    }
+
+    /**
+     * Tests that task content metadata only contains the attempts that actually
+     * remain after applying the job's attempt filters.
+     *
+     * @covers \archivingmod_quiz\archivingmod
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_get_task_content_metadata_respects_attempts_filter(): void {
+        // Prepare quiz with multiple attempts per user and a job that only archives the latest attempt of each user.
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
+        $context = \context_module::instance($rc->cm->id);
+
+        $job = archive_job::create($context, get_admin()->id, 'manual', settings: self::get_formdata_all_filters_enabled());
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $context,
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'quiz'
+        );
+
+        // Determine expected attempts.
+        $quizmanager = quiz_manager::from_context($context);
+        $allattempts = $quizmanager->get_all_attempts();
+        $latestattempts = $quizmanager->get_latest_attempt_of_each_user();
+        $this->assertGreaterThan(count($latestattempts), count($allattempts), 'Fixture must contain non-latest attempts');
+
+        // Content metadata must only list the latest attempts, not all.
+        $metadata = (new archivingmod($context))->get_task_content_metadata($task);
+        $this->assertCount(count($latestattempts), $metadata, 'Only filtered attempts should be part of the content metadata');
+        $this->assertEqualsCanonicalizing(
+            array_column($latestattempts, 'attemptid'),
+            array_map(fn($entry) => $entry->refid, $metadata),
+            'Content metadata should reference exactly the latest attempts'
+        );
     }
 
     /**

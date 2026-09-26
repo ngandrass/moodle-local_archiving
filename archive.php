@@ -54,12 +54,8 @@ $PAGE->activityheader->disable();
 
 $html = '';
 
-// Check capabilities.
-$cancreate = has_capability('local/archiving:create', $ctx);
-
-// Only build and process the job create form if the user is allowed to create archives.
 $jobcreateformhtml = '';
-if ($cancreate) {
+if (has_capability('local/archiving:create', $ctx)) {
     // Get job create form for this activity.
     $driver = driver_factory::activity_archiving_driver($cm->modname, $ctx);
     $form = $driver->get_job_create_form($cm->modname, $cm);
@@ -70,8 +66,6 @@ if ($cancreate) {
     }
 
     if ($form->is_submitted() && $form->is_validated()) {
-        require_capability('local/archiving:create', $ctx);
-
         // Ensure that manual archive job creation is enabled.
         if (!driver_factory::archiving_trigger('manual')->is_enabled()) {
             // We should never get here if nobody messes with the form. But who knows how creative people might get ;) ...

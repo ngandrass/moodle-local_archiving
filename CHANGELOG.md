@@ -1,5 +1,50 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDXX)
+
+- Update Moodle plugin CI to include Moodle 5.2 and all supported PHP versions
+- Add sub-plugin PHPUnit test execution stage to Moodle plugin CI pipeline
+- Asynchronously retrieve files from remote storages (e.g., S3 object store) to allow downloading via the Moodle UI
+- Add callback hooks to store and retrieve functions of storage drivers to allow for progress tracking
+- Harden file retrieval logic
+- Add support for receiving chunked uploads of quiz archives
+- Add an option to flatten the archive structure, placing all files directly in the root directory of the archive.
+- Allow exporting only the latest quiz attempt of each user in the generated archive
+- Add an option to include or exclude the quiz attempts metadata CSV file
+- Add support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack) in quizzes.
+- Include core sub-plugins in PHPUnit coverage reports
+- Adapt unit tests to Moodle upstream permission checks
+- Make unit tests ready for PHPUnit 12 (honor current deprecations)
+- Move sub-plugin directories to plugin root to align with Moodle core conventions
+- Restructure repository to meet Moodle coding style level 2 namespace suggestions
+- Improve Moodle "pluginfile image" inlining logic in report generators
+- Improve archive job logging in storing stage
+- Improve handling of duplicate files in archives
+- Protect sub-plugin enable / disable endpoint from CSRF
+- Let timed out archive jobs remain marked as "Timeout" instead of "Failed" (both are final job states)
+- Fix error reporting when forcefully accessing the archive job artifacts download page of an unfinished job
+- Fix type confusion in default archive job settings exports
+- Fix display of archiving overview pages for courses that have no supported activities
+- Remove TSP data on file handle deletion
+- Clear local artifact cache right away during artifact deletion instead of waiting for the next housekeeping task
+- Ensure proper cleanup of temporary files and data on archive job failure at every stage
+- Gracefully terminate job processing ad-hoc tasks when an archive job is deleted before it has finished
+- Fix race condition between job initialization and ad-hoc cron task execution
+- Validate file contents against stored checksum when retrieving files from storage to ensure data integrity
+- Prevent archive job creation with negative retention time values
+- Support course module / activity level archiving capability assignments
+- Prevent log messages of long-running archive jobs from being displayed truncated
+- Gracefully fail during chunked-upload reassembly if chunks are missing
+- Prevent archiving path admin settings from accepting paths inside the Moodle web root directory
+- Resolve symlinks during archiving path admin setting validation to always validate the real path
+- Apply enabled filters to course module names during rendering
+- Display timestamps in archive job overview table and job log in the timezone of the user viewing the page
+- Fix job overview table action button tooltips for Moodle 5.x
+- Localize activity names in archive job creation form titles
+- Display missing job / file delete permission errors early in forms and redirect back to the correct page
+- Deny archive job / file deletion by default (capability: `local/archiving:delete`)
+
+
 ## Version 1.0.0 (2025112300)
 
 This is the first stable release of the archiving subsystem including all shipped sub-plugins 🎉
@@ -161,6 +206,9 @@ Listed changes are split into categories, reflecting the affected component / (s
 - Fix database field type for archive job progress
 - Add created default archive trigger plugins to plugin overview in the docs
 - Add archiving trigger sub-plugin component and API descriptions to developer docs
+- Improve speed of artifact file SHA256 hash generation
+- Exclude deleted files from storage stats counters on components overview page
+
 
 ### Sub-Plugins
 

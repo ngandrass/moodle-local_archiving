@@ -1,0 +1,164 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Tests for the file_reassembler class
+ *
+ * @package   local_archiving
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace local_archiving;
+
+
+/**
+ * Tests for the file_reassembler class
+ */
+final class file_reassembler_test extends \advanced_testcase {
+    /**
+     * Helper to get the test data generator for local_archiving
+     *
+     * @return \local_archiving_generator
+     */
+    private function generator(): \local_archiving_generator {
+        /** @var \local_archiving_generator */ // phpcs:disable moodle.Commenting.InlineComment.DocBlock
+        return self::getDataGenerator()->get_plugin_generator('local_archiving');
+    }
+
+    /**
+     * Test reassembly of individually uploaded files to the file storage
+     *
+     * @covers \local_archiving\file_reassembler
+     *
+     * @return void
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_reasamble_chunked_file(): void {
+        // Prepare mocks.
+        $this->resetAfterTest();
+        $userreference = $this->generator()->create_user();
+        $usercontext = \context_user::instance($userreference->id);
+        $originalfilename = 'testfile.tar.gz';
+        // NOTE: This SHA256 hash is precomputed based on the per file mock data,
+        // defined in `create_draft_file` of the `archivingmod_quiz_generator` class.
+        // Because we concatinate three dummy files, the expected value should be,
+        // the SHA256 hash of the dummy data repeated three times.
+        $expectedfilehash = 'b6b34e2b8247c3ff64a1cc6793c663bdb7226ffd801859549462bbd20b563f9a';
+
+        // Create mock chunk files.
+        $chunkfiles = [
+            $this->generator()->create_draft_file($originalfilename . '.chunk000000000.bin', userid: $userreference->id),
+            $this->generator()->create_draft_file($originalfilename . '.chunk000000001.bin', userid: $userreference->id),
+            $this->generator()->create_draft_file($originalfilename . '.chunk000000002.bin', userid: $userreference->id),
+        ];
+        foreach ($chunkfiles as $file) {
+            $this->assertNotNull($file, 'Failed to create mock chunk file');
+        }
+
+        // Try to rassemble individual chunks to the "original file".
+        $reassembledfile = file_reassembler::reassemble_chunked_file(
+            $usercontext->id,
+            0, // Always zero in test cases.
+            '/', // Always '/' in test cases.
+            $originalfilename,
+            count($chunkfiles),
+        );
+        $this->assertNotNull($reassembledfile, 'File reassembly failed');
+
+        // Check if reassembly creates true byte concatinated file.
+        $actualhash = storage::hash_file($reassembledfile);
+        $this->assertEquals(
+            $expectedfilehash,
+            $actualhash,
+            'Reassembly of original file is not byte perfect: Mismatch in expected and actual SHA256 file hashes.'
+        );
+
+        // Check if individual chunks were cleaned up.
+        foreach ($chunkfiles as $file) {
+            $this->assertFalse(
+                get_file_storage()->get_file(
+                    $file->get_contextid(),
+                    $file->get_component(),
+                    $file->get_filearea(),
+                    $file->get_itemid(),
+                    $file->get_filepath(),
+                    $file->get_filename()
+                ),
+                'Missing cleanup of at least one chunk file'
+            );
+        }
+    }
+
+    /**
+     * Tests that reassembly detects a missing chunk
+     *
+     * @covers \local_archiving\file_reassembler
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_reassemble_chunked_file_missing_chunk(): void {
+        // Create chunks 0 and 2 but not 1.
+        $this->resetAfterTest();
+        $user = $this->generator()->create_user();
+        $usercontext = \context_user::instance($user->id);
+        $originalfilename = 'testfile.tar.gz';
+        $this->generator()->create_draft_file($originalfilename . '.chunk000000000.bin', userid: $user->id);
+        $this->generator()->create_draft_file($originalfilename . '.chunk000000002.bin', userid: $user->id);
+
+        $this->assertNull(
+            file_reassembler::reassemble_chunked_file($usercontext->id, 0, '/', $originalfilename, 3),
+            'Reassembly must return null if a chunk is missing.'
+        );
+        $this->assertFalse(
+            get_file_storage()->get_file($usercontext->id, 'user', 'draft', 0, '/', $originalfilename),
+            'No reassembled file must be created if a chunk is missing.'
+        );
+    }
+
+    /**
+     * Tests that a non-positive chunk count is rejected
+     *
+     * @covers \local_archiving\file_reassembler
+     * @dataProvider invalid_artifact_count_data_provider
+     *
+     * @param int $artifactcount Invalid number of chunks
+     * @return void
+     * @throws \coding_exception
+     * @throws \file_exception
+     */
+    public function test_reassemble_chunked_file_invalid_count(int $artifactcount): void {
+        $this->resetAfterTest();
+        $this->expectException(\coding_exception::class);
+        file_reassembler::reassemble_chunked_file(1, 0, '/', 'testfile.tar.gz', $artifactcount);
+    }
+
+    /**
+     * Data provider for test_reassemble_chunked_file_invalid_count
+     *
+     * @return array[] Test data
+     */
+    public static function invalid_artifact_count_data_provider(): array {
+        return [
+            'Zero' => [0],
+            'Negative' => [-1],
+        ];
+    }
+}

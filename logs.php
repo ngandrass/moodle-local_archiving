@@ -18,13 +18,12 @@
  * Logging overview page
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 use local_archiving\archive_job;
-use local_archiving\logging\logger;
-use local_archiving\type\archive_job_status;
+use local_archiving\local\logging\logger;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -37,17 +36,17 @@ $ctx = $job->get_context();
 [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
 
 // Check login and capabilities.
-require_login($course);
-require_capability('local/archiving:view', $ctx->get_course_context());
+require_login($course, false, $cm);
+require_capability('local/archiving:view', $ctx);
 
 // Setup page.
-$PAGE->set_context($ctx->get_course_context());
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($cm->name);
 $PAGE->set_url(new moodle_url(
     '/local/archiving/logs.php',
     ['jobid' => $jobid]
 ));
+$PAGE->activityheader->disable();
 
 // Render output.
 $jobmeta = $job->get_metadata_entries();
@@ -62,7 +61,7 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
         'timecreated' => $job->get_timecreated(),
         'timemodified' => $job->get_timemodified(),
         'logs' => array_reduce(
-            $job->get_logger()->get_logs(),
+            $job->get_logger()->get_logs(limitnum: 99999),
             fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
             ""
         ),

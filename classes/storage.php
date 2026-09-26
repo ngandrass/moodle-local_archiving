@@ -18,13 +18,13 @@
  * This file defines the storage class
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_archiving;
 
-use local_archiving\type\db_table;
+use local_archiving\local\type\db_table;
 use stored_file;
 
 // phpcs:ignore
@@ -132,18 +132,20 @@ class storage {
      */
     public static function hash_file(stored_file $file, string $algo = 'sha256'): ?string {
         // Validate requested hash algorithm.
-        if (!array_search($algo, hash_algos())) {
+        if (!in_array($algo, hash_algos())) {
             return null;
         }
 
-        // Calculate file hash chunk-wise.
+        // Calculate file hash stream-wise.
         $fh = $file->get_content_file_handle(stored_file::FILE_HANDLE_FOPEN);
-        $hashctx = hash_init($algo);
-        while (!feof($fh)) {
-            hash_update($hashctx, fgets($fh, 4096));
-        }
+        try {
+            $hashctx = hash_init($algo);
+            hash_update_stream($hashctx, $fh);
 
-        return hash_final($hashctx);
+            return hash_final($hashctx);
+        } finally {
+            fclose($fh);
+        }
     }
 
     /**
@@ -171,7 +173,7 @@ class storage {
             '
                 SELECT SUM(filesize) AS usagebytes, COUNT(*) AS filecount, COUNT(DISTINCT jobid) AS jobcount
                 FROM {' . db_table::FILE_HANDLE->value . '}
-                WHERE archivingstore = :archivingstore;
+                WHERE archivingstore = :archivingstore AND deleted = 0;
             ',
             ['archivingstore' => $archivingstorename]
         );

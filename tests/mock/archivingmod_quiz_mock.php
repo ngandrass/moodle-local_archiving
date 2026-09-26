@@ -18,16 +18,16 @@
  * Mock activity archiving driver
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 use archivingmod_quiz\quiz_manager;
 use local_archiving\activity_archiving_task;
-use local_archiving\exception\yield_exception;
-use local_archiving\type\activity_archiving_task_status;
-use local_archiving\type\cm_state_fingerprint;
-use local_archiving\type\task_content_metadata;
+use local_archiving\local\exception\yield_exception;
+use local_archiving\local\type\activity_archiving_task_status;
+use local_archiving\local\type\cm_state_fingerprint;
+use local_archiving\local\type\task_content_metadata;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -36,7 +36,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Mock activity archiving driver
  */
-class archivingmod_quiz_mock extends \local_archiving\driver\archivingmod {
+class archivingmod_quiz_mock extends \local_archiving\local\driver\archivingmod {
     /** @var \stdClass Course the quiz lives in */
     protected \stdClass $course;
 
@@ -123,7 +123,7 @@ class archivingmod_quiz_mock extends \local_archiving\driver\archivingmod {
         $quizmanager = quiz_manager::from_context($task->get_context());
 
         $res = [];
-        foreach ($quizmanager->get_attempts() as $attempt) {
+        foreach ($quizmanager->get_all_attempts() as $attempt) {
             $res[] = new task_content_metadata(
                 taskid: $task->get_id(),
                 userid: $attempt->userid,

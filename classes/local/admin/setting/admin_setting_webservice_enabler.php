@@ -29,7 +29,7 @@ require_once($CFG->libdir . '/adminlib.php'); // @codeCoverageIgnore
  * provides shortcuts to enable them if needed.
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_webservice_enabler extends \admin_setting_description {

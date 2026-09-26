@@ -16,16 +16,19 @@
 
 namespace local_archiving;
 
-use local_archiving\exception\yield_exception;
-use local_archiving\type\archive_job_status;
-use local_archiving\type\db_table;
-use local_archiving\type\log_level;
+use local_archiving\local\exception\yield_exception;
+use local_archiving\local\type\archive_job_status;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\log_level;
+use local_archiving\local\util\course_util;
+use local_archiving\task\process_archive_job;
+use local_archiving\task\retrieve_remote_file;
 
 /**
  * Tests for the archive_job class
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -120,6 +123,88 @@ final class archive_job_test extends \advanced_testcase {
         $this->assertEquals(get_admin()->id, $retrievedjob->get_userid(), 'User ID should match');
         $this->assertEquals($settings, $retrievedjob->get_settings(), 'Settings should match');
         $this->assertEquals('manual', $retrievedjob->get_trigger(), 'Trigger should match');
+    }
+
+    /**
+     * Tests that archive_job::create() enforces the course category whitelist.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_create_enforces_coursecat_whitelist(): void {
+        $this->resetAfterTest();
+
+        // Prepare a course inside a category that is not part of the whitelist.
+        $category = self::getDataGenerator()->create_category();
+        $course = $this->generator()->create_course(['category' => $category->id]);
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $ctx = \context_module::instance($cm->cmid);
+
+        // Restrict archiving to a different, unrelated category.
+        $othercategory = self::getDataGenerator()->create_category();
+        set_config('coursecat_whitelist', $othercategory->id, 'local_archiving');
+        $this->assertFalse(
+            course_util::archiving_enabled_for_course($course->id),
+            'Archiving must be disabled for the course used in this test.'
+        );
+
+        // A regular user without the bypass capability must not be able to create a job.
+        $user = self::getDataGenerator()->create_and_enrol($course, 'editingteacher');
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('archiving_disabled_for_this_course_by_category', 'local_archiving'));
+        archive_job::create(
+            context: $ctx,
+            userid: $user->id,
+            trigger: 'manual',
+            settings: (object) [],
+        );
+    }
+
+    /**
+     * Tests that archive_job::create() still allows job creation for a category-restricted
+     * course as long as the acting user holds the bypass capability.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_create_coursecat_whitelist_bypass(): void {
+        $this->resetAfterTest();
+
+        // Prepare a course inside a category that is not part of the whitelist.
+        $category = self::getDataGenerator()->create_category();
+        $course = $this->generator()->create_course(['category' => $category->id]);
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $ctx = \context_module::instance($cm->cmid);
+
+        // Restrict archiving to a different, unrelated category.
+        $othercategory = self::getDataGenerator()->create_category();
+        set_config('coursecat_whitelist', $othercategory->id, 'local_archiving');
+        $this->assertFalse(
+            course_util::archiving_enabled_for_course($course->id),
+            'Archiving must be disabled for the course used in this test.'
+        );
+
+        // Grant the bypass capability to a user via a custom role.
+        $roleid = self::getDataGenerator()->create_role();
+        assign_capability('local/archiving:bypasscourserestrictions', CAP_ALLOW, $roleid, \context_system::instance());
+        $user = self::getDataGenerator()->create_and_enrol($course, 'editingteacher');
+        role_assign($roleid, $user->id, \context_system::instance());
+        accesslib_clear_all_caches_for_unit_testing();
+
+        // Creation must succeed for a user holding the bypass capability.
+        $createdjob = archive_job::create(
+            context: $ctx,
+            userid: $user->id,
+            trigger: 'manual',
+            settings: (object) [],
+        );
+        $this->assertGreaterThan(0, $createdjob->get_id(), 'Created job should have a valid ID despite the category restriction.');
     }
 
     /**
@@ -410,10 +495,27 @@ final class archive_job_test extends \advanced_testcase {
             activity_archiving_task::get_by_jobid($jobid),
             'Job should create at least one activity archiving task'
         );
+        $filehandles = file_handle::get_by_jobid($jobid);
         $this->assertNotEmpty(
-            file_handle::get_by_jobid($jobid),
+            $filehandles,
             'Job should create at least one file handle for the archived content'
         );
+
+        // Queue an outstanding on-demand retrieval for one of the file handles, simulating a
+        // fetch that was started but not yet processed by cron when the job gets deleted.
+        $filehandleid = reset($filehandles)->id;
+        $task = retrieve_remote_file::create(file_handle::get_by_id($filehandleid), get_admin()->id);
+        \core\task\manager::queue_adhoc_task($task);
+        remote_file_fetcher::mark_queued($filehandleid);
+
+        // Add TSP data.
+        $DB->insert_record(db_table::TSP->value, [
+            'filehandleid' => $filehandleid,
+            'timecreated' => time(),
+            'server' => 'localhost',
+            'timestampquery' => 'sample-query',
+            'timestampreply' => 'sample-reply',
+        ]);
 
         // Delete the job and check that everything was cleaned up correctly.
         $job->delete();
@@ -437,10 +539,74 @@ final class archive_job_test extends \advanced_testcase {
             $DB->get_records(db_table::FILE_HANDLE->value, ['jobid' => $jobid]),
             'Job file handles should be deleted from the database'
         );
+        $this->assertFalse(
+            $DB->record_exists(db_table::TSP->value, ['filehandleid' => $filehandleid]),
+            'TSP data for the job\'s file handles should be removed when the job is deleted'
+        );
         $this->assertEmpty(
             $DB->get_records(db_table::LOG->value, ['jobid' => $jobid]),
             'Job logs should be deleted from the database'
         );
+        $this->assertEmpty(
+            \core\task\manager::get_adhoc_tasks(retrieve_remote_file::class),
+            'Outstanding retrieve_remote_file tasks should be cancelled when the job is deleted'
+        );
+        $this->assertNull(
+            remote_file_fetcher::get($filehandleid),
+            'Outstanding remote_file_fetcher tracking records should be purged when the job is deleted'
+        );
+    }
+
+    /**
+     * Tests that deleting a job that is queued or currently running removes
+     * everything associated with it, including its pending processing task,
+     * while leaving other jobs untouched.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_delete_active_job(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create a job that is running (has an activity archiving task and an artifact) and a bystander job.
+        $settings = (object) [
+            'export_course_backup' => false,
+            'export_cm_backup' => false,
+            'storage_driver' => 'localdir',
+        ];
+        $job = $this->generator()->create_archive_job(['settings' => $settings]);
+        $job->enqueue();
+        $job->execute();
+        $jobid = $job->get_id();
+        $this->assertSame(archive_job_status::ACTIVITY_ARCHIVING, $job->get_status());
+        $this->assertNotEmpty(activity_archiving_task::get_by_jobid($jobid), 'Job should have an activity archiving task');
+        $this->generator()->create_file_handle(['jobid' => $jobid]);
+
+        $otherjob = $this->generator()->create_archive_job(['settings' => $settings]);
+        $otherjob->enqueue();
+
+        $this->assertCount(2, \core\task\manager::get_adhoc_tasks(process_archive_job::class));
+
+        // Delete the running job.
+        $job->delete();
+
+        $this->assertFalse($DB->record_exists(db_table::JOB->value, ['id' => $jobid]), 'Job should be deleted');
+        $this->assertFalse($DB->record_exists(db_table::ACTIVITY_TASK->value, ['jobid' => $jobid]), 'Tasks should be deleted');
+        $this->assertFalse($DB->record_exists(db_table::FILE_HANDLE->value, ['jobid' => $jobid]), 'File handles should be deleted');
+        $this->assertFalse($DB->record_exists(db_table::LOG->value, ['jobid' => $jobid]), 'Logs should be deleted');
+
+        // Only the pending processing task of the other job must remain.
+        $remaining = \core\task\manager::get_adhoc_tasks(process_archive_job::class);
+        $this->assertCount(1, $remaining, 'Pending processing task of the deleted job should be removed');
+        $this->assertSame($otherjob->get_id(), (int) reset($remaining)->get_custom_data()->jobid);
+        $this->assertTrue($DB->record_exists(db_table::JOB->value, ['id' => $otherjob->get_id()]), 'Other job must be kept');
     }
 
     /**
@@ -515,14 +681,16 @@ final class archive_job_test extends \advanced_testcase {
      * @throws \moodle_exception
      */
     public function test_timeout(): void {
-        // Create a new job.
+        global $DB;
         $this->resetAfterTest();
-        $job = $this->generator()->create_archive_job();
 
-        // Configure timeout to be instant.
-        set_config('job_timeout_min', -1, 'local_archiving');
+        // Create a new job and backdate its creation time to simulate a timeout scenario.
+        $job = $this->generator()->create_archive_job();
+        $DB->set_field(db_table::JOB->value, 'timecreated', time() - (2 * MINSECS), ['id' => $job->get_id()]);
+        set_config('job_timeout_min', 1, 'local_archiving');
 
         // Check if the job is considered timed out.
+        $job = archive_job::get_by_id($job->get_id());
         $this->assertTrue($job->is_overdue(), 'Job should be considered overdue with instant timeout');
     }
 
@@ -573,6 +741,160 @@ final class archive_job_test extends \advanced_testcase {
             $job->set_status($state);
             $this->assertSame(100, $job->get_progress(), "Progress should be 100% after {$state->name} state");
         }
+    }
+
+    /**
+     * Tests that no log entry is written when the reported total size is zero or negative.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_zero_total(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(0, 0);
+
+        $this->assertCount(0, $job->get_logger()->get_logs(), 'No log entry should be written.');
+    }
+
+    /**
+     * Tests that the first observed progress tick is always logged.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_logs_first_tick(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(50, 200);
+
+        $logs = array_values($job->get_logger()->get_logs());
+        $this->assertCount(1, $logs, 'Expected exactly one log entry after the first progress tick.');
+        $this->assertEquals(log_level::INFO->value, $logs[0]->level, 'Progress should be logged at INFO level.');
+        $this->assertEquals($job->get_id(), $logs[0]->jobid, 'Log entry should be linked to the job.');
+        $this->assertStringContainsString('25%', $logs[0]->message, 'Log message does not include percentage.');
+    }
+
+    /**
+     * Tests that intermediate progress ticks are throttled.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_throttles_intermediate_ticks(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(50, 200);
+        $callback(100, 200);
+
+        $this->assertCount(
+            1,
+            $job->get_logger()->get_logs(),
+            'A second intermediate progress tick within 10 seconds should not be logged again.'
+        );
+    }
+
+    /**
+     * Tests that the final 100% completion tick is always logged, even within the throttle window.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_always_logs_completion(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(50, 200);
+        $callback(200, 200);
+
+        $logs = array_values($job->get_logger()->get_logs());
+        $this->assertCount(2, $logs, 'Completion should be logged even though it is within the throttle window.');
+        $this->assertStringContainsString('100%', $logs[1]->message, 'Second log entry should report 100% completion.');
+    }
+
+    /**
+     * Tests that the completion tick is only logged once, even if reported multiple times.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_completion_logged_once(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job = $this->generator()->create_archive_job();
+
+        $callback = self::call_protected_archive_job_method($job, 'store_progress_callback');
+        $callback(200, 200);
+        $callback(200, 200);
+
+        $this->assertCount(
+            1,
+            $job->get_logger()->get_logs(),
+            'A repeated completion tick should not be logged again.'
+        );
+    }
+
+    /**
+     * Tests that separate calls to store_progress_callback() produce independent closures that do not share state.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_store_progress_callback_independent_instances(): void {
+        $this->resetAfterTest();
+        set_config('log_level', log_level::TRACE->value, 'local_archiving');
+        $job1 = $this->generator()->create_archive_job();
+        $job2 = $this->generator()->create_archive_job();
+
+        $callback1 = self::call_protected_archive_job_method($job1, 'store_progress_callback');
+        $callback2 = self::call_protected_archive_job_method($job2, 'store_progress_callback');
+
+        $callback1(50, 200);
+        $callback2(100, 400);
+
+        $logs1 = array_values($job1->get_logger()->get_logs());
+        $logs2 = array_values($job2->get_logger()->get_logs());
+
+        $this->assertCount(1, $logs1, 'First job should have exactly one log entry.');
+        $this->assertCount(1, $logs2, 'Second job should have exactly one log entry.');
+        $this->assertStringContainsString('25%', $logs1[0]->message, 'First job log should report its own progress.');
+        $this->assertStringContainsString('25%', $logs2[0]->message, 'Second job log should report its own progress.');
     }
 
     /**
@@ -780,7 +1102,7 @@ final class archive_job_test extends \advanced_testcase {
             ],
             'All allowed variables' => [
                 'pattern' => array_reduce(
-                    \local_archiving\type\archive_filename_variable::values(),
+                    \local_archiving\local\type\archive_filename_variable::values(),
                     function ($carry, $item) {
                         return $carry . '${' . $item . '}';
                     },

@@ -18,14 +18,14 @@
  * This file defines the tsp_manager class.
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_archiving;
 
-use local_archiving\type\db_table;
-use local_archiving\type\filearea;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\filearea;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -248,14 +248,15 @@ class tsp_manager {
      *
      * @param string $path Path to the virtual TSP file, according to the pluginfile URL
      * @param string $filename Name of the virtual TSP file to be sent, according to the pluginfile URL
+     * @param \context $context Calling context to verify the requested TSP file is accessible in this context
      * @return void None, this method will terminate script execution after sending the file!
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    public static function send_virtual_tsp_file(string $path, string $filename): void {
+    public static function send_virtual_tsp_file(string $path, string $filename, \context $context): void {
         // Validate file path and name.
         if (!preg_match('/^\/[0-9]+\/$/', $path)) {
-            throw new \moodle_exception($path, 'local_archiving');
+            throw new \moodle_exception('invalid_tsp_file_path', 'local_archiving', '', $path);
         }
 
         if (!preg_match('/^[a-fA-F0-9]{64}\.(tsq|tsr)$/', $filename)) {
@@ -265,6 +266,17 @@ class tsp_manager {
         // Get file handle ID from path.
         $filehandleid = (int) trim($path, '/');
         $filehandle = file_handle::get_by_id($filehandleid);
+
+        // Validate calling context and file checksum.
+        $job = archive_job::get_by_id($filehandle->jobid);
+        if ($job->get_context()->id !== $context->id) {
+            throw new \moodle_exception('invalid_tsp_file_context', 'local_archiving');
+        }
+
+        $requestedsha256sum = strtolower(pathinfo($filename, PATHINFO_FILENAME));
+        if ($requestedsha256sum !== $filehandle->sha256sum) {
+            throw new \moodle_exception('invalid_tsp_file_checksum', 'local_archiving');
+        }
 
         // Retrieve TSP data for the file handle.
         $tspmanager = new self($filehandle);
@@ -287,27 +299,15 @@ class tsp_manager {
         }
 
         // Send virtual TSP file to the client.
-        \core\session\manager::write_close(); // Unlock session during file serving.
-        ob_clean();
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0, no-transform');
-        header('Pragma: no-cache');
-        header('Content-Length: ' . strlen($filecontents));
-        echo $filecontents;
-
-        // Stop at this point if we are running a unit test, so that we don't
-        // kill the test runner and can access the output buffer.
-        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST === true) {
-            return;
-        }
-
-        // @codeCoverageIgnoreStart
-        ob_flush();
-        die;
-        // @codeCoverageIgnoreEnd
+        send_file(
+            path: $filecontents,
+            filename: $filename,
+            lifetime: 0,
+            filter: 0,
+            pathisstring: true,
+            forcedownload: true,
+            mimetype: 'application/octet-stream',
+            dontdie: defined('PHPUNIT_TEST') && PHPUNIT_TEST === true,
+        );
     }
 }

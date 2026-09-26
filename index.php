@@ -18,12 +18,12 @@
  * Main entry point for archiving manager. Course archiving overview page.
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_archiving\util\course_util;
-use local_archiving\util\mod_util;
+use local_archiving\local\util\course_util;
+use local_archiving\local\util\mod_util;
 
 require_once(__DIR__ . '/../../config.php');
 

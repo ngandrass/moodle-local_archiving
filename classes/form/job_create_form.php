@@ -19,17 +19,18 @@
  * specific settings.
  *
  * @package    local_archiving
- * @copyright  2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright  2026 Niels Gandraß <niels@gandrass.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_archiving\form;
 
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\type\archive_filename_variable;
+use local_archiving\local\util\course_util;
+use local_archiving\local\util\plugin_util;
+use local_archiving\local\util\time_util;
 use local_archiving\storage;
-use local_archiving\type\archive_filename_variable;
-use local_archiving\util\course_util;
-use local_archiving\util\plugin_util;
-use local_archiving\util\time_util;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
@@ -102,7 +103,7 @@ class job_create_form extends \moodleform {
         }
 
         // Prevent form from being displayed if manual archiving is disabled.
-        if (!\local_archiving\driver\factory::archiving_trigger('manual')->is_enabled()) {
+        if (!driver_factory::archiving_trigger('manual')->is_enabled()) {
             $this->_form->addElement(
                 'html',
                 '<div class="alert alert-warning">' .
@@ -134,9 +135,11 @@ class job_create_form extends \moodleform {
     protected function definition_header(): void {
         $this->_form->addElement(
             'html',
-            '<h1>' .
-                get_string('job_create_form_header_typed', 'local_archiving', get_string('pluginname', "mod_{$this->handler}")) .
-            '</h1>'
+            '<h1>' . get_string(
+                'job_create_form_header_typed',
+                'local_archiving',
+                get_string('pluginname', "mod_{$this->cminfo->modname}")
+            ) . '</h1>'
         );
         $this->_form->addElement('html', '<p>' . get_string('job_create_form_header_desc', 'local_archiving') . '</p>');
 
@@ -148,7 +151,7 @@ class job_create_form extends \moodleform {
                     <div class="d-inline activity-icon activityiconcontainer ' . $modpurpose . ' pl-0">
                         <img src="' . $this->cminfo->get_icon_url() . '" class="activityicon mr-1" alt=""/>
                     </div>
-                    <div class="d-inline">' . $this->cminfo->name . '</div>
+                    <div class="d-inline">' . $this->cminfo->get_formatted_name() . '</div>
                 </a>
             </ul>
         </div>';
@@ -307,11 +310,14 @@ class job_create_form extends \moodleform {
      */
     #[\Override]
     public function validation($data, $files): array {
+        // Apply presets to validate actually final values.
+        $data = $this->apply_presets($data);
+
         $errors = parent::validation($data, $files);
 
         if (
             !storage::is_valid_filename_pattern(
-                $data['archive_filename_pattern'],
+                $data['archive_filename_pattern'] ?? '',
                 archive_filename_variable::values(),
                 storage::FILENAME_FORBIDDEN_CHARACTERS
             )
@@ -319,25 +325,27 @@ class job_create_form extends \moodleform {
             $errors['archive_filename_pattern'] = get_string('error_invalid_archive_filename_pattern', 'local_archiving');
         }
 
+        if (
+            !empty($data['archive_autodelete']) &&
+            (int) ($data['archive_retention_time'] ?? 0) <= 0
+        ) {
+            $errors['archive_retention_time_group'] = get_string('retentiontime_must_be_positive', 'local_archiving');
+        }
+
         return $errors;
     }
 
     /**
-     * Returns the data submitted by the user but forces all locked fields to
-     * their preset values
+     * Returns the given form data with all locked fields forced to their preset values
      *
-     * @return \stdClass Cleared, submitted form data
-     * @throws \dml_exception
+     * @param array $data Form data
+     * @return array Form data with locked fields set to their presets
      */
-    #[\Override]
-    public function get_data(): \stdClass {
-        $data = parent::get_data();
-
-        // Force locked fields to their preset values.
+    private function apply_presets(array $data): array {
         foreach ($this->config->core as $key => $value) {
             if (str_starts_with($key, 'job_preset_') && strrpos($key, '_locked') === strlen($key) - 7) {
                 if ($value) {
-                    $data->{substr($key, 11, -7)} = $this->config->core->{substr($key, 0, -7)};
+                    $data[substr($key, 11, -7)] = $this->config->core->{substr($key, 0, -7)};
                 }
             }
         }
@@ -346,13 +354,42 @@ class job_create_form extends \moodleform {
     }
 
     /**
-     * Exports the current raw form data without any validation or cleaning.
+     * Returns the data submitted by the user but forces all locked fields to
+     * their preset values
+     *
+     * @return \stdClass|null Cleared, submitted form data or null if the form was not submitted or is invalid
+     * @throws \dml_exception
+     */
+    #[\Override]
+    public function get_data(): ?\stdClass {
+        $data = parent::get_data();
+        if ($data === null) {
+            return null;
+        }
+
+        return (object) $this->apply_presets((array) $data);
+    }
+
+    /**
+     * Exports the current raw form data without any validation.
      *
      * ATTENTION: Use this function with caution. Always use get_data() if possible!
      *
      * @return \stdClass Raw, unvalidated form data
+     * @throws \coding_exception
      */
     public function export_raw_data(): \stdClass {
-        return (object) $this->_form->exportValues();
+        // Get raw form data and remove unnecessary fields.
+        $data = $this->_form->exportValues();
+        unset($data['sesskey']);
+        unset($data['_qf__' . $this->_formname]);
+
+        // Perform cleaning of current values to ensure the returned data is cast to the correct types.
+        foreach ($data as $key => $value) {
+            $type = $this->_form->getCleanType($key, $value);
+            $data[$key] = $this->_form->getCleanedValue($value, $type);
+        }
+
+        return (object) $data;
     }
 }

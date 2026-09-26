@@ -18,7 +18,7 @@
  * Manual archiving trigger mock for unit tests
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Manual archiving trigger mock for unit tests
  */
-class archivingtrigger_manual_mock extends \local_archiving\driver\archivingtrigger {
+class archivingtrigger_manual_mock extends \local_archiving\local\driver\archivingtrigger {
     #[\Override]
     public static function is_ready(): bool {
         return true;

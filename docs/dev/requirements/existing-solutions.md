@@ -16,7 +16,7 @@ This section lists existing solutions for archiving data from different Moodle a
 - Data is stored on the teachers PC
  
 
-### [Quiz Archiver](https://moodle.org/plugins/quiz_archiver)
+### [Quiz Archiver](https://marketplace.moodle.com/plugins/quiz_archiver)
 
 - Fully automated archiving of quiz attempts as PDF files and many more features
 - Support for file submissions / attachments (e.g., essay files)
@@ -29,7 +29,7 @@ This section lists existing solutions for archiving data from different Moodle a
 - Data is stored inside the Moodle LMS
 
 
-### [Quiz Archive Report](https://moodle.org/plugins/quiz_archive)
+### [Quiz Archive Report](https://marketplace.moodle.com/plugins/quiz_archive)
 
 - Renders all quiz attempts on a single page for manual printing to PDF
 - Fails for quizzes with many attempts
@@ -46,13 +46,13 @@ This section lists existing solutions for archiving data from different Moodle a
 - Data is stored inside the Moodle LMS
 - [Comparison of _Quiz Archiver_ and _Quizattemptexport_](https://moodlenrw.de/course/view.php?id=125)
 
-### [QuizExport](https://moodle.org/plugins/quiz_export)
+### [QuizExport](https://marketplace.moodle.com/plugins/quiz_export)
 
 - Renders attempts as PDF files
 - Runs directly on the Moodle server and uses `mpdf` for rendering
 
 
-### [Exportresults](https://moodle.org/plugins/quiz_exportresults)
+### [Exportresults](https://marketplace.moodle.com/plugins/quiz_exportresults)
 
 - Exports student answers into `.odt` files
 
@@ -60,7 +60,7 @@ This section lists existing solutions for archiving data from different Moodle a
 ## Assignments
 
 
-### [Assign Submission Download](https://moodle.org/plugins/local_assignsubmission_download)
+### [Assign Submission Download](https://marketplace.moodle.com/plugins/local_assignsubmission_download)
 
 - Allows bulk-downloading of submitted files
 - Limited to files only

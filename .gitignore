@@ -3,4 +3,6 @@ __pycache__/
 .venv/
 .idea/
 *.iml
+.vscode/
 *.drawio.bkp
+site/

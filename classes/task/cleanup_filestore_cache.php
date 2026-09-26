@@ -18,7 +18,7 @@
  * Scheduled task for cleaning up the filestore cache
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,7 +27,7 @@ namespace local_archiving\task;
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
-use local_archiving\type\filearea;
+use local_archiving\local\type\filearea;
 
 
 /**

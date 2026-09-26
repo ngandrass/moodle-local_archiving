@@ -18,14 +18,13 @@
  * Form for deleting archive jobs
  *
  * @package    local_archiving
- * @copyright  2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright  2026 Niels Gandraß <niels@gandrass.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_archiving\form;
 
 use local_archiving\archive_job;
-use local_archiving\type\archive_job_status;
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 

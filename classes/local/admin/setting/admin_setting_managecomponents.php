@@ -20,8 +20,9 @@ namespace local_archiving\local\admin\setting;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 use core\exception\moodle_exception;
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\util\plugin_util;
 use local_archiving\storage;
-use local_archiving\util\plugin_util;
 
 require_once($CFG->libdir . '/adminlib.php'); // @codeCoverageIgnore
 
@@ -34,7 +35,7 @@ require_once($CFG->libdir . '/adminlib.php'); // @codeCoverageIgnore
  * provides a convenient way to access their settings.
  *
  * @package local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_managecomponents extends \admin_setting {
@@ -224,6 +225,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 'action' => $archivingdriver['enabled'] ? 'plugindisable' : 'pluginenable',
                 'plugin' => $archivingdriver['component'],
                 'wantsurl' => $PAGE->url,
+                'sesskey' => sesskey(),
             ]);
             if ($archivingdriver['enabled']) {
                 $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));
@@ -325,6 +327,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 'action' => $storagedriver['enabled'] ? 'plugindisable' : 'pluginenable',
                 'plugin' => $storagedriver['component'],
                 'wantsurl' => $PAGE->url,
+                'sesskey' => sesskey(),
             ]);
             if ($storagedriver['enabled']) {
                 $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));
@@ -347,7 +350,7 @@ class admin_setting_managecomponents extends \admin_setting {
             $usagehtml = '';
             if ($storagedriver['enabled']) {
                 // From this point on, we need a proper instance of the storage driver.
-                $driver = \local_archiving\driver\factory::storage_driver($storagedrivername);
+                $driver = driver_factory::storage_driver($storagedrivername);
 
                 // Calculate usage.
                 $usage = storage::calculate_archivingstore_stats($storagedrivername);
@@ -459,6 +462,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 'action' => $trigger['enabled'] ? 'plugindisable' : 'pluginenable',
                 'plugin' => $trigger['component'],
                 'wantsurl' => $PAGE->url,
+                'sesskey' => sesskey(),
             ]);
             if ($trigger['enabled']) {
                 $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));
@@ -537,6 +541,7 @@ class admin_setting_managecomponents extends \admin_setting {
                 'action' => $eventconnector['enabled'] ? 'plugindisable' : 'pluginenable',
                 'plugin' => $eventconnector['component'],
                 'wantsurl' => $PAGE->url,
+                'sesskey' => sesskey(),
             ]);
             if ($eventconnector['enabled']) {
                 $enableicon = $OUTPUT->pix_icon('t/hide', get_string('disable'));

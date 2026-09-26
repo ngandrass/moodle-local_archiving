@@ -9,8 +9,8 @@ implementations must adhere to.
 
 ## Overview
 
-The abstract driver base class for external event connectors is {{ source_file('classes/driver/archivingevent.php',
-'\\local_archiving\\driver\\archivingevent') }}.
+The abstract driver base class for external event connectors is {{ source_file('classes/local/driver/archivingevent.php',
+'\\local_archiving\\local\\driver\\archivingevent') }}.
 
 !!! notice "Overview reduced for bravery"
     For bravery, the following overview diagram is reduced to the most important classes and members. Therefore, some
@@ -57,6 +57,7 @@ classDiagram
 
 ## Implementation
 
-Each external event connector must implement the {{ source_file('classes/driver/archivingevent.php', '\\local_archiving\\driver\\archivingevent') }}
-interface with a class, placed at the following location: `/local/archiving/driver/event/<pluginname>/classes/archivingevent.php`,
-where `<pluginname>` is the name of the external event connector (e.g., `mycms`, `externalapi`, ...).
+Each external event connector must implement the {{ source_file('classes/local/driver/archivingevent.php',
+'\\local_archiving\\local\\driver\\archivingevent') }} interface with a class, placed at the following location:
+`/local/archiving/local/driver/event/<pluginname>/classes/archivingevent.php`, where `<pluginname>` is the name of the
+external event connector (e.g., `mycms`, `externalapi`, ...).

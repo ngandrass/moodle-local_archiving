@@ -16,15 +16,13 @@
 
 namespace local_archiving;
 
-use local_archiving\exception\storage_exception;
-use local_archiving\type\archive_filename_variable;
-use local_archiving\type\filearea;
+use local_archiving\local\type\archive_filename_variable;
 
 /**
  * Tests for the storage helper class.
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -389,6 +387,34 @@ final class storage_test extends \advanced_testcase {
         $this->assertEquals(1024, $stats->usagebytes, '[moodle] Usage bytes should does not match.');
         $this->assertEquals(1, $stats->filecount, '[moodle] File count should not match.');
         $this->assertEquals(1, $stats->jobcount, '[moodle] Job count should not match.');
+    }
+
+    /**
+     * Tests that deleted files are excluded from the archiving store statistics.
+     *
+     * @covers \local_archiving\storage
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function test_calculate_archivingstore_stats_ignores_deleted_files(): void {
+        // Prepare existing and deleted file handles.
+        $this->resetAfterTest();
+        $this->generator()
+            ->create_file_handle(['archivingstorename' => 'localdir', 'jobid' => 1, 'filesize' => 100]);
+        $this->generator()
+            ->create_file_handle(['archivingstorename' => 'localdir', 'jobid' => 1, 'filesize' => 200])
+            ->mark_as_deleted();
+        $this->generator()
+            ->create_file_handle(['archivingstorename' => 'localdir', 'jobid' => 2, 'filesize' => 400])
+            ->mark_as_deleted();
+
+        // Get stats and verify them.
+        $stats = storage::calculate_archivingstore_stats('localdir');
+        $this->assertEquals(100, $stats->usagebytes, 'Deleted files must not count towards the usage bytes.');
+        $this->assertEquals(1, $stats->filecount, 'Deleted files must not count towards the file count.');
+        $this->assertEquals(1, $stats->jobcount, 'Jobs that only have deleted files must not be counted.');
     }
 
     /**

@@ -18,21 +18,27 @@
  * An archive job
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_archiving;
 
-use local_archiving\driver\archivingmod;
-use local_archiving\exception\yield_exception;
-use local_archiving\logging\job_logger;
-use local_archiving\type\archive_filename_variable;
-use local_archiving\type\archive_job_status;
-use local_archiving\type\db_table;
-use local_archiving\type\log_level;
-use local_archiving\util\mod_util;
-use local_archiving\util\plugin_util;
+use local_archiving\local\driver\archivingmod;
+use local_archiving\local\driver\driver_factory;
+use local_archiving\local\exception\storage_exception;
+use local_archiving\local\exception\yield_exception;
+use local_archiving\local\logging\job_logger;
+use local_archiving\local\type\activity_archiving_task_status;
+use local_archiving\local\type\archive_filename_variable;
+use local_archiving\local\type\archive_job_status;
+use local_archiving\local\type\db_table;
+use local_archiving\local\type\log_level;
+use local_archiving\local\util\course_util;
+use local_archiving\local\util\mod_util;
+use local_archiving\local\util\plugin_util;
+use local_archiving\task\process_archive_job;
+use local_archiving\task\retrieve_remote_file;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -134,6 +140,15 @@ class archive_job {
             throw new \moodle_exception('invalid_context', 'local_archiving');
         }
 
+        // Enforce the course category whitelist.
+        $coursectx = $context->get_course_context();
+        if (
+            !course_util::archiving_enabled_for_course($coursectx->instanceid) &&
+            !has_capability('local/archiving:bypasscourserestrictions', $coursectx, $userid)
+        ) {
+            throw new \moodle_exception('archiving_disabled_for_this_course_by_category', 'local_archiving');
+        }
+
         // Clean settings object.
         if ($cleansettings) {
             $settings = (object) array_filter(
@@ -211,13 +226,13 @@ class archive_job {
             $lockfactory = \core\lock\lock_config::get_lock_factory('local_archiving_archive_job');
         }
 
-        $jobtimeoutmin = get_config('local_archiving', 'job_timeout_min');
+        $jobtimeoutmin = max((int) get_config('local_archiving', 'job_timeout_min') ?: HOURMINS, 1);
 
         if (
             !$lock = $lockfactory->get_lock(
                 $this->get_lock_resource(),
                 $timeoutsec,
-                ($jobtimeoutmin ?: 6 * 60) * 60
+                $jobtimeoutmin * MINSECS
             )
         ) {
             $this->get_logger()->warn("Failed to acquire lock for '{$this->get_lock_resource()}' after {$timeoutsec} seconds.");
@@ -258,8 +273,8 @@ class archive_job {
         }
 
         $task = \local_archiving\task\process_archive_job::create($this);
-        \core\task\manager::queue_adhoc_task($task);
         $this->set_status(archive_job_status::QUEUED);
+        \core\task\manager::queue_adhoc_task($task);
     }
 
     /**
@@ -319,9 +334,14 @@ class archive_job {
      * @param bool $failonlocktimeout If true, an exception will be thrown if
      * the lock could not be acquired after a given timeout.
      * @return void
+     * @throws \Throwable
+     * @throws \base_setting_exception
+     * @throws \base_task_exception
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
+     * @throws storage_exception
+     * @throws yield_exception
      */
     public function execute(bool $failonlocktimeout = false): void {
         // Acquire lock for job execution.
@@ -344,19 +364,16 @@ class archive_job {
                 throw new \moodle_exception('invalid_archive_job_state', 'local_archiving');
             }
 
+            // Do not process completed jobs.
+            if ($this->is_completed()) {
+                $this->get_logger()->debug('Job is already completed. No further processing required.');
+                return;
+            }
+
             // Timeout if required.
             if ($this->is_overdue()) {
-                // Update task status.
-                $this->set_status(archive_job_status::TIMEOUT);
-
-                // Stop all running tasks.
-                foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
-                    $task->cancel();
-                }
-
-                // Perform cleanup and die.
-                $this->cleanup();
-                throw new \moodle_exception('archive_job_timed_out', 'local_archiving');
+                $this->abort(archive_job_status::TIMEOUT);
+                throw new yield_exception();
             }
 
             // Queued -> Pre-Processing.
@@ -437,6 +454,22 @@ class archive_job {
                 $driver->execute_all_tasks_for_job($this->get_id());
 
                 if ($driver->is_all_tasks_for_job_completed($this->get_id())) {
+                    // Check that every task was successful and did not silently fail without throwing an exception.
+                    foreach (activity_archiving_task::get_by_jobid($this->id) as $task) {
+                        if ($task->get_status() !== activity_archiving_task_status::FINISHED) {
+                            $this->get_logger()->error(
+                                "Activity archiving task #{$task->get_id()} ({$task->get_archivingmodname()}) " .
+                                "did not finish successfully. Status: {$task->get_status()->value}"
+                            );
+                            throw new \moodle_exception('activity_archiving_task_failed', 'local_archiving');
+                        }
+
+                        $this->get_logger()->debug(
+                            "Activity archiving task #{$task->get_id()} ({$task->get_archivingmodname()}) finished successfully."
+                        );
+                    }
+
+                    // Every task finished successfully. Continue.
                     $this->set_status(archive_job_status::BACKUP_COLLECTION);
                 } else {
                     $this->get_logger()->info('Not all activity archiving tasks are finished yet. Waiting ...');
@@ -501,7 +534,7 @@ class archive_job {
                 $tasks = activity_archiving_task::get_by_jobid($this->id);
                 $storagepath = "job-{$this->id}";
 
-                $driver = \local_archiving\driver\factory::storage_driver($this->get_setting('storage_driver') ?? 'null');
+                $driver = driver_factory::storage_driver($this->get_setting('storage_driver') ?? 'null');
                 $this->set_metadata_entry('storage_driver', $driver->get_plugin_name());
 
                 if (!$driver->is_enabled()) {
@@ -514,12 +547,17 @@ class archive_job {
                     throw new \moodle_exception('artifact_storing_failed', 'local_archiving');
                 }
 
+                $this->get_logger()->debug("Using storage driver: {$driver->get_plugin_name()}");
+
                 // Activity archiving tasks.
                 foreach ($tasks as $task) {
                     foreach ($task->get_linked_artifacts() as $artifact) {
-                        $filehandle = $driver->store($this->id, $artifact, $storagepath);
-                        $this->get_logger()->info('Stored activity artifact: ' .
-                            "{$filehandle->filename} (size: " . display_size($filehandle->filesize) . ") (id: {$filehandle->id})");
+                        $this->get_logger()->info(
+                            "Storing activity artifact: {$artifact->get_filename()} " .
+                            "(size: " . display_size($artifact->get_filesize()) . ") (id: {$artifact->get_id()})"
+                        );
+                        $filehandle = $driver->store($this->id, $artifact, $storagepath, $this->store_progress_callback());
+                        $this->get_logger()->info(' -> Success. File handle ID: ' . $filehandle->id);
                         $task->unlink_artifact($artifact, true);
                     }
                 }
@@ -540,9 +578,12 @@ class archive_job {
                             );
                         }
 
-                        $filehandle = $driver->store($this->id, $backupfile, $storagepath);
-                        $this->get_logger()->info('Stored backup: ' .
-                            "{$filehandle->filename} (size: " . display_size($filehandle->filesize) . ") (id: {$filehandle->id})");
+                        $this->get_logger()->info(
+                            "Storing Moodle backup: {$backupfile->get_filename()} " .
+                            "(size: " . display_size($backupfile->get_filesize()) . ") (id: {$backupfile->get_id()})"
+                        );
+                        $filehandle = $driver->store($this->id, $backupfile, $storagepath, $this->store_progress_callback());
+                        $this->get_logger()->info(' -> Success. File handle ID: ' . $filehandle->id);
                         $bm->cleanup();
                     } else {
                         $this->get_logger()->debug("No {$backupidkey} found.");
@@ -609,7 +650,7 @@ class archive_job {
             // Catch the yield silently and let everything else bubble up.
             if (!$e instanceof yield_exception) {
                 $this->get_logger()->fatal($e->getMessage());
-                $this->set_status(archive_job_status::FAILURE);
+                $this->abort();
                 throw $e;
             }
         } finally {
@@ -639,6 +680,54 @@ class archive_job {
     }
 
     /**
+     * Aborts this job including all associated tasks.
+     *
+     * This method ensures that all files and temporary data of this job are
+     * removed and that the job cleanup logic is executed.
+     *
+     * @param archive_job_status $status Job status to set after aborting. Defaults to FAILURE.
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    protected function abort(archive_job_status $status = archive_job_status::FAILURE): void {
+        $this->set_status($status);
+
+        // Cancel running activity archiving tasks. This also removes all linked temporary files.
+        $archivingtasks = activity_archiving_task::get_by_jobid($this->id);
+        foreach ($archivingtasks as $task) {
+            try {
+                $task->cancel();
+                $task->delete();
+            } catch (\Throwable $e) {
+                $this->get_logger()->error(
+                    "Failed to cancel and delete activity archiving task #{$task->get_id()}: {$e->getMessage()}"
+                );
+            }
+        }
+
+        // We do not cancel backup tasks here because once they are submitted to async task handler of Moodle
+        // a clean cancellation can not be guaranteed. Orphaned backups will be automatically cleaned up
+        // by \local_archiving\task\cleanup_orphaned_backups.
+
+        // Delete job artifacts.
+        $files = file_handle::get_by_jobid($this->id);
+        foreach ($files as $filehandle) {
+            try {
+                $filehandle->destroy(removefile: true);
+            } catch (\Throwable $e) {
+                $this->get_logger()->error(
+                    "Failed to destroy file handle #{$filehandle->id}: {$e->getMessage()}"
+                );
+            }
+        }
+
+        // Call internal job cleanup logic.
+        $this->cleanup();
+    }
+
+    /**
      * Returns a new instance of the activity archiving driver for this job
      *
      * @return archivingmod Activity archiving driver instance
@@ -652,7 +741,7 @@ class archive_job {
             throw new \moodle_exception('no_supported_activity_archiving_driver_found', 'local_archiving');
         }
 
-        return \local_archiving\driver\factory::activity_archiving_driver($drivername, $this->context);
+        return driver_factory::activity_archiving_driver($drivername, $this->context);
     }
 
     /**
@@ -684,38 +773,67 @@ class archive_job {
 
     /**
      * Deletes an archive job and everything that is associated with it from the
-     * database
+     * database. Also cancels pending ad-hoc tasks associated with this job.
      *
+     * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
     public function delete(): void {
-        global $DB;
+        global $CFG, $DB;
 
-        // Handle activity archiving tasks.
-        $archivingtasks = activity_archiving_task::get_by_jobid($this->id);
-        foreach ($archivingtasks as $task) {
-            $task->cancel();
-            $task->delete();
-        }
+        $lock = $this->lock();
 
-        // Delete job artifacts.
-        $files = file_handle::get_by_jobid($this->id);
-        foreach ($files as $filehandle) {
-            // Remove local cache copy if present.
-            if ($cachedfile = $filehandle->get_local_file()) {
-                $cachedfile->delete();
+        try {
+            // Remove pending job processing tasks.
+            if (!$this->is_completed()) {
+                foreach (\core\task\manager::get_adhoc_tasks(process_archive_job::class, skiprunning: true) as $processingtask) {
+                    // Check if the task is associated with this job.
+                    if ((int) $processingtask->get_custom_data()->jobid !== $this->id) {
+                        continue;
+                    }
+
+                    // Cancel ad-hoc task.
+                    if (method_exists(\core\task\manager::class, 'delete_adhoc_task')) {
+                        // Moodle >= 5.0: Use core API.
+                        \core\task\manager::delete_adhoc_task($processingtask->get_id());
+                    } else if ($CFG->branch < 500) {
+                        // Moodle <= 4.5: delete_adhoc_task() was only added in Moodle 5.0.
+                        // This is the exact way delete_adhoc_task() is implemented at the time of writing.
+                        // Future uses default to the Moodle core API to prevent missing changes to this logic.
+                        $DB->delete_records('task_adhoc', ['id' => $processingtask->get_id()]);
+                    } else {
+                        throw new \coding_exception('Missing \core\task\manager::delete_adhoc_task() method,
+                         but we are not on Moodle < 5.0? This should never happen.');
+                    }
+                }
             }
 
-            // Remove original file from the storage.
-            $filehandle->destroy(removefile: true);
-        }
+            // Handle activity archiving tasks.
+            $archivingtasks = activity_archiving_task::get_by_jobid($this->id);
+            foreach ($archivingtasks as $task) {
+                $task->cancel();
+                $task->delete();
+            }
 
-        // Delete records from the database.
-        $DB->delete_records(db_table::METADATA->value, ['jobid' => $this->id]);
-        $DB->delete_records(db_table::TEMPFILE->value, ['jobid' => $this->id]);
-        $DB->delete_records(db_table::LOG->value, ['jobid' => $this->id]);
-        $DB->delete_records(db_table::JOB->value, ['id' => $this->id]);
+            // Delete job artifacts.
+            $files = file_handle::get_by_jobid($this->id);
+            foreach ($files as $filehandle) {
+                // Cancel/purge any outstanding on-demand retrieval for this file handle before it's gone.
+                retrieve_remote_file::cancel_and_purge($filehandle->id);
+
+                // Remove original file from the storage. Also clears file cache and TSP data.
+                $filehandle->destroy(removefile: true);
+            }
+
+            // Delete records from the database.
+            $DB->delete_records(db_table::METADATA->value, ['jobid' => $this->id]);
+            $DB->delete_records(db_table::TEMPFILE->value, ['jobid' => $this->id]);
+            $DB->delete_records(db_table::LOG->value, ['jobid' => $this->id]);
+            $DB->delete_records(db_table::JOB->value, ['id' => $this->id]);
+        } finally {
+            $lock->release();
+        }
     }
 
     /**
@@ -845,7 +963,7 @@ class archive_job {
      * @throws \dml_exception
      */
     public function is_overdue(): bool {
-        $jobtimeoutsec = get_config('local_archiving', 'job_timeout_min') * 60;
+        $jobtimeoutsec = max((int) get_config('local_archiving', 'job_timeout_min') ?: HOURMINS, 1) * MINSECS;
         if (time() > $this->timecreated + $jobtimeoutsec) {
             return true;
         }
@@ -875,7 +993,7 @@ class archive_job {
                     return 60;
                 } else {
                     $total = array_reduce($tasks, fn ($carry, $task) => $carry + $task->get_progress(), 0);
-                    return 0.6 * ($total / count($tasks));
+                    return (int) round(0.6 * ($total / count($tasks)));
                 }
             case archive_job_status::POST_PROCESSING:
             case archive_job_status::BACKUP_COLLECTION:
@@ -892,6 +1010,52 @@ class archive_job {
             default:
                 return null; // @codeCoverageIgnore
         }
+    }
+
+    /**
+     * Builds a progress callback for artifact store and retrieve operations that reports storing
+     * progress to the job log.
+     *
+     * Always logs the first observed progress tick and the final 100% completion tick; every
+     * update inbetween is throttled to at most one log entry every 10 seconds. A fresh instance
+     * must be built for each store() call so that each file's transfer gets its own independent
+     * throttle state.
+     *
+     * @return callable A callback with signature function(int $bytesdone, int $bytestotal): void
+     * @throws \dml_exception
+     */
+    protected function store_progress_callback(): callable {
+        // Prepare inherited state for the closure.
+        $logger = $this->get_logger();
+        $lastlogtime = 0;
+        $loggedcomplete = false;
+
+        // Create progress reporting closure.
+        return function (int $bytesdone, int $bytestotal) use ($logger, &$lastlogtime, &$loggedcomplete): void {
+            if ($bytestotal <= 0) {
+                return;
+            }
+
+            // Ensure we log 0% and 100% progress, but everything inbetween only every 10 seconds.
+            $iscomplete = $bytesdone >= $bytestotal;
+            $now = time();
+
+            if ($iscomplete) {
+                if ($loggedcomplete) {
+                    return;
+                }
+                $loggedcomplete = true;
+            } else if ($now - $lastlogtime < 10) {
+                return;
+            }
+
+            // Log current progress.
+            $lastlogtime = $now;
+            $percent = (int) floor(($bytesdone / $bytestotal) * 100);
+            $logger->info(
+                " -> Progress: {$percent}% (" . display_size($bytesdone) . ' / ' . display_size($bytestotal) . ')'
+            );
+        };
     }
 
     /**

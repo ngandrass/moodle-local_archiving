@@ -7,3 +7,4 @@
 - Supports asynchronous file retrieval from object storage.
 - Periodically report upload progress to job log during processing.
 - Automatically test S3 connection and bucket access rights during plugin configuration.
+- Detection and handling of stalled up- and downloads

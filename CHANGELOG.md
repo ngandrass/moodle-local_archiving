@@ -42,6 +42,7 @@
 - Fix job overview table action button tooltips for Moodle 5.x
 - Localize activity names in archive job creation form titles
 - Display missing job / file delete permission errors early in forms and redirect back to the correct page
+- Deny archive job / file deletion by default (capability: `local/archiving:delete`)
 
 
 ## Version 1.0.0 (2025112300)

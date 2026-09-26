@@ -35,6 +35,8 @@
 - Support course module / activity level archiving capability assignments
 - Prevent log messages of long-running archive jobs from being displayed truncated
 - Gracefully fail during chunked-upload reassembly if chunks are missing
+- Prevent archiving path admin settings from accepting paths inside the Moodle web root directory
+- Resolve symlinks during archiving path admin setting validation to always validate the real path
 
 
 ## Version 1.0.0 (2025112300)

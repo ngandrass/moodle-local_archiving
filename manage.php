@@ -62,6 +62,16 @@ $PAGE->activityheader->disable();
 // Handle POSTed data.
 $outhtml = '';
 if ($action === 'jobdelete') {
+    // Check capability for file deletion but inject $wantsurl as a "continue" target.
+    try {
+        require_capability('local/archiving:delete', $ctx);
+    } catch (\required_capability_exception $e) {
+        if (!empty($wantsurl)) {
+            $e->link = $wantsurl;
+        }
+        throw $e;
+    }
+
     $jobid = required_param('jobid', PARAM_INT);
     $PAGE->set_url(new moodle_url(
         '/local/archiving/manage.php',
@@ -72,16 +82,6 @@ if ($action === 'jobdelete') {
             'wantsurl' => $wantsurl,
         ]
     ));
-
-    // Check capability for file deletion but inject $wantsurl as a "continue" target.
-    try {
-        require_capability('local/archiving:delete', $ctx);
-    } catch (\required_capability_exception $e) {
-        if (!empty($wantsurl)) {
-            $e->link = $wantsurl;
-        }
-        throw $e;
-    }
 
     // Render and handle the job delete form.
     $form = new job_delete_form($contextid, $jobid, $wantsurl);
@@ -97,6 +97,16 @@ if ($action === 'jobdelete') {
         $outhtml .= $form->render();
     }
 } else if ($action === 'filedelete') {
+    // Check capability for file deletion but inject $wantsurl as a "continue" target.
+    try {
+        require_capability('local/archiving:delete', $ctx);
+    } catch (\required_capability_exception $e) {
+        if (!empty($wantsurl)) {
+            $e->link = $wantsurl;
+        }
+        throw $e;
+    }
+
     $filehandleid = required_param('filehandleid', PARAM_INT);
     $PAGE->set_url(new moodle_url(
         '/local/archiving/manage.php',
@@ -107,16 +117,6 @@ if ($action === 'jobdelete') {
             'wantsurl' => $wantsurl,
         ]
     ));
-
-    // Check capability for file deletion but inject $wantsurl as a "continue" target.
-    try {
-        require_capability('local/archiving:delete', $ctx);
-    } catch (\required_capability_exception $e) {
-        if (!empty($wantsurl)) {
-            $e->link = $wantsurl;
-        }
-        throw $e;
-    }
 
     // Render and handle the file delete form.
     $form = new file_delete_form($contextid, $filehandleid, $wantsurl);

@@ -21,6 +21,7 @@
 
     Example context (json):
     {
+        "cancreate": true,
         "archivingenabled": true,
         "archivingenableforced": false,
         "cms": [
@@ -47,10 +48,16 @@
         <div class="col-12">
             <h1>{{#str}} archiving, local_archiving {{/str}}</h1>
             <p>
-                {{#str}} archiving_course_overview_desc, local_archiving {{/str}}
+                {{#cancreate}}
+                    {{#str}} archiving_course_overview_desc, local_archiving {{/str}}
+                {{/cancreate}}
+                {{^cancreate}}
+                    {{#str}} archiving_course_overview_readonly_desc, local_archiving {{/str}}
+                {{/cancreate}}
             </p>
         </div>
     </div>
+    {{#cancreate}}
     {{#archivingenabled}}
         <div class="row mt-2">
             <div class="col-12">
@@ -209,6 +216,7 @@
             </div>
         </div>
     {{/archivingenabled}}
+    {{/cancreate}}
     <div class="row mt-3">
         <div class="col-12">
             <h3>{{#str}} archive_jobs, local_archiving {{/str}}</h3>

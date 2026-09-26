@@ -1,3 +1,0 @@
-[submodule "driver/event/apistub"]
-	path = driver/event/apistub
-	url = https://github.com/ngandrass/moodle-archivingevent_apistub.git

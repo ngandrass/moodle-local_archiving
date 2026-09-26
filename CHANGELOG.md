@@ -39,6 +39,7 @@
 - Resolve symlinks during archiving path admin setting validation to always validate the real path
 - Apply enabled filters to course module names during rendering
 - Display timestamps in archive job overview table and job log in the timezone of the user viewing the page
+- Fix job overview table action button tooltips for Moodle 5.x
 
 
 ## Version 1.0.0 (2025112300)

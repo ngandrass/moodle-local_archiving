@@ -150,7 +150,7 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_user($values) {
-        return '<a href="' . new \moodle_url('/user/profile.php', ['id' => $values->userid]) . '">' . $values->username . '</a>';
+        return \html_writer::link(new \moodle_url('/user/profile.php', ['id' => $values->userid]), s($values->username));
     }
 
     /**
@@ -166,18 +166,30 @@ class job_overview_table extends \table_sql {
         $job = archive_job::get_by_id($values->id);
         $status = archive_job_status::from($values->status)->status_display_args();
 
-        $statustooltiphtml = 'data-toggle="tooltip" data-placement="top" title="' . $status->help . '"';
-        $html = '<span class="badge badge-' . $status->color . '" ' . $statustooltiphtml . '>' . $status->text . '</span><br/>';
+        $html = \html_writer::span($status->text, 'badge badge-' . $status->color, [
+            'data-toggle' => 'tooltip',
+            'data-placement' => 'top',
+            'title' => $status->help,
+        ]);
+        $html .= \html_writer::empty_tag('br');
 
         $progress = $job->get_progress();
         if ($progress !== null && $progress < 100) {
-            // phpcs:ignore
-            $html .= '<span title="'.get_string('progress', 'local_archiving').'" alt="'.get_string('progress', 'local_archiving').'" data-toggle="tooltip" data-placement="top">';
-            $html .= '<i class="fa fa-spinner"></i>&nbsp;' . $progress . '%';
-            $html .= '</span><br/>';
+            $progresslabel = get_string('progress', 'local_archiving');
+            $html .= \html_writer::span(
+                \html_writer::tag('i', '', ['class' => 'fa fa-spinner', 'aria-hidden' => 'true']) . '&nbsp;' . $progress . '%',
+                '',
+                [
+                    'title' => $progresslabel,
+                    'aria-label' => $progresslabel,
+                    'data-toggle' => 'tooltip',
+                    'data-placement' => 'top',
+                ]
+            );
+            $html .= \html_writer::empty_tag('br');
         }
 
-        $html .= '<small>' . date('H:i:s', $values->timemodified) . '</small>';
+        $html .= \html_writer::tag('small', userdate($values->timemodified, '%H:%M:%S'));
 
         return $html;
     }
@@ -199,17 +211,14 @@ class job_overview_table extends \table_sql {
         $files = file_handle::get_by_jobid($values->id);
         if ($job->is_completed() && count($files) > 0) {
             $downloadurl = new \moodle_url('/local/archiving/download.php', ['jobid' => $values->id]);
-            // phpcs:ignore
-            $html .= '<a href="'.$downloadurl.'" class="btn btn-success mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('download').'" alt="'.get_string('download').'"><i class="fa fa-download"></i></a>';
+            $html .= $this->action_button($downloadurl, 'btn-success', get_string('download'), 'fa-download');
         } else {
-            // phpcs:ignore
-            $html .= '<a href="#" class="btn btn-outline-success mx-1 disabled" role="button" alt="'.get_string('download').'" alt="'.get_string('download').'" disabled aria-disabled="true"><i class="fa fa-download"></i></a>';
+            $html .= $this->action_button(null, 'btn-outline-success', get_string('download'), 'fa-download');
         }
 
         // Action: Show logs.
         $logurl = new \moodle_url('/local/archiving/logs.php', ['jobid' => $values->id]);
-        // phpcs:ignore
-        $html .= '<a href="'.$logurl.'" class="btn btn-info mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('logs').'" alt="'.get_string('logs').'"><i class="fa fa-file-waveform"></i></a>';
+        $html .= $this->action_button($logurl, 'btn-info', get_string('logs'), 'fa-file-waveform');
 
         // Action: Delete.
         $deleteurl = new \moodle_url('/local/archiving/manage.php', [
@@ -218,9 +227,43 @@ class job_overview_table extends \table_sql {
             'jobid' => $values->id,
             'wantsurl' => $PAGE->url->out(false),
         ]);
-        // phpcs:ignore
-        $html .= '<a href="'.$deleteurl.'" class="btn btn-danger mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('delete').'" alt="'.get_string('delete').'"><i class="fa fa-trash"></i></a>';
+        $html .= $this->action_button($deleteurl, 'btn-danger', get_string('delete'), 'fa-trash');
 
         return $html;
+    }
+
+    /**
+     * Renders an icon-only action button
+     *
+     * @param \moodle_url|null $url Target of the button, or null to render a disabled button
+     * @param string $btnclass Bootstrap button class (e.g. 'btn-success')
+     * @param string $label Accessible label and tooltip of the button
+     * @param string $icon FontAwesome icon class (e.g. 'fa-download')
+     * @return string HTML code of the button
+     */
+    protected function action_button(?\moodle_url $url, string $btnclass, string $label, string $icon): string {
+        $attributes = [
+            'class' => "btn {$btnclass} mx-1",
+            'role' => 'button',
+            'title' => $label,
+            'aria-label' => $label,
+        ];
+
+        if ($url === null) {
+            $attributes['class'] .= ' disabled';
+            $attributes['aria-disabled'] = 'true';
+            $attributes['tabindex'] = '-1';
+        } else {
+            $attributes['data-toggle'] = 'tooltip';
+            $attributes['data-bs-toggle'] = 'tooltip';
+            $attributes['data-placement'] = 'top';
+            $attributes['data-bs-placement'] = 'top';
+        }
+
+        return \html_writer::link(
+            $url ?? '#',
+            \html_writer::tag('i', '', ['class' => "fa {$icon}", 'aria-hidden' => 'true']),
+            $attributes
+        );
     }
 }

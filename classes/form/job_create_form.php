@@ -135,9 +135,11 @@ class job_create_form extends \moodleform {
     protected function definition_header(): void {
         $this->_form->addElement(
             'html',
-            '<h1>' .
-                get_string('job_create_form_header_typed', 'local_archiving', get_string('pluginname', "mod_{$this->handler}")) .
-            '</h1>'
+            '<h1>' . get_string(
+                'job_create_form_header_typed',
+                'local_archiving',
+                get_string('pluginname', "mod_{$this->cminfo->modname}")
+            ) . '</h1>'
         );
         $this->_form->addElement('html', '<p>' . get_string('job_create_form_header_desc', 'local_archiving') . '</p>');
 

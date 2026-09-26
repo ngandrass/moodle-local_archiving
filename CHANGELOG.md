@@ -40,6 +40,7 @@
 - Apply enabled filters to course module names during rendering
 - Display timestamps in archive job overview table and job log in the timezone of the user viewing the page
 - Fix job overview table action button tooltips for Moodle 5.x
+- Localize activity names in archive job creation form titles
 
 
 ## Version 1.0.0 (2025112300)

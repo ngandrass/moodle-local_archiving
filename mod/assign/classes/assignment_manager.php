@@ -176,9 +176,11 @@ class assignment_manager {
         global $DB;
 
         // Handle submission ID filter.
+        $filterwhereclause = '';
+        $filterparams = [];
         if ($filtersubmissionids) {
-            $submissionidssql = implode(', ', array_map(fn($v): string => intval($v), $filtersubmissionids));
-            $filterwhereclause = "AND s.id IN ({$submissionidssql})";
+            [$idsql, $filterparams] = $DB->get_in_or_equal($filtersubmissionids, SQL_PARAMS_NAMED, 'sid');
+            $filterwhereclause = " AND s.id {$idsql}";
         }
 
         // Get all requested submissions.
@@ -187,11 +189,11 @@ class assignment_manager {
                     s.timecreated, s.timemodified, s.timestarted,
                     u.username, u.firstname, u.lastname, u.email, u.idnumber
              FROM {assign_submission} s LEFT JOIN {user} u ON s.userid = u.id
-             WHERE status = :status AND s.assignment = :assignmentid " . ($filterwhereclause ?? ''),
-            [
+             WHERE status = :status AND s.assignment = :assignmentid " . $filterwhereclause,
+            array_merge([
                 'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
                 'assignmentid' => $this->assignment->get_instance()->id,
-            ]
+            ], $filterparams)
         );
     }
 

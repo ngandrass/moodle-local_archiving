@@ -219,8 +219,15 @@ class quiz_manager {
         global $DB;
 
         // Handle attempt ID filter.
+        $filterwhereclause = '';
+        $filterparams = [];
         if ($filterattemptids) {
-            $filterwhereclause = "AND qa.id IN (" . implode(', ', array_map(fn($v): string => intval($v), $filterattemptids)) . ")";
+            [$idsql, $filterparams] = $DB->get_in_or_equal(
+                array_map(fn($v): string => intval($v), $filterattemptids),
+                SQL_PARAMS_NAMED,
+                'aid'
+            );
+            $filterwhereclause = " AND qa.id {$idsql}";
         }
 
         // Get all requested attempts.
@@ -228,10 +235,8 @@ class quiz_manager {
             "SELECT qa.id AS attemptid, qa.userid, qa.attempt, qa.state, qa.timestart, qa.timefinish, " .
             "       u.username, u.firstname, u.lastname, u.email, u.idnumber " .
             "FROM {quiz_attempts} qa LEFT JOIN {user} u ON qa.userid = u.id " .
-            "WHERE qa.preview = 0 AND qa.quiz = :quizid " . ($filterwhereclause ?? ''),
-            [
-                "quizid" => $this->quiz->id,
-            ]
+            "WHERE qa.preview = 0 AND qa.quiz = :quizid " . $filterwhereclause,
+            array_merge(["quizid" => $this->quiz->id], $filterparams)
         );
     }
 

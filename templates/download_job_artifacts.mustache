@@ -276,13 +276,8 @@
                                         </a>
                                     {{/fetch.showcancel}}
                                     {{^fetch.showcancel}}
-                                        {{! Fetch is not running, show delete button. URL is based on whether the file can be deleted or not. }}
-                                        {{#deleteurl}}
-                                            <a href="{{{deleteurl}}}" class="btn btn-danger mx-1" role="button">
-                                        {{/deleteurl}}
-                                        {{^deleteurl}}
-                                            <a href="#" class="btn btn-outline-danger mx-1 disabled" role="button" aria-disabled="true">
-                                        {{/deleteurl}}
+                                        {{! Fetch is not running, show delete button }}
+                                        <a href="{{{deleteurl}}}" class="btn btn-danger mx-1" role="button">
                                             <i class="fa fa-trash"></i>&nbsp;
                                             {{#str}} delete {{/str}}
                                         </a>

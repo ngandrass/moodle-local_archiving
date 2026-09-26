@@ -155,6 +155,7 @@ class quiz_manager {
      * @return array Array of all attempts IDs together with the userid that were
      * made inside this quiz.
      *
+     * @throws \coding_exception
      * @throws \dml_exception
      */
     public function get_filtered_attempts(array $filterkeys): array {
@@ -170,6 +171,8 @@ class quiz_manager {
                 case attempts_filter::LATEST->value:
                     $filterattempts[] = $this->get_latest_attempt_of_each_user();
                     break;
+                default:
+                    throw new \coding_exception("Unknown attempts filter: {$filter}");
             }
         }
 

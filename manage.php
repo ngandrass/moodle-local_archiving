@@ -73,14 +73,22 @@ if ($action === 'jobdelete') {
         ]
     ));
 
+    // Check capability for file deletion but inject $wantsurl as a "continue" target.
+    try {
+        require_capability('local/archiving:delete', $ctx);
+    } catch (\required_capability_exception $e) {
+        if (!empty($wantsurl)) {
+            $e->link = $wantsurl;
+        }
+        throw $e;
+    }
+
+    // Render and handle the job delete form.
     $form = new job_delete_form($contextid, $jobid, $wantsurl);
 
     if ($form->is_cancelled()) {
         redirect($wantsurl);
     } else if ($form->is_submitted() && $form->is_validated()) {
-        require_capability('local/archiving:delete', $ctx);
-
-        // Perform deletion.
         $job = archive_job::get_by_id($jobid);
         $job->delete();
 
@@ -100,14 +108,22 @@ if ($action === 'jobdelete') {
         ]
     ));
 
+    // Check capability for file deletion but inject $wantsurl as a "continue" target.
+    try {
+        require_capability('local/archiving:delete', $ctx);
+    } catch (\required_capability_exception $e) {
+        if (!empty($wantsurl)) {
+            $e->link = $wantsurl;
+        }
+        throw $e;
+    }
+
+    // Render and handle the file delete form.
     $form = new file_delete_form($contextid, $filehandleid, $wantsurl);
 
     if ($form->is_cancelled()) {
         redirect($wantsurl);
     } else if ($form->is_submitted() && $form->is_validated()) {
-        require_capability('local/archiving:delete', $ctx);
-
-        // Perform deletion.
         $filehandle = file_handle::get_by_id($filehandleid);
         $filehandle->archivingstore()->delete($filehandle);
         $filehandle->mark_as_deleted();

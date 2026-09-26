@@ -104,8 +104,13 @@ if (count($filehandles) == 0) {
             'sha256sum' => $filehandle->sha256sum,
             'tsp' => null,
             'storagedriver' => get_string('pluginname', "archivingstore_{$filehandle->archivingstorename}"),
-            'downloadurl' => null,
-            'deleteurl' => null,
+            'downloadurl' => null, // Populated conditionally below.
+            'deleteurl' => new \moodle_url('/local/archiving/manage.php', [
+                'action' => 'filedelete',
+                'filehandleid' => $filehandle->id,
+                'contextid' => $ctx->id,
+                'wantsurl' => $PAGE->url->out(false),
+            ]),
             'fetch' => null,
         ];
 
@@ -176,15 +181,6 @@ if (count($filehandles) == 0) {
 
                 // Mark page as requiring refreshes while we have active fetch tasks.
                 $needsrefresh = $needsrefresh || $fetch['queued'] || $fetch['fetching'];
-            }
-
-            if (has_capability('local/archiving:delete', $ctx)) {
-                $file['deleteurl'] = new \moodle_url('/local/archiving/manage.php', [
-                    'action' => 'filedelete',
-                    'filehandleid' => $filehandle->id,
-                    'contextid' => $ctx->id,
-                    'wantsurl' => $PAGE->url->out(false),
-                ]);
             }
         }
 

@@ -221,15 +221,13 @@ class job_overview_table extends \table_sql {
         $html .= $this->action_button($logurl, 'btn-info', get_string('logs'), 'fa-file-waveform');
 
         // Action: Delete.
-        if (has_capability('local/archiving:delete', \context::instance_by_id($values->contextid))) {
-            $deleteurl = new \moodle_url('/local/archiving/manage.php', [
-                'action' => 'jobdelete',
-                'contextid' => $values->contextid,
-                'jobid' => $values->id,
-                'wantsurl' => $PAGE->url->out(false),
-            ]);
-            $html .= $this->action_button($deleteurl, 'btn-danger', get_string('delete'), 'fa-trash');
-        }
+        $deleteurl = new \moodle_url('/local/archiving/manage.php', [
+            'action' => 'jobdelete',
+            'contextid' => $values->contextid,
+            'jobid' => $values->id,
+            'wantsurl' => $PAGE->url->out(false),
+        ]);
+        $html .= $this->action_button($deleteurl, 'btn-danger', get_string('delete'), 'fa-trash');
 
         return $html;
     }

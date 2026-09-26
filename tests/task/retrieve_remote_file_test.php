@@ -21,6 +21,9 @@ use local_archiving\local\exception\storage_exception;
 use local_archiving\local\type\file_fetch_status;
 use local_archiving\remote_file_fetcher;
 
+// phpcs:ignore
+defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
+
 require_once(__DIR__ . '/../mock/archivingstore_localdir_mock.php');
 
 /**
@@ -29,10 +32,6 @@ require_once(__DIR__ . '/../mock/archivingstore_localdir_mock.php');
  * @package   local_archiving
  * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-/**
- * Tests for the retrieve_remote_file ad-hoc task.
  */
 final class retrieve_remote_file_test extends \advanced_testcase {
     /**

@@ -24,6 +24,7 @@
 - Fix bug in dynamic file and folder name validation
 - Ensure Moodle 5.2 compatibility
 - Fix `taskid` parameter type (was string, now int) in `process_uploaded_artifact` web service function
+- Add archive worker service link to privacy provider
 
 
 ## Version 1.0.0 (2025102700)

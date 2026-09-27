@@ -24,6 +24,7 @@
 
 namespace archivingmod_assign\privacy;
 
+use core_privacy\local\metadata\collection;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -32,11 +33,31 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Privacy provider for archivingmod_assign
  *
+ * This plugin does not store any personal data itself. All data that passes
+ * through it is temporary and passed to the external worker service. Created
+ * artifacts are stored by the core plugin and are not owned by this plugin.
+ *
  * @codeCoverageIgnore This is handled by Moodle core tests
  */
-class provider implements \core_privacy\local\metadata\null_provider {
-    #[\Override]
-    public static function get_reason(): string {
-        return 'privacy:metadata';
+class provider implements // phpcs:ignore
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\plugin\subplugin_provider {
+    /**
+     * Returns meta data about this plugin.
+     *
+     * @param collection $collection The initialised collection to add items to.
+     * @return collection A listing of user data stored through this system.
+     */
+    public static function get_metadata(collection $collection): collection {
+        $collection->add_external_location_link('archivingmod_assign_worker', [
+            'submissionid' => 'privacy:metadata:worker:submissionid',
+            'submissionreport' => 'privacy:metadata:worker:submissionreport',
+            'assignment' => 'privacy:metadata:worker:assignment',
+            'submission' => 'privacy:metadata:worker:submission',
+            'feedback' => 'privacy:metadata:worker:feedback',
+            'annotation' => 'privacy:metadata:worker:annotation',
+        ], 'privacy:metadata:worker');
+
+        return $collection;
     }
 }

@@ -54,6 +54,8 @@ class provider implements // phpcs:ignore
      */
     public static function get_metadata(collection $collection): collection {
         // Subsystem links.
+        $collection->add_subsystem_link('core_backup', [], 'privacy:metadata:core_backup');
+        $collection->add_subsystem_link('core_external', [], 'privacy:metadata:core_external');
         $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
 
         // Database tables.

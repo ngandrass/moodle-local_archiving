@@ -45,6 +45,7 @@
 - Deny archive job / file deletion by default (capability: `local/archiving:delete`)
 - Add all used subsystems to privacy provider
 - Add archive file metadata table to privacy provider
+- Fix archive jobs from other courses / activities being listed on the archive job overview on context path collisions
 
 
 ## Version 1.0.0 (2025112300)

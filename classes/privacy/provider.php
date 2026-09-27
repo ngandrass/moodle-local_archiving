@@ -82,6 +82,20 @@ class provider implements // phpcs:ignore
             'datavalue' => 'privacy:metadata:' . db_table::METADATA->value . ':datavalue',
         ], 'privacy:metadata:' . db_table::METADATA->value);
 
+        $collection->add_database_table(db_table::FILE_HANDLE->value, [
+            'archivingstore' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':archivingstore',
+            'deleted' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':deleted',
+            'filename' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':filename',
+            'filepath' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':filepath',
+            'filekey' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':filekey',
+            'filesize' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':filesize',
+            'sha256sum' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':sha256sum',
+            'mimetype' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':mimetype',
+            'timecreated' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':timecreated',
+            'timemodified' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':timemodified',
+            'retentiontime' => 'privacy:metadata:' . db_table::FILE_HANDLE->value . ':retentiontime',
+        ], 'privacy:metadata:' . db_table::FILE_HANDLE->value);
+
         $collection->add_database_table(db_table::CONTENT->value, [
             'taskid' => 'privacy:metadata:' . db_table::CONTENT->value . ':taskid',
             'userid' => 'privacy:metadata:' . db_table::CONTENT->value . ':userid',
@@ -180,6 +194,22 @@ class provider implements // phpcs:ignore
                     'timecreated' => $row->timecreated,
                 ], $joblogrows);
 
+                // Fetch file handles associated with job.
+                $jobfilerows = $DB->get_records(db_table::FILE_HANDLE->value, ['jobid' => $job->id]);
+                $files = array_map(fn ($row) => (object) [
+                    'archivingstore' => $row->archivingstore,
+                    'deleted' => $row->deleted,
+                    'filename' => $row->filename,
+                    'filepath' => $row->filepath,
+                    'filekey' => $row->filekey,
+                    'filesize' => $row->filesize,
+                    'sha256sum' => $row->sha256sum,
+                    'mimetype' => $row->mimetype,
+                    'timecreated' => $row->timecreated,
+                    'timemodified' => $row->timemodified,
+                    'retentiontime' => $row->retentiontime,
+                ], $jobfilerows);
+
                 // Export everything related to this job.
                 writer::with_context($context)->export_data(
                     [$subctxbase, "{$jobctxsuffix}: {$job->id}"],
@@ -192,6 +222,7 @@ class provider implements // phpcs:ignore
                         'timemodified' => $job->timemodified,
                         'metadata' => $metadata,
                         'logs' => $logs,
+                        'files' => $files,
                     ]
                 );
             }

@@ -6,6 +6,7 @@
 - Implement store and retrieve callback hooks.
 - Fix missing language string on file storage failure.
 - Ensure Moodle 5.2 compatibility
+- Describe files stored by this plugin in privacy provider
 
 
 ## Version 1.1.0 (2025101300)

@@ -24,6 +24,7 @@
 
 namespace archivingstore_moodle\privacy;
 
+use core_privacy\local\metadata\collection;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -32,11 +33,25 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Privacy provider for archivingstore_moodle
  *
+ * Archive files are stored in the Moodle file store but are not owned by this
+ * plugin. They are instead owned by the core plugin. This privacy provider
+ * therefore solely links the respective subsystem. Please refer to the
+ * local_archiving privacy provider for more information.
+ *
  * @codeCoverageIgnore This is handled by Moodle core tests
  */
-class provider implements \core_privacy\local\metadata\null_provider {
-    #[\Override]
-    public static function get_reason(): string {
-        return 'privacy:metadata';
+class provider implements // phpcs:ignore
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\plugin\subplugin_provider {
+    /**
+     * Returns meta data about this system.
+     *
+     * @param collection $collection The initialised collection to add items to.
+     * @return collection A listing of user data stored through this system.
+     */
+    public static function get_metadata(collection $collection): collection {
+        $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
+
+        return $collection;
     }
 }

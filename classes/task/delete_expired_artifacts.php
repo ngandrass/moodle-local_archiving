@@ -49,12 +49,13 @@ class delete_expired_artifacts extends \core\task\scheduled_task {
     }
 
     /**
-     * Removes all files that have not been accessed recently from the local
-     * Moodle filestore cache.
+     * Deletes all artifacts that have an expired retention time.
      *
-     * Note: The timemodified field is set initially when the file is cached and
-     * is updated whenever it is downloaded to from the local cache. This
-     * prevents actively used cache copies from being deleted.
+     * An artifacts file_handle must be marked with a retention time during
+     * its creation. All file_handles without a retention time will never
+     * expire and be kept indefinitely until deleted manually.
+     *
+     * @throws \dml_exception
      */
     public function execute() {
         // Get all expired artifact file handles.

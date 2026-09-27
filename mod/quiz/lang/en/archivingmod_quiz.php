@@ -38,7 +38,6 @@ $string['question_id'] = 'Question ID';
 $string['remote_worker_enqueue_job_failed'] = 'Failed to enqueue archive job at the remote archive worker service.';
 $string['remote_worker_enqueue_job_failed_a'] = 'Failed to enqueue archive job at the remote archive worker service: {$a}';
 $string['remote_worker_missing_return_param'] = 'The remote archive worker service did not return the expected response. Missing parameter: {$a}';
-$string['setting_autoconfigure'] = 'Automatic configuration';
 $string['setting_enabled'] = 'Enabled';
 $string['setting_enabled_desc'] = 'Enables or disables this activity archiving driver. If disabled, no activities can be archived using this driver.';
 $string['setting_header_archive_worker'] = 'Archive Worker Service';

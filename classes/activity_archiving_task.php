@@ -175,7 +175,7 @@ final class activity_archiving_task {
         $context = \context::instance_by_id($task->contextid);
 
         if (!$context instanceof \context_module) {
-            throw new \moodle_exception('invalidcontext', 'local_archiving');
+            throw new \moodle_exception('invalidcontext', 'error');
         }
 
         return new self(
@@ -208,7 +208,7 @@ final class activity_archiving_task {
             $context = \context::instance_by_id($task->contextid);
 
             if (!$context instanceof \context_module) {
-                throw new \moodle_exception('invalidcontext', 'local_archiving');
+                throw new \moodle_exception('invalidcontext', 'error');
             }
 
             $result[] = new self(
@@ -414,7 +414,7 @@ final class activity_archiving_task {
         global $DB;
 
         if (!$this->is_completed() && !$force) {
-            throw new \moodle_exception('task_settings_cant_be_cleared', 'local_archiving');
+            throw new \moodle_exception('task_not_completed_yet', 'local_archiving');
         }
 
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
@@ -563,7 +563,7 @@ final class activity_archiving_task {
 
         // Validate lifetime.
         if ($lifetimesec <= 0) {
-            throw new \moodle_exception('invalid_wstoken_lifetime', 'local_archiving');
+            throw new \coding_exception('Invalid webservice token lifetime. Must be a positive integer.');
         }
 
         // Invalidate existing token if present.
@@ -654,13 +654,14 @@ final class activity_archiving_task {
      *
      * @param int $progress New task progress in percent (0 to 100)
      * @return void
-     * @throws \moodle_exception If the given progress value is invalid
+     * @throws \coding_exception If the given progress value is invalid
+     * @throws \dml_exception
      */
     public function set_progress(int $progress): void {
         global $DB;
 
         if ($progress < 0 || $progress > 100) {
-            throw new \moodle_exception('invalid_progress_value', 'local_archiving');
+            throw new \coding_exception('Invalid progress value received. Must be between 0 and 100');
         }
 
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
@@ -758,7 +759,7 @@ final class activity_archiving_task {
             $referencestoartifact = $DB->count_records(db_table::TEMPFILE->value, ['fileid' => $artifactfile->get_id()]);
 
             if ($referencestoartifact > 0) {
-                throw new \moodle_exception('artifactfile_still_linked', 'local_archiving');
+                throw new \moodle_exception('artifactfile_still_linked_after_delete', 'local_archiving');
             }
 
             $artifactfile->delete();

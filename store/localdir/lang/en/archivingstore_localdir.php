@@ -32,3 +32,5 @@ $string['setting_enabled'] = 'Enabled';
 $string['setting_enabled_desc'] = 'Enables or disables this storage driver. If disabled, no archives can be sent to or retrieved from this storage.';
 $string['setting_storage_path'] = 'Storage path';
 $string['setting_storage_path_desc'] = 'The absolute path to the directory where archives are stored. This directory must exist and be writable by the web server user.';
+$string['storagepathdoesnotexist'] = 'Storage path does not exist.';
+$string['storagepathnotconfigured'] = 'Storage path was not configured yet.';

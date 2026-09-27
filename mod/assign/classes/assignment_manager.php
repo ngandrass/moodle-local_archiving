@@ -72,14 +72,14 @@ class assignment_manager {
         $ctx = context_module::instance($cmid);
         [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'assign');
         if ($course->id != $courseid) {
-            throw new \moodle_exception('invalidcourseid', 'local_archiving');
+            throw new \moodle_exception('invalidcourseid', 'error');
         }
 
         // Get assignment.
         $assignment = new \assign($ctx, $cm, $course);
         if ($assignment->get_course_module()->id != $this->cmid) {
             // We should never get here but let's be sure.
-            throw new \moodle_exception('assignmentnotfound', 'local_archiving'); // @codeCoverageIgnore
+            throw new \moodle_exception('notfound', 'error'); // @codeCoverageIgnore
         }
 
         $this->course = $course;

@@ -58,14 +58,14 @@ $html = "";
 
 // Only allow successfully finished jobs.
 if ($job->get_status() !== archive_job_status::COMPLETED) {
-    throw new \moodle_exception('job_not_completed', 'local_archiving');
+    throw new \moodle_exception('job_not_completed_yet', 'local_archiving');
 }
 
 // Get file handles for this job.
 $filehandles = file_handle::get_by_jobid($job->get_id());
 if (count($filehandles) == 0) {
     // No file handles found, display error message.
-    $html .= $OUTPUT->notification(get_string('no_files_found', 'local_archiving'), 'error');
+    $html .= $OUTPUT->notification(get_string('nothingtodisplay', 'error'), 'error');
 } else {
     // Files found, prepare template context.
     $tplctx = [

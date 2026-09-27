@@ -85,7 +85,7 @@ class course_util {
             WHERE course.id=:courseid
             ', ['courseid' => $courseid]);
         if (!$coursepath) {
-            throw new \moodle_exception('invalidcourseid');
+            throw new \moodle_exception('invalidcourseid', 'error');
         }
 
         $coursecategories = explode('/', trim($coursepath, '/'));

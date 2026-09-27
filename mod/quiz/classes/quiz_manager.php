@@ -69,7 +69,7 @@ class quiz_manager {
         [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'quiz');
         $quiz = $DB->get_record('quiz', ['id' => $cm->instance], '*', MUST_EXIST);
         if ($course->id != $courseid) {
-            throw new \moodle_exception('invalidcourseid', 'local_archiving');
+            throw new \moodle_exception('invalidcourseid', 'error');
         }
 
         $this->course = $course;

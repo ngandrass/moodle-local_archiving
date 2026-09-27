@@ -69,12 +69,12 @@ if ($form->is_submitted() && $form->is_validated()) {
     // Ensure that manual archive job creation is enabled.
     if (!driver_factory::archiving_trigger('manual')->is_enabled()) {
         // We should never get here if nobody messes with the form. But who knows how creative people might get ;) ...
-        throw new \moodle_exception('manual_job_creation_disabled', 'local_archiving');
+        throw new \moodle_exception('nopermissiontoaccesspage', 'error');
     }
 
     $jobsettings = $form->get_data();
     if (!$jobsettings) {
-        throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
+        throw new \moodle_exception('invaliddata', 'error');
     }
     $job = \local_archiving\archive_job::create($ctx, $USER->id, 'manual', $jobsettings);
     $job->enqueue();

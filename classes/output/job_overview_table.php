@@ -66,7 +66,7 @@ class job_overview_table extends \table_sql {
 
         // Validate context and pre-cache modinfo.
         if (!($ctx instanceof \context_course || $ctx instanceof \context_module)) {
-            throw new \coding_exception(get_string('invalidcontext', 'local_archiving'));
+            throw new \coding_exception(get_string('invalidcontext', 'error'));
         }
 
         $this->coursectx = $ctx->get_course_context();

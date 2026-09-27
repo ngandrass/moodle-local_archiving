@@ -43,7 +43,7 @@ $filehandle = file_handle::get_by_id($filehandleid);
 $job = archive_job::get_by_id($filehandle->jobid);
 $ctx = $job->get_context();
 if ($ctx->id != $contextid) {
-    throw new \moodle_exception('invalidcontext', 'local_archiving');
+    throw new \moodle_exception('invalidcontext', 'error');
 }
 [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
 

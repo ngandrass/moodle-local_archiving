@@ -181,7 +181,8 @@ class process_uploaded_artifact extends external_api {
         }
 
         // Check access rights.
-        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
+        $wstoken = optional_param('wstoken', null, PARAM_TEXT);
+        if (empty($wstoken) || $task->get_webservice_token() !== $wstoken) {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 

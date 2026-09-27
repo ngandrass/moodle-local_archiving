@@ -43,6 +43,7 @@
 - Localize activity names in archive job creation form titles
 - Display missing job / file delete permission errors early in forms and redirect back to the correct page
 - Deny archive job / file deletion by default (capability: `local/archiving:delete`)
+- Provide proper info message when a course contains no supported activities for archiving
 
 
 ## Version 1.0.0 (2025112300)

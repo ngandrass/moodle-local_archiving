@@ -46,6 +46,7 @@
 - Provide proper info message when a course contains no supported activities for archiving
 - Hide archive job creation form for users that don't have the capability to create new archive jobs (`local/archiving:create`)
 - Improve descriptions on archiving overview and job creation pages
+- Fix activity list status pills display for Moodle 5.x
 
 
 ## Version 1.0.0 (2025112300)

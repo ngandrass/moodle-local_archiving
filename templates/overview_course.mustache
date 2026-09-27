@@ -99,7 +99,7 @@
                                     {{#canbearchived}}
                                         {{#lastarchived}}
                                             <span
-                                                class="badge badge-success pb-1 px-2"
+                                                class="badge badge-success text-bg-success pb-1 px-2"
                                                 title="{{#str}} badge_archived_help, local_archiving {{/str}}"
                                                 data-toggle="tooltip"
                                                 data-placement="top"
@@ -110,7 +110,7 @@
                                             </span>
                                             {{#dirty}}
                                                 <span
-                                                    class="badge badge-danger pb-1 px-2"
+                                                    class="badge badge-danger text-bg-danger pb-1 px-2"
                                                     title="{{#str}} badge_new_changes_help, local_archiving {{/str}}"
                                                     data-toggle="tooltip"
                                                     data-placement="top"
@@ -122,7 +122,7 @@
                                         {{/lastarchived}}
                                         {{^lastarchived}}
                                             <span
-                                                class="badge badge-warning pb-1 px-2"
+                                                class="badge badge-warning text-bg-warning pb-1 px-2"
                                                 title="{{#str}} badge_never_archived_help, local_archiving {{/str}}"
                                                 data-toggle="tooltip"
                                                 data-placement="top"
@@ -135,7 +135,7 @@
                                     {{^canbearchived}}
                                         {{^supported}}
                                             <span
-                                                class="badge badge-muted pb-1 px-2"
+                                                class="badge badge-muted text-bg-light pb-1 px-2"
                                                 title="{{#str}} badge_unsupported_help, local_archiving {{/str}}"
                                                 data-toggle="tooltip"
                                                 data-placement="top"
@@ -147,7 +147,7 @@
                                         {{#supported}}
                                             {{^enabled}}
                                                 <span
-                                                    class="badge badge-muted pb-1 px-2"
+                                                    class="badge badge-muted text-bg-light pb-1 px-2"
                                                     title="{{#str}} badge_disabled_help, local_archiving {{/str}}"
                                                     data-toggle="tooltip"
                                                     data-placement="top"
@@ -159,7 +159,7 @@
                                             {{#enabled}}
                                                 {{^ready}}
                                                     <span
-                                                        class="badge badge-danger pb-1 px-2"
+                                                        class="badge badge-danger text-bg-danger pb-1 px-2"
                                                         title="{{#str}} badge_not_ready_help, local_archiving {{/str}}"
                                                         data-toggle="tooltip"
                                                         data-placement="top"
@@ -170,7 +170,7 @@
                                                 {{/ready}}
                                                 {{#ready}}
                                                     <span
-                                                        class="badge badge-danger pb-1 px-2"
+                                                        class="badge badge-danger text-bg-danger pb-1 px-2"
                                                         title="{{#str}} badge_cannot_be_archived_help, local_archiving {{/str}}"
                                                         data-toggle="tooltip"
                                                         data-placement="top"

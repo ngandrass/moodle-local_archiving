@@ -44,6 +44,8 @@
 - Display missing job / file delete permission errors early in forms and redirect back to the correct page
 - Deny archive job / file deletion by default (capability: `local/archiving:delete`)
 - Provide proper info message when a course contains no supported activities for archiving
+- Hide archive job creation form for users that don't have the capability to create new archive jobs (`local/archiving:create`)
+- Improve descriptions on archiving overview and job creation pages
 
 
 ## Version 1.0.0 (2025112300)

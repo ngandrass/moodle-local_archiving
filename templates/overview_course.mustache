@@ -57,13 +57,17 @@
             </p>
         </div>
     </div>
-    {{#cancreate}}
     {{#archivingenabled}}
         <div class="row mt-2">
             <div class="col-12">
                 <h3>{{#str}} activities {{/str}}</h3>
                 <p>
-                    {{#str}} activity_archiving_list_desc, local_archiving {{/str}}
+                    {{#cancreate}}
+                        {{#str}} activity_archiving_list_desc, local_archiving {{/str}}
+                    {{/cancreate}}
+                    {{^cancreate}}
+                        {{#str}} activity_archiving_list_readonly_desc, local_archiving {{/str}}
+                    {{/cancreate}}
                 </p>
                 {{#archivingenableforced}}
                     <div class="alert alert-warning" role="alert">
@@ -216,7 +220,6 @@
             </div>
         </div>
     {{/archivingenabled}}
-    {{/cancreate}}
     <div class="row mt-3">
         <div class="col-12">
             <h3>{{#str}} archive_jobs, local_archiving {{/str}}</h3>

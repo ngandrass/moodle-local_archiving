@@ -69,7 +69,7 @@ $tplctx = [
     ]),
 ];
 
-if ($archivingenabled && $cancreate) {
+if ($archivingenabled) {
     foreach (mod_util::get_cms_with_metadata($courseid, $excludedisabledcms) as $obj) {
         $tplctx['cms'][] = [
             'id' => $obj->cm->id,

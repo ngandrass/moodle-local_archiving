@@ -25,7 +25,8 @@
 // @codingStandardsIgnoreFile
 
 $string['a_archive_jobs'] = '{$a} archive jobs';
-$string['activity_archiving_list_desc'] = 'Below you can find a list of all activities in this course. Supported activities can be archived by clicking the respective entry in the list. If an activity is not supported, it will be disabled.';
+$string['activity_archiving_list_desc'] = 'Below you find a list of all archivable activities in this course. Clicking on any of the activities brings you to the respective archiving page where you can inspect existing archives. The status indicator on the right side shows you if an activity was previously archived and if there have been any changes since then. If an activity is not supported for archiving, it is hidden by default. Click the button in the bottom right corner of the list to show all activities in this course, including unsupported ones.';
+$string['activity_archiving_list_readonly_desc'] = 'Below you find a list of all archivable activities in this course. Clicking on any of the activities brings you to the respective archiving page where you can inspect existing archives. The status indicator on the right side shows you if an activity was previously archived and if there have been any changes since then. If an activity is not supported for archiving, it is hidden by default. Click the button in the bottom right corner of the list to show all activities in this course, including unsupported ones.';
 $string['activity_archiving_task'] = 'Activity archiving task';
 $string['activity_archiving_task_failed'] = 'Activity archiving task failed';
 $string['activitytype'] = 'Activity type';
@@ -59,8 +60,8 @@ $string['archiving:bypasscourserestrictions'] = 'Bypass course category restrict
 $string['archiving:create'] = 'Create new archives';
 $string['archiving:delete'] = 'Delete archives and metadata';
 $string['archiving:view'] = 'View archiving overview page and sub-pages';
-$string['archiving_course_overview_desc'] = 'This page allows to create and access archives for all supported activities in this course.';
-$string['archiving_course_overview_readonly_desc'] = 'This page allows to access archives for all supported activities in this course.';
+$string['archiving_course_overview_desc'] = 'This page allows to create new and access existing archives for all supported activities in this course.';
+$string['archiving_course_overview_readonly_desc'] = 'This page allows to access existing archives for all supported activities in this course.';
 $string['archiving_date'] = 'Archiving date';
 $string['archiving_disabled_for_this_course_by_category'] = 'Archiving has been disabled for the course category this course is part of. Please contact your system administrator if you think this is a mistake.';
 $string['archiving_force_allowed_for_course'] = 'Archiving has been disabled for this course. However, you have the permission to bypass this restriction (<code>local/archiving:bypasscourserestrictions</code>) and thereby are allowed create new archives for activities in this course. Proceed with caution!';

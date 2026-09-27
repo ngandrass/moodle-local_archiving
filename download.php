@@ -65,7 +65,7 @@ if ($job->get_status() !== archive_job_status::COMPLETED) {
 $filehandles = file_handle::get_by_jobid($job->get_id());
 if (count($filehandles) == 0) {
     // No file handles found, display error message.
-    $html .= $OUTPUT->notification(get_string('nothingtodisplay', 'error'), 'error');
+    $html .= $OUTPUT->notification(get_string('nothingtodisplay', 'moodle'), 'error');
 } else {
     // Files found, prepare template context.
     $tplctx = [

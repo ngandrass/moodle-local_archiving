@@ -499,7 +499,7 @@ final class activity_archiving_task {
         // Validate input.
         foreach ($taskcontentmetadata as $entry) {
             if (!($entry instanceof task_content_metadata)) {
-                throw new \coding_exception('invalid_task_content_metadata_entry', 'local_archiving');
+                throw new \coding_exception('Invalid task content metadata entry. Must be an instance of task_content_metadata.');
             }
         }
 

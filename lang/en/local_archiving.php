@@ -29,6 +29,7 @@ $string['activity_archiving_driver_not_enabled'] = 'The activity archiving drive
 $string['activity_archiving_driver_not_ready'] = 'The activity archiving driver for this activity type is not ready for archiving.';
 $string['activity_archiving_list_desc'] = 'Below you can find a list of all activities in this course. Supported activities can be archived by clicking the respective entry in the list. If an activity is not supported, it will be disabled.';
 $string['activity_archiving_task'] = 'Activity archiving task';
+$string['activity_archiving_task_creation_failed'] = 'Creation of the activity archiving task failed.';
 $string['activity_archiving_task_failed'] = 'Activity archiving task failed';
 $string['activity_not_ready_for_archiving'] = 'This activity is currently not ready to be archived.';
 $string['activitytype'] = 'Activity type';

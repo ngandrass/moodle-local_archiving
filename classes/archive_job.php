@@ -237,7 +237,7 @@ class archive_job {
         ) {
             $this->get_logger()->warn("Failed to acquire lock for '{$this->get_lock_resource()}' after {$timeoutsec} seconds.");
             if ($timeouterror) {
-                throw new \moodle_exception('locktimeout');
+                throw new \moodle_exception('locktimeout', 'moodle');
             }
         }
 
@@ -1097,7 +1097,7 @@ class archive_job {
             return $settings->{$key};
         } else {
             if ($strict) {
-                throw new \coding_exception('invalid_job_setting_requested', 'local_archiving');
+                throw new \coding_exception("Setting '{$key}' does not exist for job #{$this->id}");
             }
         }
 
@@ -1186,7 +1186,7 @@ class archive_job {
             return json_decode($record->datavalue);
         } else {
             if ($strict) {
-                throw new \coding_exception('invalid_job_metadata_requested', 'local_archiving');
+                throw new \coding_exception("Metadata entry '{$key}' does not exist for job #{$this->id}");
             }
         }
 

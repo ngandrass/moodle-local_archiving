@@ -10,6 +10,7 @@
 - Add admin settings for worker service connection and archive flattening
 - Finalize Moodle privacy API provider
 - Rename dependency from moodle-quiz-archive-worker to moodle-archiving-worker
+- Setup course and module in `$PAGE` object during `generate_submission_report` web service function
 
 
 ## Version 0.0.3 (2025102700)

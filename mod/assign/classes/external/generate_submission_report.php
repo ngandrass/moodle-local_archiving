@@ -253,6 +253,7 @@ class generate_submission_report extends external_api {
         $PAGE->set_url(new \moodle_url('/webservice/rest/server.php', [
             'wsfunction' => 'archivingmod_assign_generate_submission_report',
         ]));
+        $PAGE->set_cm($manager->get_cm(), $manager->get_course());
 
         // Parse requested sections.
         $sections = [];

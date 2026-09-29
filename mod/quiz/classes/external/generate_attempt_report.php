@@ -258,6 +258,7 @@ class generate_attempt_report extends external_api {
         $PAGE->set_url(new \moodle_url('/webservice/rest/server.php', [
             'wsfunction' => 'archivingmod_quiz_generate_attempt_report',
         ]));
+        $PAGE->set_cm($quizmanager->get_cm(), $quizmanager->get_course());
 
         // Generate attempt report as HTML.
         $sections = [];

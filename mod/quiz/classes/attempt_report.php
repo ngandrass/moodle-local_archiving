@@ -29,7 +29,9 @@ use archivingmod_quiz\local\type\attempt_report_section;
 use local_archiving\local\util\course_util;
 use local_archiving\local\util\report_util;
 use local_archiving\storage;
+use mod_quiz\grade_calculator;
 use mod_quiz\output\attempt_summary_information;
+use mod_quiz\output\grades\grade_out_of;
 use mod_quiz\quiz_attempt;
 
 // phpcs:ignore
@@ -220,6 +222,23 @@ class attempt_report {
                             $formattedgrade = get_string('outof', 'quiz', $a);
                         }
                         $summaryinfo->add_item('grade', get_string('gradenoun'), $formattedgrade);
+
+                        // Grades for extra grade items, if any.
+                        if (!is_null($grade)) {
+                            foreach ($attemptobj->get_grade_item_totals() as $gradeitemid => $gradeoutof) {
+                                $summaryinfo->add_item(
+                                    'marks' . $gradeitemid,
+                                    format_string($gradeoutof->name),
+                                    new grade_out_of(
+                                        $quiz,
+                                        $gradeoutof->grade,
+                                        $gradeoutof->maxgrade,
+                                        style: abs($gradeoutof->maxgrade - 100) < grade_calculator::ALMOST_ZERO ?
+                                            grade_out_of::NORMAL : grade_out_of::WITH_PERCENT
+                                    )
+                                );
+                            }
+                        }
                     }
                 }
             }

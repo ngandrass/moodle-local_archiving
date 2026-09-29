@@ -26,6 +26,7 @@
 - Fix `taskid` parameter type (was string, now int) in `process_uploaded_artifact` web service function
 - Add archive worker service link to privacy provider
 - Setup course and module in `$PAGE` object during `generate_attempt_report` web service function
+- List all defined grade items individually below the overall quiz grade in attempt report headers
 
 
 ## Version 1.0.0 (2025102700)

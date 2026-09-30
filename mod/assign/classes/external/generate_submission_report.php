@@ -39,6 +39,7 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use local_archiving\activity_archiving_task;
+use local_archiving\local\type\paper_format;
 use local_archiving\storage;
 
 /**
@@ -266,11 +267,22 @@ class generate_submission_report extends external_api {
             }
         }
 
+        // Determine correction margin.
+        $settings = $task->get_job()->get_settings();
+        $correctionmargin = 0;
+        if (!empty($settings->correction_margin)) {
+            $correctionmargin = paper_format::from($settings->paper_format)->correction_margin_percent();
+        }
+
         // Generate submission report and attachments data.
         $report = $manager->submission_report();
         $res = [
             'submissionid' => $params['submissionid'],
-            'report' => $report->generate_full_page($params['submissionid'], $sections),
+            'report' => $report->generate_full_page(
+                $params['submissionid'],
+                $sections,
+                marginpercent: $correctionmargin
+            ),
             'attachments' => $manager->get_submission_attachments_metadata($params['submissionid']),
         ];
 

@@ -225,6 +225,29 @@ final class submission_report_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that invalid correction margins are rejected
+     *
+     * @covers \archivingmod_assign\submission_report
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_generate_full_page_with_invalid_correction_margin(): void {
+        $this->resetAfterTest();
+        $testdata = $this::getDataGenerator()->create_assignment_with_text_submission();
+
+        $ctx = \context_module::instance($testdata->cm->id);
+        $assign = new \assign($ctx, $testdata->cm, $testdata->course);
+        $report = new submission_report($testdata->course, $testdata->cm, $assign);
+
+        $this->expectException(\coding_exception::class);
+        $report->generate_full_page($testdata->submission->id, submission_report_section::cases(), false, false, false, -1);
+    }
+
+    /**
      * Tests that generate_submission_filename() correctly substitutes known variables.
      *
      * @covers \archivingmod_assign\submission_report

@@ -122,6 +122,18 @@ class job_create_form extends \local_archiving\form\job_create_form {
         $this->_form->addHelpButton('paper_format', 'task_paper_format', 'archivingmod_assign');
         $this->_form->setDefault('paper_format', $this->config->handler->job_preset_paper_format);
 
+        // Advanced options: Correction margin.
+        $this->_form->addElement(
+            'advcheckbox',
+            'correction_margin',
+            get_string('task_correction_margin', 'archivingmod_assign'),
+            get_string('enable'),
+            $this->config->handler->job_preset_correction_margin_locked ? 'disabled' : null,
+            ['0', '1']
+        );
+        $this->_form->addHelpButton('correction_margin', 'task_correction_margin', 'archivingmod_assign');
+        $this->_form->setDefault('correction_margin', $this->config->handler->job_preset_correction_margin);
+
         // Advanced options: Keep HTML files.
         $this->_form->addElement(
             'advcheckbox',

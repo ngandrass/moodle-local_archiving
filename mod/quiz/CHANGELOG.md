@@ -27,6 +27,7 @@
 - Add archive worker service link to privacy provider
 - Setup course and module in `$PAGE` object during `generate_attempt_report` web service function
 - List all defined grade items individually below the overall quiz grade in attempt report headers
+- Create advanced job option to add correction margins to the right side of generated attempt reports
 
 
 ## Version 1.0.0 (2025102700)

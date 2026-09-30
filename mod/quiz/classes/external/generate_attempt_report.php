@@ -38,6 +38,7 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use local_archiving\activity_archiving_task;
+use local_archiving\local\type\paper_format;
 use local_archiving\storage;
 
 /**
@@ -270,10 +271,21 @@ class generate_attempt_report extends external_api {
                 $sections[] = $sectiontype;
             }
         }
+
+        $settings = $task->get_job()->get_settings();
+        $correctionmargin = 0;
+        if (!empty($settings->correction_margin)) {
+            $correctionmargin = paper_format::from($settings->paper_format)->correction_margin_percent();
+        }
+
         $report = $quizmanager->attempt_report();
         $res = [
             'attemptid' => $params['attemptid'],
-            'report' => $report->generate_full_page($params['attemptid'], $sections),
+            'report' => $report->generate_full_page(
+                $params['attemptid'],
+                $sections,
+                marginpercent: $correctionmargin
+            ),
         ];
 
         // Check for attachments.

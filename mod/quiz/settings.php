@@ -143,6 +143,16 @@ if ($hassiteconfig) {
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);
 
+        // Job preset: Correction margin.
+        $set = new admin_setting_configcheckbox(
+            'archivingmod_quiz/job_preset_correction_margin',
+            get_string('task_correction_margin', 'archivingmod_quiz'),
+            get_string('task_correction_margin_help', 'archivingmod_quiz'),
+            '0',
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $settings->add($set);
+
         // Job preset: Attempt folder name pattern.
         $set = new admin_setting_filename_pattern(
             'archivingmod_quiz/job_preset_attempt_foldername_pattern',

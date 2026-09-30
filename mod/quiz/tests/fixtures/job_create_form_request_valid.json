@@ -42,6 +42,10 @@
 	"export_course_backup": "0",
 	"storage_driver": "moodle",
 	"paper_format": "A4",
+	"correction_margin": [
+		"0",
+		"1"
+	],
 	"keep_html_files": [
 		"0",
 		"1"

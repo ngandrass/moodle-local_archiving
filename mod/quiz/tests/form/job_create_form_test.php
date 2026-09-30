@@ -237,6 +237,7 @@ final class job_create_form_test extends \advanced_testcase {
             [
                 'Locked: export_attempts' => ['export_attempts', 1, 0],
                 'Locked: paper_format' => ['paper_format', 'A3', 'letter'],
+                'Locked: correction_margin' => ['correction_margin', 1, 0],
                 'Locked: keep_html_files' => ['keep_html_files', 1, 0],
                 'Locked: image_optimize' => ['image_optimize', 1, 0],
                 'Locked: image_optimize_width' => ['image_optimize_width', 1024, 100],

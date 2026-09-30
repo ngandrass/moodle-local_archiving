@@ -184,6 +184,28 @@ final class attempt_report_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that invalid correction margins are rejected
+     *
+     * @covers \archivingmod_quiz\attempt_report
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_full_page_with_invalid_correction_margin(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
+
+        $this->expectException(\coding_exception::class);
+        $report->generate_full_page($rc->attemptids[0], attempt_report_section::cases(), false, false, false, 101);
+    }
+
+    /**
      * Tests generation of a report with no header
      *
      * @covers \archivingmod_quiz\attempt_report::generate

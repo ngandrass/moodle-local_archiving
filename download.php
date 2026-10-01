@@ -111,7 +111,7 @@ if (count($filehandles) == 0) {
                 'filehandleid' => $filehandle->id,
                 'contextid' => $ctx->id,
                 'wantsurl' => $PAGE->url->out(false),
-            ]): null,
+            ]) : null,
             'fetch' => null,
         ];
 

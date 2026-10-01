@@ -2,33 +2,33 @@
 
 ## Version X.Y.Z (YYYYMMDDXX)
 
+- Allow exporting only the latest quiz attempt of each user in the generated archive
+- Add support for receiving chunked uploads to enable the transfer of large quiz archives independent of the upload limit
+- Add support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack).
+- Add "Question internals" attempt report section, showing question ID, question bank version, ID number, and tags above each question
 - Add attempt report setting for showing / hiding overall quiz grade
 - Add attempt report setting for showing / hiding question correctness indicators
 - Add attempt report setting for showing / hiding raw marks for questions
-- Add an option to include or exclude the quiz attempts metadata CSV file
-- Allow exporting only the latest quiz attempt of each user in the generated archive
-- Add "Question internals" attempt report section, showing question ID, question bank version, ID number, and tags above each question
+- List all defined grade items individually below the overall quiz grade in attempt report headers
+- Create advanced job option to add correction margins to the right side of generated attempt reports
 - Display the attempting user's email address inside the attempt report header
 - Add `${email}` variable for attempt file- and folder name patterns
 - Include user email address in attempt metadata queries and the `get_attempts_metadata` web service response
-- Add support for receiving chunked uploads to enable the transfer of large quiz archives independent of the upload limit
-- Add support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack).
+- Add an option to include or exclude the quiz attempts metadata CSV file
+- Automatically reschedule archive job for immediate execution if the worker service finished successfully
 - Fix rendering of overall quiz feedback
 - Force wrapping of long lines in code boxes to prevent overflowing out of page boundaries
 - Reduce padding of comment boxes within code boxes to prevent them from overlapping student code
 - Optimize main report container spacing to reduce the amount of whitespace in the generated PDF
-- Forcefully disable unlocked attempt report sections that depend on another disabled section
 - Prevent instance-specific modifications to Moodle header and footer from leaking into printed PDFs (thanks to @abias !)
+- Fix bug in dynamic file and folder name validation
+- Fix `taskid` parameter type (was string, now int) in `process_uploaded_artifact` web service function
+- Setup course and module in `$PAGE` object during `generate_attempt_report` web service function
+- Forcefully disable unlocked attempt report sections that depend on another disabled section
 - Migrate quiz attempt renderer to new quiz attempt summary API
 - Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher
-- Fix bug in dynamic file and folder name validation
 - Ensure Moodle 5.2 compatibility
-- Fix `taskid` parameter type (was string, now int) in `process_uploaded_artifact` web service function
 - Add archive worker service link to privacy provider
-- Setup course and module in `$PAGE` object during `generate_attempt_report` web service function
-- List all defined grade items individually below the overall quiz grade in attempt report headers
-- Create advanced job option to add correction margins to the right side of generated attempt reports
-- Automatically reschedule archive job for immediate execution if the worker service finished successfully
 
 
 ## Version 1.0.0 (2025102700)

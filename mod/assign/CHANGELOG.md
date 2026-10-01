@@ -2,16 +2,15 @@
 
 ## Version X.Y.Z (YYYYMMDDXX)
 
-- Implement full assignment submission archiving pipeline: submission report generation, metadata retrieval, artifact upload, and task status webservices
-- Add remote archive worker driver to enqueue and track archiving jobs on the external worker service
-- Add submission report renderer with configurable report sections (header, instructions, submission, status, comments, feedback, grade, grading details)
-- Add configurable attachment handling (assignment, submission, feedback, annotation files) with per-type selection in the job creation form
+- Implement full assignment submission archiving pipeline: submission report generation, metadata retrieval, and status reporting
+- Make submission reports configurable with various sections (header, instructions, submission, comments, feedback, grading details, ...)
+- Allow configurable file attachment handling (assignment, submission, feedback, annotation files) with per-type selection
+- Provide machine-readable assignment submissions metadata export in CSV format
 - Add folder name and file name pattern generation for archived submissions
-- Add admin settings for worker service connection and archive flattening
+- Allow to decide between flat and hierarchical archive folder structure
+- Re-use existing Moodle archiving worker service for report generation
 - Finalize Moodle privacy API provider
 - Rename dependency from moodle-quiz-archive-worker to moodle-archiving-worker
-- Setup course and module in `$PAGE` object during `generate_submission_report` web service function
-- Create advanced job option to add correction margins to the right side of generated submission reports
 
 
 ## Version 0.0.3 (2025102700)

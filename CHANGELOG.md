@@ -2,57 +2,144 @@
 
 ## Version X.Y.Z (YYYYMMDDXX)
 
-- Update Moodle plugin CI to include Moodle 5.2 and all supported PHP versions
-- Add sub-plugin PHPUnit test execution stage to Moodle plugin CI pipeline
+This is the first big release after the v1.0.0. It features support for archiving assignment activities, a lot of
+improvements under the hood, a simplified repository structure, and a largely extended documentation 🎉
+
+Listed changes are split into categories, reflecting the affected component / (sub-) plugin.
+
+### Archiving Core (`local_archiving`)
+
+- Add an option to flatten the archive structure, placing all files directly in the root directory of the archive.
+- Add support for receiving chunked uploads of archive data from worker services
 - Asynchronously retrieve files from remote storages (e.g., S3 object store) to allow downloading via the Moodle UI
 - Add callback hooks to store and retrieve functions of storage drivers to allow for progress tracking
 - Harden file retrieval logic
-- Add support for receiving chunked uploads of quiz archives
-- Add an option to flatten the archive structure, placing all files directly in the root directory of the archive.
-- Allow exporting only the latest quiz attempt of each user in the generated archive
-- Add an option to include or exclude the quiz attempts metadata CSV file
-- Add support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack) in quizzes.
-- Include core sub-plugins in PHPUnit coverage reports
-- Adapt unit tests to Moodle upstream permission checks
-- Make unit tests ready for PHPUnit 12 (honor current deprecations)
+- Validate file contents against stored checksum when retrieving files from storage to ensure data integrity
+- Let timed out archive jobs remain marked as "Timeout" instead of "Failed" (both are final job states)
+- Fix error reporting when forcefully accessing the archive job artifacts download page of an unfinished job
+- Improve handling of duplicate files in archives
+- Fix display of archiving overview pages for courses that have no supported activities
+- Support course module / activity level archiving capability assignments
+- Deny archive job / file deletion by default (capability: `local/archiving:delete`)
+- Disable delete button in job overview table and on file download page for users that do not possess the `local/archiving:delete` capability
+- Hide archive job creation form for users that don't have the capability to create new archive jobs (`local/archiving:create`)
+- Display missing job / file delete permission errors early in forms and redirect back to the correct page
+- Provide proper info message when a course contains no supported activities for archiving
 - Move sub-plugin directories to plugin root to align with Moodle core conventions
 - Restructure repository to meet Moodle coding style level 2 namespace suggestions
 - Improve Moodle "pluginfile image" inlining logic in report generators
 - Improve archive job logging in storing stage
-- Improve handling of duplicate files in archives
-- Protect sub-plugin enable / disable endpoint from CSRF
-- Let timed out archive jobs remain marked as "Timeout" instead of "Failed" (both are final job states)
-- Fix error reporting when forcefully accessing the archive job artifacts download page of an unfinished job
-- Fix type confusion in default archive job settings exports
-- Fix display of archiving overview pages for courses that have no supported activities
-- Remove TSP data on file handle deletion
+- Prevent log messages of long-running archive jobs from being displayed truncated
 - Clear local artifact cache right away during artifact deletion instead of waiting for the next housekeeping task
 - Ensure proper cleanup of temporary files and data on archive job failure at every stage
 - Gracefully terminate job processing ad-hoc tasks when an archive job is deleted before it has finished
-- Fix race condition between job initialization and ad-hoc cron task execution
-- Validate file contents against stored checksum when retrieving files from storage to ensure data integrity
 - Prevent archive job creation with negative retention time values
-- Support course module / activity level archiving capability assignments
-- Prevent log messages of long-running archive jobs from being displayed truncated
+- Fix race condition between job initialization and ad-hoc cron task execution
+- Enable archiving jobs to be rescheduled for immediate execution
 - Gracefully fail during chunked-upload reassembly if chunks are missing
+- Provide common paper-format based scaling suggestions for correction margins inside activity reports
+- Apply enabled filters to course module names during rendering
+- Localize activity names in archive job creation form titles
+- Display timestamps in archive job overview table and job log in the timezone of the user viewing the page
+- Improve descriptions on archiving overview and job creation pages
+- Fix job overview table action button tooltips for Moodle 5.x
+- Fix activity list status pills display for Moodle 5.x
+- Protect sub-plugin enable / disable endpoint from CSRF
+- Fix type confusion in default archive job settings exports
+- Remove TSP data on file handle deletion
+- Fix archive jobs from other courses / activities being listed on the archive job overview on context path collisions
 - Prevent archiving path admin settings from accepting paths inside the Moodle web root directory
 - Resolve symlinks during archiving path admin setting validation to always validate the real path
-- Apply enabled filters to course module names during rendering
-- Display timestamps in archive job overview table and job log in the timezone of the user viewing the page
-- Fix job overview table action button tooltips for Moodle 5.x
-- Localize activity names in archive job creation form titles
-- Display missing job / file delete permission errors early in forms and redirect back to the correct page
-- Deny archive job / file deletion by default (capability: `local/archiving:delete`)
-- Provide proper info message when a course contains no supported activities for archiving
-- Hide archive job creation form for users that don't have the capability to create new archive jobs (`local/archiving:create`)
-- Disable delete button in job overview table and on file download page for users that do not possess the `local/archiving:delete` capability
-- Improve descriptions on archiving overview and job creation pages
-- Fix activity list status pills display for Moodle 5.x
 - Add all used subsystems to privacy provider
 - Add archive file metadata table to privacy provider
-- Fix archive jobs from other courses / activities being listed on the archive job overview on context path collisions
-- Provide common paper-format based scaling suggestions for correction margins inside activity reports
-- Enable archiving jobs to be rescheduled for immediate execution
+- Update Moodle plugin CI to include Moodle 5.2 and all supported PHP versions
+- Add sub-plugin PHPUnit test execution stage to Moodle plugin CI pipeline
+- Include core sub-plugins in PHPUnit coverage reports
+- Adapt unit tests to Moodle upstream permission checks
+- Make unit tests ready for PHPUnit 12 (honor current deprecations)
+
+### Sub-Plugins
+
+#### Activity Archiving Driver: Assign (`archivingmod_assign`)
+
+- Implement full assignment submission archiving pipeline: submission report generation, metadata retrieval, and status reporting
+- Make submission reports configurable with various sections (header, instructions, submission, comments, feedback, grading details, ...)
+- Allow configurable file attachment handling (assignment, submission, feedback, annotation files) with per-type selection
+- Provide machine-readable assignment submissions metadata export in CSV format
+- Add folder name and file name pattern generation for archived submissions
+- Allow to decide between flat and hierarchical archive folder structure
+- Re-use existing Moodle archiving worker service for report generation
+- Finalize Moodle privacy API provider
+- Rename dependency from moodle-quiz-archive-worker to moodle-archiving-worker
+
+#### Activity Archiving Driver: Quiz (`archivingmod_quiz`)
+
+- Allow exporting only the latest quiz attempt of each user in the generated archive
+- Add support for receiving chunked uploads to enable the transfer of large quiz archives independent of the upload limit
+- Add support for question type [JACK](https://github.com/Wunderbyte-GmbH/moodle_qtype_jack).
+- Add "Question internals" attempt report section, showing question ID, question bank version, ID number, and tags above each question
+- Add attempt report setting for showing / hiding overall quiz grade
+- Add attempt report setting for showing / hiding question correctness indicators
+- Add attempt report setting for showing / hiding raw marks for questions
+- List all defined grade items individually below the overall quiz grade in attempt report headers
+- Create advanced job option to add correction margins to the right side of generated attempt reports
+- Display the attempting user's email address inside the attempt report header
+- Add `${email}` variable for attempt file- and folder name patterns
+- Include user email address in attempt metadata queries and the `get_attempts_metadata` web service response
+- Add an option to include or exclude the quiz attempts metadata CSV file
+- Automatically reschedule archive job for immediate execution if the worker service finished successfully
+- Fix rendering of overall quiz feedback
+- Force wrapping of long lines in code boxes to prevent overflowing out of page boundaries
+- Reduce padding of comment boxes within code boxes to prevent them from overlapping student code
+- Optimize main report container spacing to reduce the amount of whitespace in the generated PDF
+- Prevent instance-specific modifications to Moodle header and footer from leaking into printed PDFs (thanks to @abias !)
+- Fix bug in dynamic file and folder name validation
+- Fix `taskid` parameter type (was string, now int) in `process_uploaded_artifact` web service function
+- Setup course and module in `$PAGE` object during `generate_attempt_report` web service function
+- Forcefully disable unlocked attempt report sections that depend on another disabled section
+- Migrate quiz attempt renderer to new quiz attempt summary API
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher
+- Ensure Moodle 5.2 compatibility
+- Add archive worker service link to privacy provide
+
+#### Storage Driver: Local Directory (`archivingstore_localdir`)
+
+- Install as disabled by default since this plugin requires configuration prior to use.
+- Implement store and retrieve callback hooks.
+- Honor `$CFG->directorypermissions` Moodle config value on target directory creation
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026082900` or higher.
+- Ensure Moodle 5.2 compatibility
+- Describe files stored by this plugin in privacy provider
+
+#### Storage Driver: Moodle Filestore (`archivingstore_moodle`)
+
+- Implement store and retrieve callback hooks.
+- Fix missing language string on file storage failure.
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026082900` or higher.
+- Ensure Moodle 5.2 compatibility
+- Describe files stored by this plugin in privacy provider
+
+#### Storage Driver: S3 Obejct Store (`archivingstore_s3`)
+
+- Initial release of the S3 storage driver for the Moodle archiving subsystem 🎉
+- Implements store, retrieve, and delete functionality.
+- Supports asynchronous file retrieval from object storage.
+- Periodically report upload progress to job log during processing.
+- Automatically test S3 connection and bucket access rights during plugin configuration.
+- Detection and handling of stalled up- and downloads
+
+#### Archiving Trigger: Manual (`archivingtrigger_manual`)
+
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+- Ensure Moodle 5.2 compatibility
+
+#### Archiving Trigger: Scheduled (`archivingtrigger_cron`)
+
+- Install trigger in a disabled state
+- Enable dry-run mode at installation
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+- Adapt unit test to Moodle upstream permission check changes
+- Ensure Moodle 5.2 compatibility
 
 
 ## Version 1.0.0 (2025112300)

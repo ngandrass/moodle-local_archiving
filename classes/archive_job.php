@@ -137,7 +137,7 @@ class archive_job {
 
         // Check context.
         if (!($context instanceof \context_module)) {
-            throw new \moodle_exception('invalid_context', 'local_archiving');
+            throw new \moodle_exception('invalidcontext', 'error');
         }
 
         // Enforce the course category whitelist.
@@ -191,7 +191,7 @@ class archive_job {
         $context = \context::instance_by_id($job->contextid);
 
         if (!($context instanceof \context_module)) {
-            throw new \moodle_exception('invalid_context', 'local_archiving');
+            throw new \moodle_exception('invalidcontext', 'error');
         }
 
         return new self($job->id, $context, $job->userid, $job->origin, $job->timecreated, archive_job_status::from($job->status));
@@ -237,7 +237,7 @@ class archive_job {
         ) {
             $this->get_logger()->warn("Failed to acquire lock for '{$this->get_lock_resource()}' after {$timeoutsec} seconds.");
             if ($timeouterror) {
-                throw new \moodle_exception('locktimeout');
+                throw new \moodle_exception('locktimeout', 'moodle');
             }
         }
 
@@ -760,7 +760,7 @@ class archive_job {
         }
 
         if (!$driver::is_ready()) {
-            throw new \moodle_exception('component_not_ready', 'local_archiving');
+            throw new \moodle_exception('activity_archiving_driver_not_ready', 'local_archiving');
         }
 
         if (!$driver->can_be_archived()) {
@@ -1097,7 +1097,7 @@ class archive_job {
             return $settings->{$key};
         } else {
             if ($strict) {
-                throw new \coding_exception('invalid_job_setting_requested', 'local_archiving');
+                throw new \coding_exception("Setting '{$key}' does not exist for job #{$this->id}");
             }
         }
 
@@ -1116,7 +1116,7 @@ class archive_job {
         global $DB;
 
         if (!$this->is_completed() && !$force) {
-            throw new \moodle_exception('job_settings_cant_be_cleared', 'local_archiving');
+            throw new \moodle_exception('job_not_completed_yet', 'local_archiving');
         }
 
         $DB->update_record(db_table::JOB->value, [
@@ -1186,7 +1186,7 @@ class archive_job {
             return json_decode($record->datavalue);
         } else {
             if ($strict) {
-                throw new \coding_exception('invalid_job_metadata_requested', 'local_archiving');
+                throw new \coding_exception("Metadata entry '{$key}' does not exist for job #{$this->id}");
             }
         }
 

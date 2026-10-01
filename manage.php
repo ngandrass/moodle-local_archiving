@@ -134,7 +134,7 @@ if ($action === 'jobdelete') {
         $outhtml .= $form->render();
     }
 } else {
-    throw new \coding_exception('invalidaction', 'local_archiving');
+    throw new \coding_exception('Invalid action parameter.');
 }
 
 // Render output.

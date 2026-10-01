@@ -282,7 +282,7 @@ class tsp_manager {
         $tspmanager = new self($filehandle);
         $tspdata = $tspmanager->get_tsp_data();
         if (!$tspdata) {
-            throw new \moodle_exception('tsp_data_not_found_for_file', 'local_archiving');
+            throw new \moodle_exception('notfound', 'error');
         }
 
         // Determine the requested file type and contents.

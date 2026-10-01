@@ -47,6 +47,11 @@
 - Hide archive job creation form for users that don't have the capability to create new archive jobs (`local/archiving:create`)
 - Improve descriptions on archiving overview and job creation pages
 - Fix activity list status pills display for Moodle 5.x
+- Add all used subsystems to privacy provider
+- Add archive file metadata table to privacy provider
+- Fix archive jobs from other courses / activities being listed on the archive job overview on context path collisions
+- Provide common paper-format based scaling suggestions for correction margins inside activity reports
+- Enable archiving jobs to be rescheduled for immediate execution
 
 
 ## Version 1.0.0 (2025112300)

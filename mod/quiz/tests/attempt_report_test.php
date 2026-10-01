@@ -184,6 +184,28 @@ final class attempt_report_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that invalid correction margins are rejected
+     *
+     * @covers \archivingmod_quiz\attempt_report
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_generate_full_page_with_invalid_correction_margin(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
+
+        $this->expectException(\coding_exception::class);
+        $report->generate_full_page($rc->attemptids[0], attempt_report_section::cases(), false, false, false, 101);
+    }
+
+    /**
      * Tests generation of a report with no header
      *
      * @covers \archivingmod_quiz\attempt_report::generate
@@ -296,6 +318,75 @@ final class attempt_report_test extends \advanced_testcase {
             $html,
             'Quiz grade found when it should be absent'
         );
+    }
+
+    /**
+     * Tests generation of a report for a quiz with multiple grade items
+     *
+     * @covers \archivingmod_quiz\attempt_report
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_generate_report_with_grade_items(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $quizgenerator = $generator->get_plugin_generator('mod_quiz');
+        $questiongenerator = $generator->get_plugin_generator('core_question');
+
+        // Create a quiz with two true/false questions, each assigned to its own grade item.
+        $course = $generator->create_course();
+        $quiz = $quizgenerator->create_instance(['course' => $course->id, 'grade' => 100, 'sumgrades' => 2]);
+        $cm = get_fast_modinfo($course)->get_cm($quiz->cmid);
+        $category = $questiongenerator->create_question_category();
+        $gradeitems = [
+            1 => $quizgenerator->create_grade_item(['quizid' => $quiz->id, 'name' => 'Grade item A']),
+            2 => $quizgenerator->create_grade_item(['quizid' => $quiz->id, 'name' => 'Grade item B']),
+        ];
+        foreach ($gradeitems as $slot => $gradeitem) {
+            $question = $questiongenerator->create_question('truefalse', null, ['category' => $category->id]);
+            quiz_add_quiz_question($question->id, $quiz, 0, 1);
+            $DB->set_field('quiz_slots', 'quizgradeitemid', $gradeitem->id, ['quizid' => $quiz->id, 'slot' => $slot]);
+        }
+
+        // Create a finished attempt. First question is answered correctly, second one wrong.
+        $student = $generator->create_and_enrol($course, 'student');
+        $this->setUser($student);
+        $attempt = $quizgenerator->create_attempt($quiz->id, $student->id);
+        $quizgenerator->submit_responses($attempt->id, [1 => 'True', 2 => 'False'], false, true);
+        $this->setAdminUser();
+
+        // Generate report with only the header and quiz grade and verify that all grade items are present.
+        $report = new attempt_report($course, $cm, $quiz);
+        $html = $report->generate($attempt->id, [
+            attempt_report_section::HEADER,
+            attempt_report_section::QUIZ_GRADE,
+        ]);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+        foreach ($gradeitems as $gradeitem) {
+            $this->assertMatchesRegularExpression(
+                '/<th[^<>]*>\s*' . preg_quote($gradeitem->name, '/') . '\s*<\/th>/',
+                $html,
+                'Grade item "' . $gradeitem->name . '" not found'
+            );
+        }
+
+        // Generate report with only the header (no quiz grade) and verify that grade items are absent.
+        $html = $report->generate($attempt->id, [
+            attempt_report_section::HEADER,
+        ]);
+        $this->assertNotEmpty($html, 'Generated report is empty');
+        foreach ($gradeitems as $gradeitem) {
+            $this->assertStringNotContainsString(
+                $gradeitem->name,
+                $html,
+                'Grade item "' . $gradeitem->name . '" found when it should be absent'
+            );
+        }
     }
 
     /**

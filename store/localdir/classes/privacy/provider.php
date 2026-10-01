@@ -24,6 +24,7 @@
 
 namespace archivingstore_localdir\privacy;
 
+use core_privacy\local\metadata\collection;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -32,11 +33,27 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Privacy provider for archivingstore_localdir
  *
+ * This plugin does not store any personal data inside Moodle. It stores all
+ * files in a configurable local directory on the server that is external to
+ * Moodle.
+ *
  * @codeCoverageIgnore This is handled by Moodle core tests
  */
-class provider implements \core_privacy\local\metadata\null_provider {
-    #[\Override]
-    public static function get_reason(): string {
-        return 'privacy:metadata';
+class provider implements // phpcs:ignore
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\plugin\subplugin_provider {
+    /**
+     * Returns meta data about this system.
+     *
+     * @param collection $collection The initialised collection to add items to.
+     * @return collection A listing of user data stored through this system.
+     */
+    public static function get_metadata(collection $collection): collection {
+        $collection->add_external_location_link('archivingstore_localdir_storage', [
+            'filename' => 'privacy:metadata:storage:filename',
+            'filecontent' => 'privacy:metadata:storage:filecontent',
+        ], 'privacy:metadata:storage');
+
+        return $collection;
     }
 }

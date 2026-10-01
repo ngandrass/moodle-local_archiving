@@ -36,6 +36,7 @@ use local_archiving\activity_archiving_task;
 use local_archiving\file_reassembler;
 use local_archiving\local\type\activity_archiving_task_status;
 use local_archiving\storage;
+use local_archiving\task\process_archive_job;
 
 
 /**
@@ -181,7 +182,8 @@ class process_uploaded_artifact extends external_api {
         }
 
         // Check access rights.
-        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
+        $wstoken = optional_param('wstoken', null, PARAM_TEXT);
+        if (empty($wstoken) || $task->get_webservice_token() !== $wstoken) {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
@@ -262,8 +264,15 @@ class process_uploaded_artifact extends external_api {
             ];
         }
 
-        // Report success.
+        // Mark task as successful and reschedule the corresponding job.
         $task->set_status(activity_archiving_task_status::FINISHED);
+
+        try {
+            process_archive_job::schedule_now($task->get_job());
+        } catch (\Throwable $e) { // phpcs:ignore
+            // Not critical if we can not reschedule the task. But please always return a web service response!
+        }
+
         return [
             'status' => 'OK',
         ];

@@ -151,6 +151,64 @@ final class process_archive_job_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that a pending job can be pulled forward in the execution queue
+     *
+     * @covers \local_archiving\task\process_archive_job
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_schedule_now(): void {
+        // Create a task that is scheduled for a future run.
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $task = process_archive_job::create($job);
+        $task->set_next_run_time(time() + 300);
+        \core\task\manager::queue_adhoc_task($task);
+
+        $tasks = \core\task\manager::get_adhoc_tasks(process_archive_job::class);
+        $this->assertCount(1, $tasks, 'There should be one ad-hoc task created.');
+        $pendingtask = array_pop($tasks);
+        $this->assertGreaterThan(time(), $pendingtask->get_next_run_time(), 'The task should be scheduled for a future run.');
+
+        // Pull the task forward.
+        process_archive_job::schedule_now($job);
+
+        $tasks = \core\task\manager::get_adhoc_tasks(process_archive_job::class);
+        $this->assertCount(1, $tasks, 'No additional task must be created when scheduling a job immediately.');
+        $scheduledtask = array_pop($tasks);
+        $this->assertEquals($pendingtask->get_id(), $scheduledtask->get_id(), 'The existing task should have been reused.');
+        $this->assertLessThanOrEqual(time(), $scheduledtask->get_next_run_time(), 'The task should be due for execution.');
+    }
+
+    /**
+     * Tests that a job without a pending task gets a new task when scheduled immediately.
+     *
+     * @covers \local_archiving\task\process_archive_job
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_schedule_now_without_pending_task(): void {
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $this->assertEmpty(
+            \core\task\manager::get_adhoc_tasks(process_archive_job::class),
+            'There should be no existing ad-hoc tasks.'
+        );
+
+        process_archive_job::schedule_now($job);
+
+        $tasks = \core\task\manager::get_adhoc_tasks(process_archive_job::class);
+        $this->assertCount(1, $tasks, 'A task should have been created if none was pending.');
+        $this->assertLessThanOrEqual(time(), array_pop($tasks)->get_next_run_time(), 'The task should be due for execution.');
+    }
+
+    /**
      * Tests execution and self-rescheduling of a process_archive_job task.
      *
      * @covers \local_archiving\task\process_archive_job

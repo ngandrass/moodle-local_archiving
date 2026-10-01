@@ -59,7 +59,7 @@ class job_delete_form extends \moodleform {
         // Get and validate job.
         $this->job = archive_job::get_by_id($jobid);
         if ($this->job->get_context()->id != $contextid) {
-            throw new \moodle_exception('invalidcontext', 'local_archiving');
+            throw new \moodle_exception('invalidcontext', 'error');
         }
 
         parent::__construct($PAGE->url);

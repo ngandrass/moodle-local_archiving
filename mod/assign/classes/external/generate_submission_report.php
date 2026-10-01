@@ -39,6 +39,7 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use local_archiving\activity_archiving_task;
+use local_archiving\local\type\paper_format;
 use local_archiving\storage;
 
 /**
@@ -208,7 +209,8 @@ class generate_submission_report extends external_api {
         }
 
         // Check access rights.
-        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
+        $wstoken = optional_param('wstoken', null, PARAM_TEXT);
+        if (empty($wstoken) || $task->get_webservice_token() !== $wstoken) {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
@@ -252,6 +254,7 @@ class generate_submission_report extends external_api {
         $PAGE->set_url(new \moodle_url('/webservice/rest/server.php', [
             'wsfunction' => 'archivingmod_assign_generate_submission_report',
         ]));
+        $PAGE->set_cm($manager->get_cm(), $manager->get_course());
 
         // Parse requested sections.
         $sections = [];
@@ -264,11 +267,22 @@ class generate_submission_report extends external_api {
             }
         }
 
+        // Determine correction margin.
+        $settings = $task->get_job()->get_settings();
+        $correctionmargin = 0;
+        if (!empty($settings->correction_margin)) {
+            $correctionmargin = paper_format::from($settings->paper_format)->correction_margin_percent();
+        }
+
         // Generate submission report and attachments data.
         $report = $manager->submission_report();
         $res = [
             'submissionid' => $params['submissionid'],
-            'report' => $report->generate_full_page($params['submissionid'], $sections),
+            'report' => $report->generate_full_page(
+                $params['submissionid'],
+                $sections,
+                marginpercent: $correctionmargin
+            ),
             'attachments' => $manager->get_submission_attachments_metadata($params['submissionid']),
         ];
 

@@ -70,4 +70,20 @@ enum paper_format: string {
 
     /** @var string US Ledger paper format */
     case LEDGER = 'Ledger';
+
+    /**
+     * Returns an appropriate correction margin size for this paper format
+     *
+     * @return int Percentage of the page width (0 - 100) to use as correction margin
+     */
+    public function correction_margin_percent(): int {
+        return match ($this) {
+            self::DIN_A6 => 15,
+            self::DIN_A5 => 20,
+            self::DIN_A4, self::LETTER, self::LEGAL => 25,
+            self::DIN_A3, self::TABLOID, self::LEDGER => 20,
+            self::DIN_A2 => 15,
+            self::DIN_A1, self::DIN_A0 => 10,
+        };
+    }
 }

@@ -317,6 +317,8 @@ class submission_report {
      * stripped from the generated HTML DOM
      * @param bool $inlineimages If true, all images will be inlined as base64
      * to prevent rendering issues on user side
+     * @param int $marginpercent Percentage of correction margin (0 - 100) to
+     * add to the right of the report
      *
      * @return string HTML DOM of the rendered assignment submission report
      *
@@ -330,9 +332,15 @@ class submission_report {
         array $sections,
         bool $fixrelativeurls = true,
         bool $minimal = true,
-        bool $inlineimages = true
+        bool $inlineimages = true,
+        int $marginpercent = 0
     ): string {
         global $CFG, $OUTPUT, $PAGE;
+
+        // Validate correction margin.
+        if ($marginpercent < 0 || $marginpercent > 100) {
+            throw new \coding_exception('Correction margin percent must be between 0 and 100');
+        }
 
         // Add a assignment archiver specific CSS class to provide a unique CSS selector.
         // This can be used to add additional styling to the submission report page accessed by the worker,
@@ -415,6 +423,17 @@ class submission_report {
                 }
             ");
             $dom->getElementsByTagName('head')[0]->appendChild($csshacksnode);
+        }
+
+        // Add correction margin if desired.
+        if ($marginpercent > 0) {
+            $correctionmargincssnode = $dom->createElement("style", "
+                /* Add correction margin to the right of the page */
+                body {
+                    margin-right: {$marginpercent}%;
+                }
+            ");
+            $dom->getElementsByTagName('head')[0]->appendChild($correctionmargincssnode);
         }
 
         // Convert all local images to base64 if desired.

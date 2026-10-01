@@ -60,13 +60,13 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function __construct(string $uniqueid, \context $ctx) {
-        global $OUTPUT, $PAGE;
+        global $DB, $OUTPUT, $PAGE;
 
         parent::__construct($uniqueid);
 
         // Validate context and pre-cache modinfo.
         if (!($ctx instanceof \context_course || $ctx instanceof \context_module)) {
-            throw new \coding_exception(get_string('invalidcontext', 'local_archiving'));
+            throw new \coding_exception(get_string('invalidcontext', 'error'));
         }
 
         $this->coursectx = $ctx->get_course_context();
@@ -103,9 +103,12 @@ class job_overview_table extends \table_sql {
             '{' . db_table::JOB->value . '} j ' .
                 'JOIN {user} u ON j.userid = u.id ' .
                 'JOIN {context} ctx ON ctx.id = j.contextid',
-            "ctx.path LIKE :ctxpath",
+            // We match the context directly by id, or any of its children by path. The seperation is required because
+            // the path must have a trailing slash to avoid matching contexts with a similar path (e.g., /1/3/25 vs. /1/3/250).
+            '(ctx.id = :ctxid OR ' . $DB->sql_like('ctx.path', ':ctxpath') . ')',
             [
-                'ctxpath' => $ctx->path . '%',
+                'ctxid' => $ctx->id,
+                'ctxpath' => $ctx->path . '/%',
             ]
         );
 

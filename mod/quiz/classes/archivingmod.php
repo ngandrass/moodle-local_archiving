@@ -63,10 +63,10 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         // Try to get course, cm info, and quiz.
         [$this->course, $this->cm] = get_course_and_cm_from_cmid($this->cmid, 'quiz');
         if (empty($this->cm)) {
-            throw new \moodle_exception('invalid_cmid', 'archivingmod_quiz'); // @codeCoverageIgnore
+            throw new \moodle_exception('invalidcoursemodule', 'error'); // @codeCoverageIgnore
         }
         if ($this->course->id != $this->courseid) {
-            throw new \moodle_exception('invalid_courseid', 'archivingmod_quiz'); // @codeCoverageIgnore
+            throw new \moodle_exception('invalidcourseid', 'error'); // @codeCoverageIgnore
         }
         $this->quizid = $this->cm->instance;
     }

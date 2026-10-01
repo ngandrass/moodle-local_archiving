@@ -45,6 +45,7 @@
 - Deny archive job / file deletion by default (capability: `local/archiving:delete`)
 - Provide proper info message when a course contains no supported activities for archiving
 - Hide archive job creation form for users that don't have the capability to create new archive jobs (`local/archiving:create`)
+- Disable delete button in job overview table and on file download page for users that do not possess the `local/archiving:delete` capability
 - Improve descriptions on archiving overview and job creation pages
 - Fix activity list status pills display for Moodle 5.x
 - Add all used subsystems to privacy provider

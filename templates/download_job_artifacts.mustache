@@ -277,10 +277,33 @@
                                     {{/fetch.showcancel}}
                                     {{^fetch.showcancel}}
                                         {{! Fetch is not running, show delete button }}
-                                        <a href="{{{deleteurl}}}" class="btn btn-danger mx-1" role="button">
-                                            <i class="fa fa-trash"></i>&nbsp;
-                                            {{#str}} delete {{/str}}
-                                        </a>
+                                        {{#deleteurl}}
+                                            <a href="{{{deleteurl}}}" class="btn btn-danger mx-1" role="button">
+                                                <i class="fa fa-trash"></i>&nbsp;
+                                                {{#str}} delete {{/str}}
+                                            </a>
+                                        {{/deleteurl}}
+                                        {{^deleteurl}}
+                                            <span
+                                                class="d-inline-block"
+                                                title="{{#str}} deletion_prohibited_by_capability, local_archiving {{/str}}"
+                                                data-toggle="tooltip"
+                                                data-bs-toggle="tooltip"
+                                                data-placement="top"
+                                                data-bs-placement="top"
+                                            >
+                                                <a
+                                                    href="#"
+                                                    class="btn btn-outline-danger disabled mx-1"
+                                                    role="button"
+                                                    aria-disabled="true"
+                                                    tabindex="-1"
+                                                >
+                                                    <i class="fa fa-trash"></i>&nbsp;
+                                                    {{#str}} delete {{/str}}
+                                                </a>
+                                            </span>
+                                        {{/deleteurl}}
                                     {{/fetch.showcancel}}
                                 {{/fetch.cancelling}}
                             </div>

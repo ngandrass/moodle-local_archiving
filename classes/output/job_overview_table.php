@@ -245,7 +245,7 @@ class job_overview_table extends \table_sql {
             $html .= $this->action_button(
                 null,
                 'btn-outline-danger',
-                get_string('delete_job_prohibited_by_capability', 'local_archiving'),
+                get_string('deletion_prohibited_by_capability', 'local_archiving'),
                 'fa-trash'
             );
         }
@@ -276,7 +276,6 @@ class job_overview_table extends \table_sql {
         $wrapperattributes = [
             'class' => 'd-inline-block',
             'title' => $label,
-            'aria-label' => $label,
             'data-toggle' => 'tooltip',
             'data-bs-toggle' => 'tooltip',
             'data-placement' => 'top',

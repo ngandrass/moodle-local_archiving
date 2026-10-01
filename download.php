@@ -44,6 +44,7 @@ $ctx = $job->get_context();
 // Check login and capabilities.
 require_login($course, false, $cm);
 require_capability('local/archiving:view', $ctx);
+$candelete = has_capability('local/archiving:delete', $ctx);
 
 // Setup page.
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
@@ -105,12 +106,12 @@ if (count($filehandles) == 0) {
             'tsp' => null,
             'storagedriver' => get_string('pluginname', "archivingstore_{$filehandle->archivingstorename}"),
             'downloadurl' => null, // Populated conditionally below.
-            'deleteurl' => new \moodle_url('/local/archiving/manage.php', [
+            'deleteurl' => $candelete ? new \moodle_url('/local/archiving/manage.php', [
                 'action' => 'filedelete',
                 'filehandleid' => $filehandle->id,
                 'contextid' => $ctx->id,
                 'wantsurl' => $PAGE->url->out(false),
-            ]),
+            ]): null,
             'fetch' => null,
         ];
 

@@ -59,9 +59,9 @@ if (!$archivingenabled && has_capability('local/archiving:bypasscourserestrictio
 }
 
 $tplctx = [
-    'cancreate' => $cancreate,
     'archivingenabled' => $archivingenabled,
     'archivingenableforced' => $archivingenableforced,
+    'cancreate' => $cancreate,
     'hidedisabledcms' => $excludedisabledcms,
     'hidedisabledcmsurl' => new \moodle_url('/local/archiving/index.php', [
         'courseid' => $courseid,

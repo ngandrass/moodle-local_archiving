@@ -23,6 +23,7 @@
     {
         "archivingenabled": true,
         "archivingenableforced": false,
+        "cancreate": true,
         "cms": [
             {
                 "name": "Activity name",
@@ -47,7 +48,12 @@
         <div class="col-12">
             <h1>{{#str}} archiving, local_archiving {{/str}}</h1>
             <p>
-                {{#str}} archiving_course_overview_desc, local_archiving {{/str}}
+                {{#cancreate}}
+                    {{#str}} archiving_course_overview_desc, local_archiving {{/str}}
+                {{/cancreate}}
+                {{^cancreate}}
+                    {{#str}} archiving_course_overview_readonly_desc, local_archiving {{/str}}
+                {{/cancreate}}
             </p>
         </div>
     </div>
@@ -56,7 +62,12 @@
             <div class="col-12">
                 <h3>{{#str}} activities {{/str}}</h3>
                 <p>
-                    {{#str}} activity_archiving_list_desc, local_archiving {{/str}}
+                    {{#cancreate}}
+                        {{#str}} activity_archiving_list_desc, local_archiving {{/str}}
+                    {{/cancreate}}
+                    {{^cancreate}}
+                        {{#str}} activity_archiving_list_readonly_desc, local_archiving {{/str}}
+                    {{/cancreate}}
                 </p>
                 {{#archivingenableforced}}
                     <div class="alert alert-warning" role="alert">
@@ -88,7 +99,7 @@
                                     {{#canbearchived}}
                                         {{#lastarchived}}
                                             <span
-                                                class="badge badge-success pb-1 px-2"
+                                                class="badge badge-success text-bg-success pb-1 px-2"
                                                 title="{{#str}} badge_archived_help, local_archiving {{/str}}"
                                                 data-toggle="tooltip"
                                                 data-placement="top"
@@ -99,7 +110,7 @@
                                             </span>
                                             {{#dirty}}
                                                 <span
-                                                    class="badge badge-danger pb-1 px-2"
+                                                    class="badge badge-danger text-bg-danger pb-1 px-2"
                                                     title="{{#str}} badge_new_changes_help, local_archiving {{/str}}"
                                                     data-toggle="tooltip"
                                                     data-placement="top"
@@ -111,7 +122,7 @@
                                         {{/lastarchived}}
                                         {{^lastarchived}}
                                             <span
-                                                class="badge badge-warning pb-1 px-2"
+                                                class="badge badge-warning text-bg-warning pb-1 px-2"
                                                 title="{{#str}} badge_never_archived_help, local_archiving {{/str}}"
                                                 data-toggle="tooltip"
                                                 data-placement="top"
@@ -124,7 +135,7 @@
                                     {{^canbearchived}}
                                         {{^supported}}
                                             <span
-                                                class="badge badge-muted pb-1 px-2"
+                                                class="badge badge-muted text-bg-light pb-1 px-2"
                                                 title="{{#str}} badge_unsupported_help, local_archiving {{/str}}"
                                                 data-toggle="tooltip"
                                                 data-placement="top"
@@ -136,7 +147,7 @@
                                         {{#supported}}
                                             {{^enabled}}
                                                 <span
-                                                    class="badge badge-muted pb-1 px-2"
+                                                    class="badge badge-muted text-bg-light pb-1 px-2"
                                                     title="{{#str}} badge_disabled_help, local_archiving {{/str}}"
                                                     data-toggle="tooltip"
                                                     data-placement="top"
@@ -148,7 +159,7 @@
                                             {{#enabled}}
                                                 {{^ready}}
                                                     <span
-                                                        class="badge badge-danger pb-1 px-2"
+                                                        class="badge badge-danger text-bg-danger pb-1 px-2"
                                                         title="{{#str}} badge_not_ready_help, local_archiving {{/str}}"
                                                         data-toggle="tooltip"
                                                         data-placement="top"
@@ -159,7 +170,7 @@
                                                 {{/ready}}
                                                 {{#ready}}
                                                     <span
-                                                        class="badge badge-danger pb-1 px-2"
+                                                        class="badge badge-danger text-bg-danger pb-1 px-2"
                                                         title="{{#str}} badge_cannot_be_archived_help, local_archiving {{/str}}"
                                                         data-toggle="tooltip"
                                                         data-placement="top"
@@ -176,8 +187,8 @@
                         </a>
                     {{/cms}}
                     {{^cms}}
-                        <li class="list-group-item">
-                            Nothing to show... TODO
+                        <li class="list-group-item list-group-item-info py-3">
+                            {{#str}} nothingtodisplay, moodle {{/str}}
                         </li>
                     {{/cms}}
                 </div>

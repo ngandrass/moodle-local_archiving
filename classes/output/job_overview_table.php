@@ -49,6 +49,9 @@ class job_overview_table extends \table_sql {
     /** @var \course_modinfo Cached course_modinfo object */
     protected \course_modinfo $coursemodinfo;
 
+    /** @var bool Stores whether the viewing user has the capability to delete archive jobs */
+    protected bool $usercandelete = false;
+
     /**
      * Constructor
      *
@@ -71,6 +74,7 @@ class job_overview_table extends \table_sql {
 
         $this->coursectx = $ctx->get_course_context();
         $this->coursemodinfo = get_fast_modinfo($this->coursectx->instanceid);
+        $this->usercandelete = has_capability('local/archiving:delete', $ctx);
 
         $refreshhtml = $OUTPUT->render_from_template('local_archiving/components/refresh_button', [
             'lastupdated' => time(),
@@ -216,7 +220,12 @@ class job_overview_table extends \table_sql {
             $downloadurl = new \moodle_url('/local/archiving/download.php', ['jobid' => $values->id]);
             $html .= $this->action_button($downloadurl, 'btn-success', get_string('download'), 'fa-download');
         } else {
-            $html .= $this->action_button(null, 'btn-outline-success', get_string('download'), 'fa-download');
+            $html .= $this->action_button(
+                null,
+                'btn-outline-success',
+                get_string('files_require_successful_job', 'local_archiving'),
+                'fa-download'
+            );
         }
 
         // Action: Show logs.
@@ -224,19 +233,32 @@ class job_overview_table extends \table_sql {
         $html .= $this->action_button($logurl, 'btn-info', get_string('logs'), 'fa-file-waveform');
 
         // Action: Delete.
-        $deleteurl = new \moodle_url('/local/archiving/manage.php', [
-            'action' => 'jobdelete',
-            'contextid' => $values->contextid,
-            'jobid' => $values->id,
-            'wantsurl' => $PAGE->url->out(false),
-        ]);
-        $html .= $this->action_button($deleteurl, 'btn-danger', get_string('delete'), 'fa-trash');
+        if ($this->usercandelete) {
+            $deleteurl = new \moodle_url('/local/archiving/manage.php', [
+                'action' => 'jobdelete',
+                'contextid' => $values->contextid,
+                'jobid' => $values->id,
+                'wantsurl' => $PAGE->url->out(false),
+            ]);
+            $html .= $this->action_button($deleteurl, 'btn-danger', get_string('delete'), 'fa-trash');
+        } else {
+            $html .= $this->action_button(
+                null,
+                'btn-outline-danger',
+                get_string('deletion_prohibited_by_capability', 'local_archiving'),
+                'fa-trash'
+            );
+        }
 
         return $html;
     }
 
     /**
-     * Renders an icon-only action button
+     * Renders an icon-only action button.
+     *
+     * We create a wrapper span around the button to ensure that the tooltip is
+     * displayed even when the button is disabled. Otherwise pointer events will
+     * be ignored by the browser.
      *
      * @param \moodle_url|null $url Target of the button, or null to render a disabled button
      * @param string $btnclass Bootstrap button class (e.g. 'btn-success')
@@ -245,28 +267,38 @@ class job_overview_table extends \table_sql {
      * @return string HTML code of the button
      */
     protected function action_button(?\moodle_url $url, string $btnclass, string $label, string $icon): string {
-        $attributes = [
+        $btnattributes = [
             'class' => "btn {$btnclass} mx-1",
             'role' => 'button',
             'title' => $label,
             'aria-label' => $label,
         ];
+        $wrapperattributes = [
+            'class' => 'd-inline-block',
+            'title' => $label,
+            'data-toggle' => 'tooltip',
+            'data-bs-toggle' => 'tooltip',
+            'data-placement' => 'top',
+            'data-bs-placement' => 'top',
+        ];
 
+        // Render buttons with null URLs as disabled.
         if ($url === null) {
-            $attributes['class'] .= ' disabled';
-            $attributes['aria-disabled'] = 'true';
-            $attributes['tabindex'] = '-1';
-        } else {
-            $attributes['data-toggle'] = 'tooltip';
-            $attributes['data-bs-toggle'] = 'tooltip';
-            $attributes['data-placement'] = 'top';
-            $attributes['data-bs-placement'] = 'top';
+            $btnattributes['class'] .= ' disabled';
+            $btnattributes['aria-disabled'] = 'true';
+            $btnattributes['tabindex'] = '-1';
         }
 
-        return \html_writer::link(
+        $buttonhtml = \html_writer::link(
             $url ?? '#',
             \html_writer::tag('i', '', ['class' => "fa {$icon}", 'aria-hidden' => 'true']),
-            $attributes
+            $btnattributes
+        );
+
+        return \html_writer::span(
+            $buttonhtml,
+            "",
+            $wrapperattributes
         );
     }
 }

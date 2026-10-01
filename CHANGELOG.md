@@ -47,6 +47,7 @@
 - Add archive file metadata table to privacy provider
 - Fix archive jobs from other courses / activities being listed on the archive job overview on context path collisions
 - Provide common paper-format based scaling suggestions for correction margins inside activity reports
+- Enable archiving jobs to be rescheduled for immediate execution
 
 
 ## Version 1.0.0 (2025112300)

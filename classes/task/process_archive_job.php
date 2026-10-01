@@ -80,11 +80,36 @@ class process_archive_job extends \core\task\adhoc_task {
     }
 
     /**
+     * Pull this existing task forward in the scheduler queue to be executed as soon as possible.
+     *
+     * If no instance of this task is scheduled, a new one will be creaded and scheduled for immediate
+     * execution.
+     *
+     * In contrast to reschedule(), which is called to queue a later successor instance of this task,
+     * this function will modify an existing task by setting its next run time to the current time,
+     * thereby pulling it to the * front of the Moodle execution queue. This can be used if, for
+     * example, an external archiving worker finished asynchronous work and the bussiness logic is
+     * waiting for the rescheduled task instance.
+     *
+     * @param archive_job $job Archive job to process as soon as possible
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public static function schedule_now(archive_job $job): void {
+        $task = self::create($job);
+        $task->set_next_run_time(time());
+        \core\task\manager::reschedule_or_queue_adhoc_task($task);
+    }
+
+    /**
      * Retrieves the archive job that is associated with this task
      *
      * @return archive_job Archive job this task processes
      * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function get_archive_job(): archive_job {
         // TODO (MDL-0): Maybe cache this inside self, if performance becomes an issue.

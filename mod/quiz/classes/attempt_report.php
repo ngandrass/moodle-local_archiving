@@ -468,8 +468,8 @@ class attempt_report {
         if ($marginpercent > 0) {
             $correctionmargincssnode = $dom->createElement("style", "
                 /* Add correction margin to the right of the page */
-                body {
-                    margin-right: {$marginpercent}%;
+                #region-main {
+                    margin-right: {$marginpercent}% !important;
                 }
             ");
             $dom->getElementsByTagName('head')[0]->appendChild($correctionmargincssnode);

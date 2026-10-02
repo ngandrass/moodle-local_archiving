@@ -347,6 +347,8 @@ class submission_report {
         // for example by specifying additional (s)css in the theme scss setting in the moodle administration.
         $PAGE->add_body_class('assign-archiver-report');
 
+        $PAGE->activityheader->disable();
+
         // Build HTML tree.
         $html = "";
         $html .= $OUTPUT->header();

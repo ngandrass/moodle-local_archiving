@@ -495,7 +495,13 @@ class submission_report {
             'courseid' => $this->course->id ?: 0,
             'coursename' => $this->course->fullname ?: 'null',
             'courseshortname' => $this->course->shortname ?: 'null',
+            'createddatetime' => !empty($submissioninfo->timecreated)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $submissioninfo->timecreated)
+                : 'null',
             'date' => date('Y-m-d'),
+            'duedatetime' => !empty($assigninstance->duedate)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $assigninstance->duedate)
+                : 'null',
             'email' => str_replace('.', '_', $userinfo->email) ?: 'null',
             'firstname' => $userinfo->firstname ?: 'null',
             'groupidnumbers' => join('-', array_map(fn($group) => $group->idnumber ?: 'null', $usergroups)) ?: 0,
@@ -503,6 +509,15 @@ class submission_report {
             'groupnames' => join('-', array_map(fn($group) => $group->name, $usergroups)) ?: 'nogroup',
             'idnumber' => $userinfo->idnumber ?: 'null',
             'lastname' => $userinfo->lastname ?: 'null',
+            'modifieddatetime' => !empty($submissioninfo->timemodified)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $submissioninfo->timemodified)
+                : 'null',
+            'opendatetime' => !empty($assigninstance->allowsubmissionsfromdate)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $assigninstance->allowsubmissionsfromdate)
+                : 'null',
+            'startdatetime' => !empty($submissioninfo->timestarted)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $submissioninfo->timestarted)
+                : 'null',
             'submissionid' => $submissionid ?: 0,
             'time' => date('H-i-s'),
             'timecreated' => $submissioninfo->timecreated ?: 0,

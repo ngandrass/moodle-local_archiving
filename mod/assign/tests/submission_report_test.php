@@ -311,6 +311,102 @@ final class submission_report_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that generate_submission_filename() expands datetime variables in
+     * human-readable format.
+     *
+     * @covers \archivingmod_assign\submission_report
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \moodle_exception
+     */
+    public function test_generate_submission_filename_substitutes_datetime_variables(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $testdata = $this::getDataGenerator()->create_assignment_with_text_submission();
+
+        // Set fixed timestamps before the assignment instance is loaded.
+        $times = [
+            'allowsubmissionsfromdate' => 1790805783,
+            'duedate' => 1790892420,
+            'timestarted' => 1790810000,
+            'timecreated' => 1790811000,
+            'timemodified' => 1790812000,
+        ];
+        $DB->update_record('assign', (object) [
+            'id' => $testdata->assignment->id,
+            'allowsubmissionsfromdate' => $times['allowsubmissionsfromdate'],
+            'duedate' => $times['duedate'],
+        ]);
+        $DB->update_record('assign_submission', (object) [
+            'id' => $testdata->submission->id,
+            'timestarted' => $times['timestarted'],
+            'timecreated' => $times['timecreated'],
+            'timemodified' => $times['timemodified'],
+        ]);
+
+        $ctx = \context_module::instance($testdata->cm->id);
+        $assign = new \assign($ctx, $testdata->cm, $testdata->course);
+        $report = new submission_report($testdata->course, $testdata->cm, $assign);
+
+        $filename = $report->generate_submission_filename(
+            $testdata->submission->id,
+            '${opendatetime}-${duedatetime}-${startdatetime}-${createddatetime}-${modifieddatetime}',
+            false
+        );
+
+        $this->assertSame(
+            date('Y-m-d_H-i-s', $times['allowsubmissionsfromdate']) . '-' .
+            date('Y-m-d_H-i-s', $times['duedate']) . '-' .
+            date('Y-m-d_H-i-s', $times['timestarted']) . '-' .
+            date('Y-m-d_H-i-s', $times['timecreated']) . '-' .
+            date('Y-m-d_H-i-s', $times['timemodified']),
+            $filename,
+            'Datetime variables were not expanded correctly in filename'
+        );
+    }
+
+    /**
+     * Tests that generate_submission_filename() expands unset datetime variables
+     * to 'null'.
+     *
+     * @covers \archivingmod_assign\submission_report
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \moodle_exception
+     */
+    public function test_generate_submission_filename_unset_datetime_variables(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $testdata = $this::getDataGenerator()->create_assignment_with_text_submission();
+
+        // Clear dates before the assignment instance is loaded.
+        $DB->update_record('assign', (object) [
+            'id' => $testdata->assignment->id,
+            'allowsubmissionsfromdate' => 0,
+            'duedate' => 0,
+        ]);
+        $DB->set_field('assign_submission', 'timestarted', null, ['id' => $testdata->submission->id]);
+
+        $ctx = \context_module::instance($testdata->cm->id);
+        $assign = new \assign($ctx, $testdata->cm, $testdata->course);
+        $report = new submission_report($testdata->course, $testdata->cm, $assign);
+
+        $filename = $report->generate_submission_filename(
+            $testdata->submission->id,
+            'submission-${opendatetime}-${duedatetime}-${startdatetime}',
+            false
+        );
+
+        $this->assertSame('submission-null-null-null', $filename, 'Unset datetime variables were not expanded to null');
+    }
+
+    /**
      * Tests that generate_submission_filename() preserves path separators when
      * generating a folder name.
      *

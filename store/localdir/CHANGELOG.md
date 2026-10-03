@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.2.0 (2026092700)
 
 - Install as disabled by default since this plugin requires configuration prior to use.
 - Implement store and retrieve callback hooks.

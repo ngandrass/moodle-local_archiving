@@ -531,11 +531,23 @@ class attempt_report {
             'groupidnumbers' => join('-', array_map(fn($group) => $group->idnumber ?: 'null', $usergroups)) ?: 0,
             'groupnames' => join('-', array_map(fn($group) => $group->name, $usergroups)) ?: 'nogroup',
             'quizname' => $this->quiz->name ?: 'null',
+            'opendatetime' => !empty($this->quiz->timeopen)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $this->quiz->timeopen)
+                : 'null',
+            'closedatetime' => !empty($this->quiz->timeclose)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $this->quiz->timeclose)
+                : 'null',
             'timestamp' => time(),
             'date' => date('Y-m-d'),
             'time' => date('H-i-s'),
             'timestart' => $attemptinfo->timestart ?: 0,
             'timefinish' => $attemptinfo->timefinish ?: 0,
+            'startdatetime' => $attemptinfo->timestart
+                ? date(storage::FILENAME_DATETIME_FORMAT, $attemptinfo->timestart)
+                : 'null',
+            'finishdatetime' => $attemptinfo->timefinish
+                ? date(storage::FILENAME_DATETIME_FORMAT, $attemptinfo->timefinish)
+                : 'null',
             'username' => $userinfo->username ?: 'null',
             'firstname' => $userinfo->firstname ?: 'null',
             'lastname' => $userinfo->lastname ?: 'null',

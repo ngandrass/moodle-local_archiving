@@ -13,6 +13,11 @@
 - Create advanced job option to add correction margins to the right side of generated attempt reports
 - Display the attempting user's email address inside the attempt report header
 - Add `${email}` variable for attempt file- and folder name patterns
+- Add human-readable date and time variables (`YYYY-MM-DD_HH-MM-SS`) for attempt file- and folder name patterns:
+    - `${opendatetime}`: Quiz opening date and time
+    - `${closedatetime}`: Quiz closing date and time
+    - `${startdatetime}`: Attempt start date and time
+    - `${finishdatetime}`: Attempt finish date and time
 - Include user email address in attempt metadata queries and the `get_attempts_metadata` web service response
 - Add an option to include or exclude the quiz attempts metadata CSV file
 - Automatically reschedule archive job for immediate execution if the worker service finished successfully

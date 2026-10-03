@@ -39,6 +39,9 @@ class storage {
     /** @var int Number of characters a string variable will be cut off after expansion */
     public const FILENAME_VARIABLE_MAX_LENGTH = 128;
 
+    /** @var string Date format used for human-readable datetime pattern variables */
+    public const FILENAME_DATETIME_FORMAT = 'Y-m-d_H-i-s';
+
     /** @var int Number of characters after a single filename is trimmed */
     public const FILENAME_MAX_LENGTH = 240;
 

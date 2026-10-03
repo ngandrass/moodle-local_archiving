@@ -59,7 +59,7 @@ The variables are available for use within the respective name patterns:
 | `${groupnames}`      | Names of the student's groups          |      ❌      |           ✅           |       ✅        |
 | `${timestart}`       | Submission start Unix timestamp        |      ❌      |           ✅           |       ✅        |
 | `${timecreated}`     | Submission creation Unix timestamp     |      ❌      |           ✅           |       ✅        |
-| `${timemodified}`    | Submission modofication Unix timestamp |      ❌      |           ✅           |       ✅        |
+| `${timemodified}`    | Submission modification Unix timestamp |      ❌      |           ✅           |       ✅        |
 | `${date}`            | Current date (`YYYY-MM-DD`)            |      ✅      |           ✅           |       ✅        |
 | `${time}`            | Current time (`HH-MM-SS`)              |      ✅      |           ✅           |       ✅        |
 | `${timestamp}`       | Current Unix timestamp                 |      ✅      |           ✅           |       ✅        |

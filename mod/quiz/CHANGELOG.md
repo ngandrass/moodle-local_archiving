@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.1.0 (2026100300)
 
 - Allow exporting only the latest quiz attempt of each user in the generated archive
 - Add support for receiving chunked uploads to enable the transfer of large quiz archives independent of the upload limit
@@ -31,7 +31,7 @@
 - Setup course and module in `$PAGE` object during `generate_attempt_report` web service function
 - Forcefully disable unlocked attempt report sections that depend on another disabled section
 - Migrate quiz attempt renderer to new quiz attempt summary API
-- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026100300` or higher
 - Ensure Moodle 5.2 compatibility
 - Add archive worker service link to privacy provider
 

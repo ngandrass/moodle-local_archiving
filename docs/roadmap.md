@@ -187,11 +187,15 @@ The state of each Milestone is depicted by the respective icon and color:
 
     [:material-book-open-page-variant: View Documentation Index](index.md){.md-button}
 
-!!! abstract "Implementing additional activities, storage backends, ..."
+!!! success "Implementing additional activities, storage backends, ..."
     Implementing support for additional Moodle activities, storage backends, and other customizations.
 
-!!! abstract "Release within the Moodle Plugin Directory"
-    Releasing the archiving solution to the wide public via the Moodle Plugin Directory. For this release, the archiving
+    This task is completed. You can find all of the available sub-plugins inside this documentation.
+
+    [:fontawesome-solid-cubes: Visit Components Overview](components.md){ .md-button }
+
+!!! note "Release within the Moodle Marketplace"
+    Releasing the archiving solution to the wide public via the Moodle Marketplace. For this release, the archiving
     system must not only be stable and tested, but also extensive documentation and help resources must be available.
 
 !!! abstract "Ensuring Maintenance"

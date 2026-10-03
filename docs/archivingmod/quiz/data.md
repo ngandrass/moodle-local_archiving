@@ -37,28 +37,32 @@ extension is added automatically, so do not add an extension yourself.
 
 The variables are available for use within the respective name patterns:
 
-| Variable             | Description                        | Archive name | Attempt folder name | Attempt name |
-|----------------------|------------------------------------|:------------:|:-------------------:|:------------:|
-| `${courseid}`        | Course ID                          |      ✅      |         ✅          |      ✅      |
-| `${coursename}`      | Course name                        |      ✅      |         ✅          |      ✅      |
-| `${courseshortname}` | Course short name                  |      ✅      |         ✅          |      ✅      |
-| `${cmid}`            | Course module ID                   |      ✅      |         ✅          |      ✅      |
-| `${quizid}`          | Quiz ID                            |      ✅      |         ✅          |      ✅      |
-| `${quizname}`        | Quiz name                          |      ✅      |         ✅          |      ✅      |
-| `${attemptid}`       | Attempt ID                         |      ❌      |         ✅          |      ✅      |
-| `${username}`        | Student username                   |      ❌      |         ✅          |      ✅      |
-| `${firstname}`       | Student first name                 |      ❌      |         ✅          |      ✅      |
-| `${lastname}`        | Student last name                  |      ❌      |         ✅          |      ✅      |
-| `${email}`           | Student email address              |      ❌      |         ✅          |      ✅      |
-| `${idnumber}`        | Student ID number                  |      ❌      |         ✅          |      ✅      |
-| `${groupids}`        | IDs of the student's groups        |      ❌      |         ✅          |      ✅      |
-| `${groupidnumbers}`  | ID numbers of the student's groups |      ❌      |         ✅          |      ✅      |
-| `${groupnames}`      | Names of the student's groups      |      ❌      |         ✅          |      ✅      |
-| `${timestart}`       | Attempt start Unix timestamp       |      ❌      |         ✅          |      ✅      |
-| `${timefinish}`      | Attempt finish Unix timestamp      |      ❌      |         ✅          |      ✅      |
-| `${date}`            | Current date (`YYYY-MM-DD`)        |      ✅      |         ✅          |      ✅      |
-| `${time}`            | Current time (`HH-MM-SS`)          |      ✅      |         ✅          |      ✅      |
-| `${timestamp}`       | Current Unix timestamp             |      ✅      |         ✅          |      ✅      |
+| Variable             | Description                            | Archive name | Attempt folder name | Attempt name |
+|----------------------|----------------------------------------|:------------:|:-------------------:|:------------:|
+| `${courseid}`        | Course ID                              |      ✅      |         ✅          |      ✅      |
+| `${coursename}`      | Course name                            |      ✅      |         ✅          |      ✅      |
+| `${courseshortname}` | Course short name                      |      ✅      |         ✅          |      ✅      |
+| `${cmid}`            | Course module ID                       |      ✅      |         ✅          |      ✅      |
+| `${quizid}`          | Quiz ID                                |      ✅      |         ✅          |      ✅      |
+| `${quizname}`        | Quiz name                              |      ✅      |         ✅          |      ✅      |
+| `${opendatetime}`    | Quiz opening (`YYYY-MM-DD_HH-MM-SS`)   |      ❌      |         ✅          |      ✅      |
+| `${closedatetime}`   | Quiz closing (`YYYY-MM-DD_HH-MM-SS`)   |      ❌      |         ✅          |      ✅      |
+| `${attemptid}`       | Attempt ID                             |      ❌      |         ✅          |      ✅      |
+| `${username}`        | Student username                       |      ❌      |         ✅          |      ✅      |
+| `${firstname}`       | Student first name                     |      ❌      |         ✅          |      ✅      |
+| `${lastname}`        | Student last name                      |      ❌      |         ✅          |      ✅      |
+| `${email}`           | Student email address                  |      ❌      |         ✅          |      ✅      |
+| `${idnumber}`        | Student ID number                      |      ❌      |         ✅          |      ✅      |
+| `${groupids}`        | IDs of the student's groups            |      ❌      |         ✅          |      ✅      |
+| `${groupidnumbers}`  | ID numbers of the student's groups     |      ❌      |         ✅          |      ✅      |
+| `${groupnames}`      | Names of the student's groups          |      ❌      |         ✅          |      ✅      |
+| `${timestart}`       | Attempt start Unix timestamp           |      ❌      |         ✅          |      ✅      |
+| `${timefinish}`      | Attempt finish Unix timestamp          |      ❌      |         ✅          |      ✅      |
+| `${startdatetime}`   | Attempt start (`YYYY-MM-DD_HH-MM-SS`)  |      ❌      |         ✅          |      ✅      |
+| `${finishdatetime}`  | Attempt finish (`YYYY-MM-DD_HH-MM-SS`) |      ❌      |         ✅          |      ✅      |
+| `${date}`            | Current date (`YYYY-MM-DD`)            |      ✅      |         ✅          |      ✅      |
+| `${time}`            | Current time (`HH-MM-SS`)              |      ✅      |         ✅          |      ✅      |
+| `${timestamp}`       | Current Unix timestamp                 |      ✅      |         ✅          |      ✅      |
 
 !!! info
     This list may not be exhaustive. Please check the help text of the respective option in Moodle itself. It will

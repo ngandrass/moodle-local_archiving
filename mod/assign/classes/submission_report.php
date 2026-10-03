@@ -489,7 +489,7 @@ class submission_report {
         $assigninstance = $this->assignment->get_instance();
         $data = [
             'assignmentid' => $assigninstance->id ?: 0,
-            'assignmenttitle' => $assigninstance->name ?: 'null',
+            'assignmentname' => $assigninstance->name ?: 'null',
             'attemptnumber' => $submissioninfo->attemptnumber ?: 0,
             'cmid' => $this->cm->id ?: 0,
             'courseid' => $this->course->id ?: 0,

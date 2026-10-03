@@ -62,8 +62,8 @@ enum submission_filename_variable: string {
     /** @var string Assignment ID */
     case ASSIGNMENTID = 'assignmentid';
 
-    /** @var string Assignment title */
-    case ASSIGNMENTNAME = 'assignmenttitle';
+    /** @var string Assignment name */
+    case ASSIGNMENTNAME = 'assignmentname';
 
     /** @var string Submission ID */
     case SUBMISSIONID = 'submissionid';

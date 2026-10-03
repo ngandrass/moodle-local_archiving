@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.2.0 (2026092700)
 
 - Implement store and retrieve callback hooks.
 - Fix missing language string on file storage failure.

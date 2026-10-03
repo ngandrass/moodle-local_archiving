@@ -25,11 +25,11 @@
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 $plugin->component = 'archivingstore_moodle';
-$plugin->release = '1.1.0';
-$plugin->version = 2026082900;
+$plugin->release = '1.2.0';
+$plugin->version = 2026092700;
 $plugin->requires = 2024100700;
 $plugin->supported = [405, 502]; // X meta-supported-moodle{4.5 - 5.2} meta-supported-php{8.1 - 8.4}.
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [
-    'local_archiving' => 2026082800,
+    'local_archiving' => 2026082900,
 ];

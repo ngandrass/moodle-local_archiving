@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.0.0 (2026100100)
 
 - Initial release of the S3 storage driver for the Moodle archiving subsystem 🎉
 - Implements store, retrieve, and delete functionality.

@@ -18,7 +18,7 @@
  * Plugin administration pages are defined here
  *
  * @package     archivingmod_quiz
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -139,6 +139,16 @@ if ($hassiteconfig) {
             get_string('task_paper_format_help', 'archivingmod_quiz'),
             'A4',
             array_combine(paper_format::values(), paper_format::values()),
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $settings->add($set);
+
+        // Job preset: Correction margin.
+        $set = new admin_setting_configcheckbox(
+            'archivingmod_quiz/job_preset_correction_margin',
+            get_string('task_correction_margin', 'archivingmod_quiz'),
+            get_string('task_correction_margin_help', 'archivingmod_quiz'),
+            '0',
         );
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);

@@ -18,7 +18,7 @@
  * Quiz activity archiving driver
  *
  * @package     archivingmod_quiz
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -94,10 +94,10 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         // Try to get course, cm info, and quiz.
         [$this->course, $this->cm] = get_course_and_cm_from_cmid($this->cmid, 'quiz');
         if (empty($this->cm)) {
-            throw new \moodle_exception('invalid_cmid', 'archivingmod_quiz'); // @codeCoverageIgnore
+            throw new \moodle_exception('invalidcoursemodule', 'error'); // @codeCoverageIgnore
         }
         if ($this->course->id != $this->courseid) {
-            throw new \moodle_exception('invalid_courseid', 'archivingmod_quiz'); // @codeCoverageIgnore
+            throw new \moodle_exception('invalidcourseid', 'error'); // @codeCoverageIgnore
         }
         $this->quizid = $this->cm->instance;
     }
@@ -224,8 +224,14 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     public function get_task_content_metadata(activity_archiving_task $task): array {
         $quizmanager = quiz_manager::from_context($task->get_context());
 
+        $attempts = $quizmanager->get_filtered_attempts(
+            self::build_attempts_filters_from_formdata(
+                $task->get_job()->get_settings()
+            )
+        );
+
         $res = [];
-        foreach ($quizmanager->get_all_attempts() as $attempt) {
+        foreach ($attempts as $attempt) {
             $res[] = new task_content_metadata(
                 taskid: $task->get_id(),
                 userid: $attempt->userid,
@@ -320,7 +326,7 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         // Extract attempt filters from form data object.
         $attemptfilters = [];
         foreach (attempts_filter::cases() as $filter) {
-            if ($settings->{'attempts_filter_' . $filter->value}) {
+            if ($settings->{'attempts_filter_' . $filter->value} ?? null) {
                 array_push($attemptfilters, $filter->value);
             }
         }

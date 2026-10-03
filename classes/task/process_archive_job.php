@@ -18,13 +18,15 @@
  * Ad-hoc task for processing a given archive job asynchronously
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_archiving\task;
 
 use local_archiving\archive_job;
+use local_archiving\local\exception\storage_exception;
+use local_archiving\local\exception\yield_exception;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -71,13 +73,34 @@ class process_archive_job extends \core\task\adhoc_task {
      * @throws \moodle_exception
      */
     public function reschedule(int $delaysec = 30): void {
-        // FIXME: Debug mode. Remove delaysec override later!
-        $delaysec = 5;
-
         mtrace('Rescheduling self for future run after ' . $delaysec . ' seconds.');
         $task = self::create($this->get_archive_job());
         $task->set_next_run_time(time() + $delaysec);
         \core\task\manager::queue_adhoc_task($task);
+    }
+
+    /**
+     * Pull this existing task forward in the scheduler queue to be executed as soon as possible.
+     *
+     * If no instance of this task is scheduled, a new one will be creaded and scheduled for immediate
+     * execution.
+     *
+     * In contrast to reschedule(), which is called to queue a later successor instance of this task,
+     * this function will modify an existing task by setting its next run time to the current time,
+     * thereby pulling it to the * front of the Moodle execution queue. This can be used if, for
+     * example, an external archiving worker finished asynchronous work and the bussiness logic is
+     * waiting for the rescheduled task instance.
+     *
+     * @param archive_job $job Archive job to process as soon as possible
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public static function schedule_now(archive_job $job): void {
+        $task = self::create($job);
+        $task->set_next_run_time(time());
+        \core\task\manager::reschedule_or_queue_adhoc_task($task);
     }
 
     /**
@@ -86,6 +109,7 @@ class process_archive_job extends \core\task\adhoc_task {
      * @return archive_job Archive job this task processes
      * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function get_archive_job(): archive_job {
         // TODO (MDL-0): Maybe cache this inside self, if performance becomes an issue.
@@ -104,13 +128,24 @@ class process_archive_job extends \core\task\adhoc_task {
      * yield to free up resources.
      *
      * @return void
+     * @throws \Throwable
+     * @throws \base_setting_exception
+     * @throws \base_task_exception
      * @throws \coding_exception
      * @throws \dml_exception
+     * @throws storage_exception
+     * @throws yield_exception
      * @throws \moodle_exception
      */
     #[\Override]
     public function execute(): void {
-        $job = $this->get_archive_job();
+        try {
+            $job = $this->get_archive_job();
+        } catch (\dml_missing_record_exception) {
+            mtrace('Archive job was deleted, nothing to do.');
+            return;
+        }
+
         $job->execute();
 
         if (!$job->is_completed()) {

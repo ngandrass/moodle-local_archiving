@@ -18,7 +18,7 @@
  * This file defines the get_attempts_metadata webservice function
  *
  * @package   archivingmod_quiz
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -200,8 +200,14 @@ class get_attempts_metadata extends external_api {
         }
 
         // Check access rights.
-        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
+        $wstoken = optional_param('wstoken', null, PARAM_TEXT);
+        if (empty($wstoken) || $task->get_webservice_token() !== $wstoken) {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
+        }
+
+        // Ensure that the task type matches.
+        if ($task->get_archivingmodname() !== 'quiz') {
+            return ['status' => webservice_status::E_TASK_TYPE_INVALID->name];
         }
 
         // Get quiz manager and build response.

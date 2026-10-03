@@ -62,8 +62,14 @@ enum submission_filename_variable: string {
     /** @var string Assignment ID */
     case ASSIGNMENTID = 'assignmentid';
 
-    /** @var string Assignment title */
-    case ASSIGNMENTNAME = 'assignmenttitle';
+    /** @var string Assignment name */
+    case ASSIGNMENTNAME = 'assignmentname';
+
+    /** @var string Date and time from which submissions are allowed in human-readable format */
+    case OPENDATETIME = 'opendatetime';
+
+    /** @var string Assignment due date and time in human-readable format */
+    case DUEDATETIME = 'duedatetime';
 
     /** @var string Submission ID */
     case SUBMISSIONID = 'submissionid';
@@ -94,6 +100,15 @@ enum submission_filename_variable: string {
 
     /** @var string Submission last modification time */
     case TIMEMODIFIED = 'timemodified';
+
+    /** @var string Submission start in human-readable format */
+    case STARTDATETIME = 'startdatetime';
+
+    /** @var string Submission creation in human-readable format */
+    case CREATEDDATETIME = 'createddatetime';
+
+    /** @var string Submission last modification in human-readable format */
+    case MODIFIEDDATETIME = 'modifieddatetime';
 
     /** @var string Current date */
     case DATE = 'date';

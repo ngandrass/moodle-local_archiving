@@ -43,22 +43,22 @@ $filehandle = file_handle::get_by_id($filehandleid);
 $job = archive_job::get_by_id($filehandle->jobid);
 $ctx = $job->get_context();
 if ($ctx->id != $contextid) {
-    throw new \moodle_exception('invalidcontext', 'local_archiving');
+    throw new \moodle_exception('invalidcontext', 'error');
 }
 [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
 
 // Check login and capabilities.
-require_login($course);
-require_capability('local/archiving:view', $ctx->get_course_context());
+require_login($course, false, $cm);
+require_capability('local/archiving:view', $ctx);
 
 // Setup page.
-$PAGE->set_context($ctx->get_course_context());
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($cm->name);
 $PAGE->set_url(new moodle_url(
     '/local/archiving/fetch.php',
     ['filehandleid' => $filehandleid, 'contextid' => $contextid]
 ));
+$PAGE->activityheader->disable();
 
 $overviewurl = new moodle_url('/local/archiving/download.php', ['jobid' => $job->get_id()]);
 

@@ -18,7 +18,7 @@
  * Web service function declarations for the archivingmod_quiz plugin.
  *
  * @package     archivingmod_quiz
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -32,28 +32,28 @@ $functions = [
         'classname' => 'archivingmod_quiz\external\generate_attempt_report',
         'description' => 'Generates a full HTML DOM containing all report data on the specified attempt',
         'type' => 'read',
-        'ajax' => true,
+        'ajax' => false,
         'services' => [],
     ],
     'archivingmod_quiz_get_attempts_metadata' => [
         'classname' => 'archivingmod_quiz\external\get_attempts_metadata',
         'description' => 'Returns metadata about attempts of a quiz',
         'type' => 'read',
-        'ajax' => true,
+        'ajax' => false,
         'services' => [],
     ],
     'archivingmod_quiz_update_task_status' => [
         'classname' => 'archivingmod_quiz\external\update_task_status',
         'description' => 'Updates the status of a quiz archiving task',
         'type' => 'write',
-        'ajax' => true,
+        'ajax' => false,
         'services' => [],
     ],
     'archivingmod_quiz_process_uploaded_artifact' => [
         'classname' => 'archivingmod_quiz\external\process_uploaded_artifact',
         'description' => 'Called by the archive worker once an artifact has been uploaded and is ready for processing.',
         'type' => 'write',
-        'ajax' => true,
+        'ajax' => false,
         'services' => [],
     ],
 ];

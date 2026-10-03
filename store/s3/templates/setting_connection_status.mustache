@@ -39,7 +39,7 @@
         </label>
     </div>
     <div class="form-setting col-sm-9">
-        <div class="form-description">{{{description}}}</div>
+        <div class="form-description">{{description}}</div>
         <ul class="list-group mt-2 mb-1 d-inline-flex">
             {{#rows}}
             <li class="list-group-item d-flex justify-content-between align-items-center {{^ok}} list-group-item-danger {{/ok}}">
@@ -54,7 +54,7 @@
                         <i class="fa-solid fa-square-xmark text-danger fa-xl"></i>&nbsp;
                         {{{label}}}
                         {{#detail}}
-                        <div class="text-muted small mt-1">{{{detail}}}</div>
+                        <div class="text-muted small mt-1">{{detail}}</div>
                         {{/detail}}
                     </div>
                 {{/ok}}

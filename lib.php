@@ -141,7 +141,7 @@ function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $f
     // Catch virtual files.
     if ($filearea == filearea::TSP) {
         try {
-            tsp_manager::send_virtual_tsp_file($filepath, $filename);
+            tsp_manager::send_virtual_tsp_file($filepath, $filename, $context);
         } catch (Exception $e) {
             send_header_404();
             throw $e;
@@ -182,7 +182,7 @@ function local_archiving_pluginfile($course, $cm, $context, $filearea, $args, $f
                         filename: $filename
                     );
                 } else {
-                    // Redirect users for REMOTE tier files that are not yet available in the cache to the fecthing UI.
+                    // Redirect users for REMOTE tier files that are not yet available in the cache to the fetching UI.
                     $job = archive_job::get_by_id($filehandle->jobid);
                     redirect(new moodle_url('/local/archiving/fetch.php', [
                         'filehandleid' => $filehandle->id,

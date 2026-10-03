@@ -19,17 +19,18 @@
  *
  * @package     archivingstore_localdir
  * @category    string
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // @codingStandardsIgnoreFile
 
-// Common
 $string['pluginname'] = 'Local Directory';
-$string['privacy:metadata'] = 'All data stored via this storage driver remains owned by local_archiving and will be handled directly by its privacy API instead.';
-
-// Settings.
+$string['privacy:metadata:storage'] = 'Archive files are written to a directory on the server outside of the Moodle file system. Moodle cannot manage these files directly.';
+$string['privacy:metadata:storage:filecontent'] = 'Content of the archive file, including all archived user data.';
+$string['privacy:metadata:storage:filename'] = 'Name of the archive file. It can contain user details, depending on the configured filename patterns.';
 $string['setting_enabled'] = 'Enabled';
 $string['setting_enabled_desc'] = 'Enables or disables this storage driver. If disabled, no archives can be sent to or retrieved from this storage.';
 $string['setting_storage_path'] = 'Storage path';
 $string['setting_storage_path_desc'] = 'The absolute path to the directory where archives are stored. This directory must exist and be writable by the web server user.';
+$string['storagepathdoesnotexist'] = 'Storage path does not exist.';
+$string['storagepathnotconfigured'] = 'Storage path was not configured yet.';

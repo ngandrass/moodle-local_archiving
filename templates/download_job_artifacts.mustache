@@ -110,7 +110,7 @@
                 </tr>
                 <tr>
                     <td>{{#str}} activity {{/str}}</td>
-                    <td><a href="{{{ job.cm.url }}}">{{{ job.cm.name }}}</a></td>
+                    <td><a href="{{ job.cm.url }}">{{{ job.cm.name }}}</a></td>
                 </tr>
             </table>
         </div>
@@ -276,16 +276,34 @@
                                         </a>
                                     {{/fetch.showcancel}}
                                     {{^fetch.showcancel}}
-                                        {{! Fetch is not running, show delete button. URL is based on whether the file can be deleted or not. }}
+                                        {{! Fetch is not running, show delete button }}
                                         {{#deleteurl}}
                                             <a href="{{{deleteurl}}}" class="btn btn-danger mx-1" role="button">
+                                                <i class="fa fa-trash"></i>&nbsp;
+                                                {{#str}} delete {{/str}}
+                                            </a>
                                         {{/deleteurl}}
                                         {{^deleteurl}}
-                                            <a href="#" class="btn btn-outline-danger mx-1 disabled" role="button" aria-disabled="true">
+                                            <span
+                                                class="d-inline-block"
+                                                title="{{#str}} deletion_prohibited_by_capability, local_archiving {{/str}}"
+                                                data-toggle="tooltip"
+                                                data-bs-toggle="tooltip"
+                                                data-placement="top"
+                                                data-bs-placement="top"
+                                            >
+                                                <a
+                                                    href="#"
+                                                    class="btn btn-outline-danger disabled mx-1"
+                                                    role="button"
+                                                    aria-disabled="true"
+                                                    tabindex="-1"
+                                                >
+                                                    <i class="fa fa-trash"></i>&nbsp;
+                                                    {{#str}} delete {{/str}}
+                                                </a>
+                                            </span>
                                         {{/deleteurl}}
-                                            <i class="fa fa-trash"></i>&nbsp;
-                                            {{#str}} delete {{/str}}
-                                        </a>
                                     {{/fetch.showcancel}}
                                 {{/fetch.cancelling}}
                             </div>
@@ -304,7 +322,7 @@
 
         {{^files}}
             <div class="col-sm-12">
-                <p>{{#str}} no_files_available, local_archiving {{/str}}</p>
+                <p>{{#str}} nothingtodisplay, moodle {{/str}}</p>
             </div>
         {{/files}}
     </div>

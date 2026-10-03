@@ -29,7 +29,9 @@ use archivingmod_quiz\local\type\attempt_report_section;
 use local_archiving\local\util\course_util;
 use local_archiving\local\util\report_util;
 use local_archiving\storage;
+use mod_quiz\grade_calculator;
 use mod_quiz\output\attempt_summary_information;
+use mod_quiz\output\grades\grade_out_of;
 use mod_quiz\quiz_attempt;
 
 // phpcs:ignore
@@ -220,6 +222,23 @@ class attempt_report {
                             $formattedgrade = get_string('outof', 'quiz', $a);
                         }
                         $summaryinfo->add_item('grade', get_string('gradenoun'), $formattedgrade);
+
+                        // Grades for extra grade items, if any.
+                        if (!is_null($grade)) {
+                            foreach ($attemptobj->get_grade_item_totals() as $gradeitemid => $gradeoutof) {
+                                $summaryinfo->add_item(
+                                    'marks' . $gradeitemid,
+                                    format_string($gradeoutof->name),
+                                    new grade_out_of(
+                                        $quiz,
+                                        $gradeoutof->grade,
+                                        $gradeoutof->maxgrade,
+                                        style: abs($gradeoutof->maxgrade - 100) < grade_calculator::ALMOST_ZERO ?
+                                            grade_out_of::NORMAL : grade_out_of::WITH_PERCENT
+                                    )
+                                );
+                            }
+                        }
                     }
                 }
             }
@@ -338,6 +357,8 @@ class attempt_report {
      * stripped from the generated HTML DOM
      * @param bool $inlineimages If true, all images will be inlined as base64
      * to prevent rendering issues on user side
+     * @param int $marginpercent Percentage of correction margin (0 - 100) to
+     * add to the right of the report
      *
      * @return string HTML DOM of the rendered quiz attempt report
      *
@@ -351,14 +372,22 @@ class attempt_report {
         array $sections,
         bool $fixrelativeurls = true,
         bool $minimal = true,
-        bool $inlineimages = true
+        bool $inlineimages = true,
+        int $marginpercent = 0
     ): string {
         global $CFG, $OUTPUT, $PAGE;
+
+        // Validate correction margin.
+        if ($marginpercent < 0 || $marginpercent > 100) {
+            throw new \coding_exception('Correction margin percent must be between 0 and 100');
+        }
 
         // Add a quiz archiver specific CSS class to provide a unique CSS selector.
         // This can be used to add additional styling to the quiz report page accessed by the worker,
         // for example by specifying additional (s)css in the theme scss setting in the moodle administration.
         $PAGE->add_body_class('quiz-archiver-report');
+
+        $PAGE->activityheader->disable();
 
         // Build HTML tree.
         $html = "";
@@ -435,6 +464,17 @@ class attempt_report {
             $dom->getElementsByTagName('head')[0]->appendChild($csshacksnode);
         }
 
+        // Add correction margin if desired.
+        if ($marginpercent > 0) {
+            $correctionmargincssnode = $dom->createElement("style", "
+                /* Add correction margin to the right of the page */
+                #region-main {
+                    margin-right: {$marginpercent}% !important;
+                }
+            ");
+            $dom->getElementsByTagName('head')[0]->appendChild($correctionmargincssnode);
+        }
+
         // Convert all local images to base64 if desired.
         if ($inlineimages) {
             $wwwroot = get_config('archivingmod_quiz')->internal_wwwroot ?: null;
@@ -491,11 +531,23 @@ class attempt_report {
             'groupidnumbers' => join('-', array_map(fn($group) => $group->idnumber ?: 'null', $usergroups)) ?: 0,
             'groupnames' => join('-', array_map(fn($group) => $group->name, $usergroups)) ?: 'nogroup',
             'quizname' => $this->quiz->name ?: 'null',
+            'opendatetime' => !empty($this->quiz->timeopen)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $this->quiz->timeopen)
+                : 'null',
+            'closedatetime' => !empty($this->quiz->timeclose)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $this->quiz->timeclose)
+                : 'null',
             'timestamp' => time(),
             'date' => date('Y-m-d'),
             'time' => date('H-i-s'),
             'timestart' => $attemptinfo->timestart ?: 0,
             'timefinish' => $attemptinfo->timefinish ?: 0,
+            'startdatetime' => $attemptinfo->timestart
+                ? date(storage::FILENAME_DATETIME_FORMAT, $attemptinfo->timestart)
+                : 'null',
+            'finishdatetime' => $attemptinfo->timefinish
+                ? date(storage::FILENAME_DATETIME_FORMAT, $attemptinfo->timefinish)
+                : 'null',
             'username' => $userinfo->username ?: 'null',
             'firstname' => $userinfo->firstname ?: 'null',
             'lastname' => $userinfo->lastname ?: 'null',

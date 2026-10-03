@@ -18,7 +18,7 @@
  * An asynchronous activity archiving task
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -175,7 +175,7 @@ final class activity_archiving_task {
         $context = \context::instance_by_id($task->contextid);
 
         if (!$context instanceof \context_module) {
-            throw new \moodle_exception('invalidcontext', 'local_archiving');
+            throw new \moodle_exception('invalidcontext', 'error');
         }
 
         return new self(
@@ -208,7 +208,7 @@ final class activity_archiving_task {
             $context = \context::instance_by_id($task->contextid);
 
             if (!$context instanceof \context_module) {
-                throw new \moodle_exception('invalidcontext', 'local_archiving');
+                throw new \moodle_exception('invalidcontext', 'error');
             }
 
             $result[] = new self(
@@ -414,7 +414,7 @@ final class activity_archiving_task {
         global $DB;
 
         if (!$this->is_completed() && !$force) {
-            throw new \moodle_exception('task_settings_cant_be_cleared', 'local_archiving');
+            throw new \moodle_exception('task_not_completed_yet', 'local_archiving');
         }
 
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
@@ -499,7 +499,7 @@ final class activity_archiving_task {
         // Validate input.
         foreach ($taskcontentmetadata as $entry) {
             if (!($entry instanceof task_content_metadata)) {
-                throw new \coding_exception('invalid_task_content_metadata_entry', 'local_archiving');
+                throw new \coding_exception('Invalid task content metadata entry. Must be an instance of task_content_metadata.');
             }
         }
 
@@ -563,7 +563,7 @@ final class activity_archiving_task {
 
         // Validate lifetime.
         if ($lifetimesec <= 0) {
-            throw new \moodle_exception('invalid_wstoken_lifetime', 'local_archiving');
+            throw new \coding_exception('Invalid webservice token lifetime. Must be a positive integer.');
         }
 
         // Invalidate existing token if present.
@@ -584,7 +584,7 @@ final class activity_archiving_task {
         ]);
 
         // Log token creation.
-        $this->get_logger()->debug('Created token for web service with ID ' . $webserviceid . ': ' . $wstoken);
+        $this->get_logger()->debug('Created token for web service with ID ' . $webserviceid);
 
         return $wstoken;
     }
@@ -612,7 +612,7 @@ final class activity_archiving_task {
         ]);
 
         // Log token destruction.
-        $this->get_logger()->debug('Destroyed web service token: ' . $wstoken);
+        $this->get_logger()->debug('Destroyed web service token');
 
         return true;
     }
@@ -654,13 +654,14 @@ final class activity_archiving_task {
      *
      * @param int $progress New task progress in percent (0 to 100)
      * @return void
-     * @throws \moodle_exception If the given progress value is invalid
+     * @throws \coding_exception If the given progress value is invalid
+     * @throws \dml_exception
      */
     public function set_progress(int $progress): void {
         global $DB;
 
         if ($progress < 0 || $progress > 100) {
-            throw new \moodle_exception('invalid_progress_value', 'local_archiving');
+            throw new \coding_exception('Invalid progress value received. Must be between 0 and 100');
         }
 
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
@@ -721,7 +722,7 @@ final class activity_archiving_task {
         }
 
         // Calculate sha256sum if not given.
-        if (!$sha256sum || storage::is_valid_sha256sum($sha256sum)) {
+        if (!$sha256sum || !storage::is_valid_sha256sum($sha256sum)) {
             $sha256sum = storage::hash_file($targetfile);
         }
 
@@ -758,7 +759,7 @@ final class activity_archiving_task {
             $referencestoartifact = $DB->count_records(db_table::TEMPFILE->value, ['fileid' => $artifactfile->get_id()]);
 
             if ($referencestoartifact > 0) {
-                throw new \moodle_exception('artifactfile_still_linked', 'local_archiving');
+                throw new \moodle_exception('artifactfile_still_linked_after_delete', 'local_archiving');
             }
 
             $artifactfile->delete();

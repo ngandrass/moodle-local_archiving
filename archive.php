@@ -18,7 +18,7 @@
  * Activity archiving overview
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -32,16 +32,14 @@ global $OUTPUT, $PAGE, $USER;
 $courseid = required_param('courseid', PARAM_INT);
 $cmid = required_param('cmid', PARAM_INT);
 
-$coursectx = context_course::instance($courseid);
-$ctx = context_module::instance($cmid);
-[$course, $cm] = get_course_and_cm_from_cmid($cmid);
+[$course, $cm] = get_course_and_cm_from_cmid($cmid, courseorid: $courseid);
+$ctx = $cm->context;
 
 // Check login and capabilities.
-require_login($courseid);
+require_login($course, false, $cm);
 require_capability('local/archiving:view', $ctx);
 
 // Setup page.
-$PAGE->set_context($coursectx);
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($cm->name);
 $PAGE->set_url(new moodle_url(
@@ -52,41 +50,45 @@ $PAGE->set_url(new moodle_url(
     ]
 ));
 $PAGE->set_pagelayout('incourse');
+$PAGE->activityheader->disable();
 
 $html = '';
 
-// Get job create form for this activity.
-$driver = driver_factory::activity_archiving_driver($cm->modname, $ctx);
-$form = $driver->get_job_create_form($cm->modname, $cm);
+$jobcreateformhtml = '';
+if (has_capability('local/archiving:create', $ctx)) {
+    // Get job create form for this activity.
+    $driver = driver_factory::activity_archiving_driver($cm->modname, $ctx);
+    $form = $driver->get_job_create_form($cm->modname, $cm);
 
-// Handle form submission.
-if ($form->is_cancelled()) {
-    redirect(new \moodle_url('/local/archiving/index.php', ['courseid' => $courseid]));
-}
-
-if ($form->is_submitted() && $form->is_validated()) {
-    require_capability('local/archiving:create', $ctx);
-
-    // Ensure that manual archive job creation is enabled.
-    if (!driver_factory::archiving_trigger('manual')->is_enabled()) {
-        // We should never get here if nobody messes with the form. But who knows how creative people might get ;) ...
-        throw new \moodle_exception('manual_job_creation_disabled', 'local_archiving');
+    // Handle form submission.
+    if ($form->is_cancelled()) {
+        redirect(new \moodle_url('/local/archiving/index.php', ['courseid' => $courseid]));
     }
 
-    $jobsettings = $form->get_data();
-    if (!$jobsettings) {
-        throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
-    }
-    $job = \local_archiving\archive_job::create($ctx, $USER->id, 'manual', $jobsettings);
-    $job->enqueue();
+    if ($form->is_submitted() && $form->is_validated()) {
+        // Ensure that manual archive job creation is enabled.
+        if (!driver_factory::archiving_trigger('manual')->is_enabled()) {
+            // We should never get here if nobody messes with the form. But who knows how creative people might get ;) ...
+            throw new \moodle_exception('manual_job_creation_disabled', 'local_archiving');
+        }
 
-    $html .= $OUTPUT->notification(
-        get_string('archive_job_created_details', 'local_archiving', [
-            'jobid' => $job->get_id(),
-            'cmname' => $cm->name,
-        ]),
-        'success'
-    );
+        $jobsettings = $form->get_data();
+        if (!$jobsettings) {
+            throw new \moodle_exception('job_create_form_data_empty', 'local_archiving');
+        }
+        $job = \local_archiving\archive_job::create($ctx, $USER->id, 'manual', $jobsettings);
+        $job->enqueue();
+
+        $html .= $OUTPUT->notification(
+            get_string('archive_job_created_details', 'local_archiving', [
+                'jobid' => $job->get_id(),
+                'cmname' => $cm->name,
+            ]),
+            'success'
+        );
+    }
+
+    $jobcreateformhtml = $form->render();
 }
 
 // Prepare template context for page.
@@ -98,7 +100,7 @@ $jobtablehtml = ob_get_contents();
 ob_end_clean();
 
 $tplctx = [
-    'jobcreateformhtml' => $form->render(),
+    'jobcreateformhtml' => $jobcreateformhtml,
     'jobtablehtml' => $jobtablehtml,
     'modfullname' => $cm->modfullname,
     'urls' => [

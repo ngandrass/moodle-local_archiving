@@ -18,7 +18,7 @@
  * Main entry point for archiving manager. Course archiving overview page.
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -49,6 +49,7 @@ $PAGE->set_url(new \moodle_url(
 $PAGE->set_pagelayout('incourse');
 
 // Build context for page template.
+$cancreate = has_capability('local/archiving:create', $ctx);
 $archivingenabled = course_util::archiving_enabled_for_course($courseid);
 $archivingenableforced = false;
 if (!$archivingenabled && has_capability('local/archiving:bypasscourserestrictions', $ctx)) {
@@ -60,6 +61,7 @@ if (!$archivingenabled && has_capability('local/archiving:bypasscourserestrictio
 $tplctx = [
     'archivingenabled' => $archivingenabled,
     'archivingenableforced' => $archivingenableforced,
+    'cancreate' => $cancreate,
     'hidedisabledcms' => $excludedisabledcms,
     'hidedisabledcmsurl' => new \moodle_url('/local/archiving/index.php', [
         'courseid' => $courseid,

@@ -19,15 +19,12 @@
  *
  * @package     archivingstore_moodle
  * @category    string
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // @codingStandardsIgnoreFile
 
-// Common
 $string['pluginname'] = 'Moodle Filestore';
-$string['privacy:metadata'] = 'All data stored via this storage driver remains owned by local_archiving and will be handled directly by its privacy API instead.';
-
-// Settings.
+$string['privacy:metadata:core_files'] = 'Archive files, including all archived user data (e.g., quiz attempts or assignment submissions), are stored inside the Moodle file store.';
 $string['setting_enabled'] = 'Enabled';
 $string['setting_enabled_desc'] = 'Enables or disables this storage driver. If disabled, no archives can be sent to or retrieved from this storage.';

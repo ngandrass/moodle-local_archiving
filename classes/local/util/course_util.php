@@ -18,7 +18,7 @@
  * Utility class for courses
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -85,7 +85,7 @@ class course_util {
             WHERE course.id=:courseid
             ', ['courseid' => $courseid]);
         if (!$coursepath) {
-            throw new \moodle_exception('invalidcourseid');
+            throw new \moodle_exception('invalidcourseid', 'error');
         }
 
         $coursecategories = explode('/', trim($coursepath, '/'));

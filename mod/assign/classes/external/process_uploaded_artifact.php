@@ -36,6 +36,7 @@ use local_archiving\activity_archiving_task;
 use local_archiving\file_reassembler;
 use local_archiving\local\type\activity_archiving_task_status;
 use local_archiving\storage;
+use local_archiving\task\process_archive_job;
 
 
 /**
@@ -155,6 +156,8 @@ class process_uploaded_artifact extends external_api {
         string $artifactsha256sumraw,
         int $artifactcountraw,
     ): array {
+        global $USER;
+
         // Validate request.
         $params = self::validate_parameters(self::execute_parameters(), [
             'uuid' => $uuidraw,
@@ -178,7 +181,8 @@ class process_uploaded_artifact extends external_api {
         }
 
         // Check access rights.
-        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
+        $wstoken = optional_param('wstoken', null, PARAM_TEXT);
+        if (empty($wstoken) || $task->get_webservice_token() !== $wstoken) {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
@@ -191,6 +195,12 @@ class process_uploaded_artifact extends external_api {
         if ($task->is_completed()) {
             // This is just a safeguard since web service tokens should be invalidated once a task completes.
             return ['status' => webservice_status::E_NO_UPLOAD_EXPECTED->name]; // @codeCoverageIgnore
+        }
+
+        // Only accept files from the draft area of the user this request is authenticated as.
+        $draftcontext = \context_user::instance($USER->id, IGNORE_MISSING);
+        if (!$draftcontext || $params['artifact_contextid'] !== (int) $draftcontext->id) {
+            return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
         // Get or reconstruct uploaded file/-s.
@@ -229,7 +239,7 @@ class process_uploaded_artifact extends external_api {
 
         // Validate uploaded file.
         // Note: We use SHA256 instead of Moodle sha1, since SHA1 is prone to hash collisions!
-        if ($params['artifact_sha256sum'] != storage::hash_file($draftfile)) {
+        if ($params['artifact_sha256sum'] !== storage::hash_file($draftfile)) {
             $task->set_status(activity_archiving_task_status::FAILED);
             $draftfile->delete();
             return ['status' => webservice_status::E_CHECKSUM_MISMATCH->name];
@@ -253,8 +263,15 @@ class process_uploaded_artifact extends external_api {
             ];
         }
 
-        // Report success.
+        // Mark task as successful and reschedule the corresponding job.
         $task->set_status(activity_archiving_task_status::FINISHED);
+
+        try {
+            process_archive_job::schedule_now($task->get_job());
+        } catch (\Throwable $e) { // phpcs:ignore
+            // Not critical if we can not reschedule the task. But please always return a web service response!
+        }
+
         return [
             'status' => 'OK',
         ];

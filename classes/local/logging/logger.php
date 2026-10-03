@@ -18,7 +18,7 @@
  * This file defines the logger class
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -261,7 +261,7 @@ class logger {
      * @return string Formatted log entry
      */
     public static function format_log_entry(\stdClass $logentry): string {
-        return date('Y-m-d H:i:s', $logentry->timecreated) .
+        return userdate($logentry->timecreated, '%Y-%m-%d %H:%M:%S') .
             ' [' . str_pad(log_level::from($logentry->level)->name, 5, ' ', STR_PAD_LEFT) . '] ' .
             ($logentry->taskid ? ' -> ' : '') .
             $logentry->message;

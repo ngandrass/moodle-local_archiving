@@ -266,7 +266,7 @@ final class remote_file_fetcher {
      * void, throwing a storage_exception to request that the caller abort the transfer
      */
     public static function progress_callback(int $filehandleid): callable {
-        // Prepare state to be inherrited by the colsure.
+        // Prepare state to be inherited by the closure.
         $lastupdatetime = 0;
         $lastcancelchecktime = 0;
         $loggedcomplete = false;
@@ -283,7 +283,7 @@ final class remote_file_fetcher {
         ): void {
             $now = time();
 
-            // Handle cancelation requests.
+            // Handle cancellation requests.
             if ($now - $lastcancelchecktime >= self::CANCEL_CHECK_THROTTLE_SECONDS) {
                 $lastcancelchecktime = $now;
                 if (self::is_cancel_requested($filehandleid)) {

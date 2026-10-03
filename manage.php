@@ -18,7 +18,7 @@
  * Job management endpoint. Primarily for handling POSTed data.
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,29 +34,44 @@ global $OUTPUT, $PAGE;
 
 // Parse expected params.
 $contextid = required_param('contextid', PARAM_INT);
-$action = required_param('action', PARAM_TEXT);
-$wantsurl = optional_param('wantsurl', '', PARAM_URL);
+$action = required_param('action', PARAM_ALPHA);
+$wantsurl = optional_param('wantsurl', '', PARAM_LOCALURL);
 
 // Validate context and check capabilities.
 $ctx = context::instance_by_id($contextid);
 if (!($ctx instanceof \context_course || $ctx instanceof \context_module)) {
-    throw new \moodle_exception(get_string('invalidcontext', 'local_archiving'));
+    throw new \moodle_exception('invalidcontext', 'error');
 }
 
 // Check login and capabilities.
 $courseid = $ctx->get_course_context()->instanceid;
-$course = get_course($courseid);
-require_login($courseid);
+$cm = null;
+if ($ctx instanceof \context_module) {
+    [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
+} else {
+    $course = get_course($courseid);
+}
+require_login($course, false, $cm);
 require_capability('local/archiving:view', $ctx);
 
 // Setup page.
-$PAGE->set_context($ctx->get_course_context());
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($course->fullname);
+$PAGE->activityheader->disable();
 
 // Handle POSTed data.
 $outhtml = '';
 if ($action === 'jobdelete') {
+    // Check capability for file deletion but inject $wantsurl as a "continue" target.
+    try {
+        require_capability('local/archiving:delete', $ctx);
+    } catch (\required_capability_exception $e) {
+        if (!empty($wantsurl)) {
+            $e->link = $wantsurl;
+        }
+        throw $e;
+    }
+
     $jobid = required_param('jobid', PARAM_INT);
     $PAGE->set_url(new moodle_url(
         '/local/archiving/manage.php',
@@ -68,14 +83,12 @@ if ($action === 'jobdelete') {
         ]
     ));
 
+    // Render and handle the job delete form.
     $form = new job_delete_form($contextid, $jobid, $wantsurl);
 
     if ($form->is_cancelled()) {
         redirect($wantsurl);
     } else if ($form->is_submitted() && $form->is_validated()) {
-        require_capability('local/archiving:delete', $ctx);
-
-        // Perform deletion.
         $job = archive_job::get_by_id($jobid);
         $job->delete();
 
@@ -84,6 +97,16 @@ if ($action === 'jobdelete') {
         $outhtml .= $form->render();
     }
 } else if ($action === 'filedelete') {
+    // Check capability for file deletion but inject $wantsurl as a "continue" target.
+    try {
+        require_capability('local/archiving:delete', $ctx);
+    } catch (\required_capability_exception $e) {
+        if (!empty($wantsurl)) {
+            $e->link = $wantsurl;
+        }
+        throw $e;
+    }
+
     $filehandleid = required_param('filehandleid', PARAM_INT);
     $PAGE->set_url(new moodle_url(
         '/local/archiving/manage.php',
@@ -95,14 +118,12 @@ if ($action === 'jobdelete') {
         ]
     ));
 
+    // Render and handle the file delete form.
     $form = new file_delete_form($contextid, $filehandleid, $wantsurl);
 
     if ($form->is_cancelled()) {
         redirect($wantsurl);
     } else if ($form->is_submitted() && $form->is_validated()) {
-        require_capability('local/archiving:delete', $ctx);
-
-        // Perform deletion.
         $filehandle = file_handle::get_by_id($filehandleid);
         $filehandle->archivingstore()->delete($filehandle);
         $filehandle->mark_as_deleted();
@@ -113,7 +134,7 @@ if ($action === 'jobdelete') {
         $outhtml .= $form->render();
     }
 } else {
-    throw new \coding_exception('invalidaction', 'local_archiving');
+    throw new \coding_exception('Invalid action parameter.');
 }
 
 // Render output.

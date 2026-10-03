@@ -20,7 +20,7 @@
  * Valid variables for attempt filename patterns
  *
  * @package     archivingmod_quiz
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -65,6 +65,12 @@ enum attempt_filename_variable: string {
     /** @var string Quiz name */
     case QUIZNAME = 'quizname';
 
+    /** @var string Quiz opening date and time in human-readable format */
+    case OPENDATETIME = 'opendatetime';
+
+    /** @var string Quiz closing date and time in homan-readable format */
+    case CLOSEDATETIME = 'closedatetime';
+
     /** @var string Attempt ID */
     case ATTEMPTID = 'attemptid';
 
@@ -88,6 +94,12 @@ enum attempt_filename_variable: string {
 
     /** @var string Attempt finish time */
     case TIMEFINISH = 'timefinish';
+
+    /** @var string Attempt start in human-readable format */
+    case STARTDATETIME = 'startdatetime';
+
+    /** @var string Attempt finish in human-readable format */
+    case FINISHDATETIME = 'finishdatetime';
 
     /** @var string Current date */
     case DATE = 'date';

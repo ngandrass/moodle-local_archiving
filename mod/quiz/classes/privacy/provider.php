@@ -18,12 +18,13 @@
  * Privacy provider class for the archivingmod_quiz plugin.
  *
  * @package   archivingmod_quiz
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace archivingmod_quiz\privacy;
 
+use core_privacy\local\metadata\collection;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -32,11 +33,28 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 /**
  * Privacy provider for archivingmod_quiz
  *
+ * This plugin does not store any personal data itself. All data that passes
+ * through it is temporary and passed to the external worker service. Created
+ * artifacts are stored by the core plugin and are not owned by this plugin.
+ *
  * @codeCoverageIgnore This is handled by Moodle core tests
  */
-class provider implements \core_privacy\local\metadata\null_provider {
-    #[\Override]
-    public static function get_reason(): string {
-        return 'privacy:metadata';
+class provider implements // phpcs:ignore
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\plugin\subplugin_provider {
+    /**
+     * Returns meta data about this plugin.
+     *
+     * @param collection $collection The initialised collection to add items to.
+     * @return collection A listing of user data stored through this system.
+     */
+    public static function get_metadata(collection $collection): collection {
+        $collection->add_external_location_link('archivingmod_quiz_worker', [
+            'attemptid' => 'privacy:metadata:worker:attemptid',
+            'attemptreport' => 'privacy:metadata:worker:attemptreport',
+            'attachment' => 'privacy:metadata:worker:attachment',
+        ], 'privacy:metadata:worker');
+
+        return $collection;
     }
 }

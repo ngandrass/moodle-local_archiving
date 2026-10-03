@@ -4,14 +4,18 @@ This page contains various screenshots of the archiving subsystem core as well a
 sub-plugins. The screenshots shown here do not cover the full depth of the plugin's functionality, but they should give
 you a good first impression of the plugin and its features.
 
-!!! example "Beta Screenshots"
-    The following screenshots are from the current development version of the plugin. They may differ from the final
-    stable release and might be outdated. To get the latest impression of the plugin, please install a local test version.
+!!! tip "Check out component pages for more screenshots!"
+    This page only shows a small selection of all screenshots. You can find more detailed screenshots of all components
+    within their individual documentation sections.
+
+    Check out all available components here:
+
+    [:fontawesome-solid-cubes: Components Overview](components.md){ .md-button }
 
 
 ## User interface
 
-This section contains screenshots of the pages that are visible to managers.
+This section contains screenshots of the pages that are visible to trainers and managers.
 
 ### Course archiving overview page
 ![Screenshot of the archiving overview within a Moodle course](assets/screenshots/course_archiving_overview.png)
@@ -30,11 +34,35 @@ This section contains screenshots of the pages that are visible to managers.
 
 This section contains example screenshots of archived data.
 
-### Example of PDF report (excerpt)
-![Image of example of PDF report (extract): Header](assets/screenshots/quiz_archiver_report_example_pdf_header.png)
-![Image of example of PDF report (extract): Question 1](assets/screenshots/quiz_archiver_report_example_pdf_question_1.png)
-![Image of example of PDF report (extract): Question 2](assets/screenshots/quiz_archiver_report_example_pdf_question_2.png)
-![Image of example of PDF report (extract): Question 3](assets/screenshots/quiz_archiver_report_example_pdf_question_3.png)
+### Quiz report header
+![Screenshot: Quiz report header](assets/screenshots/archivingmod_quiz_report_header.png)
+
+### Multi choice question
+![Screenshot: Multi choice question](assets/screenshots/archivingmod_quiz_report_multichoice.png)
+
+### Drag-and-drop question
+![Screenshot: Drag-and-drop question](assets/screenshots/archivingmod_quiz_report_dnd.png)
+
+### Interactive graph question
+![Screenshot: Interactive graph question](assets/screenshots/archivingmod_quiz_report_graphs.png)
+
+### JSXGraph question
+![Screenshot: JSXGraph question](assets/screenshots/archivingmod_quiz_report_jsxgraph.png)
+
+### Submission report header
+![Screenshot: Submission report header](assets/screenshots/archivingmod_assign_report_header.png)
+
+### Assignment instructions
+![Screenshot: Assignment instructions](assets/screenshots/archivingmod_assign_report_instructions.png)
+
+### Submission details
+![Screenshot: Submission details](assets/screenshots/archivingmod_assign_report_submission.png)
+
+### Grader feedback
+![Screenshot: Grader feedback](assets/screenshots/archivingmod_assign_report_feedback.png)
+
+### Plugin admin settings
+![Screenshot: Plugin admin settings](assets/screenshots/archivingmod_assign_settings.png)
 
 
 ## Admin interface and settings

@@ -18,7 +18,7 @@
  * Interface definitions for storage drivers
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -110,7 +110,7 @@ abstract class archivingstore extends base {
      * retrieval, in which case implementations must catch it, abort the
      * transfer, perform any necessary cleanup, and re-throw it to the caller
      * (rather than swallowing it or replacing it with a different exception).
-     * Drivers that retrieve data neraly instant (e.g., LOCAL tier) may ignore
+     * Drivers that retrieve data nearly instant (e.g., LOCAL tier) may ignore
      * this parameter entirely, since there is no meaningful transfer to cancel.
      * @return \stored_file The retrieved file
      * @throws storage_exception

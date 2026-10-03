@@ -1,9 +1,12 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.2.0 (2026092700)
 
-- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026082900` or higher.
 - Implement store and retrieve callback hooks.
+- Fix missing language string on file storage failure.
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026082900` or higher.
+- Ensure Moodle 5.2 compatibility
+- Describe files stored by this plugin in privacy provider
 
 
 ## Version 1.1.0 (2025101300)

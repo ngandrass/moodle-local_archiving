@@ -41,7 +41,8 @@ class file_reassembler {
      * @param string $filepath File path of the target file chunks
      * @param string $originalfilename Name of original file to reasamble.
      * @param int $artifactcount Number of chunks original file was split into.
-     * @return stored_file|null
+     * @return stored_file|null Reassembled file or null if one of the chunks is missing
+     * @throws \coding_exception If the number of chunks is invalid.
      * @throws \file_exception If chunk data can not be appended while reassembly.
      */
     public static function reassemble_chunked_file(
@@ -51,11 +52,9 @@ class file_reassembler {
         string $originalfilename,
         int $artifactcount,
     ): ?stored_file {
-        // Construct list of expected chunk file names.
-        $chunkfilenames = array_map(
-            fn ($x) => sprintf('%s.chunk%09d.bin', $originalfilename, $x),
-            range(0, $artifactcount - 1),
-        );
+        if ($artifactcount < 1) {
+            throw new \coding_exception('The number of chunks must be at least 1');
+        }
 
         // Create temporary file on disk to append chunks to one by one.
         // This is required because you can not write inside the file storage.
@@ -63,8 +62,17 @@ class file_reassembler {
         $temporaryfilepath = tempnam($temporarydirectory, 'reassembly');
         $temporaryfile = fopen($temporaryfilepath, 'w');
 
-        foreach ($chunkfilenames as $i => $chunkfilename) {
+        for ($i = 0; $i < $artifactcount; $i++) {
+            $chunkfilename = sprintf('%s.chunk%09d.bin', $originalfilename, $i);
             $chunkfile = get_file_storage()->get_file($contextid, 'user', 'draft', $itemid, $filepath, $chunkfilename);
+
+            // A missing chunk is fatal. Clean up and bail out.
+            if (!$chunkfile) {
+                fclose($temporaryfile);
+                unlink($temporaryfilepath);
+                return null;
+            }
+
             $chunkfilehandle = $chunkfile->get_content_file_handle(stored_file::FILE_HANDLE_FOPEN);
 
             // Append chunk files content in mini chunks of 4KB.

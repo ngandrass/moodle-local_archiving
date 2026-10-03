@@ -18,7 +18,7 @@
  * Handle for files stored by storage drivers
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -297,6 +297,13 @@ final class file_handle {
             }
         }
 
+        // Drop cached file (if exists) and TSP data.
+        $cachedfile = $this->get_local_file();
+        if ($cachedfile) {
+            $cachedfile->delete();
+        }
+        (new tsp_manager($this))->delete_tsp_data();
+
         // Remove the file handle from the database.
         $DB->delete_records(db_table::FILE_HANDLE->value, ['id' => $this->id]);
     }
@@ -415,10 +422,18 @@ final class file_handle {
         }
 
         // File not found in the local filestore cache, retrieve it from the storage driver.
-        return $this->archivingstore()->retrieve(
+        $file = $this->archivingstore()->retrieve(
             $this,
             $this->generate_retrieval_fileinfo_record()
         );
+
+        // Verify file integrity.
+        if ($this->sha256sum !== storage::hash_file($file)) {
+            $file->delete();
+            throw new storage_exception('retrieved_file_checksum_mismatch', 'local_archiving', a: $this->id);
+        }
+
+        return $file;
     }
 
     /**
@@ -499,6 +514,14 @@ final class file_handle {
     public function mark_as_deleted(): void {
         global $DB;
 
+        // Drop cached file (if exists) and TSP data.
+        $cachedfile = $this->get_local_file();
+        if ($cachedfile) {
+            $cachedfile->delete();
+        }
+        (new tsp_manager($this))->delete_tsp_data();
+
+        // Mark file as deleted.
         $DB->update_record(db_table::FILE_HANDLE->value, [
             'id' => $this->id,
             'deleted' => true,

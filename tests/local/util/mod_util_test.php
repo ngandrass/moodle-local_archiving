@@ -22,7 +22,7 @@ use local_archiving\local\type\archive_job_status;
  * Tests for the mod util class.
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -109,5 +109,32 @@ final class mod_util_test extends \advanced_testcase {
             $this->assertTrue($cm->supported, 'CM should be supported');
             $this->assertTrue($cm->enabled, 'CM should be enabled');
         }
+    }
+
+    /**
+     * Tests that CM metadata generation does not fail if excludedisabled-filter
+     * removes all cms from result set.
+     *
+     * @covers \local_archiving\local\util\mod_util
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_cms_with_metadata_all_filtered_out(): void {
+        $this->resetAfterTest();
+
+        // Prepare course that contains an unsupported activity.
+        $course = $this->generator()->create_course();
+        $this->generator()->create_module('page', ['course' => $course->id]);
+
+        // Should be returned normally if unsupported activitities are included.
+        $cmmeta = mod_util::get_cms_with_metadata($course->id, false);
+        $this->assertCount(1, $cmmeta, 'Should retrieve the single unsupported cm');
+
+        // With filtering, no cm should survive.
+        $cmmeta = mod_util::get_cms_with_metadata($course->id, true);
+        $this->assertSame([], $cmmeta, 'Should retrieve an empty array once the only cm is filtered out');
     }
 }

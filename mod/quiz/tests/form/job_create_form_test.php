@@ -23,7 +23,7 @@ use archivingmod_quiz\local\type\attempt_report_section;
  * Tests for the job_create_form class
  *
  * @package   archivingmod_quiz
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -237,6 +237,7 @@ final class job_create_form_test extends \advanced_testcase {
             [
                 'Locked: export_attempts' => ['export_attempts', 1, 0],
                 'Locked: paper_format' => ['paper_format', 'A3', 'letter'],
+                'Locked: correction_margin' => ['correction_margin', 1, 0],
                 'Locked: keep_html_files' => ['keep_html_files', 1, 0],
                 'Locked: image_optimize' => ['image_optimize', 1, 0],
                 'Locked: image_optimize_width' => ['image_optimize_width', 1024, 100],

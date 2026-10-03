@@ -18,7 +18,7 @@
  * This file defines the quiz class
  *
  * @package   archivingmod_quiz
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -69,7 +69,7 @@ class quiz_manager {
         [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'quiz');
         $quiz = $DB->get_record('quiz', ['id' => $cm->instance], '*', MUST_EXIST);
         if ($course->id != $courseid) {
-            throw new \moodle_exception('invalidcourseid', 'local_archiving');
+            throw new \moodle_exception('invalidcourseid', 'error');
         }
 
         $this->course = $course;
@@ -155,6 +155,7 @@ class quiz_manager {
      * @return array Array of all attempts IDs together with the userid that were
      * made inside this quiz.
      *
+     * @throws \coding_exception
      * @throws \dml_exception
      */
     public function get_filtered_attempts(array $filterkeys): array {
@@ -170,6 +171,8 @@ class quiz_manager {
                 case attempts_filter::LATEST->value:
                     $filterattempts[] = $this->get_latest_attempt_of_each_user();
                     break;
+                default:
+                    throw new \coding_exception("Unknown attempts filter: {$filter}");
             }
         }
 
@@ -219,8 +222,15 @@ class quiz_manager {
         global $DB;
 
         // Handle attempt ID filter.
+        $filterwhereclause = '';
+        $filterparams = [];
         if ($filterattemptids) {
-            $filterwhereclause = "AND qa.id IN (" . implode(', ', array_map(fn($v): string => intval($v), $filterattemptids)) . ")";
+            [$idsql, $filterparams] = $DB->get_in_or_equal(
+                array_map(fn($v): string => intval($v), $filterattemptids),
+                SQL_PARAMS_NAMED,
+                'aid'
+            );
+            $filterwhereclause = " AND qa.id {$idsql}";
         }
 
         // Get all requested attempts.
@@ -228,10 +238,8 @@ class quiz_manager {
             "SELECT qa.id AS attemptid, qa.userid, qa.attempt, qa.state, qa.timestart, qa.timefinish, " .
             "       u.username, u.firstname, u.lastname, u.email, u.idnumber " .
             "FROM {quiz_attempts} qa LEFT JOIN {user} u ON qa.userid = u.id " .
-            "WHERE qa.preview = 0 AND qa.quiz = :quizid " . ($filterwhereclause ?? ''),
-            [
-                "quizid" => $this->quiz->id,
-            ]
+            "WHERE qa.preview = 0 AND qa.quiz = :quizid " . $filterwhereclause,
+            array_merge(["quizid" => $this->quiz->id], $filterparams)
         );
     }
 

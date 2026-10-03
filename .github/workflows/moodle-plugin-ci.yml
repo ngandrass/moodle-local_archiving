@@ -2,7 +2,7 @@ name: Moodle Plugin CI
 
 on:
   push:
-    branches: [ "master", "develop", "refactor/monorepo" ] # FIXME: Remove "refactor/monorepo" before merge!
+    branches: [ "master", "develop" ]
   pull_request:
     branches: [ "master", "develop" ]
 

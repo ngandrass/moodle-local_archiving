@@ -10,34 +10,32 @@ The form elements largely depend on the targeted activity type. In the example a
 All settings feature a comprehensive help text that explains their effect in detail. It can be accessed by hovering over
 the question mark symbol next to each setting.
 
-To create the archiving job, click the _Create archive_ button at the bottom of the form. You should now see a
-confirmation message and a newly created job in the table at the bottom of the page. You can monitor the progress of the
-archive job by clicking on the refresh button in the top right corner of the table or by navigating to the job logs page
-of the respective archive job.
+To create the archiving job, click the {{ mform_element('Create archive', 'button') }} button at the bottom of the
+form. You should now see a confirmation message and a newly created job in the table at the bottom of the page. You can
+monitor the progress of the archive job by clicking on the refresh button in the top right corner of the table or by
+navigating to the job logs page of the respective archive job.
 
-If you wish to select another activity, use the _Cancel_ button to return to the archiving overview without creating a
-new job.
+If you wish to select another activity, use the {{ mform_element('Cancel', 'button') }} button to return to the
+archiving overview without creating a new job.
 
 !!! info "Locked settings"
     Some settings might be locked by the administrator to enforce organization-wide policies. Locked settings are
     indicated by a greyed-out appearance and can not be changed by the user.
 
-## Advanced Settings
 
-When creating any new activity archive, the _Advanced settings_ section contains options for naming the the archive
-itself as well as defining its file structure layout:
+## Archive naming
 
-- **Archive name** controls the name of the final archive file.
-- **Flatten archive** determines the file structure layout of contained artifacts.
+When creating any new activity archive, the {{ mform_element ('Advanced settings', 'section') }} section will always
+contain the {{ mform_element('Archive name', 'text') }} option for naming the archive itself. Patterns supplied here
+may contain plain text and variables. Variables must use the `${variablename}` syntax. The file extension is added
+automatically, so do not add an extension yourself.
 
-Patterns may contain plain text and variables. Variables must use the `${variablename}` syntax. The file extension is
-added automatically to the _Archive name_; do not add an extension yourself.
-
+One example of an archive name might be `${cmname}-archive-${courseshortname}-${date}`, which results in an archive with
+the file name `quiz-archive-MATH101-2026-08-07.zip`.
 
 ### Available variables
 
-The following table lists all variables available to the naming options. Avariable is only expanded when it is supported
-by the selected option.
+The table below lists all available variables:
 
 | Variable             | Description                        |
 |----------------------|------------------------------------|
@@ -57,17 +55,5 @@ by the selected option.
 
 ### Naming rules
 
-The following characters are forbidden for generated archive names:
-`.`, `:`, `;`, `*`, `?`, `!`, `"`, `<`, `>`, `|`, and `/`.
-
-One example of an archive might be `${cmname}-archive-${courseshortname}-${date}` which results in an archive with the
-file name `quiz-archive-MATH101-2026-08-07.zip`.
-
-### File structure
-
-The _Flatten export archive_ checkbox determines how files are organized inside the resulting archive:
-
-- When it is **not selected**, the archive uses a hierarchical structure with separate directories for the different
-  artifact types and reports.
-- When it is **selected**, the archive uses a flat structure. All files are placed directly in the root of the archive.
-  Prefixes are added to file names to distinguish different kind of artifacts and to prevent name collisions.
+The following characters are forbidden for generated archive names: `.`, `:`, `;`, `*`, `?`, `!`, `"`, `<`, `>`, `|`,
+and `/`.

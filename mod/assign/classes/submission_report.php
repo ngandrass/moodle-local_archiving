@@ -121,7 +121,7 @@ class submission_report {
                     cmid: $this->cm->id,
                 ),
                 'introattachments' => $this->assignment->render_area_files('mod_assign', ASSIGN_INTROATTACHMENT_FILEAREA, 0),
-                'icon' => $OUTPUT->render(activity_icon::from_modname('assign')),
+                'icon' => $this->render_activity_icon(),
                 'dates' => [
                     'opened' => $assigninstance->allowsubmissionsfromdate,
                     'due' => $assigninstance->duedate,
@@ -144,6 +144,32 @@ class submission_report {
                 'report' => $this->generate_submission_and_feedback_html($submittinguser, $sections),
             ],
             'archivingdate' => time(),
+        ]);
+    }
+
+    /**
+     * Renders the assignment activity icon.
+     *
+     * This includes a shim for Moodle <= 4.5 where core_course\output\activity_icon
+     * was not yet available. This method can be removed once Moodle 4.5 support is dropped.
+     *
+     * @return string HTML representation of the activity icon
+     * @throws \coding_exception
+     */
+    protected function render_activity_icon(): string {
+        global $OUTPUT;
+
+        // Moodle >= 5.0.
+        if (class_exists(activity_icon::class)) {
+            return $OUTPUT->render(activity_icon::from_modname('assign'));
+        }
+
+        // TODO (MDL-0): Delete this method in favor of the activity_icon class once Moodle 4.5 support is dropped.
+        // Moodle <= 4.5.
+        return \html_writer::empty_tag('img', [
+            'src' => $this->cm->get_icon_url(),
+            'class' => 'activityicon',
+            'alt' => '',
         ]);
     }
 
@@ -291,6 +317,8 @@ class submission_report {
      * stripped from the generated HTML DOM
      * @param bool $inlineimages If true, all images will be inlined as base64
      * to prevent rendering issues on user side
+     * @param int $marginpercent Percentage of correction margin (0 - 100) to
+     * add to the right of the report
      *
      * @return string HTML DOM of the rendered assignment submission report
      *
@@ -304,14 +332,22 @@ class submission_report {
         array $sections,
         bool $fixrelativeurls = true,
         bool $minimal = true,
-        bool $inlineimages = true
+        bool $inlineimages = true,
+        int $marginpercent = 0
     ): string {
         global $CFG, $OUTPUT, $PAGE;
+
+        // Validate correction margin.
+        if ($marginpercent < 0 || $marginpercent > 100) {
+            throw new \coding_exception('Correction margin percent must be between 0 and 100');
+        }
 
         // Add a assignment archiver specific CSS class to provide a unique CSS selector.
         // This can be used to add additional styling to the submission report page accessed by the worker,
         // for example by specifying additional (s)css in the theme scss setting in the moodle administration.
         $PAGE->add_body_class('assign-archiver-report');
+
+        $PAGE->activityheader->disable();
 
         // Build HTML tree.
         $html = "";
@@ -391,6 +427,17 @@ class submission_report {
             $dom->getElementsByTagName('head')[0]->appendChild($csshacksnode);
         }
 
+        // Add correction margin if desired.
+        if ($marginpercent > 0) {
+            $correctionmargincssnode = $dom->createElement("style", "
+                /* Add correction margin to the right of the page */
+                #region-main {
+                    margin-right: {$marginpercent}% !important;
+                }
+            ");
+            $dom->getElementsByTagName('head')[0]->appendChild($correctionmargincssnode);
+        }
+
         // Convert all local images to base64 if desired.
         if ($inlineimages) {
             $wwwroot = get_config('archivingmod_assign')->internal_wwwroot ?: null;
@@ -442,13 +489,19 @@ class submission_report {
         $assigninstance = $this->assignment->get_instance();
         $data = [
             'assignmentid' => $assigninstance->id ?: 0,
-            'assignmenttitle' => $assigninstance->name ?: 'null',
+            'assignmentname' => $assigninstance->name ?: 'null',
             'attemptnumber' => $submissioninfo->attemptnumber ?: 0,
             'cmid' => $this->cm->id ?: 0,
             'courseid' => $this->course->id ?: 0,
             'coursename' => $this->course->fullname ?: 'null',
             'courseshortname' => $this->course->shortname ?: 'null',
+            'createddatetime' => !empty($submissioninfo->timecreated)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $submissioninfo->timecreated)
+                : 'null',
             'date' => date('Y-m-d'),
+            'duedatetime' => !empty($assigninstance->duedate)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $assigninstance->duedate)
+                : 'null',
             'email' => str_replace('.', '_', $userinfo->email) ?: 'null',
             'firstname' => $userinfo->firstname ?: 'null',
             'groupidnumbers' => join('-', array_map(fn($group) => $group->idnumber ?: 'null', $usergroups)) ?: 0,
@@ -456,6 +509,15 @@ class submission_report {
             'groupnames' => join('-', array_map(fn($group) => $group->name, $usergroups)) ?: 'nogroup',
             'idnumber' => $userinfo->idnumber ?: 'null',
             'lastname' => $userinfo->lastname ?: 'null',
+            'modifieddatetime' => !empty($submissioninfo->timemodified)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $submissioninfo->timemodified)
+                : 'null',
+            'opendatetime' => !empty($assigninstance->allowsubmissionsfromdate)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $assigninstance->allowsubmissionsfromdate)
+                : 'null',
+            'startdatetime' => !empty($submissioninfo->timestarted)
+                ? date(storage::FILENAME_DATETIME_FORMAT, $submissioninfo->timestarted)
+                : 'null',
             'submissionid' => $submissionid ?: 0,
             'time' => date('H-i-s'),
             'timecreated' => $submissioninfo->timecreated ?: 0,

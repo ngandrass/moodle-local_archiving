@@ -30,7 +30,7 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php'); // @
  * Tests generator for the archivingmod_quiz plugin
  *
  * @package   archivingmod_quiz
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class archivingmod_quiz_generator extends \testing_data_generator {

@@ -18,7 +18,7 @@
  * This file defines the update_task_status webservice function
  *
  * @package   archivingmod_quiz
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -134,14 +134,15 @@ class update_task_status extends external_api {
             return ['status' => webservice_status::E_TASK_NOT_FOUND->name];
         }
 
+        // Check access rights.
+        $wstoken = optional_param('wstoken', null, PARAM_TEXT);
+        if (empty($wstoken) || $task->get_webservice_token() !== $wstoken) {
+            return ['status' => webservice_status::E_ACCESS_DENIED->name];
+        }
+
         // Ensure that the task type matches.
         if ($task->get_archivingmodname() !== 'quiz') {
             return ['status' => webservice_status::E_TASK_TYPE_INVALID->name];
-        }
-
-        // Check access rights.
-        if ($task->get_webservice_token() !== optional_param('wstoken', null, PARAM_TEXT)) {
-            return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 
         // Do not alter the status if the task is already completed.

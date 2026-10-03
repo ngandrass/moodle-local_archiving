@@ -39,6 +39,12 @@ final class s3_client {
     /** @var int Maximum object size supported via a single PUT request (5 GiB - 1 byte) */
     public const MAX_PUT_OBJECT_SIZE = 5 * 1024 * 1024 * 1024 - 1;
 
+    /** @var int Transfer speed (bytes / sec) used as a detection threshold for stalled transfers */
+    private const LOW_SPEED_LIMIT_BYTES = 1024;
+
+    /** @var int Number of seconds before a request with a speed below LOW_SPEED_LIMIT_BYTES is timed out */
+    private const LOW_SPEED_TIME_SECONDS = 60;
+
     /** @var string SHA-256 hash of an empty string, used as the payload hash for requests without a body */
     private const EMPTY_PAYLOAD_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
@@ -171,7 +177,10 @@ final class s3_client {
     }
 
     /**
-     * Uploads a local file to this storage under the given object key
+     * Uploads a local file to this storage under the given object key.
+     *
+     * Currently, only single part uploads are supported. The maximum supported
+     * file size is self::MAX_PUT_OBJECT_SIZE bytes.
      *
      * @param string $key Object key to store the file under (relative to the configured key prefix)
      * @param string $localpath Absolute path of the local file to upload
@@ -250,7 +259,7 @@ final class s3_client {
 
         $callbackcapture = (object) ['exception' => null];
         $options = array_merge(
-            $this->base_curl_options(timeout: 0),
+            $this->base_curl_options(timeout: HOURSECS),
             $this->progress_curl_option($progresscallback, upload: false, capture: $callbackcapture),
             [
                 'CURLOPT_HTTPHEADER' => $this->format_http_headers($headers),
@@ -281,7 +290,7 @@ final class s3_client {
             return;
         }
 
-        // If re reached this point, the download_one() call streamed the S3 error body straight to $localpath.
+        // If we reached this point, the download_one() call streamed the S3 error body straight to $localpath.
         // Parse the error body and unlink the local file.
         $body = is_readable($localpath) ? (string) file_get_contents($localpath) : '';
         @unlink($localpath);
@@ -351,7 +360,7 @@ final class s3_client {
 
         // Generic CURL error.
         if (!empty($c->error)) {
-            throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: $c->error);
+            throw new storage_exception('error_s3_object_existence_check_failed', 'archivingstore_s3', a: $c->error);
         }
 
         // @codeCoverageIgnoreStart
@@ -367,7 +376,7 @@ final class s3_client {
         }
 
         // Other error. Treat as check failure.
-        throw new storage_exception('error_s3_object_delete_failed', 'archivingstore_s3', a: "HTTP {$httpcode}");
+        throw new storage_exception('error_s3_object_existence_check_failed', 'archivingstore_s3', a: "HTTP {$httpcode}");
         // @codeCoverageIgnoreEnd
     }
 
@@ -501,7 +510,7 @@ final class s3_client {
     private function canonical_path(string $key = ''): string {
         $fullkey = $key !== '' ? $this->full_key($key) : '';
 
-        // Populate segemnts based on selected path-style.
+        // Populate segments based on selected path-style.
         $segments = [];
         if ($this->pathstyle) {
             $segments[] = $this->bucket;
@@ -521,7 +530,7 @@ final class s3_client {
     /**
      * Builds the set of curl options shared by all signed object-level requests
      *
-     * @param int $timeout Maximum transfer time in seconds, or 0 for no limit (e.g. large uploads/downloads)
+     * @param int $timeout Maximum transfer time in seconds, or 0 for no limit
      * @return array<string, mixed> Curl options
      */
     private function base_curl_options(int $timeout = 30): array {
@@ -535,6 +544,8 @@ final class s3_client {
             'CURLOPT_SSL_VERIFYHOST' => $this->verifytls ? 2 : 0,
             'CURLOPT_CONNECTTIMEOUT' => 10,
             'CURLOPT_TIMEOUT' => $timeout,
+            'CURLOPT_LOW_SPEED_LIMIT' => self::LOW_SPEED_LIMIT_BYTES,
+            'CURLOPT_LOW_SPEED_TIME' => self::LOW_SPEED_TIME_SECONDS,
         ];
     }
 

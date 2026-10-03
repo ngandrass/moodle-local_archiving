@@ -18,18 +18,18 @@
  * Plugin version and other meta-data are defined here
  *
  * @package     archivingtrigger_manual
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 $plugin->component = 'archivingtrigger_manual';
-$plugin->release = '1.1.0';
-$plugin->version = 2025101301;
+$plugin->release = '1.2.0';
+$plugin->version = 2026092600;
 $plugin->requires = 2024100700;
-$plugin->supported = [405, 501]; // X meta-supported-moodle{4.5 - 5.1} meta-supported-php{8.1 - 8.4}.
+$plugin->supported = [405, 502]; // X meta-supported-moodle{4.5 - 5.2} meta-supported-php{8.1 - 8.4}.
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [
-    'local_archiving' => 2026073000,
+    'local_archiving' => 2026082900,
 ];

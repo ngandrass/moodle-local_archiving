@@ -18,7 +18,7 @@
  * Tests for the remote_archive_worker class
  *
  * @package   archivingmod_quiz
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -37,26 +37,6 @@ final class remote_archive_worker_test extends \advanced_testcase {
     // phpcs:ignore
     public static function getDataGenerator(): \archivingmod_quiz_generator {
         return parent::getDataGenerator()->get_plugin_generator('archivingmod_quiz');
-    }
-
-    /**
-     * Tests the get_status method of the remote archive worker.
-     *
-     * @covers \archivingmod_quiz\remote_archive_worker
-     *
-     * @return void
-     * @throws \dml_exception
-     */
-    public function test_get_status(): void {
-        // Create a worker instance.
-        $this->resetAfterTest();
-        set_config('worker_url', 'http://lorem.ipsum', 'archivingmod_quiz');
-        set_config('internal_wwwroot', 'http://internal.moodle', 'archivingmod_quiz');
-        $worker = remote_archive_worker::instance();
-
-        // Try to get the status.
-        $this->expectException(\moodle_exception::class, 'Since we have not set up a real worker, this should fail.');
-        $worker->get_status();
     }
 
     /**

@@ -40,26 +40,6 @@ final class remote_archive_worker_test extends \advanced_testcase {
     }
 
     /**
-     * Tests the get_status method of the remote archive worker.
-     *
-     * @covers \archivingmod_assign\remote_archive_worker
-     *
-     * @return void
-     * @throws \dml_exception
-     */
-    public function test_get_status(): void {
-        // Create a worker instance.
-        $this->resetAfterTest();
-        set_config('worker_url', 'http://lorem.ipsum', 'archivingmod_assign');
-        set_config('internal_wwwroot', 'http://internal.moodle', 'archivingmod_assign');
-        $worker = remote_archive_worker::instance();
-
-        // Try to get the status.
-        $this->expectException(\moodle_exception::class, 'Since we have not set up a real worker, this should fail.');
-        $worker->get_status();
-    }
-
-    /**
      * Tests enqueuing an archive job with valid data.
      *
      * @covers \archivingmod_assign\remote_archive_worker

@@ -143,6 +143,16 @@ if ($hassiteconfig) {
         $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $settings->add($set);
 
+        // Job preset: Correction margin.
+        $set = new admin_setting_configcheckbox(
+            'archivingmod_assign/job_preset_correction_margin',
+            get_string('task_correction_margin', 'archivingmod_assign'),
+            get_string('task_correction_margin_help', 'archivingmod_assign'),
+            '0',
+        );
+        $set->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $settings->add($set);
+
         // Job preset: Keep HTML files.
         $set = new admin_setting_configcheckbox(
             'archivingmod_assign/job_preset_keep_html_files',

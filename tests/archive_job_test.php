@@ -20,13 +20,15 @@ use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
+use local_archiving\local\util\course_util;
+use local_archiving\task\process_archive_job;
 use local_archiving\task\retrieve_remote_file;
 
 /**
  * Tests for the archive_job class
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -121,6 +123,88 @@ final class archive_job_test extends \advanced_testcase {
         $this->assertEquals(get_admin()->id, $retrievedjob->get_userid(), 'User ID should match');
         $this->assertEquals($settings, $retrievedjob->get_settings(), 'Settings should match');
         $this->assertEquals('manual', $retrievedjob->get_trigger(), 'Trigger should match');
+    }
+
+    /**
+     * Tests that archive_job::create() enforces the course category whitelist.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_create_enforces_coursecat_whitelist(): void {
+        $this->resetAfterTest();
+
+        // Prepare a course inside a category that is not part of the whitelist.
+        $category = self::getDataGenerator()->create_category();
+        $course = $this->generator()->create_course(['category' => $category->id]);
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $ctx = \context_module::instance($cm->cmid);
+
+        // Restrict archiving to a different, unrelated category.
+        $othercategory = self::getDataGenerator()->create_category();
+        set_config('coursecat_whitelist', $othercategory->id, 'local_archiving');
+        $this->assertFalse(
+            course_util::archiving_enabled_for_course($course->id),
+            'Archiving must be disabled for the course used in this test.'
+        );
+
+        // A regular user without the bypass capability must not be able to create a job.
+        $user = self::getDataGenerator()->create_and_enrol($course, 'editingteacher');
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('archiving_disabled_for_this_course_by_category', 'local_archiving'));
+        archive_job::create(
+            context: $ctx,
+            userid: $user->id,
+            trigger: 'manual',
+            settings: (object) [],
+        );
+    }
+
+    /**
+     * Tests that archive_job::create() still allows job creation for a category-restricted
+     * course as long as the acting user holds the bypass capability.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_create_coursecat_whitelist_bypass(): void {
+        $this->resetAfterTest();
+
+        // Prepare a course inside a category that is not part of the whitelist.
+        $category = self::getDataGenerator()->create_category();
+        $course = $this->generator()->create_course(['category' => $category->id]);
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $ctx = \context_module::instance($cm->cmid);
+
+        // Restrict archiving to a different, unrelated category.
+        $othercategory = self::getDataGenerator()->create_category();
+        set_config('coursecat_whitelist', $othercategory->id, 'local_archiving');
+        $this->assertFalse(
+            course_util::archiving_enabled_for_course($course->id),
+            'Archiving must be disabled for the course used in this test.'
+        );
+
+        // Grant the bypass capability to a user via a custom role.
+        $roleid = self::getDataGenerator()->create_role();
+        assign_capability('local/archiving:bypasscourserestrictions', CAP_ALLOW, $roleid, \context_system::instance());
+        $user = self::getDataGenerator()->create_and_enrol($course, 'editingteacher');
+        role_assign($roleid, $user->id, \context_system::instance());
+        accesslib_clear_all_caches_for_unit_testing();
+
+        // Creation must succeed for a user holding the bypass capability.
+        $createdjob = archive_job::create(
+            context: $ctx,
+            userid: $user->id,
+            trigger: 'manual',
+            settings: (object) [],
+        );
+        $this->assertGreaterThan(0, $createdjob->get_id(), 'Created job should have a valid ID despite the category restriction.');
     }
 
     /**
@@ -424,6 +508,15 @@ final class archive_job_test extends \advanced_testcase {
         \core\task\manager::queue_adhoc_task($task);
         remote_file_fetcher::mark_queued($filehandleid);
 
+        // Add TSP data.
+        $DB->insert_record(db_table::TSP->value, [
+            'filehandleid' => $filehandleid,
+            'timecreated' => time(),
+            'server' => 'localhost',
+            'timestampquery' => 'sample-query',
+            'timestampreply' => 'sample-reply',
+        ]);
+
         // Delete the job and check that everything was cleaned up correctly.
         $job->delete();
         $this->assertEmpty(
@@ -446,6 +539,10 @@ final class archive_job_test extends \advanced_testcase {
             $DB->get_records(db_table::FILE_HANDLE->value, ['jobid' => $jobid]),
             'Job file handles should be deleted from the database'
         );
+        $this->assertFalse(
+            $DB->record_exists(db_table::TSP->value, ['filehandleid' => $filehandleid]),
+            'TSP data for the job\'s file handles should be removed when the job is deleted'
+        );
         $this->assertEmpty(
             $DB->get_records(db_table::LOG->value, ['jobid' => $jobid]),
             'Job logs should be deleted from the database'
@@ -458,6 +555,58 @@ final class archive_job_test extends \advanced_testcase {
             remote_file_fetcher::get($filehandleid),
             'Outstanding remote_file_fetcher tracking records should be purged when the job is deleted'
         );
+    }
+
+    /**
+     * Tests that deleting a job that is queued or currently running removes
+     * everything associated with it, including its pending processing task,
+     * while leaving other jobs untouched.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_delete_active_job(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create a job that is running (has an activity archiving task and an artifact) and a bystander job.
+        $settings = (object) [
+            'export_course_backup' => false,
+            'export_cm_backup' => false,
+            'storage_driver' => 'localdir',
+        ];
+        $job = $this->generator()->create_archive_job(['settings' => $settings]);
+        $job->enqueue();
+        $job->execute();
+        $jobid = $job->get_id();
+        $this->assertSame(archive_job_status::ACTIVITY_ARCHIVING, $job->get_status());
+        $this->assertNotEmpty(activity_archiving_task::get_by_jobid($jobid), 'Job should have an activity archiving task');
+        $this->generator()->create_file_handle(['jobid' => $jobid]);
+
+        $otherjob = $this->generator()->create_archive_job(['settings' => $settings]);
+        $otherjob->enqueue();
+
+        $this->assertCount(2, \core\task\manager::get_adhoc_tasks(process_archive_job::class));
+
+        // Delete the running job.
+        $job->delete();
+
+        $this->assertFalse($DB->record_exists(db_table::JOB->value, ['id' => $jobid]), 'Job should be deleted');
+        $this->assertFalse($DB->record_exists(db_table::ACTIVITY_TASK->value, ['jobid' => $jobid]), 'Tasks should be deleted');
+        $this->assertFalse($DB->record_exists(db_table::FILE_HANDLE->value, ['jobid' => $jobid]), 'File handles should be deleted');
+        $this->assertFalse($DB->record_exists(db_table::LOG->value, ['jobid' => $jobid]), 'Logs should be deleted');
+
+        // Only the pending processing task of the other job must remain.
+        $remaining = \core\task\manager::get_adhoc_tasks(process_archive_job::class);
+        $this->assertCount(1, $remaining, 'Pending processing task of the deleted job should be removed');
+        $this->assertSame($otherjob->get_id(), (int) reset($remaining)->get_custom_data()->jobid);
+        $this->assertTrue($DB->record_exists(db_table::JOB->value, ['id' => $otherjob->get_id()]), 'Other job must be kept');
     }
 
     /**
@@ -532,14 +681,16 @@ final class archive_job_test extends \advanced_testcase {
      * @throws \moodle_exception
      */
     public function test_timeout(): void {
-        // Create a new job.
+        global $DB;
         $this->resetAfterTest();
-        $job = $this->generator()->create_archive_job();
 
-        // Configure timeout to be instant.
-        set_config('job_timeout_min', -1, 'local_archiving');
+        // Create a new job and backdate its creation time to simulate a timeout scenario.
+        $job = $this->generator()->create_archive_job();
+        $DB->set_field(db_table::JOB->value, 'timecreated', time() - (2 * MINSECS), ['id' => $job->get_id()]);
+        set_config('job_timeout_min', 1, 'local_archiving');
 
         // Check if the job is considered timed out.
+        $job = archive_job::get_by_id($job->get_id());
         $this->assertTrue($job->is_overdue(), 'Job should be considered overdue with instant timeout');
     }
 

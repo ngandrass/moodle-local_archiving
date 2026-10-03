@@ -19,15 +19,12 @@
  *
  * @package     archivingtrigger_manual
  * @category    string
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // @codingStandardsIgnoreFile
 
-// Common
 $string['pluginname'] = 'Manual';
 $string['privacy:metadata'] = 'This archiving trigger plugin does not store any personal data.';
-
-// Settings.
 $string['setting_enabled'] = 'Enabled';
 $string['setting_enabled_desc'] = 'Enables or disables this archiving trigger.';

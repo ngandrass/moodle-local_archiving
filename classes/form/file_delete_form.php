@@ -18,7 +18,7 @@
  * Form for deleting single archiving job artifact files
  *
  * @package    local_archiving
- * @copyright  2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright  2026 Niels Gandraß <niels@gandrass.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -64,7 +64,7 @@ class file_delete_form extends \moodleform {
         $this->filehandle = file_handle::get_by_id($filehandleid);
         $this->job = archive_job::get_by_id($this->filehandle->jobid);
         if ($this->job->get_context()->id != $contextid) {
-            throw new \moodle_exception('invalidcontext', 'local_archiving');
+            throw new \moodle_exception('invalidcontext', 'error');
         }
 
         parent::__construct($PAGE->url);

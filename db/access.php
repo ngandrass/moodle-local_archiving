@@ -18,7 +18,7 @@
  * Capability definitions for the local_archiving plugin
  *
  * @package     local_archiving
- * @copyright   2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright   2026 Niels Gandraß <niels@gandrass.de>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -53,10 +53,7 @@ $capabilities = [
         'riskbitmask' => (RISK_DATALOSS),
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => [
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW,
-        ],
+        'archetypes' => [],
     ],
     // Capability to create new archives, regardless of any filters.
     'local/archiving:bypasscourserestrictions' => [

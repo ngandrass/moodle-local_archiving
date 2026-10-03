@@ -18,7 +18,7 @@
  * This file defines the job overview table renderer
  *
  * @package   local_archiving
- * @copyright 2025 Niels Gandraß <niels@gandrass.de>
+ * @copyright 2026 Niels Gandraß <niels@gandrass.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -49,6 +49,9 @@ class job_overview_table extends \table_sql {
     /** @var \course_modinfo Cached course_modinfo object */
     protected \course_modinfo $coursemodinfo;
 
+    /** @var bool Stores whether the viewing user has the capability to delete archive jobs */
+    protected bool $usercandelete = false;
+
     /**
      * Constructor
      *
@@ -60,17 +63,18 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function __construct(string $uniqueid, \context $ctx) {
-        global $OUTPUT, $PAGE;
+        global $DB, $OUTPUT, $PAGE;
 
         parent::__construct($uniqueid);
 
         // Validate context and pre-cache modinfo.
         if (!($ctx instanceof \context_course || $ctx instanceof \context_module)) {
-            throw new \coding_exception(get_string('invalidcontext', 'local_archiving'));
+            throw new \coding_exception(get_string('invalidcontext', 'error'));
         }
 
         $this->coursectx = $ctx->get_course_context();
         $this->coursemodinfo = get_fast_modinfo($this->coursectx->instanceid);
+        $this->usercandelete = has_capability('local/archiving:delete', $ctx);
 
         $refreshhtml = $OUTPUT->render_from_template('local_archiving/components/refresh_button', [
             'lastupdated' => time(),
@@ -103,9 +107,12 @@ class job_overview_table extends \table_sql {
             '{' . db_table::JOB->value . '} j ' .
                 'JOIN {user} u ON j.userid = u.id ' .
                 'JOIN {context} ctx ON ctx.id = j.contextid',
-            "ctx.path LIKE :ctxpath",
+            // We match the context directly by id, or any of its children by path. The seperation is required because
+            // the path must have a trailing slash to avoid matching contexts with a similar path (e.g., /1/3/25 vs. /1/3/250).
+            '(ctx.id = :ctxid OR ' . $DB->sql_like('ctx.path', ':ctxpath') . ')',
             [
-                'ctxpath' => $ctx->path . '%',
+                'ctxid' => $ctx->id,
+                'ctxpath' => $ctx->path . '/%',
             ]
         );
 
@@ -119,9 +126,12 @@ class job_overview_table extends \table_sql {
      *
      * @param \stdClass $values Values of the current row
      * @return string HTML code to be displayed
+     * @throws \coding_exception
      */
     public function col_timecreated($values) {
-        return date('Y-m-d\<\b\r\\>H:i:s', $values->timecreated);
+        return userdate($values->timecreated, '%Y-%m-%d') .
+            \html_writer::empty_tag('br') .
+            userdate($values->timecreated, '%H:%M:%S');
     }
 
     /**
@@ -136,7 +146,7 @@ class job_overview_table extends \table_sql {
         $modctx = \context::instance_by_id($values->contextid);
         $cm = $this->coursemodinfo->get_cm($modctx->instanceid);
 
-        return '<a href="' . $cm->get_url() . '">' . $cm->name . '</a>';
+        return \html_writer::link($cm->get_url(), $cm->get_formatted_name());
     }
 
     /**
@@ -147,7 +157,7 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_user($values) {
-        return '<a href="' . new \moodle_url('/user/profile.php', ['id' => $values->userid]) . '">' . $values->username . '</a>';
+        return \html_writer::link(new \moodle_url('/user/profile.php', ['id' => $values->userid]), s($values->username));
     }
 
     /**
@@ -163,18 +173,30 @@ class job_overview_table extends \table_sql {
         $job = archive_job::get_by_id($values->id);
         $status = archive_job_status::from($values->status)->status_display_args();
 
-        $statustooltiphtml = 'data-toggle="tooltip" data-placement="top" title="' . $status->help . '"';
-        $html = '<span class="badge badge-' . $status->color . '" ' . $statustooltiphtml . '>' . $status->text . '</span><br/>';
+        $html = \html_writer::span($status->text, 'badge badge-' . $status->color, [
+            'data-toggle' => 'tooltip',
+            'data-placement' => 'top',
+            'title' => $status->help,
+        ]);
+        $html .= \html_writer::empty_tag('br');
 
         $progress = $job->get_progress();
         if ($progress !== null && $progress < 100) {
-            // phpcs:ignore
-            $html .= '<span title="'.get_string('progress', 'local_archiving').'" alt="'.get_string('progress', 'local_archiving').'" data-toggle="tooltip" data-placement="top">';
-            $html .= '<i class="fa fa-spinner"></i>&nbsp;' . $progress . '%';
-            $html .= '</span><br/>';
+            $progresslabel = get_string('progress', 'local_archiving');
+            $html .= \html_writer::span(
+                \html_writer::tag('i', '', ['class' => 'fa fa-spinner', 'aria-hidden' => 'true']) . '&nbsp;' . $progress . '%',
+                '',
+                [
+                    'title' => $progresslabel,
+                    'aria-label' => $progresslabel,
+                    'data-toggle' => 'tooltip',
+                    'data-placement' => 'top',
+                ]
+            );
+            $html .= \html_writer::empty_tag('br');
         }
 
-        $html .= '<small>' . date('H:i:s', $values->timemodified) . '</small>';
+        $html .= \html_writer::tag('small', userdate($values->timemodified, '%H:%M:%S'));
 
         return $html;
     }
@@ -196,28 +218,87 @@ class job_overview_table extends \table_sql {
         $files = file_handle::get_by_jobid($values->id);
         if ($job->is_completed() && count($files) > 0) {
             $downloadurl = new \moodle_url('/local/archiving/download.php', ['jobid' => $values->id]);
-            // phpcs:ignore
-            $html .= '<a href="'.$downloadurl.'" class="btn btn-success mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('download').'" alt="'.get_string('download').'"><i class="fa fa-download"></i></a>';
+            $html .= $this->action_button($downloadurl, 'btn-success', get_string('download'), 'fa-download');
         } else {
-            // phpcs:ignore
-            $html .= '<a href="#" class="btn btn-outline-success mx-1 disabled" role="button" alt="'.get_string('download').'" alt="'.get_string('download').'" disabled aria-disabled="true"><i class="fa fa-download"></i></a>';
+            $html .= $this->action_button(
+                null,
+                'btn-outline-success',
+                get_string('files_require_successful_job', 'local_archiving'),
+                'fa-download'
+            );
         }
 
         // Action: Show logs.
         $logurl = new \moodle_url('/local/archiving/logs.php', ['jobid' => $values->id]);
-        // phpcs:ignore
-        $html .= '<a href="'.$logurl.'" class="btn btn-info mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('logs').'" alt="'.get_string('logs').'"><i class="fa fa-file-waveform"></i></a>';
+        $html .= $this->action_button($logurl, 'btn-info', get_string('logs'), 'fa-file-waveform');
 
         // Action: Delete.
-        $deleteurl = new \moodle_url('/local/archiving/manage.php', [
-            'action' => 'jobdelete',
-            'contextid' => $values->contextid,
-            'jobid' => $values->id,
-            'wantsurl' => $PAGE->url->out(true),
-        ]);
-        // phpcs:ignore
-        $html .= '<a href="'.$deleteurl.'" class="btn btn-danger mx-1" role="button" data-toggle="tooltip" data-placement="top" title="'.get_string('delete').'" alt="'.get_string('delete').'"><i class="fa fa-trash"></i></a>';
+        if ($this->usercandelete) {
+            $deleteurl = new \moodle_url('/local/archiving/manage.php', [
+                'action' => 'jobdelete',
+                'contextid' => $values->contextid,
+                'jobid' => $values->id,
+                'wantsurl' => $PAGE->url->out(false),
+            ]);
+            $html .= $this->action_button($deleteurl, 'btn-danger', get_string('delete'), 'fa-trash');
+        } else {
+            $html .= $this->action_button(
+                null,
+                'btn-outline-danger',
+                get_string('deletion_prohibited_by_capability', 'local_archiving'),
+                'fa-trash'
+            );
+        }
 
         return $html;
+    }
+
+    /**
+     * Renders an icon-only action button.
+     *
+     * We create a wrapper span around the button to ensure that the tooltip is
+     * displayed even when the button is disabled. Otherwise pointer events will
+     * be ignored by the browser.
+     *
+     * @param \moodle_url|null $url Target of the button, or null to render a disabled button
+     * @param string $btnclass Bootstrap button class (e.g. 'btn-success')
+     * @param string $label Accessible label and tooltip of the button
+     * @param string $icon FontAwesome icon class (e.g. 'fa-download')
+     * @return string HTML code of the button
+     */
+    protected function action_button(?\moodle_url $url, string $btnclass, string $label, string $icon): string {
+        $btnattributes = [
+            'class' => "btn {$btnclass} mx-1",
+            'role' => 'button',
+            'title' => $label,
+            'aria-label' => $label,
+        ];
+        $wrapperattributes = [
+            'class' => 'd-inline-block',
+            'title' => $label,
+            'data-toggle' => 'tooltip',
+            'data-bs-toggle' => 'tooltip',
+            'data-placement' => 'top',
+            'data-bs-placement' => 'top',
+        ];
+
+        // Render buttons with null URLs as disabled.
+        if ($url === null) {
+            $btnattributes['class'] .= ' disabled';
+            $btnattributes['aria-disabled'] = 'true';
+            $btnattributes['tabindex'] = '-1';
+        }
+
+        $buttonhtml = \html_writer::link(
+            $url ?? '#',
+            \html_writer::tag('i', '', ['class' => "fa {$icon}", 'aria-hidden' => 'true']),
+            $btnattributes
+        );
+
+        return \html_writer::span(
+            $buttonhtml,
+            "",
+            $wrapperattributes
+        );
     }
 }

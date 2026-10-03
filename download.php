@@ -42,30 +42,31 @@ $ctx = $job->get_context();
 [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
 
 // Check login and capabilities.
-require_login($course);
-require_capability('local/archiving:view', $ctx->get_course_context());
+require_login($course, false, $cm);
+require_capability('local/archiving:view', $ctx);
+$candelete = has_capability('local/archiving:delete', $ctx);
 
 // Setup page.
-$PAGE->set_context($ctx->get_course_context());
 $PAGE->set_title(get_string('pluginname', 'local_archiving'));
 $PAGE->set_heading($cm->name);
 $PAGE->set_url(new moodle_url(
     '/local/archiving/download.php',
     ['jobid' => $jobid]
 ));
+$PAGE->activityheader->disable();
 $renderer = $PAGE->get_renderer('local_archiving');
 $html = "";
 
 // Only allow successfully finished jobs.
-if (!$job->get_status() == archive_job_status::COMPLETED) {
-    throw new \moodle_exception('job_not_completed', 'local_archiving');
+if ($job->get_status() !== archive_job_status::COMPLETED) {
+    throw new \moodle_exception('job_not_completed_yet', 'local_archiving');
 }
 
 // Get file handles for this job.
 $filehandles = file_handle::get_by_jobid($job->get_id());
 if (count($filehandles) == 0) {
     // No file handles found, display error message.
-    $html .= $OUTPUT->notification(get_string('no_files_found', 'local_archiving'), 'error');
+    $html .= $OUTPUT->notification(get_string('nothingtodisplay', 'moodle'), 'error');
 } else {
     // Files found, prepare template context.
     $tplctx = [
@@ -74,7 +75,7 @@ if (count($filehandles) == 0) {
             "timecreated" => $job->get_timecreated(),
             "cm" => [
                 "id" => $cm->id,
-                "name" => $cm->name,
+                "name" => $cm->get_formatted_name(),
                 "url" => $cm->url,
             ],
         ],
@@ -104,8 +105,13 @@ if (count($filehandles) == 0) {
             'sha256sum' => $filehandle->sha256sum,
             'tsp' => null,
             'storagedriver' => get_string('pluginname', "archivingstore_{$filehandle->archivingstorename}"),
-            'downloadurl' => null,
-            'deleteurl' => null,
+            'downloadurl' => null, // Populated conditionally below.
+            'deleteurl' => $candelete ? new \moodle_url('/local/archiving/manage.php', [
+                'action' => 'filedelete',
+                'filehandleid' => $filehandle->id,
+                'contextid' => $ctx->id,
+                'wantsurl' => $PAGE->url->out(false),
+            ]) : null,
             'fetch' => null,
         ];
 
@@ -176,15 +182,6 @@ if (count($filehandles) == 0) {
 
                 // Mark page as requiring refreshes while we have active fetch tasks.
                 $needsrefresh = $needsrefresh || $fetch['queued'] || $fetch['fetching'];
-            }
-
-            if (has_capability('local/archiving:delete', $ctx->get_course_context())) {
-                $file['deleteurl'] = new \moodle_url('/local/archiving/manage.php', [
-                    'action' => 'filedelete',
-                    'filehandleid' => $filehandle->id,
-                    'contextid' => $ctx->id,
-                    'wantsurl' => $PAGE->url->out(false),
-                ]);
             }
         }
 

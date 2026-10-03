@@ -1,10 +1,10 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.1.0 (2026092600)
 
 - Install trigger in a disabled state
 - Enable dry-run mode at installation
-- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026082900` or higher.
 - Adapt unit test to Moodle upstream permission check changes
 - Ensure Moodle 5.2 compatibility
 

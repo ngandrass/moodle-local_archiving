@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.1.0 (2026100300)
 
 This is the first big release after the v1.0.0. It features support for archiving assignment activities, a lot of
 improvements under the hood, a simplified repository structure, and a largely extended documentation 🎉
@@ -103,7 +103,7 @@ Listed changes are split into categories, reflecting the affected component / (s
 - Setup course and module in `$PAGE` object during `generate_attempt_report` web service function
 - Forcefully disable unlocked attempt report sections that depend on another disabled section
 - Migrate quiz attempt renderer to new quiz attempt summary API
-- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026100300` or higher
 - Ensure Moodle 5.2 compatibility
 - Add archive worker service link to privacy provide
 
@@ -135,14 +135,14 @@ Listed changes are split into categories, reflecting the affected component / (s
 
 #### Archiving Trigger: Manual (`archivingtrigger_manual`)
 
-- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026082900` or higher.
 - Ensure Moodle 5.2 compatibility
 
 #### Archiving Trigger: Scheduled (`archivingtrigger_cron`)
 
 - Install trigger in a disabled state
 - Enable dry-run mode at installation
-- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026073000` or higher.
+- Adapt to archiving core refactoring. Now requires `local_archiving` version `2026082900` or higher.
 - Adapt unit test to Moodle upstream permission check changes
 - Ensure Moodle 5.2 compatibility
 

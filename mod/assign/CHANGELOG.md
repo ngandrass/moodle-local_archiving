@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDXX)
+## Version 1.0.0 (2026100300)
 
 - Implement full assignment submission archiving pipeline: submission report generation, metadata retrieval, and status reporting
 - Make submission reports configurable with various sections (header, instructions, submission, comments, feedback, grading details, ...)

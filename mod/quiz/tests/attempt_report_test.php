@@ -775,6 +775,8 @@ final class attempt_report_test extends \advanced_testcase {
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
         $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
+        $rc->quiz->timeopen = 1790805783;
+        $rc->quiz->timeclose = 1790892420;
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Full pattern.
@@ -812,6 +814,22 @@ final class attempt_report_test extends \advanced_testcase {
                 "Unsubstituted variable '{$var}' found in folder name"
             );
         }
+
+        // Datetime variables must be expanded in human-readable format.
+        // Tested separately because the full pattern exceeds the maximum filename length.
+        $foldername = $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: '${opendatetime}-${closedatetime}-${startdatetime}-${finishdatetime}',
+            isfoldername: true
+        );
+        $this->assertSame(
+            date('Y-m-d_H-i-s', $rc->quiz->timeopen) . '-' .
+            date('Y-m-d_H-i-s', $rc->quiz->timeclose) . '-' .
+            date('Y-m-d_H-i-s', $attemptinfo->timestart) . '-' .
+            ($attemptinfo->timefinish ? date('Y-m-d_H-i-s', $attemptinfo->timefinish) : 'null'),
+            $foldername,
+            'Datetime variables were not expanded correctly in folder name'
+        );
     }
 
     /**
@@ -906,6 +924,8 @@ final class attempt_report_test extends \advanced_testcase {
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
         $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
+        $rc->quiz->timeopen = 1790805783;
+        $rc->quiz->timeclose = 1790892420;
         $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
 
         // Full pattern.
@@ -943,6 +963,49 @@ final class attempt_report_test extends \advanced_testcase {
                 "Unsubstituted variable '{$var}' found in filename"
             );
         }
+
+        // Datetime variables must be expanded in human-readable format.
+        // Tested separately because the full pattern exceeds the maximum filename length.
+        $filename = $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: '${opendatetime}-${closedatetime}-${startdatetime}-${finishdatetime}',
+            isfoldername: false
+        );
+        $this->assertSame(
+            date('Y-m-d_H-i-s', $rc->quiz->timeopen) . '-' .
+            date('Y-m-d_H-i-s', $rc->quiz->timeclose) . '-' .
+            date('Y-m-d_H-i-s', $attemptinfo->timestart) . '-' .
+            ($attemptinfo->timefinish ? date('Y-m-d_H-i-s', $attemptinfo->timefinish) : 'null'),
+            $filename,
+            'Datetime variables were not expanded correctly in filename'
+        );
+    }
+
+    /**
+     * Test expansion of datetime variables for quizzes without open and close dates
+     *
+     * @covers \archivingmod_quiz\attempt_report::generate_attempt_filename
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     */
+    public function test_generate_attempt_filename_unset_datetime_variables(): void {
+        // Generate data.
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
+        $rc->quiz->timeopen = 0;
+        $rc->quiz->timeclose = 0;
+        $report = new attempt_report($rc->course, $rc->cm, $rc->quiz);
+
+        $filename = $report->generate_attempt_filename(
+            attemptid: $rc->attemptids[0],
+            pattern: 'attempt-${opendatetime}-${closedatetime}',
+            isfoldername: false
+        );
+        $this->assertSame('attempt-null-null', $filename, 'Unset datetime variables were not expanded to null');
     }
 
     /**

@@ -40,29 +40,34 @@ extension is added automatically, so do not add an extension yourself.
 
 The variables are available for use within the respective name patterns:
 
-| Variable             | Description                            | Archive name | Submission folder name | Submission name |
-|----------------------|----------------------------------------|:------------:|:----------------------:|:---------------:|
-| `${courseid}`        | Course ID                              |      ✅      |           ✅           |       ✅        |
-| `${coursename}`      | Course name                            |      ✅      |           ✅           |       ✅        |
-| `${courseshortname}` | Course short name                      |      ✅      |           ✅           |       ✅        |
-| `${cmid}`            | Course module ID                       |      ✅      |           ✅           |       ✅        |
-| `${assignmentid}`    | Assignment ID                          |      ✅      |           ✅           |       ✅        |
-| `${assignmentname}`  | Assignment name                        |      ✅      |           ✅           |       ✅        |
-| `${submissionid}`    | Submission ID                          |      ❌      |           ✅           |       ✅        |
-| `${username}`        | Student username                       |      ❌      |           ✅           |       ✅        |
-| `${firstname}`       | Student first name                     |      ❌      |           ✅           |       ✅        |
-| `${lastname}`        | Student last name                      |      ❌      |           ✅           |       ✅        |
-| `${email}`           | Student email address                  |      ❌      |           ✅           |       ✅        |
-| `${idnumber}`        | Student ID number                      |      ❌      |           ✅           |       ✅        |
-| `${groupids}`        | IDs of the student's groups            |      ❌      |           ✅           |       ✅        |
-| `${groupidnumbers}`  | ID numbers of the student's groups     |      ❌      |           ✅           |       ✅        |
-| `${groupnames}`      | Names of the student's groups          |      ❌      |           ✅           |       ✅        |
-| `${timestart}`       | Submission start Unix timestamp        |      ❌      |           ✅           |       ✅        |
-| `${timecreated}`     | Submission creation Unix timestamp     |      ❌      |           ✅           |       ✅        |
-| `${timemodified}`    | Submission modification Unix timestamp |      ❌      |           ✅           |       ✅        |
-| `${date}`            | Current date (`YYYY-MM-DD`)            |      ✅      |           ✅           |       ✅        |
-| `${time}`            | Current time (`HH-MM-SS`)              |      ✅      |           ✅           |       ✅        |
-| `${timestamp}`       | Current Unix timestamp                 |      ✅      |           ✅           |       ✅        |
+| Variable              | Description                                     | Archive name | Submission folder name | Submission name |
+|-----------------------|-------------------------------------------------|:------------:|:----------------------:|:---------------:|
+| `${courseid}`         | Course ID                                       |      ✅      |           ✅           |       ✅        |
+| `${coursename}`       | Course name                                     |      ✅      |           ✅           |       ✅        |
+| `${courseshortname}`  | Course short name                               |      ✅      |           ✅           |       ✅        |
+| `${cmid}`             | Course module ID                                |      ✅      |           ✅           |       ✅        |
+| `${assignmentid}`     | Assignment ID                                   |      ✅      |           ✅           |       ✅        |
+| `${assignmentname}`   | Assignment name                                 |      ✅      |           ✅           |       ✅        |
+| `${opendatetime}`     | Allow submissions from (`YYYY-MM-DD_HH-MM-SS`)  |      ❌      |           ✅           |       ✅        |
+| `${duedatetime}`      | Due date (`YYYY-MM-DD_HH-MM-SS`)                |      ❌      |           ✅           |       ✅        |
+| `${submissionid}`     | Submission ID                                   |      ❌      |           ✅           |       ✅        |
+| `${username}`         | Student username                                |      ❌      |           ✅           |       ✅        |
+| `${firstname}`        | Student first name                              |      ❌      |           ✅           |       ✅        |
+| `${lastname}`         | Student last name                               |      ❌      |           ✅           |       ✅        |
+| `${email}`            | Student email address                           |      ❌      |           ✅           |       ✅        |
+| `${idnumber}`         | Student ID number                               |      ❌      |           ✅           |       ✅        |
+| `${groupids}`         | IDs of the student's groups                     |      ❌      |           ✅           |       ✅        |
+| `${groupidnumbers}`   | ID numbers of the student's groups              |      ❌      |           ✅           |       ✅        |
+| `${groupnames}`       | Names of the student's groups                   |      ❌      |           ✅           |       ✅        |
+| `${timestart}`        | Submission start Unix timestamp                 |      ❌      |           ✅           |       ✅        |
+| `${startdatetime}`    | Submission start (`YYYY-MM-DD_HH-MM-SS`)        |      ❌      |           ✅           |       ✅        |
+| `${timecreated}`      | Submission creation Unix timestamp              |      ❌      |           ✅           |       ✅        |
+| `${createddatetime}`  | Submission creation (`YYYY-MM-DD_HH-MM-SS`)     |      ❌      |           ✅           |       ✅        |
+| `${timemodified}`     | Submission modification Unix timestamp          |      ❌      |           ✅           |       ✅        |
+| `${modifieddatetime}` | Submission modification (`YYYY-MM-DD_HH-MM-SS`) |      ❌      |           ✅           |       ✅        |
+| `${date}`             | Current date (`YYYY-MM-DD`)                     |      ✅      |           ✅           |       ✅        |
+| `${time}`             | Current time (`HH-MM-SS`)                       |      ✅      |           ✅           |       ✅        |
+| `${timestamp}`        | Current Unix timestamp                          |      ✅      |           ✅           |       ✅        |
 
 !!! info
     This list may not be exhaustive. Please check the help text of the respective option in Moodle itself. It will

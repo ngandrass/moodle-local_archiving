@@ -383,6 +383,11 @@ class submission_report {
                     #region-main * {
                         visibility: visible;
                     }
+
+                    #sticky-footer,
+                    footer {
+                        display: none !important;
+                    }
                 }
 
                 /* Ensure that parent container (invisible) does not cause additional margings or paddings */

@@ -126,22 +126,22 @@
 
                     <div class="card-body p-2 {{#deleted}} text-muted {{/deleted}}">
                         <ul class="list-group p-0 list-group-flush">
-                            <li class="list-group-item">
+                            <li class="list-group-item bg-transparent">
                                 <i class="fa-regular fa-file-lines"></i>&nbsp;
                                 <strong>{{#str}} type, local_archiving {{/str}}:</strong>
                                 {{filetype}}
                             </li>
-                            <li class="list-group-item">
+                            <li class="list-group-item bg-transparent">
                                 <i class="fa-regular fa-floppy-disk"></i>&nbsp;
                                 <strong>{{#str}} size {{/str}}:</strong>
                                 {{filesize}}
                             </li>
-                            <li class="list-group-item">
+                            <li class="list-group-item bg-transparent">
                                 <i class="fa-regular fa-calendar"></i>&nbsp;
                                 <strong>{{#str}} timecreated {{/str}}:</strong>
                                 {{#userdate}} {{timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
                             </li>
-                            <li class="list-group-item">
+                            <li class="list-group-item bg-transparent">
                                 <i class="fa-solid fa-trash"></i>&nbsp;
                                 <strong>{{#str}} automatic_deletion, local_archiving {{/str}}:</strong>
                                 {{#deleted}}
@@ -163,17 +163,17 @@
                                     {{/retentiontime}}
                                 {{/deleted}}
                             </li>
-                            <li class="list-group-item">
+                            <li class="list-group-item bg-transparent">
                                 <i class="fa fa-database"></i>&nbsp;
                                 <strong>{{#str}} subplugintype_archivingstore, local_archiving {{/str}}:</strong>
                                 {{storagedriver}}
                             </li>
-                            <li class="list-group-item">
+                            <li class="list-group-item bg-transparent">
                                 <i class="fa fa-hashtag"></i>&nbsp;
                                 <strong>{{#str}} checksum, local_archiving {{/str}} (SHA256):</strong>
                                 <code class="{{^deleted}}text-body{{/deleted}}{{#deleted}}text-muted{{/deleted}}" style="word-break: break-all;">{{sha256sum}}</code>
                             </li>
-                            <li class="list-group-item">
+                            <li class="list-group-item bg-transparent">
                                 <i class="fa-solid fa-file-contract"></i>&nbsp;
                                 <strong>{{#str}} signature, local_archiving {{/str}} (TSP):</strong>
                                 {{#tsp}}

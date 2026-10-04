@@ -163,6 +163,7 @@ final class process_archive_job_test extends \advanced_testcase {
     public function test_schedule_now(): void {
         // Create a task that is scheduled for a future run.
         $this->resetAfterTest();
+        $this->setAdminUser();
         $job = $this->generator()->create_archive_job();
         $task = process_archive_job::create($job);
         $task->set_next_run_time(time() + 300);

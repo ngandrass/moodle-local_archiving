@@ -1,5 +1,12 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDNN)
+
+- Ensure compatibility with Moodle 5.3
+- Fix archive job file attributes list styles in Moodle 5.3
+- Renovate moodle-plugin-ci GitHub action workflow
+
+
 ## Version 1.1.0 (2026100300)
 
 This is the first big release after the v1.0.0. It features support for archiving assignment activities, a lot of

@@ -423,6 +423,11 @@ class attempt_report {
                     #region-main * {
                         visibility: visible;
                     }
+
+                    #sticky-footer,
+                    footer {
+                        display: none !important;
+                    }
                 }
 
                 /* Ensure that parent container (invisible) does not cause additional margings or paddings */
@@ -435,6 +440,11 @@ class attempt_report {
 
                 div#page-wrapper {
                     height: initial !important;
+                }
+
+                /* Force white background color of main container (Moodle >= 5.3) */
+                body {
+                    --bs-body-bg: #fff !important;
                 }
 
                 /* Prevent STACK input errors breaking the page */

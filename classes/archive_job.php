@@ -33,6 +33,7 @@ use local_archiving\local\type\activity_archiving_task_status;
 use local_archiving\local\type\archive_filename_variable;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
+use local_archiving\local\type\archive_job_fingerprint;
 use local_archiving\local\type\log_level;
 use local_archiving\local\util\course_util;
 use local_archiving\local\util\mod_util;
@@ -72,6 +73,7 @@ class archive_job {
      * @param string $trigger Name of the archiving trigger that created this job
      * @param int $timecreated Unix timestamp of creation
      * @param archive_job_status $status Current job status
+     * @param archive_job_fingerprint $fingerprint Fingerprint of this job
      */
     protected function __construct(
         /** @var int ID of this archive job */
@@ -86,6 +88,8 @@ class archive_job {
         protected readonly int $timecreated,
         /** @var archive_job_status $status Current job status */
         protected archive_job_status $status,
+        /** @var archive_job_fingerprint $fingerprint Fingerprint of this job */
+        protected readonly archive_job_fingerprint $fingerprint,
     ) {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
@@ -125,6 +129,7 @@ class archive_job {
      *
      * @throws \dml_exception
      * @throws \moodle_exception
+     * @throws \JsonException On fingerprint calculation problems
      */
     public static function create(
         \context $context,
@@ -158,7 +163,13 @@ class archive_job {
             );
         }
 
-        // Create object.
+        $fingerprint = archive_job_fingerprint::generate(
+            $context->get_course_context()->instanceid,
+            $context->instanceid,
+            $settings
+        );
+
+        // Create archive job entry in DB.
         $now = time();
         $jobstatus = archive_job_status::UNINITIALIZED;
         $id = $DB->insert_record(db_table::JOB->value, [
@@ -167,11 +178,12 @@ class archive_job {
             'origin' => $trigger,
             'status' => $jobstatus->value,
             'settings' => json_encode($settings),
+            'fingerprint' => $fingerprint->get_raw_value(),
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
 
-        return new self($id, $context, $userid, $trigger, $now, $jobstatus);
+        return new self($id, $context, $userid, $trigger, $now, $jobstatus, $fingerprint);
     }
 
     /**
@@ -194,7 +206,15 @@ class archive_job {
             throw new \moodle_exception('invalidcontext', 'error');
         }
 
-        return new self($job->id, $context, $job->userid, $job->origin, $job->timecreated, archive_job_status::from($job->status));
+        return new self(
+            $job->id,
+            $context,
+            $job->userid,
+            $job->origin,
+            $job->timecreated,
+            archive_job_status::from($job->status),
+            archive_job_fingerprint::from_raw_value($job->fingerprint),
+        );
     }
 
     /**
@@ -870,6 +890,15 @@ class archive_job {
      */
     public function get_trigger(): string {
         return $this->trigger;
+    }
+
+    /**
+     * Retrieves the fingerprint of this job
+     *
+     * @return archive_job_fingerprint Fingerprint of this job
+     */
+    public function get_fingerprint(): archive_job_fingerprint {
+        return $this->fingerprint;
     }
 
     /**

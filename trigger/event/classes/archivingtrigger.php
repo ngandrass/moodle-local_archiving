@@ -28,7 +28,9 @@ namespace archivingtrigger_event;
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 use core\event\base;
+use local_archiving\archive_job;
 use local_archiving\local\driver\driver_factory;
+use local_archiving\local\type\archive_job_fingerprint;
 use local_archiving\local\util\plugin_util;
 
 
@@ -90,6 +92,7 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
+     * @throws \JsonException On fingerprint calculation problems
      */
     public static function handle_event(\core\event\base $event): void {
         $eventname = $event->eventname;
@@ -115,14 +118,20 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
         }
 
         // TODO: Limit scope to actual attempt / submission / ....
-        // TODO: Check for pre-existing archive jobs.
 
-        // Build archive job settings object and trigger archive job.
+        // Build archive job settings object and determine fingerprint.
         [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
         $form = $driver->get_job_create_form($drivername, $cm);
         $jobsettings = $form->export_raw_data();
+        $fingerprint = archive_job_fingerprint::generate($course->id, $cm->id, $jobsettings);
 
-        $job = \local_archiving\archive_job::create($cm->context, get_admin()->id, 'event', $jobsettings);
+        // Do not create a new job if an identical one is still pending.
+        if (archive_job::get_incomplete_job_count_for_fingerprint($fingerprint) > 0) {
+            return;
+        }
+
+        // Trigger archive job.
+        $job = archive_job::create($cm->context, get_admin()->id, 'event', $jobsettings);
         $job->enqueue();
     }
 }

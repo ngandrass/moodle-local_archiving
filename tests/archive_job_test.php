@@ -17,6 +17,7 @@
 namespace local_archiving;
 
 use local_archiving\local\exception\yield_exception;
+use local_archiving\local\type\archive_job_fingerprint;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
@@ -123,6 +124,140 @@ final class archive_job_test extends \advanced_testcase {
         $this->assertEquals(get_admin()->id, $retrievedjob->get_userid(), 'User ID should match');
         $this->assertEquals($settings, $retrievedjob->get_settings(), 'Settings should match');
         $this->assertEquals('manual', $retrievedjob->get_trigger(), 'Trigger should match');
+    }
+
+    /**
+     * Tests that the job fingerprint is calculated, stored, and restored correctly.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_fingerprint_stored_and_retrieved(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Prepare course, activity, and job.
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $settings = (object) [
+            'foo' => 'bar',
+            'attemptids' => [1, 2, 3],
+            'nested' => (object) ['lorem' => 'ipsum'],
+        ];
+        $job = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'settings' => $settings,
+        ], $course, $cm);
+
+        // Validate calculated fingerprint.
+        $expected = archive_job_fingerprint::generate($course->id, $cm->cmid, $settings);
+        $this->assertTrue(
+            $expected->equals($job->get_fingerprint()),
+            'Job fingerprint should match the fingerprint generated from course, cm, and settings'
+        );
+
+        // Validate stored fingerprint.
+        $this->assertSame(
+            $job->get_fingerprint()->get_raw_value(),
+            $DB->get_field(db_table::JOB->value, 'fingerprint', ['id' => $job->get_id()], MUST_EXIST),
+            'Stored fingerprint should match the job fingerprint'
+        );
+
+        // Validate restored fingerprint.
+        $retrievedjob = archive_job::get_by_id($job->get_id());
+        $this->assertTrue(
+            $job->get_fingerprint()->equals($retrievedjob->get_fingerprint()),
+            'Retrieved job fingerprint should match the created job fingerprint'
+        );
+    }
+
+    /**
+     * Tests that jobs targeting the same course module with identical settings
+     * share a fingerprint, while jobs targeting different course modules do not.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_fingerprint_matches_for_same_target_and_settings(): void {
+        $this->resetAfterTest();
+
+        // Prepare course and activities.
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $othercm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+
+        // Create jobs for the same cm that only differ in key order, trigger, and user.
+        $job = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'trigger' => 'manual',
+            'settings' => (object) ['foo' => 'bar', 'attemptids' => [1, 2, 3]],
+        ], $course, $cm);
+        $samejob = $this->generator()->create_archive_job([
+            'userid' => $this->generator()->create_user()->id,
+            'trigger' => 'event',
+            'settings' => (object) ['attemptids' => [3, 2, 1], 'foo' => 'bar'],
+        ], $course, $cm);
+        $this->assertTrue(
+            $job->get_fingerprint()->equals($samejob->get_fingerprint()),
+            'Jobs targeting the same cm with identical settings should share a fingerprint'
+        );
+
+        // Create job with identical settings for a different cm.
+        $otherjob = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'settings' => (object) ['foo' => 'bar', 'attemptids' => [1, 2, 3]],
+        ], $course, $othercm);
+        $this->assertFalse(
+            $job->get_fingerprint()->equals($otherjob->get_fingerprint()),
+            'Jobs targeting different cms should not share a fingerprint'
+        );
+    }
+
+    /**
+     * Tests that mform specific settings, which are removed during settings
+     * cleaning, do not influence the job fingerprint.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_fingerprint_ignores_cleaned_mform_settings(): void {
+        $this->resetAfterTest();
+
+        // Prepare course and activity.
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+
+        // Create jobs with and without mform specific settings.
+        $job = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'settings' => (object) ['foo' => 'bar'],
+            'cleansettings' => true,
+        ], $course, $cm);
+        $mformjob = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'settings' => (object) [
+                'foo' => 'bar',
+                'mform_isexpanded_id_header' => 1,
+                'submitbutton' => 'Submit',
+            ],
+            'cleansettings' => true,
+        ], $course, $cm);
+
+        $this->assertTrue(
+            $job->get_fingerprint()->equals($mformjob->get_fingerprint()),
+            'Cleaned mform settings should not influence the job fingerprint'
+        );
     }
 
     /**

@@ -103,6 +103,26 @@ final class archive_job_fingerprint_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that form-specific settings do not influence the fingerprint.
+     *
+     * @covers \local_archiving\local\type\archive_job_fingerprint
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     */
+    public function test_fingerprint_ignores_form_fields(): void {
+        $a = archive_job_fingerprint::generate(1, 2, (object) ['foo' => 'bar']);
+        $b = archive_job_fingerprint::generate(1, 2, (object) [
+            'foo' => 'bar',
+            'mform_isexpanded_id_header' => 1,
+            'submitbutton' => 'Submit',
+        ]);
+
+        $this->assertTrue($a->equals($b), 'Form-specific settings must not influence the fingerprint.');
+    }
+
+    /**
      * Tests that fingerprints change whenever any of their inputs change.
      *
      * @covers \local_archiving\local\type\archive_job_fingerprint

@@ -261,6 +261,28 @@ final class archive_job_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that preprocessing job settings removes form-specific fields.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     */
+    public function test_preprocess_settings(): void {
+        $settings = (object) [
+            'foo' => 'bar',
+            'attemptids' => [1, 2, 3],
+            'mform_isexpanded_id_header' => 1,
+            'submitbutton' => 'Submit',
+        ];
+
+        $this->assertEquals(
+            (object) ['foo' => 'bar', 'attemptids' => [1, 2, 3]],
+            archive_job::preprocess_settings($settings),
+            'Form-specific fields should be removed from job settings'
+        );
+    }
+
+    /**
      * Tests that archive_job::create() enforces the course category whitelist.
      *
      * @covers \local_archiving\archive_job
@@ -1394,5 +1416,55 @@ final class archive_job_test extends \advanced_testcase {
             archive_job::get_incomplete_job_count_for_context($ctx2),
             'There should be 0 incomplete jobs for context 2'
         );
+    }
+
+    /**
+     * Tests that not yet completed jobs are counted correctly by their fingerprint.
+     *
+     * @covers \local_archiving\archive_job
+     * @dataProvider status_by_completion_data_provider
+     *
+     * @param archive_job_status $status Status of the existing job
+     * @param bool $incomplete Whether the job is expected to count as incomplete
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_incomplete_job_count_for_fingerprint(archive_job_status $status, bool $incomplete): void {
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm1 = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $cm2 = $this->generator()->create_module('quiz', ['course' => $course->id]);
+
+        // Create a job with the given status.
+        $job = $this->generator()->create_archive_job(['settings' => (object) ['foo' => 'bar']], $course, $cm1);
+        $job->set_status($status);
+
+        // Create pending jobs that differ in settings or targeted cm.
+        $this->generator()->create_archive_job(['settings' => (object) ['bar' => 'baz']], $course, $cm1)
+            ->set_status(archive_job_status::QUEUED);
+        $this->generator()->create_archive_job(['settings' => (object) ['foo' => 'bar']], $course, $cm2)
+            ->set_status(archive_job_status::QUEUED);
+
+        $this->assertSame(
+            $incomplete ? 1 : 0,
+            archive_job::get_incomplete_job_count_for_fingerprint($job->get_fingerprint()),
+            'Only the identical job should be counted, and only if it is incomplete'
+        );
+    }
+
+    /**
+     * Data provider for test_get_incomplete_job_count_for_fingerprint.
+     *
+     * @return array List of all job status values and whether they count as incomplete
+     */
+    public static function status_by_completion_data_provider(): array {
+        $res = [];
+        foreach (archive_job_status::cases() as $status) {
+            $res[$status->name] = [$status, !$status->is_final()];
+        }
+
+        return $res;
     }
 }

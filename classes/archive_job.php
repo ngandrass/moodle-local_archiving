@@ -156,11 +156,7 @@ class archive_job {
 
         // Clean settings object.
         if ($cleansettings) {
-            $settings = (object) array_filter(
-                (array) $settings,
-                fn ($key) => !str_starts_with($key, 'mform_') && $key !== 'submitbutton',
-                ARRAY_FILTER_USE_KEY
-            );
+            $settings = self::preprocess_settings($settings);
         }
 
         $fingerprint = archive_job_fingerprint::generate(
@@ -298,6 +294,21 @@ class archive_job {
     }
 
     /**
+     * Preprocesses a job settings object by removing all form-specific fields
+     * (e.g., mform_* and submitbutton) that are not part of the actual settings
+     *
+     * @param \stdClass $settings Raw job settings object
+     * @return \stdClass Preprocessed job settings object
+     */
+    public static function preprocess_settings(\stdClass $settings): \stdClass {
+        return (object) array_filter(
+            (array) $settings,
+            fn ($key) => !str_starts_with($key, 'mform_') && $key !== 'submitbutton',
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    /**
      * Calculates the number of archive jobs that are currently being actively
      * processed based on their status values.
      *
@@ -339,6 +350,35 @@ class archive_job {
         return $DB->count_records_sql(
             "SELECT COUNT(1) FROM {local_archiving_job} WHERE contextid = :contextid AND status {$insql}",
             array_merge(['contextid' => $ctx->id], $inparams)
+        );
+    }
+
+    /**
+     * Calculates the number of archive jobs with the given fingerprint that
+     * are either pending or active.
+     *
+     * This can be used to determine if an identical archive job is currently
+     * still running before creating an identical new one.
+     *
+     * @param archive_job_fingerprint $fingerprint Fingerprint to check existing archive jobs for
+     * @return int Number of incomplete archive jobs with the given fingerprint
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function get_incomplete_job_count_for_fingerprint(archive_job_fingerprint $fingerprint): int {
+        global $DB;
+
+        // Prepare status query parameters.
+        $pendingstatusvalues = array_map(
+            fn ($s) => $s->value,
+            array_merge(archive_job_status::get_idle_states(), archive_job_status::get_active_states())
+        );
+        [$insql, $inparams] = $DB->get_in_or_equal($pendingstatusvalues, SQL_PARAMS_NAMED);
+
+        // Count number of matching archive jobs that are not yet completed.
+        return $DB->count_records_sql(
+            "SELECT COUNT(1) FROM {local_archiving_job} WHERE fingerprint = :fingerprint AND status {$insql}",
+            array_merge(['fingerprint' => $fingerprint->get_raw_value()], $inparams)
         );
     }
 

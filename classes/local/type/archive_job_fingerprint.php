@@ -27,6 +27,8 @@ namespace local_archiving\local\type;
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
+use local_archiving\archive_job;
+
 
 /**
  * A fingerprint for an archive job.
@@ -69,6 +71,9 @@ final class archive_job_fingerprint {
      * @throws \coding_exception
      */
     public static function generate(int $courseid, int $cmid, \stdClass $settings): self {
+        // Ensure we compare fully preprocessed settings objects.
+        $settings = archive_job::preprocess_settings($settings);
+
         $normalizedsettings = self::normalize(
             // Convert to JSON and back to ensure all objects end up as (associative) arrays for sorting.
             json_decode(

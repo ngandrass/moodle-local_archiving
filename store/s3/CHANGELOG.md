@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.0.1 (2026100600)
+
+- Ensure compatibility with Moodle 5.3
+
+
 ## Version 1.0.0 (2026100100)
 
 - Initial release of the S3 storage driver for the Moodle archiving subsystem 🎉

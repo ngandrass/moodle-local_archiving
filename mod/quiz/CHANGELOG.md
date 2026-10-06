@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDNN)
+## Version 1.1.1 (2026100600)
 
 - Ensure compatibility with Moodle 5.3
 - Hide course navigation popover footer in Moodle 5.3 attempt reports

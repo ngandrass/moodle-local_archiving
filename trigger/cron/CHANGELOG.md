@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.1.1 (2026100600)
+
+- Ensure compatibility with Moodle 5.3
+
+
 ## Version 1.1.0 (2026092600)
 
 - Install trigger in a disabled state

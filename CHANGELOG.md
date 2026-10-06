@@ -3,6 +3,7 @@
 ## Version X.Y.Z (YYYYMMDDNN)
 
 - Display appropriate error message when trying to access the archive job creation of an unsupported activity directly
+- Hide "Archiving" entry from course module menu for unsupported activities
 - Ensure compatibility with Moodle 5.3
 - Fix archive job file attributes list styles in Moodle 5.3
 - Renovate moodle-plugin-ci GitHub action workflow

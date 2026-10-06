@@ -50,19 +50,18 @@ final class local_archiving_lib_test extends \advanced_testcase {
         $user = $generator->create_user();
         $this->setUser($user);
 
-        $module = $generator->create_module('page', ['course' => $course->id]);
-        $cm = get_coursemodule_from_id('page', $module->cmid);
+        $supportedmodule = $generator->create_module('quiz', ['course' => $course->id]);
+        $unsupportedmodule = $generator->create_module('page', ['course' => $course->id]);
 
         // Get course and cm contexts.
         $coursecontext = \context_course::instance($course->id);
-        $modulecontext = \context_module::instance($cm->id);
+        $modulecontext = \context_module::instance($supportedmodule->cmid);
+        $unsupportedmodulecontext = \context_module::instance($unsupportedmodule->cmid);
 
-        // Assign capability to user for both contexts.
+        // Assign capability to user for all contexts.
         $roleid = $generator->create_role();
         assign_capability('local/archiving:view', CAP_ALLOW, $roleid, $coursecontext->id);
-        assign_capability('local/archiving:view', CAP_ALLOW, $roleid, $modulecontext->id);
         role_assign($roleid, $user->id, $coursecontext->id);
-        role_assign($roleid, $user->id, $modulecontext->id);
 
         // Use a real settings_navigation object with a dummy page.
         $page = new \moodle_page();
@@ -90,10 +89,15 @@ final class local_archiving_lib_test extends \advanced_testcase {
         $this->assertNotNull($foundnode, 'Course context navigation node should be added');
         $this->assertEquals(get_string('pluginname', 'local_archiving'), $foundnode->text);
 
-        // Test module context injection.
+        // Test that no node is injected for unsupported activities.
+        local_archiving_extend_settings_navigation($settingsnav, $unsupportedmodulecontext);
+        $foundnode = $modulesettingsnode->find('local_archiving', \navigation_node::TYPE_SETTING);
+        $this->assertFalse($foundnode, 'Module context navigation node should not be added for unsupported activities');
+
+        // Test module context injection for supported activities.
         local_archiving_extend_settings_navigation($settingsnav, $modulecontext);
         $foundnode = $modulesettingsnode->find('local_archiving', \navigation_node::TYPE_SETTING);
-        $this->assertNotNull($foundnode, 'Module context navigation node should be added');
+        $this->assertNotEmpty($foundnode, 'Module context navigation node should be added');
         $this->assertEquals(get_string('pluginname', 'local_archiving'), $foundnode->text);
     }
 

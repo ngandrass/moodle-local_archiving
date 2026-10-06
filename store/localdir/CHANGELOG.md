@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.2.1 (2026100600)
+
+- Ensure compatibility with Moodle 5.3
+
+
 ## Version 1.2.0 (2026092700)
 
 - Install as disabled by default since this plugin requires configuration prior to use.

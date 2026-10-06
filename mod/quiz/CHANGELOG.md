@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDNN)
+## Version 1.1.1 (2026100600)
 
 - Expose Moodle events that can trigger archive jobs
 - Ensure compatibility with Moodle 5.3

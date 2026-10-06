@@ -1,11 +1,55 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDNN)
+## Version 1.1.1 (2026100600)
 
+Listed changes are split into categories, reflecting the affected component / (sub-)plugin.
+
+### Archiving Core (`local_archiving`)
+
+- Display appropriate error message when trying to access the archive job creation of an unsupported activity directly
+- Hide "Archiving" entry from course module menu for unsupported activities
 - Ensure compatibility with Moodle 5.3
 - Fix archive job file attributes list styles in Moodle 5.3
 - Renovate moodle-plugin-ci GitHub action workflow
 - Add job fingerprints to identify archive jobs with identical course, activity, and settings
+
+### Sub-Plugins
+
+#### Activity Archiving Driver: Assign (`archivingmod_assign`)
+
+- Ensure compatibility with Moodle 5.3
+- Hide course navigation popover footer in Moodle 5.3 submission reports
+- Force white page background color on submission reports in Moodle 5.3
+
+**Note:** Please also update your [moodle-archiving-worker](https://github.com/ngandrass/moodle-archiving-worker) to the latest version to ensure full compatibility with Moodle 5.3.
+
+#### Activity Archiving Driver: Quiz (`archivingmod_quiz`)
+
+- Ensure compatibility with Moodle 5.3
+- Hide course navigation popover footer in Moodle 5.3 attempt reports
+- Force white page background color on attempt reports in Moodle 5.3
+
+**Note:** Please also update your [moodle-archiving-worker](https://github.com/ngandrass/moodle-archiving-worker) to the latest version to ensure full compatibility with Moodle 5.3.
+
+#### Storage Driver: Local Directory (`archivingstore_localdir`)
+
+- Ensure compatibility with Moodle 5.3
+
+#### Storage Driver: Moodle Filestore (`archivingstore_moodle`)
+
+- Ensure compatibility with Moodle 5.3
+
+#### Storage Driver: S3 Obejct Store (`archivingstore_s3`)
+
+- Ensure compatibility with Moodle 5.3
+
+#### Archiving Trigger: Manual (`archivingtrigger_manual`)
+
+- Ensure compatibility with Moodle 5.3
+
+#### Archiving Trigger: Scheduled (`archivingtrigger_cron`)
+
+- Ensure compatibility with Moodle 5.3
 
 
 ## Version 1.1.0 (2026100300)

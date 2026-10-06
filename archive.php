@@ -56,8 +56,13 @@ $html = '';
 
 $jobcreateformhtml = '';
 if (has_capability('local/archiving:create', $ctx)) {
-    // Get job create form for this activity.
-    $driver = driver_factory::activity_archiving_driver($cm->modname, $ctx);
+    try {
+        // Get job create form for this activity.
+        $driver = driver_factory::activity_archiving_driver($cm->modname, $ctx);
+    } catch (\Exception $e) {
+        throw new \moodle_exception('no_supported_activity_archiving_driver_found', 'local_archiving');
+    }
+
     $form = $driver->get_job_create_form($cm->modname, $cm);
 
     // Handle form submission.

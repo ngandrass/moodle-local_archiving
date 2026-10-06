@@ -26,6 +26,8 @@ use local_archiving\archive_job;
 use local_archiving\file_handle;
 use local_archiving\local\type\filearea;
 use local_archiving\local\type\storage_tier;
+use local_archiving\local\util\mod_util;
+use local_archiving\local\util\plugin_util;
 use local_archiving\tsp_manager;
 
 // phpcs:ignore
@@ -68,7 +70,10 @@ function local_archiving_extend_settings_navigation(settings_navigation $setting
 
     // Inject activity archiving node into activity course menu.
     if ($ctx && $ctx instanceof context_module) {
-        if (has_capability('local/archiving:view', $ctx)) {
+        if (
+            has_capability('local/archiving:view', $ctx) &&
+            plugin_util::get_archiving_driver_for_cm(mod_util::get_cm_info($ctx)->modname) !== null
+        ) {
             // Construct new navigation node.
             $url = new moodle_url('/local/archiving/archive.php', [
                 'courseid' => $ctx->get_course_context()->instanceid,

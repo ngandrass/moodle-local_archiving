@@ -3,6 +3,11 @@
 ## Version X.Y.Z (YYYYMMDDNN)
 
 - Expose Moodle events that can trigger archive jobs
+- Ensure compatibility with Moodle 5.3
+- Hide course navigation popover footer in Moodle 5.3 attempt reports
+- Force white page background color on attempt reports in Moodle 5.3
+
+**Note:** Please also update your [moodle-archiving-worker](https://github.com/ngandrass/moodle-archiving-worker) to the latest version to ensure full compatibility with Moodle 5.3.
 
 
 ## Version 1.1.0 (2026100300)

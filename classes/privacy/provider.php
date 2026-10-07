@@ -64,6 +64,7 @@ class provider implements // phpcs:ignore
             'userid' => 'privacy:metadata:' . db_table::JOB->value . ':userid',
             'origin' => 'privacy:metadata:' . db_table::JOB->value . ':origin',
             'settings' => 'privacy:metadata:' . db_table::JOB->value . ':settings',
+            'refids' => 'privacy:metadata:' . db_table::JOB->value . ':refids',
             'timecreated' => 'privacy:metadata:' . db_table::JOB->value . ':timecreated',
             'timemodified' => 'privacy:metadata:' . db_table::JOB->value . ':timemodified',
         ], 'privacy:metadata:' . db_table::JOB->value);
@@ -218,6 +219,7 @@ class provider implements // phpcs:ignore
                         'userid' => $job->userid,
                         'origin' => $job->origin,
                         'settings' => $job->settings,
+                        'refids' => $job->refids,
                         'timecreated' => $job->timecreated,
                         'timemodified' => $job->timemodified,
                         'metadata' => $metadata,

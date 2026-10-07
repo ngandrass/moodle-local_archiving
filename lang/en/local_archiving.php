@@ -235,6 +235,7 @@ $string['privacy:metadata:local_archiving_file:timemodified'] = 'Timestamp when 
 $string['privacy:metadata:local_archiving_job'] = 'Archive jobs that bundle a single archiving pass.';
 $string['privacy:metadata:local_archiving_job:contextid'] = 'ID of the Moodle context this archive job is associated with.';
 $string['privacy:metadata:local_archiving_job:origin'] = 'Name of the trigger that created this archive job.';
+$string['privacy:metadata:local_archiving_job:refids'] = 'IDs of the activity data (e.g., quiz attempts) targeted by this archive job.';
 $string['privacy:metadata:local_archiving_job:settings'] = 'Settings used for this archive job.';
 $string['privacy:metadata:local_archiving_job:timecreated'] = 'Timestamp when the archive job was created.';
 $string['privacy:metadata:local_archiving_job:timemodified'] = 'Timestamp when the archive job was last modified.';

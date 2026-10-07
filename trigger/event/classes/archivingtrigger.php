@@ -117,13 +117,17 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
             return;
         }
 
-        // TODO: Limit scope to actual attempt / submission / ....
+        // Resolve targetted archive objects for event.
+        $refids = $driver->get_refids_for_event($event);
+        if ($refids !== null && empty($refids)) {
+            return;
+        }
 
         // Build archive job settings object and determine fingerprint.
         [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
         $form = $driver->get_job_create_form($drivername, $cm);
         $jobsettings = $form->export_raw_data();
-        $fingerprint = archive_job_fingerprint::generate($course->id, $cm->id, $jobsettings);
+        $fingerprint = archive_job_fingerprint::generate($course->id, $cm->id, $jobsettings, $refids);
 
         // Do not create a new job if an identical one is still pending.
         if (archive_job::get_incomplete_job_count_for_fingerprint($fingerprint) > 0) {
@@ -131,7 +135,7 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
         }
 
         // Trigger archive job.
-        $job = archive_job::create($cm->context, get_admin()->id, 'event', $jobsettings);
+        $job = archive_job::create($cm->context, get_admin()->id, 'event', $jobsettings, refids: $refids);
         $job->enqueue();
     }
 }

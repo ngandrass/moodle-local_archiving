@@ -199,4 +199,109 @@ final class archivingtrigger_test extends \advanced_testcase {
 
         return $res;
     }
+
+    /**
+     * Tests that created jobs are limited to the object referenced by the event
+     * and that jobs are only deduplicated for identical objects.
+     *
+     * @covers \archivingtrigger_event\archivingtrigger
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_handle_event_scopes_job_to_event_object(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Import reference quiz with multiple attempts and enable the attempt_submitted event.
+        $generator = $this->getDataGenerator()->get_plugin_generator('archivingmod_quiz');
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
+        $context = \context_module::instance($rc->cm->id);
+        set_config('sensitivity_quiz', '\\' . \mod_quiz\event\attempt_submitted::class, 'archivingtrigger_event');
+        $this->assertGreaterThan(1, count($rc->attemptids), 'Fixture must contain multiple attempts');
+
+        $event1 = \mod_quiz\event\attempt_submitted::create([
+            'objectid' => $rc->attemptids[0],
+            'relateduserid' => $rc->userids[0],
+            'context' => $context,
+            'other' => ['submitterid' => null, 'quizid' => $rc->quiz->id],
+        ]);
+        $event2 = \mod_quiz\event\attempt_submitted::create([
+            'objectid' => $rc->attemptids[1],
+            'relateduserid' => $rc->userids[1],
+            'context' => $context,
+            'other' => ['submitterid' => null, 'quizid' => $rc->quiz->id],
+        ]);
+
+        // First event creates a job scoped to the submitted attempt.
+        archivingtrigger::handle_event($event1);
+        $jobs = $DB->get_records('local_archiving_job', ['contextid' => $context->id], 'id ASC');
+        $this->assertCount(1, $jobs, 'First event should create a job');
+        $this->assertSame([$rc->attemptids[0]], archive_job::get_by_id(reset($jobs)->id)->get_refids());
+
+        // Same attempt again must not create a duplicate while the first job is pending.
+        archivingtrigger::handle_event($event1);
+        $this->assertSame(
+            1,
+            $DB->count_records('local_archiving_job', ['contextid' => $context->id]),
+            'No duplicate job should be created for the same attempt'
+        );
+
+        // Another attempt creates a separate job.
+        archivingtrigger::handle_event($event2);
+        $jobs = $DB->get_records('local_archiving_job', ['contextid' => $context->id], 'id ASC');
+        $this->assertCount(2, $jobs, 'A different attempt should create a separate job');
+        $this->assertSame([$rc->attemptids[1]], archive_job::get_by_id(end($jobs)->id)->get_refids());
+    }
+
+    /**
+     * Tests that no job is created if the event references an object that can
+     * not be archived.
+     *
+     * @covers \archivingtrigger_event\archivingtrigger
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_handle_event_skips_non_archivable_object(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Import reference quiz with multiple attempts and enable the attempt_submitted event.
+        $generator = $this->getDataGenerator()->get_plugin_generator('archivingmod_quiz');
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
+        $context = \context_module::instance($rc->cm->id);
+        set_config('sensitivity_quiz', '\\' . \mod_quiz\event\attempt_submitted::class, 'archivingtrigger_event');
+
+        // Non-existing attempt.
+        archivingtrigger::handle_event(\mod_quiz\event\attempt_submitted::create([
+            'objectid' => -1,
+            'relateduserid' => $rc->userids[0],
+            'context' => $context,
+            'other' => ['submitterid' => null, 'quizid' => $rc->quiz->id],
+        ]));
+
+        // Preview attempt.
+        $DB->set_field('quiz_attempts', 'preview', 1, ['id' => $rc->attemptids[0]]);
+        archivingtrigger::handle_event(\mod_quiz\event\attempt_submitted::create([
+            'objectid' => $rc->attemptids[0],
+            'relateduserid' => $rc->userids[0],
+            'context' => $context,
+            'other' => ['submitterid' => null, 'quizid' => $rc->quiz->id],
+        ]));
+
+        $this->assertSame(
+            0,
+            $DB->count_records('local_archiving_job', ['contextid' => $context->id]),
+            'No job should be created for non-archivable objects'
+        );
+    }
 }

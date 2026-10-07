@@ -155,10 +155,9 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         if ($task->get_status(usecached: true) == activity_archiving_task_status::CREATED) {
             // Prepare access to quiz and webservice.
             $quizmanager = quiz_manager::from_context($task->get_context());
-            $attempts = $quizmanager->get_filtered_attempts(
-                self::build_attempts_filters_from_formdata(
-                    $task->get_job()->get_settings()
-                )
+            $attempts = $quizmanager->get_attempts(
+                self::build_attempts_filters_from_formdata($task->get_job()->get_settings()),
+                $task->get_job()->get_refids()
             );
             if (count($attempts) == 0) {
                 throw new \RuntimeException(get_string('error_no_attempts_left_after_filtering', 'archivingmod_quiz'));
@@ -223,11 +222,9 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     #[\Override]
     public function get_task_content_metadata(activity_archiving_task $task): array {
         $quizmanager = quiz_manager::from_context($task->get_context());
-
-        $attempts = $quizmanager->get_filtered_attempts(
-            self::build_attempts_filters_from_formdata(
-                $task->get_job()->get_settings()
-            )
+        $attempts = $quizmanager->get_attempts(
+            self::build_attempts_filters_from_formdata($task->get_job()->get_settings()),
+            $task->get_job()->get_refids()
         );
 
         $res = [];

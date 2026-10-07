@@ -143,6 +143,65 @@ final class archive_job_fingerprint_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that refids are included in the fingerprint if given.
+     *
+     * @covers \local_archiving\local\type\archive_job_fingerprint
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     */
+    public function test_fingerprint_refids_null_is_backwards_compatible(): void {
+        $settings = (object) ['foo' => 'bar'];
+
+        $this->assertTrue(
+            archive_job_fingerprint::generate(1, 2, $settings)->equals(
+                archive_job_fingerprint::generate(1, 2, $settings, null)
+            ),
+            'Fingerprints without refids must not change when passing null explicitly.'
+        );
+        $this->assertFalse(
+            archive_job_fingerprint::generate(1, 2, $settings)->equals(
+                archive_job_fingerprint::generate(1, 2, $settings, [1, 2, 3])
+            ),
+            'Fingerprints with refids must differ from fingerprints without refids.'
+        );
+        $this->assertFalse(
+            archive_job_fingerprint::generate(1, 2, $settings, [])->equals(
+                archive_job_fingerprint::generate(1, 2, $settings, null)
+            ),
+            'Fingerprints with empty refids must differ from fingerprints without refids.'
+        );
+    }
+
+    /**
+     * Tests that refids are fingerprintend independent of their order.
+     *
+     * @covers \local_archiving\local\type\archive_job_fingerprint
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     */
+    public function test_fingerprint_refids(): void {
+        $settings = (object) ['foo' => 'bar'];
+        $reference = archive_job_fingerprint::generate(1, 2, $settings, [1, 2, 3]);
+
+        $this->assertTrue(
+            $reference->equals(archive_job_fingerprint::generate(1, 2, $settings, [3, 1, 2])),
+            'Order of refids must not affect the fingerprint.'
+        );
+        $this->assertFalse(
+            $reference->equals(archive_job_fingerprint::generate(1, 2, $settings, [1, 2, 4])),
+            'Different refids must result in different fingerprints.'
+        );
+        $this->assertFalse(
+            $reference->equals(archive_job_fingerprint::generate(1, 2, $settings, [1, 2])),
+            'Fewer refids must result in different fingerprints.'
+        );
+    }
+
+    /**
      * Data provider for test_fingerprint_changes_with_input.
      *
      * @return array Inputs that differ from the reference fingerprint input

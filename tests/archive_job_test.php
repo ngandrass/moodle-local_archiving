@@ -1136,6 +1136,148 @@ final class archive_job_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that refids are stored and restored correctly.
+     *
+     * @covers \local_archiving\archive_job
+     * @dataProvider refids_data_provider
+     *
+     * @param array|null $refids Refids to create the job with
+     * @param array|null $expected Expected refids after retrieval
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_refids_create_and_retrieve(?array $refids, ?array $expected): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        $createdjob = $this->generator()->create_archive_job(['refids' => $refids]);
+        $this->assertSame($expected, $createdjob->get_refids(), 'Created job should hold the given refids');
+        $this->assertSame(
+            $expected === null ? null : json_encode($expected),
+            $DB->get_field(db_table::JOB->value, 'refids', ['id' => $createdjob->get_id()]),
+            'Refids should be stored normalized and sorted inside the database'
+        );
+
+        $retrievedjob = archive_job::get_by_id($createdjob->get_id());
+        $this->assertSame($expected, $retrievedjob->get_refids(), 'Retrieved job should hold the given refids');
+    }
+
+    /**
+     * Data provider for test_refids_create_and_retrieve.
+     *
+     * @return array Test data
+     */
+    public static function refids_data_provider(): array {
+        return [
+            'No refids (all objects)' => [null, null],
+            'Empty refids' => [[], []],
+            'Single refid' => [[42], [42]],
+            'Multiple sorted refids' => [[1, 2, 3], [1, 2, 3]],
+            'Multiple unsorted refids' => [[3, 1, 2], [1, 2, 3]],
+            'Numeric strings and keys' => [['a' => '7', 'b' => 5, 'c' => '13'], [5, 7, 13]],
+        ];
+    }
+
+    /**
+     * Tests that refids influence the job fingerprint.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_refids_fingerprint(): void {
+        $this->resetAfterTest();
+
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $settings = (object) ['foo' => 'bar'];
+
+        $joball = $this->generator()->create_archive_job(['settings' => $settings], $course, $cm);
+        $jobrefids = $this->generator()->create_archive_job(['settings' => $settings, 'refids' => [1, 2]], $course, $cm);
+
+        $this->assertFalse(
+            $joball->get_fingerprint()->equals($jobrefids->get_fingerprint()),
+            'Jobs with and without refids should have different fingerprints'
+        );
+        $this->assertTrue(
+            archive_job_fingerprint::generate($course->id, $cm->cmid, $settings, [2, 1])->equals($jobrefids->get_fingerprint()),
+            'Job fingerprint should include refids'
+        );
+    }
+
+    /**
+     * Tests clearing refids of a job.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_clear_refids(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Clearing refids of incomplete jobs must fail without force.
+        $job = $this->generator()->create_archive_job(['refids' => [1, 2, 3]]);
+        try {
+            $job->clear_refids();
+            $this->fail('Refids should not be cleared for incomplete jobs');
+        } catch (\moodle_exception $e) {
+            $this->assertSame([1, 2, 3], $job->get_refids(), 'Refids should not be cleared for incomplete jobs');
+        }
+
+        // Clearing refids of completed jobs must work.
+        $job->set_status(archive_job_status::COMPLETED);
+        $job->clear_refids();
+        $this->assertNull($job->get_refids(), 'Refids should be cleared');
+        $this->assertNull(
+            $DB->get_field(db_table::JOB->value, 'refids', ['id' => $job->get_id()]),
+            'Refids should be cleared from the database'
+        );
+        $this->assertNull(archive_job::get_by_id($job->get_id())->get_refids(), 'Refids should stay cleared after reload');
+
+        // Force clearing refids of incomplete jobs must work.
+        $job = $this->generator()->create_archive_job(['refids' => [4, 5]]);
+        $job->clear_refids(force: true);
+        $this->assertNull($job->get_refids(), 'Refids should be cleared when forced');
+    }
+
+    /**
+     * Tests that refids are cleared when a job is aborted.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \Throwable
+     */
+    public function test_refids_cleared_on_abort(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Create a timed-out job with refids.
+        $job = $this->generator()->create_archive_job(['refids' => [1, 2, 3]]);
+        $job->set_status(archive_job_status::QUEUED);
+        $DB->set_field(db_table::JOB->value, 'timecreated', time() - (2 * MINSECS), ['id' => $job->get_id()]);
+        set_config('job_timeout_min', 1, 'local_archiving');
+        $job = archive_job::get_by_id($job->get_id());
+
+        // Execute job to trigger abort due to timeout.
+        $job->execute();
+        $this->assertSame(archive_job_status::TIMEOUT, $job->get_status(), 'Job should have timed out');
+        $this->assertNull($job->get_refids(), 'Refids should be cleared once the job is aborted');
+        $this->assertNull(
+            $DB->get_field(db_table::JOB->value, 'refids', ['id' => $job->get_id()]),
+            'Refids should be cleared from the database once the job is aborted'
+        );
+    }
+
+    /**
      * Tests that retrieving non-existing job settings fails according to requested strictness.
      *
      * @covers \local_archiving\archive_job

@@ -219,6 +219,47 @@ final class assignment_manager_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that get_submissions() only returns the submissions targeted by the given refids.
+     *
+     * @covers \archivingmod_assign\assignment_manager
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_submissions_by_refids(): void {
+        $this->resetAfterTest();
+        $testdata = $this::getDataGenerator()->create_assignment_with_text_submission();
+
+        // Add a submission of a second student.
+        $student2 = $this::getDataGenerator()->create_and_enrol($testdata->course, 'student');
+        /** @var \mod_assign_generator $assigngen */
+        $assigngen = $this::getDataGenerator()->get_plugin_generator('mod_assign');
+        $assigngen->create_submission([
+            'cmid' => $testdata->cm->id,
+            'userid' => $student2->id,
+            'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
+            'onlinetext' => 'Second submission text.',
+        ]);
+
+        $assignman = new assignment_manager($testdata->course->id, $testdata->cm->id);
+        $this->assertCount(2, $assignman->get_submissions(), 'Expected two submissions without refids');
+
+        // Target a single submission as well as a submission ID that does not exist.
+        $submissions = $assignman->get_submissions([$testdata->submission->id, -1]);
+        $this->assertCount(1, $submissions, 'Only the targeted submission should be returned');
+        $this->assertEquals($testdata->submission->id, reset($submissions)->submissionid);
+
+        // Refids that resolve to no submission yield an empty result.
+        $this->assertSame([], $assignman->get_submissions([-1, -2]), 'Invalid refids should not resolve to any submission');
+
+        // An empty list of refids is invalid.
+        $this->expectException(\coding_exception::class);
+        $assignman->get_submissions([]);
+    }
+
+    /**
      * Tests that submission_exists() returns true for a submission that exists inside this assignment.
      *
      * @covers \archivingmod_assign\assignment_manager

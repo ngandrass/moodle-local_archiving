@@ -215,6 +215,108 @@ final class archivingmod_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that task execution fails if the assignment has no submissions.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_execute_fails_without_submissions(): void {
+        $this->resetAfterTest();
+        $mocks = $this->getDataGenerator()->create_mock_task(populateassignment: false);
+
+        $this->expectException(\RuntimeException::class);
+        (new archivingmod($mocks->context))->execute_task($mocks->task);
+    }
+
+    /**
+     * Tests that task content metadata only contains the submissions explicitly
+     * targeted by the job (refids).
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_task_content_metadata_respects_refids(): void {
+        $this->resetAfterTest();
+        $testdata = $this->getDataGenerator()->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+
+        // Target the existing submission as well as a submission ID that does not exist.
+        $job = archive_job::create($context, get_admin()->id, 'manual', new \stdClass(), refids: [$testdata->submission->id, -1]);
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $context,
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'assign'
+        );
+        $metadata = (new archivingmod($context))->get_task_content_metadata($task);
+
+        $this->assertCount(1, $metadata, 'Only targeted submissions should be part of the content metadata');
+        $this->assertEquals(
+            $testdata->submission->id,
+            $metadata[0]->refid,
+            'Content metadata should reference the targeted submission'
+        );
+    }
+
+    /**
+     * Tests that task execution only considers the submissions explicitly targeted
+     * by the job (refids) and fails if no targeted submission is left.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_execute_respects_refids(): void {
+        $this->resetAfterTest();
+        $testdata = $this->getDataGenerator()->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+        $driver = new archivingmod($context);
+
+        // Target the existing submission.
+        $job = archive_job::create($context, get_admin()->id, 'manual', new \stdClass(), refids: [$testdata->submission->id]);
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $context,
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'assign'
+        );
+        try {
+            $driver->execute_task($task);
+            $this->fail('Expected task to yield for processing.');
+        } catch (yield_exception) {
+            $this->assertEquals(
+                1,
+                $task->get_job()->get_metadata_entry('num_attempts'),
+                'Only the targeted submission should be counted'
+            );
+        }
+
+        // Target only submissions that do not exist.
+        $job = archive_job::create($context, get_admin()->id, 'manual', new \stdClass(), refids: [-1, -2]);
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $context,
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'assign'
+        );
+        $this->expectException(\RuntimeException::class);
+        $driver->execute_task($task);
+    }
+
+    /**
      * Tests that fingerprinting works correctly.
      *
      * @covers \archivingmod_assign\archivingmod

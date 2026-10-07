@@ -1,5 +1,12 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDHH)
+
+- Allow scoping archive jobs to a specific set of objects by passing a reference ID list during creation
+- Add job fingerprints to identify archive jobs with identical course, activity, and settings
+
+
+
 ## Version 1.1.1 (2026100600)
 
 Listed changes are split into categories, reflecting the affected component / (sub-)plugin.
@@ -11,7 +18,6 @@ Listed changes are split into categories, reflecting the affected component / (s
 - Ensure compatibility with Moodle 5.3
 - Fix archive job file attributes list styles in Moodle 5.3
 - Renovate moodle-plugin-ci GitHub action workflow
-- Add job fingerprints to identify archive jobs with identical course, activity, and settings
 
 ### Sub-Plugins
 

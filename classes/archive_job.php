@@ -74,6 +74,7 @@ class archive_job {
      * @param int $timecreated Unix timestamp of creation
      * @param archive_job_status $status Current job status
      * @param archive_job_fingerprint $fingerprint Fingerprint of this job
+     * @param int[]|null $refids IDs of the objects to archive or null for all objects
      */
     protected function __construct(
         /** @var int ID of this archive job */
@@ -90,6 +91,8 @@ class archive_job {
         protected archive_job_status $status,
         /** @var archive_job_fingerprint $fingerprint Fingerprint of this job */
         protected readonly archive_job_fingerprint $fingerprint,
+        /** @var int[]|null $refids IDs of the objects to archive or null for all objects */
+        protected ?array $refids = null,
     ) {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
@@ -125,6 +128,9 @@ class archive_job {
      * @param string $trigger Name of the archiving trigger that creates this job
      * @param \stdClass $settings Job settings object
      * @param bool $cleansettings If true, the settings object will be cleared from any mform stuff
+     * @param int[]|null $refids IDs of the objects to archive (e.g., quiz attempt IDs). The
+     * actual reference is resolved by the respective activity archiving driver. If null, all
+     * objects of the targeted activity will be archived.
      * @return archive_job Created archive job instance
      *
      * @throws \dml_exception
@@ -136,7 +142,8 @@ class archive_job {
         int $userid,
         string $trigger,
         \stdClass $settings,
-        bool $cleansettings = true
+        bool $cleansettings = true,
+        ?array $refids = null
     ): archive_job {
         global $DB;
 
@@ -159,10 +166,17 @@ class archive_job {
             $settings = self::preprocess_settings($settings);
         }
 
+        // Normalize refids.
+        if ($refids !== null) {
+            $refids = array_values(array_map('intval', $refids));
+            sort($refids);
+        }
+
         $fingerprint = archive_job_fingerprint::generate(
             $context->get_course_context()->instanceid,
             $context->instanceid,
-            $settings
+            $settings,
+            $refids
         );
 
         // Create archive job entry in DB.
@@ -174,12 +188,13 @@ class archive_job {
             'origin' => $trigger,
             'status' => $jobstatus->value,
             'settings' => json_encode($settings),
+            'refids' => $refids === null ? null : json_encode($refids),
             'fingerprint' => $fingerprint->get_raw_value(),
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
 
-        return new self($id, $context, $userid, $trigger, $now, $jobstatus, $fingerprint);
+        return new self($id, $context, $userid, $trigger, $now, $jobstatus, $fingerprint, $refids);
     }
 
     /**
@@ -210,6 +225,7 @@ class archive_job {
             $job->timecreated,
             archive_job_status::from($job->status),
             archive_job_fingerprint::from_raw_value($job->fingerprint),
+            $job->refids === null ? null : array_map('intval', json_decode($job->refids)),
         );
     }
 
@@ -451,6 +467,9 @@ class archive_job {
                 $this->get_logger()->trace(
                     "Initialized new archive job. Trigger: {$this->trigger} - Settings: \r\n" .
                     json_encode($this->get_settings(), JSON_PRETTY_PRINT)
+                );
+                $this->get_logger()->info(
+                    'Targeted objects (refids): ' . ($this->refids === null ? 'all' : implode(', ', $this->refids))
                 );
 
                 $this->set_status(archive_job_status::PRE_PROCESSING);
@@ -737,6 +756,7 @@ class archive_job {
         }
 
         $this->clear_settings(force: true);
+        $this->clear_refids(force: true);
     }
 
     /**
@@ -1194,6 +1214,45 @@ class archive_job {
         ]);
 
         $this->settings = new \stdClass();
+    }
+
+    /**
+     * Retrieves the IDs of explicitly targeted objects this job should archive
+     * (e.g., quiz attempt IDs or assignment submission IDs). The return value
+     * must be interpreted as follows:
+     *
+     * - null: All objects of the targeted activity should be archived. Archiving
+     *         driver decides about objects itself.
+     * - non-empty int[] list: Only the listed objects should be archived.
+     * - empty list: Invalid. Archive job without targets.
+     *
+     * Like the job settings, refids are only available while a job is active
+     * (not completed yet) and are cleared once the job reached a final state.
+     *
+     * @return int[]|null IDs of the objects to archive or null for all objects
+     */
+    public function get_refids(): ?array {
+        return $this->refids;
+    }
+
+    /**
+     * Clears the refids of this job inside the database. This option is irreversible.
+     *
+     * @param bool $force If true, force clear refids even if the job is not completed yet
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception If the job it not yet completed
+     */
+    public function clear_refids(bool $force = false): void {
+        global $DB;
+
+        if (!$this->is_completed() && !$force) {
+            throw new \moodle_exception('job_not_completed_yet', 'local_archiving');
+        }
+
+        $DB->set_field(db_table::JOB->value, 'refids', null, ['id' => $this->id]);
+
+        $this->refids = null;
     }
 
     /**

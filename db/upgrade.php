@@ -57,7 +57,9 @@ function xmldb_local_archiving_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025101600, 'local', 'archiving');
     }
 
-    if ($oldversion < 2026100600) {
+    if ($oldversion < 2026100700) {
+        // VVVVV local_archiving_job::fingerprint VVVVV.
+
         // Create new nullable fingerprint field for archive jobs (will be made non-null after migration).
         $table = new xmldb_table('local_archiving_job');
         $field = new xmldb_field('fingerprint', XMLDB_TYPE_CHAR, '64', null, null, null, null, 'origin');
@@ -78,8 +80,18 @@ function xmldb_local_archiving_upgrade($oldversion) {
             $dbman->add_index($table, $index);
         }
 
+        // VVVVV local_archiving_job::refids VVVVV.
+
+        // Add nullable refids field to archive jobs.
+        $table = new xmldb_table('local_archiving_job');
+        $field = new xmldb_field('refids', XMLDB_TYPE_TEXT, null, null, null, null, null, 'settings');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
         // Archiving savepoint reached.
-        upgrade_plugin_savepoint(true, 2026100600, 'local', 'archiving');
+        upgrade_plugin_savepoint(true, 2026100700, 'local', 'archiving');
     }
 
     return true;

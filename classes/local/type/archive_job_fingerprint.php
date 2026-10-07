@@ -34,8 +34,9 @@ use local_archiving\archive_job;
  * A fingerprint for an archive job.
  *
  * This class is used to create an easily comparable fingerprint for archive
- * jobs. It is based on the course ID, the course module ID and the job settings,
- * thereby allowing to easily answer the question: "Has there been an archive job
+ * jobs. It is based on the course ID, the course module ID, the job settings,
+ * and the IDs of the targeted objects (refids), if given. The fingerprint
+ * thereby allows to easily answer the question: "Has there been an archive job
  * for this specific activity with this specific settings before?".
  *
  * Job fingerprints do not capture the state of the targeted activity. See
@@ -66,11 +67,13 @@ final class archive_job_fingerprint {
      * @param int $courseid ID of the course the job is run for
      * @param int $cmid ID of the course module the job is run for
      * @param \stdClass $settings Job settings object
+     * @param int[]|null $refids IDs of the targeted objects or null if all
+     * objects are targeted.
      * @return self A new archive_job_fingerprint instance for the given job data.
      * @throws \JsonException If serialization of the given data failed.
      * @throws \coding_exception
      */
-    public static function generate(int $courseid, int $cmid, \stdClass $settings): self {
+    public static function generate(int $courseid, int $cmid, \stdClass $settings, ?array $refids = null): self {
         // Ensure we compare fully preprocessed settings objects.
         $settings = archive_job::preprocess_settings($settings);
 
@@ -82,10 +85,17 @@ final class archive_job_fingerprint {
             )
         );
 
+        // Ensure refids are sorted for consistent fingerprinting.
+        if ($refids !== null) {
+            $refids = array_values(array_map('intval', $refids));
+            sort($refids);
+        }
+
         $serializeddata = json_encode([
             'courseid' => $courseid,
             'cmid' => $cmid,
             'settings' => $normalizedsettings,
+            'refids' => $refids,
         ], JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR);
 
         return self::from_raw_value(hash('sha256', $serializeddata));

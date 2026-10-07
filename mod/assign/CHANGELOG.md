@@ -1,5 +1,10 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDHH)
+
+- Add support for partial archiving by passing explicit submission IDs
+
+
 ## Version 1.0.1 (2026100600)
 
 - Ensure compatibility with Moodle 5.3

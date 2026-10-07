@@ -142,24 +142,49 @@ class assignment_manager {
     }
 
     /**
-     * Get all submissions for all users inside this assignment
+     * Get submitted submissions for this assignment
      *
+     * The returned submissions can be narrowed down by a list of
+     * explicitly targeted submission IDs (refids).
+     *
+     * Ref-IDs that do not belong to this assignment or reference
+     * submissions that are not submitted are silently discarded.
+     *
+     * @param int[]|null $refids IDs of the submissions to restrict the result to or null to include all submissions.
      * @return array Array of all submission IDs together with the userid that were
      * made inside this assignment. Indexed by submissionid.
      *
+     * @throws \coding_exception If an empty refids list is given
      * @throws \dml_exception
      */
-    public function get_submissions(): array {
+    public function get_submissions(?array $refids = null): array {
         global $DB;
 
-        return $DB->get_records(
-            table: 'assign_submission',
-            conditions: [
-                'assignment' => $this->assignment->get_instance()->id,
+        // Optionally restrict to the given submission IDs.
+        $refidswhereclause = '';
+        $refidsparams = [];
+        if ($refids !== null) {
+            if (empty($refids)) {
+                throw new \coding_exception('List of targeted submission IDs must not be empty. Pass null instead.');
+            }
+
+            [$idsql, $refidsparams] = $DB->get_in_or_equal(
+                array_map('intval', $refids),
+                SQL_PARAMS_NAMED,
+                's'
+            );
+            $refidswhereclause = "AND id {$idsql}";
+        }
+
+        return $DB->get_records_sql(
+            "SELECT id AS submissionid, userid " .
+            "FROM {assign_submission} " .
+            "WHERE assignment = :assignmentid AND status = :status " . $refidswhereclause . " " .
+            "ORDER BY id ASC",
+            array_merge([
+                'assignmentid' => $this->assignment->get_instance()->id,
                 'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
-            ],
-            sort: 'id ASC',
-            fields: 'id AS submissionid, userid'
+            ], $refidsparams)
         );
     }
 

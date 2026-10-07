@@ -147,7 +147,7 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         if ($task->get_status(usecached: true) == activity_archiving_task_status::CREATED) {
             // Prepare access to assignment and webservice.
             $assignmanager = assignment_manager::from_context($task->get_context());
-            $submissions = $assignmanager->get_submissions();
+            $submissions = $assignmanager->get_submissions($task->get_job()->get_refids());
 
             $wstoken = $task->create_webservice_token(
                 webserviceid: self::get_webserviceid(),
@@ -197,7 +197,7 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         $assignmentmanager = assignment_manager::from_context($task->get_context());
 
         $res = [];
-        foreach ($assignmentmanager->get_submissions() as $submission) {
+        foreach ($assignmentmanager->get_submissions($task->get_job()->get_refids()) as $submission) {
             $res[] = new task_content_metadata(
                 taskid: $task->get_id(),
                 userid: $submission->userid,

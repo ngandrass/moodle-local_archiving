@@ -26,6 +26,7 @@ namespace archivingmod_assign;
 
 
 use local_archiving\activity_archiving_task;
+use local_archiving\archive_job;
 use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\activity_archiving_task_status;
 

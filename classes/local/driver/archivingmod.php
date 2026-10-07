@@ -131,6 +131,22 @@ abstract class archivingmod extends base {
     }
 
     /**
+     * Resolves a given Moodle event instance to the IDs that should be archived based on it.
+     *
+     * The types of IDs returned are specific to the respective archivingmod implementation,
+     * e.g., quiz attempt IDs for the archivingmod_quiz plugin. All events listed in
+     * get_archiving_eventlist() must be handeled by this function. For all other events,
+     * simply returning null is sufficient.
+     *
+     * @param \core\event\base $event Event to resolve the targeted objects for
+     * @return int[]|null IDs of the referenced objects, null for all objects,
+     * or an empty list if nothing should be archived
+     */
+    public function get_refids_for_event(\core\event\base $event): ?array {
+        return null;
+    }
+
+    /**
      * Provides access to the Moodle form that holds all settings for creating a
      * single archiving job. Generic settings are populated by the base class
      * and can be extended as needed.

@@ -3,6 +3,7 @@
 ## Version X.Y.Z (YYYYMMDDHH)
 
 - Allow scoping archive jobs to a specific set of objects by passing a reference ID list during creation
+- Add function for resolving targeted object IDs from Moodle event instances to activity archiving driver API
 - Add job fingerprints to identify archive jobs with identical course, activity, and settings
 
 

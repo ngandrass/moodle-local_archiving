@@ -385,4 +385,30 @@ final class archivingmod_test extends \advanced_testcase {
             'The base class should not provide any archiving events by default.'
         );
     }
+
+    /**
+     * Tests that the base archivingmod class does not resolve any refids from
+     * events and thereby targets the whole activity by default.
+     *
+     * @covers \local_archiving\local\driver\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     */
+    public function test_get_refids_for_event_default(): void {
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $context = \context_module::instance($cm->cmid);
+
+        $event = \mod_quiz\event\course_module_viewed::create([
+            'objectid' => $cm->id,
+            'context' => $context,
+        ]);
+
+        $this->assertNull(
+            $this->instance($context)->get_refids_for_event($event),
+            'The base class should target the whole activity by default.'
+        );
+    }
 }

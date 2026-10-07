@@ -3,6 +3,7 @@
 ## Version X.Y.Z (YYYYMMDDHH)
 
 - Add support for partial archiving by passing explicit submission IDs
+- Fail archive jobs early if no submitted submissions were found to archive
 
 
 ## Version 1.0.1 (2026100600)

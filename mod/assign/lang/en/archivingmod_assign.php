@@ -30,6 +30,7 @@ $string['cutoffdate'] = 'Cut-off date';
 $string['duedate'] = 'Due date';
 $string['error_invalid_submission_filename_pattern'] = 'Invalid submission report filename pattern. Please correct your input and try again.';
 $string['error_invalid_submission_foldername_pattern'] = 'Invalid submission report folder name pattern. Please correct your input and try again.';
+$string['error_no_submissions_left_after_filtering'] = 'No submitted assignment submissions were left for export.';
 $string['gradingduedate'] = 'Grading due date';
 $string['metadata'] = 'Metadata';
 $string['openingdate'] = 'Opening date';

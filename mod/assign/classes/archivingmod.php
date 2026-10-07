@@ -148,6 +148,9 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
             // Prepare access to assignment and webservice.
             $assignmanager = assignment_manager::from_context($task->get_context());
             $submissions = $assignmanager->get_submissions($task->get_job()->get_refids());
+            if (count($submissions) == 0) {
+                throw new \RuntimeException(get_string('error_no_submissions_left_after_filtering', 'archivingmod_assign'));
+            }
 
             $wstoken = $task->create_webservice_token(
                 webserviceid: self::get_webserviceid(),

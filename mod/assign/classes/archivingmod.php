@@ -55,27 +55,6 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     public const WEB_SERVICE_SHORTNAME = 'archivingmod_assign_ws';
 
     /**
-     * Returns a list of Moodle events that are fired by the targeted activity
-     * and can be used to trigger an archiving job for this activity type.
-     *
-     * All events listed here can be used by archiving trigger sub-plugins to
-     * automatically create new archive jobs. This archivingmod sub-plugin must
-     * not do anything with those events, it just needs to provide a list of
-     * suitable events. All configuration is done by the archiving trigger sub-
-     * plugins.
-     *
-     * @return \core\event\base[] List of events that can be used to trigger an
-     * archiving job for this activity type.
-     */
-    public static function get_archiving_eventlist(): array {
-        return [
-            \mod_assign\event\submission_created::class,
-            \mod_assign\event\submission_graded::class,
-            \mod_assign\event\submission_locked::class,
-        ];
-    }
-
-    /**
      * Creates a new activity archiving driver instance.
      *
      * @param \context_module $context
@@ -114,6 +93,29 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     #[\Override]
     public static function get_supported_activities(): array {
         return ['assign'];
+    }
+
+
+    #[\Override]
+    public function get_refids_for_event(\core\event\base $event): ?array {
+        $assignmanager = assignment_manager::from_context($this->context);
+
+        if ($event instanceof \mod_assign\event\submission_created) {
+            $submissionid = (int) $event->other['submissionid'];
+        } else if ($event instanceof \mod_assign\event\submission_graded) {
+            $submissionid = $assignmanager->get_submission_id_for_grade((int) $event->objectid);
+        } else if ($event instanceof \mod_assign\event\submission_locked) {
+            $submissionid = $assignmanager->get_submission_id_for_user((int) $event->relateduserid);
+        } else {
+            return parent::get_refids_for_event($event);
+        }
+
+        // Only target submitted submissions that are part of this assignment.
+        if ($submissionid === null || !$assignmanager->submission_exists($submissionid)) {
+            return [];
+        }
+
+        return [$submissionid];
     }
 
     #[\Override]
@@ -245,6 +247,15 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
             'assignmenttimemodified' => $assignmenttimemodified,
             'submissiontimemodified' => $submissiontimemodified,
         ]);
+    }
+
+    #[\Override]
+    public static function get_archiving_eventlist(): array {
+        return [
+            \mod_assign\event\submission_created::class,
+            \mod_assign\event\submission_graded::class,
+            \mod_assign\event\submission_locked::class,
+        ];
     }
 
     /**

@@ -352,4 +352,131 @@ final class archivingmod_test extends \advanced_testcase {
         $this->assertNotEquals($fingerprint1, $fingerprint3, 'Fingerprint should change when a submission is modified.');
         $this->assertEquals($fingerprint3, $driver->fingerprint(), 'Fingerprint should be stable if nothing changes.');
     }
+
+    /**
+     * Tests that submission_created events resolve to the created submission
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_refids_for_event_submission_created(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $testdata = $generator->create_assignment();
+        $driver = new archivingmod(\context_module::instance($testdata->cm->id));
+
+        // Capture the submission_created event fired by the submission plugin.
+        $sink = $this->redirectEvents();
+        /** @var \mod_assign_generator $assigngen */
+        $assigngen = $generator->get_plugin_generator('mod_assign');
+        $assigngen->create_submission([
+            'cmid' => $testdata->cm->id,
+            'userid' => $testdata->student->id,
+            'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
+            'onlinetext' => 'Test submission text.',
+        ]);
+        $events = array_filter($sink->get_events(), fn($e) => $e instanceof \mod_assign\event\submission_created);
+        $sink->close();
+        $this->assertNotEmpty($events, 'Expected a submission_created event');
+        $event = reset($events);
+        $submissionid = (int) $event->other['submissionid'];
+
+        // Should resolve to the created submission.
+        $this->assertSame([$submissionid], $driver->get_refids_for_event($event), 'Submission of the assignment');
+
+        // Submissions of other assignments are not targeted.
+        $otherdata = $generator->create_assignment();
+        $otherdriver = new archivingmod(\context_module::instance($otherdata->cm->id));
+        $this->assertSame([], $otherdriver->get_refids_for_event($event), 'Submission of another assignment');
+
+        // Submissions that are not submitted are not targeted.
+        $DB->set_field('assign_submission', 'status', ASSIGN_SUBMISSION_STATUS_DRAFT, ['id' => $submissionid]);
+        $this->assertSame([], $driver->get_refids_for_event($event), 'Draft submission');
+    }
+
+    /**
+     * Tests that submission_graded events resolve to the graded submission.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_refids_for_event_submission_graded(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $testdata = $generator->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+        $assign = new \assign($context, $testdata->cm, $testdata->course);
+        $driver = new archivingmod($context);
+
+        // Graded submission.
+        $grade = $generator->grade_submission($testdata);
+        $event = \mod_assign\event\submission_graded::create_from_grade($assign, $grade);
+        $this->assertSame([(int) $testdata->submission->id], $driver->get_refids_for_event($event));
+
+        // Grade without any submission.
+        $otheruser = $generator->create_and_enrol($testdata->course, 'student');
+        $othergrade = $assign->get_user_grade($otheruser->id, true);
+        $event = \mod_assign\event\submission_graded::create_from_grade($assign, $othergrade);
+        $this->assertSame([], $driver->get_refids_for_event($event), 'Grade without submission');
+    }
+
+    /**
+     * Tests that submission_locked events resolve to the latest submission of the locked user.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_refids_for_event_submission_locked(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $testdata = $generator->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+        $assign = new \assign($context, $testdata->cm, $testdata->course);
+        $driver = new archivingmod($context);
+
+        // User with submission.
+        $event = \mod_assign\event\submission_locked::create_from_user($assign, $testdata->student);
+        $this->assertSame([(int) $testdata->submission->id], $driver->get_refids_for_event($event), 'User with submission');
+
+        // User without submission.
+        $otheruser = $generator->create_and_enrol($testdata->course, 'student');
+        $event = \mod_assign\event\submission_locked::create_from_user($assign, $otheruser);
+        $this->assertSame([], $driver->get_refids_for_event($event), 'User without submission');
+    }
+
+    /**
+     * Tests that events that do not reference submissions target the whole assignment.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_refids_for_event_unrelated_event(): void {
+        $this->resetAfterTest();
+        $testdata = $this->getDataGenerator()->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+
+        $event = \mod_assign\event\course_module_viewed::create([
+            'objectid' => $testdata->assignment->id,
+            'context' => $context,
+        ]);
+
+        $this->assertNull((new archivingmod($context))->get_refids_for_event($event));
+    }
 }

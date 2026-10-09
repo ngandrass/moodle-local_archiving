@@ -4,6 +4,7 @@
 
 - Add support for partial archiving by passing explicit submission IDs
 - Fail archive jobs early if no submitted submissions were found to archive
+- Implement assignment submission resolving for archiving trigger events
 
 
 ## Version 1.0.1 (2026100600)

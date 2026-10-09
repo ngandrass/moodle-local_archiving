@@ -420,4 +420,143 @@ final class archivingmod_test extends \advanced_testcase {
             'Settings filter selection not correctly converted to filterkey list'
         );
     }
+
+    /**
+     * Tests that the given attempt event resolves to the referenced attempt.
+     *
+     * @covers \archivingmod_quiz\archivingmod
+     * @dataProvider attempt_event_data_provider
+     *
+     * @param string $eventclass Class name of the attempt event to test
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_get_refids_for_event(string $eventclass): void {
+        if (!class_exists($eventclass)) {
+            $this->markTestSkipped("Event {$eventclass} is not available in this Moodle version");
+        }
+
+        // Prepare reference course and driver.
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
+        $context = \context_module::instance($rc->cm->id);
+        $driver = new archivingmod($context);
+
+        // Create event.
+        $event = $eventclass::create([
+            'objectid' => $rc->attemptids[0],
+            'relateduserid' => $rc->userids[0],
+            'context' => $context,
+            'other' => ['submitterid' => null, 'quizid' => $rc->quiz->id],
+        ]);
+
+        // Resolve referenced attempt via driver.
+        $this->assertSame(
+            [$rc->attemptids[0]],
+            $driver->get_refids_for_event($event),
+            "Event {$eventclass} should resolve to the referenced attempt"
+        );
+    }
+
+    /**
+     * Tests that the given attempt event referencing non-archivable attempts
+     * resolves to an empty list.
+     *
+     * @covers \archivingmod_quiz\archivingmod
+     * @dataProvider attempt_event_data_provider
+     *
+     * @param string $eventclass Class name of the attempt event to test
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_get_refids_for_event_non_archivable_attempts(string $eventclass): void {
+        global $DB;
+
+        if (!class_exists($eventclass)) {
+            $this->markTestSkipped("Event {$eventclass} is not available in this Moodle version");
+        }
+
+        // Build reference course and driver.
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
+        $context = \context_module::instance($rc->cm->id);
+        $driver = new archivingmod($context);
+
+        // Non-existing attempt.
+        $event = $eventclass::create([
+            'objectid' => -1,
+            'relateduserid' => $rc->userids[0],
+            'context' => $context,
+            'other' => ['submitterid' => null, 'quizid' => $rc->quiz->id],
+        ]);
+        $this->assertSame([], $driver->get_refids_for_event($event), 'Missing attempt');
+
+        // Preview attempt.
+        $DB->set_field('quiz_attempts', 'preview', 1, ['id' => $rc->attemptids[0]]);
+        $event = $eventclass::create([
+            'objectid' => $rc->attemptids[0],
+            'relateduserid' => $rc->userids[0],
+            'context' => $context,
+            'other' => ['submitterid' => null, 'quizid' => $rc->quiz->id],
+        ]);
+        $this->assertSame([], $driver->get_refids_for_event($event), 'Preview attempt');
+
+        // Attempt of another quiz.
+        $otherquiz = $generator->create_module('quiz', ['course' => $rc->course->id]);
+        $otherdriver = new archivingmod(\context_module::instance($otherquiz->cmid));
+        $event = $eventclass::create([
+            'objectid' => $rc->attemptids[1],
+            'relateduserid' => $rc->userids[1],
+            'context' => $context,
+            'other' => ['submitterid' => null, 'quizid' => $rc->quiz->id],
+        ]);
+        $this->assertSame([], $otherdriver->get_refids_for_event($event), 'Attempt of another quiz');
+    }
+
+    /**
+     * Data provider for all attempt events the quiz driver resolves refids for.
+     *
+     * @return array List of attempt event class names
+     */
+    public static function attempt_event_data_provider(): array {
+        return [
+            'attempt_submitted' => [\mod_quiz\event\attempt_submitted::class],
+            'attempt_graded' => [\mod_quiz\event\attempt_graded::class],
+            'attempt_regraded' => [\mod_quiz\event\attempt_regraded::class],
+            'attempt_manual_grading_completed' => [\mod_quiz\event\attempt_manual_grading_completed::class],
+        ];
+    }
+
+    /**
+     * Tests that events that do not reference attempts target the whole quiz.
+     *
+     * @covers \archivingmod_quiz\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_refids_for_event_unrelated_event(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $context = \context_module::instance($quiz->cmid);
+
+        $event = \mod_quiz\event\course_module_viewed::create([
+            'objectid' => $quiz->id,
+            'context' => $context,
+        ]);
+
+        $this->assertNull((new archivingmod($context))->get_refids_for_event($event));
+    }
 }

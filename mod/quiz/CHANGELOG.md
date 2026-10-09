@@ -3,6 +3,7 @@
 ## Version X.Y.Z (YYYYMMDDHH)
 
 - Only archive explicitly targeted quiz attempts if an archive job was scoped to a specific set of attempt IDs
+- Implement quiz attempt resolving for archiving trigger events
 
 
 ## Version 1.1.1 (2026100600)

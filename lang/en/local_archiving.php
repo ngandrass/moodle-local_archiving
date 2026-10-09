@@ -151,6 +151,7 @@ $string['job_metadata_course_backup_id'] = 'Course backup ID';
 $string['job_metadata_num_attachments'] = 'Number of attachments';
 $string['job_metadata_num_attempts'] = 'Number of attempts';
 $string['job_metadata_storage_driver'] = 'Storage driver';
+$string['job_metadata_trigger'] = 'Trigger';
 $string['job_not_completed_yet'] = 'The archive job has not been completed yet.';
 $string['job_status_0'] = 'Uninitialized';
 $string['job_status_0_help'] = 'The job has not been initialized yet.';

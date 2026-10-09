@@ -464,6 +464,7 @@ class archive_job {
                     throw new yield_exception();
                 }
 
+                $this->set_metadata_entry('trigger', $this->trigger);
                 $this->get_logger()->trace(
                     "Initialized new archive job. Trigger: {$this->trigger} - Settings: \r\n" .
                     json_encode($this->get_settings(), JSON_PRETTY_PRINT)

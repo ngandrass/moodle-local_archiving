@@ -651,4 +651,145 @@ final class assignment_manager_test extends \advanced_testcase {
             $bytype[attachment_type::GRADER_ANNOTATED_FILE->value][0]['filename']
         );
     }
+
+    /**
+     * Tests that get_submission_id_for_user() resolves the submission of a user.
+     *
+     * @covers \archivingmod_assign\assignment_manager
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_submission_id_for_user(): void {
+        $this->resetAfterTest();
+        $testdata = $this::getDataGenerator()->create_assignment_with_text_submission();
+        $otheruser = $this::getDataGenerator()->create_and_enrol($testdata->course, 'student');
+        $assignman = new assignment_manager($testdata->course->id, $testdata->cm->id);
+
+        $this->assertSame((int) $testdata->submission->id, $assignman->get_submission_id_for_user($testdata->student->id));
+        $this->assertNull($assignman->get_submission_id_for_user($otheruser->id), 'User without submission');
+        $this->assertNull($assignman->get_submission_id_for_user(0), 'Invalid user ID must not fall back to current user');
+    }
+
+    /**
+     * Tests that get_submission_id_for_user() respects the requested attempt number.
+     *
+     * @covers \archivingmod_assign\assignment_manager
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_submission_id_for_user_with_attemptnumber(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $testdata = $this::getDataGenerator()->create_assignment_with_text_submission();
+
+        // Add a second attempt for the student.
+        $DB->set_field('assign_submission', 'latest', 0, ['id' => $testdata->submission->id]);
+        $secondid = $DB->insert_record('assign_submission', (object) [
+            'assignment' => $testdata->assignment->id,
+            'userid' => $testdata->student->id,
+            'groupid' => 0,
+            'attemptnumber' => $testdata->submission->attemptnumber + 1,
+            'latest' => 1,
+            'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+
+        $assignman = new assignment_manager($testdata->course->id, $testdata->cm->id);
+        $this->assertSame(
+            (int) $secondid,
+            $assignman->get_submission_id_for_user($testdata->student->id),
+            'Default latest attempt'
+        );
+        $this->assertSame(
+            (int) $testdata->submission->id,
+            $assignman->get_submission_id_for_user($testdata->student->id, (int) $testdata->submission->attemptnumber),
+            'Explicit first attempt'
+        );
+        $this->assertNull(
+            $assignman->get_submission_id_for_user($testdata->student->id, 42),
+            'Non-existing attempt'
+        );
+    }
+
+    /**
+     * Tests that get_submission_id_for_user() resolves the group submission if team submissions are enabled.
+     *
+     * @covers \archivingmod_assign\assignment_manager
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_submission_id_for_user_team_submission(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this::getDataGenerator();
+
+        // Create team assignment with a group of two students.
+        $course = $generator->create_course();
+        $student1 = $generator->create_and_enrol($course, 'student');
+        $student2 = $generator->create_and_enrol($course, 'student');
+        $group = $generator->create_group(['courseid' => $course->id]);
+        $generator->create_group_member(['groupid' => $group->id, 'userid' => $student1->id]);
+        $generator->create_group_member(['groupid' => $group->id, 'userid' => $student2->id]);
+
+        /** @var \mod_assign_generator $assigngen */
+        $assigngen = $generator->get_plugin_generator('mod_assign');
+        $assignment = $assigngen->create_instance([
+            'course' => $course->id,
+            'submissiondrafts' => 0,
+            'teamsubmission' => 1,
+            'requireallteammemberssubmit' => 0,
+            'preventsubmissionnotingroup' => 0,
+            'assignsubmission_onlinetext_enabled' => 1,
+        ]);
+        $assigngen->create_submission([
+            'cmid' => $assignment->cmid,
+            'userid' => $student1->id,
+            'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
+            'onlinetext' => 'Team submission text.',
+        ]);
+        $groupsubmission = $DB->get_record(
+            'assign_submission',
+            ['assignment' => $assignment->id, 'groupid' => $group->id, 'userid' => 0],
+            '*',
+            MUST_EXIST
+        );
+
+        // Both team members resolve to the group submission.
+        $assignman = new assignment_manager($course->id, $assignment->cmid);
+        $this->assertSame((int) $groupsubmission->id, $assignman->get_submission_id_for_user($student1->id));
+        $this->assertSame((int) $groupsubmission->id, $assignman->get_submission_id_for_user($student2->id));
+    }
+
+    /**
+     * Tests that get_submission_id_for_grade() resolves the graded submission.
+     *
+     * @covers \archivingmod_assign\assignment_manager
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_submission_id_for_grade(): void {
+        $this->resetAfterTest();
+        $testdata = $this::getDataGenerator()->create_assignment_with_text_submission();
+        $grade = $this::getDataGenerator()->grade_submission($testdata);
+        $othertestdata = $this::getDataGenerator()->create_assignment_with_text_submission();
+        $othergrade = $this::getDataGenerator()->grade_submission($othertestdata);
+
+        $assignman = new assignment_manager($testdata->course->id, $testdata->cm->id);
+        $this->assertSame((int) $testdata->submission->id, $assignman->get_submission_id_for_grade($grade->id));
+        $this->assertNull($assignman->get_submission_id_for_grade($othergrade->id), 'Grade of another assignment');
+        $this->assertNull($assignman->get_submission_id_for_grade(-1), 'Non-existing grade');
+    }
 }

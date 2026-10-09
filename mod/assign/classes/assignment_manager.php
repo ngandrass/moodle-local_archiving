@@ -241,6 +241,55 @@ class assignment_manager {
     }
 
     /**
+     * Determines the ID of a submission that was submitted by the given user
+     * inside this assignment. If team submissions are enabled, the submission
+     * of the group the user submits for is returned.
+     *
+     * @param int $userid ID of the user to get the submission for
+     * @param int $attemptnumber Attempt number of the submission or -1 for the latest attempt
+     * @return int|null ID of the found submission or null if none exists
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function get_submission_id_for_user(int $userid, int $attemptnumber = -1): ?int {
+        // Prevent assign API from falling back to the current user.
+        if ($userid <= 0) {
+            return null;
+        }
+
+        if ($this->assignment->get_instance()->teamsubmission) {
+            $submission = $this->assignment->get_group_submission($userid, 0, false, $attemptnumber);
+        } else {
+            $submission = $this->assignment->get_user_submission($userid, false, $attemptnumber);
+        }
+
+        return $submission ? (int) $submission->id : null;
+    }
+
+    /**
+     * Determines the ID of the submission the given grade belongs to.
+     *
+     * @param int $gradeid ID of the assignment grade to get the submission for
+     * @return int|null ID of the graded submission or null if the grade does
+     * not belong to this assignment or no matching submission exists
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function get_submission_id_for_grade(int $gradeid): ?int {
+        global $DB;
+
+        $grade = $DB->get_record('assign_grades', [
+            'id' => $gradeid,
+            'assignment' => $this->assignment->get_instance()->id,
+        ], 'id, userid, attemptnumber');
+        if (!$grade) {
+            return null;
+        }
+
+        return $this->get_submission_id_for_user((int) $grade->userid, (int) $grade->attemptnumber);
+    }
+
+    /**
      * Returns a list of metadata for all files that were attached to the given
      * submission to be used within the webservice API
      *

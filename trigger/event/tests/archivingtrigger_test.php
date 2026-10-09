@@ -108,6 +108,53 @@ final class archivingtrigger_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that jobs are only created for activities inside course categories
+     * that are whitelisted for archiving.
+     *
+     * @covers \archivingtrigger_event\archivingtrigger
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_handle_event_respects_coursecat_whitelist(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Prepare a quiz inside a course of a dedicated category.
+        $category = $this->getDataGenerator()->create_category();
+        $othercategory = $this->getDataGenerator()->create_category();
+        $course = $this->getDataGenerator()->create_course(['category' => $category->id]);
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $context = \context_module::instance($quiz->cmid);
+        set_config('sensitivity_quiz', '\\' . \mod_quiz\event\course_module_viewed::class, 'archivingtrigger_event');
+        $event = \mod_quiz\event\course_module_viewed::create([
+            'objectid' => $quiz->id,
+            'context' => $context,
+        ]);
+
+        // Course category is not whitelisted.
+        set_config('coursecat_whitelist', $othercategory->id, 'local_archiving');
+        archivingtrigger::handle_event($event);
+        $this->assertSame(
+            0,
+            $DB->count_records('local_archiving_job', ['contextid' => $context->id]),
+            'No job should be created for activities outside of whitelisted course categories'
+        );
+
+        // Course category is whitelisted.
+        set_config('coursecat_whitelist', $category->id, 'local_archiving');
+        archivingtrigger::handle_event($event);
+        $this->assertSame(
+            1,
+            $DB->count_records('local_archiving_job', ['contextid' => $context->id]),
+            'A job should be created for activities inside whitelisted course categories'
+        );
+    }
+
+    /**
      * Tests that a configured event creates a job and that no identical job is
      * created while a previous one is still pending.
      *

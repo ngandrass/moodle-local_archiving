@@ -31,6 +31,7 @@ use core\event\base;
 use local_archiving\archive_job;
 use local_archiving\local\driver\driver_factory;
 use local_archiving\local\type\archive_job_fingerprint;
+use local_archiving\local\util\course_util;
 use local_archiving\local\util\plugin_util;
 
 
@@ -106,6 +107,11 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
         // Validate event context.
         $ctx = $event->get_context();
         if (!$ctx instanceof \context_module) {
+            return;
+        }
+
+        // Only archive activities inside whitelisted course categories.
+        if (!course_util::archiving_enabled_for_course($ctx->get_course_context()->instanceid)) {
             return;
         }
 

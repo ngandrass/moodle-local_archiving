@@ -9,4 +9,6 @@ The following archiving triggers are currently available:
 
 [:material-cursor-default-click-outline: Manual](manual.md){ .md-button }
 &nbsp;&nbsp;
+[:material-lightning-bolt: Event-based](event.md){ .md-button }
+&nbsp;&nbsp;
 [:material-calendar-clock: Scheduled](cron.md){ .md-button }

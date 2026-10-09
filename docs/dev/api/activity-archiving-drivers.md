@@ -130,8 +130,8 @@ classDiagram
 
 Each activity archiving driver must implement the {{ source_file('classes/local/driver/archivingmod.php',
 '\\local_archiving\\local\\driver\\archivingmod') }} interface with a class, placed at the following location:
-`/local/archiving/local/driver/mod/<pluginname>/classes/archivingmod.php`, where `<pluginname>` is the name of the 
-activity archiving driver (e.g., `quiz`, `assign`, ...).
+`/local/archiving/mod/<pluginname>/classes/archivingmod.php`, where `<pluginname>` is the name of the activity archiving
+driver (e.g., `quiz`, `assign`, ...).
 
 Each activity archiving driver specifies the mod types that it supports via the `get_supported_activities()` method.
 During creation, each activity archiving driver instance is bound to a specific activity instance by its respective

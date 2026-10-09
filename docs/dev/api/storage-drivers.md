@@ -93,8 +93,8 @@ classDiagram
 
 Each storage driver must implement the {{ source_file('classes/local/driver/archivingstore.php',
 '\\local_archiving\\local\\driver\\archivingstore') }} interface with a class, placed at the following location:
-`/local/archiving/local/driver/store/<pluginname>/classes/archivingstore.php`, where `<pluginname>` is the name of the
-storage driver (e.g., `localdir`, `moodle`, ...).
+`/local/archiving/store/<pluginname>/classes/archivingstore.php`, where `<pluginname>` is the name of the storage driver
+(e.g., `localdir`, `moodle`, ...).
 
 Storage is classified into different tiers ({{ source_file ('classes/local/type/storage_tier.php',
 '\\local_archiving\\local\\type\\storage_tier') }}), which differentiate between local storage that is directly

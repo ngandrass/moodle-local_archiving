@@ -37,7 +37,7 @@ if ($hassiteconfig) {
             'archivingtrigger_event/enabled',
             get_string('setting_enabled', 'archivingtrigger_event'),
             get_string('setting_enabled_desc', 'archivingtrigger_event'),
-            '1'
+            '0'
         ));
 
         // Event sensitivity list.

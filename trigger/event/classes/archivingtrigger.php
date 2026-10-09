@@ -136,6 +136,9 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
 
         // Trigger archive job.
         $job = archive_job::create($cm->context, get_admin()->id, 'event', $jobsettings, refids: $refids);
+        $job->get_logger()->info(
+            'This job was created from the following Moodle event: ' . $event::get_name() . " ({$eventname})"
+        );
         $job->enqueue();
     }
 }

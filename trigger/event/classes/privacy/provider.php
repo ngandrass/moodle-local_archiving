@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 
 /**
- * Privacy provider for archivingtrigger_manual
+ * Privacy provider for archivingtrigger_event
  *
  * @codeCoverageIgnore This is handled by Moodle core tests
  */

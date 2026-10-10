@@ -225,7 +225,7 @@ class archive_job {
             $job->timecreated,
             archive_job_status::from($job->status),
             archive_job_fingerprint::from_raw_value($job->fingerprint),
-            $job->refids === null ? null : array_map('intval', json_decode($job->refids)),
+            $job->refids === null ? null : array_map('intval', json_decode($job->refids, flags: JSON_THROW_ON_ERROR)),
         );
     }
 

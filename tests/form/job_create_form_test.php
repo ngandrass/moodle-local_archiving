@@ -157,7 +157,8 @@ final class job_create_form_test extends \advanced_testcase {
     }
 
     /**
-     * Tests that the archive job creation form is blocked when the manual archiving trigger is disabled.
+     * Tests that the archive job creation form is fully defined, regardless of the manual archiving trigger
+     * state. Automatic triggers (e.g., cron, event) rely on the form to retrieve default job settings.
      *
      * @covers \local_archiving\form\job_create_form
      *
@@ -166,7 +167,7 @@ final class job_create_form_test extends \advanced_testcase {
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    public function test_manual_archiving_disabled_detection(): void {
+    public function test_form_independent_of_manual_trigger_state(): void {
         // Prepare a course module.
         $this->resetAfterTest();
         $course = $this->generator()->create_course();
@@ -178,37 +179,28 @@ final class job_create_form_test extends \advanced_testcase {
         $plugininfo::enable_plugin('manual', 0);
         $this->assertFalse($plugininfo->is_enabled(), 'The manual archiving trigger must be disabled now.');
 
-        // Create the form and check that a warning is displayed and the submit button is removed.
-        $form = new job_create_form('quiz', $cminfo);
-        $html = $form->render();
-
-        $this->assertStringContainsString(
-            get_string('can_not_create_archive_manual_archiving_disabled', 'local_archiving'),
-            $html,
-            'The form must contain a warning that manual archiving is disabled.'
-        );
-        $this->assertStringNotContainsString(
-            'type="submit"',
-            $html,
-            'The form must remove the submit button if manual archiving is disabled.'
-        );
-
-        // Re-enable manual archiving and confirm that the form is displayed as intended.
-        $plugininfo::enable_plugin('manual', 1);
-        $this->assertTrue($plugininfo->is_enabled(), 'The manual archiving trigger must be enabled now.');
-
+        // Create the form and check that it is fully defined.
         $form = new job_create_form('quiz', $cminfo);
         $html = $form->render();
 
         $this->assertStringNotContainsString(
             get_string('can_not_create_archive_manual_archiving_disabled', 'local_archiving'),
             $html,
-            'The form must not contain a warning that manual archiving is disabled.'
+            'The form itself must not contain a warning that manual archiving is disabled.'
         );
         $this->assertStringContainsString(
             'type="submit"',
             $html,
-            'The form must contain a submit button if manual archiving is enabled.'
+            'The form must contain a submit button, regardless of the manual archiving trigger state.'
+        );
+
+        // Ensure that default job settings are exported.
+        $defaults = $form->export_raw_data();
+        $this->assertObjectHasProperty('storage_driver', $defaults, 'Default settings must contain the storage driver.');
+        $this->assertObjectHasProperty(
+            'archive_filename_pattern',
+            $defaults,
+            'Default settings must contain the archive filename pattern.'
         );
     }
 

@@ -24,11 +24,8 @@
  */
 // @codingStandardsIgnoreFile
 
-// Common
 $string['pluginname'] = 'Event-based';
 $string['privacy:metadata'] = 'This archiving trigger plugin does not store any personal data.';
-
-// Settings.
 $string['setting_enabled'] = 'Enabled';
 $string['setting_enabled_desc'] = 'Enables or disables this archiving trigger.';
 $string['setting_sensitivity'] = 'Events: {$a}';

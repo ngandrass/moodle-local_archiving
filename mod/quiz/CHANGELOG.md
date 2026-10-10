@@ -1,7 +1,15 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDHH)
+
+- Only archive explicitly targeted quiz attempts if an archive job was scoped to a specific set of attempt IDs
+- Implement quiz attempt resolving for archiving trigger events
+- Automatically purge event observer caches on plugin enable / disable
+
+
 ## Version 1.1.1 (2026100600)
 
+- Expose Moodle events that can trigger archive jobs
 - Ensure compatibility with Moodle 5.3
 - Hide course navigation popover footer in Moodle 5.3 attempt reports
 - Force white page background color on attempt reports in Moodle 5.3

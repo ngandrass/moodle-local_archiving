@@ -159,6 +159,7 @@ nav:
   - "Archiving Triggers":
     - archivingtrigger/index.md
     - "Manual": archivingtrigger/manual.md
+    - "Event-based": archivingtrigger/event.md
     - "Scheduled": archivingtrigger/cron.md
 
   - "Developer Documentation":

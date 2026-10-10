@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 $plugin->component = 'local_archiving';
 $plugin->release = '1.1.1';
-$plugin->version = 2026100600;
+$plugin->version = 2026100700;
 $plugin->requires = 2024100700;
 $plugin->supported = [405, 503]; // X meta-supported-moodle{4.5 - 5.3} meta-supported-php{8.1 - 8.4}.
 $plugin->maturity = MATURITY_STABLE;

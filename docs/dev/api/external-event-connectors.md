@@ -59,5 +59,5 @@ classDiagram
 
 Each external event connector must implement the {{ source_file('classes/local/driver/archivingevent.php',
 '\\local_archiving\\local\\driver\\archivingevent') }} interface with a class, placed at the following location:
-`/local/archiving/local/driver/event/<pluginname>/classes/archivingevent.php`, where `<pluginname>` is the name of the
+`/local/archiving/event/<pluginname>/classes/archivingevent.php`, where `<pluginname>` is the name of the
 external event connector (e.g., `mycms`, `externalapi`, ...).

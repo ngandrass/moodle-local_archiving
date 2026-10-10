@@ -114,6 +114,39 @@ abstract class archivingmod extends base {
     abstract public function fingerprint(): cm_state_fingerprint;
 
     /**
+     * Returns a list of Moodle events that are fired by the targeted activity
+     * and can be used to trigger an archiving job for this activity type.
+     *
+     * All events listed here can be used by archiving trigger sub-plugins to
+     * automatically create new archive jobs. This archivingmod sub-plugin must
+     * not do anything with those events, it just needs to provide a list of
+     * suitable events. All configuration is done by the archiving trigger sub-
+     * plugins.
+     *
+     * @return string[] List of fully qualified event class names that can be
+     * used to trigger an archiving job for this activity type.
+     */
+    public static function get_archiving_eventlist(): array {
+        return [];
+    }
+
+    /**
+     * Resolves a given Moodle event instance to the IDs that should be archived based on it.
+     *
+     * The types of IDs returned are specific to the respective archivingmod implementation,
+     * e.g., quiz attempt IDs for the archivingmod_quiz plugin. All events listed in
+     * get_archiving_eventlist() must be handeled by this function. For all other events,
+     * simply returning null is sufficient.
+     *
+     * @param \core\event\base $event Event to resolve the targeted objects for
+     * @return int[]|null IDs of the referenced objects, null for all objects,
+     * or an empty list if nothing should be archived
+     */
+    public function get_refids_for_event(\core\event\base $event): ?array {
+        return null;
+    }
+
+    /**
      * Provides access to the Moodle form that holds all settings for creating a
      * single archiving job. Generic settings are populated by the base class
      * and can be extended as needed.

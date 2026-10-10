@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" COMMENT="XMLDB file for Moodle local/archiving" PATH="local/archiving/db" VERSION="2025101600" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" COMMENT="XMLDB file for Moodle local/archiving" PATH="local/archiving/db" VERSION="2026100700" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
     <TABLE NAME="local_archiving_job" COMMENT="Archive jobs">
       <FIELDS>
@@ -7,8 +7,10 @@
         <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the context this job is run in"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user that initiated this job"/>
         <FIELD NAME="origin" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Archiving trigger plugin that was used to initiate this job"/>
+        <FIELD NAME="fingerprint" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Fingerprint of the job, based on target cm and settings"/>
         <FIELD NAME="status" TYPE="int" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Status of this job"/>
         <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialized JSON object with job settings"/>
+        <FIELD NAME="refids" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialized JSON list of IDs of the objects to archive"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was created"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this job was updated"/>
       </FIELDS>
@@ -17,6 +19,9 @@
         <KEY NAME="contextid" TYPE="foreign" FIELDS="contextid" REFTABLE="context" REFFIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="fingerprint" UNIQUE="false" FIELDS="fingerprint"/>
+      </INDEXES>
     </TABLE>
 
     <TABLE NAME="local_archiving_metadata" COMMENT="Key-value store for persistent job metadata">

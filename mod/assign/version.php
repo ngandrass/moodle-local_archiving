@@ -32,4 +32,5 @@ $plugin->supported = [405, 503]; // X meta-supported-moodle{4.5 - 5.3} meta-supp
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [
     'local_archiving' => 2026100300,
+    'mod_assign' => 2024100700,
 ];

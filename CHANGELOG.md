@@ -1,5 +1,16 @@
 # Changelog
 
+## Version X.Y.Z (YYYYMMDDHH)
+
+- Allow scoping archive jobs to a specific set of objects by passing a reference ID list during creation
+- Add function for resolving targeted object IDs from Moodle event instances to activity archiving driver API
+- Add job fingerprints to identify archive jobs with identical course, activity, and settings
+- Store archive job trigger in job metadata section
+- Automatically purge event observer caches on plugin on programmatic sub-plugin enable / disable events
+- Decouple manual archive trigger enabled state from job creation form instantiation
+
+
+
 ## Version 1.1.1 (2026100600)
 
 Listed changes are split into categories, reflecting the affected component / (sub-)plugin.

@@ -142,24 +142,49 @@ class assignment_manager {
     }
 
     /**
-     * Get all submissions for all users inside this assignment
+     * Get submitted submissions for this assignment
      *
+     * The returned submissions can be narrowed down by a list of
+     * explicitly targeted submission IDs (refids).
+     *
+     * Ref-IDs that do not belong to this assignment or reference
+     * submissions that are not submitted are silently discarded.
+     *
+     * @param int[]|null $refids IDs of the submissions to restrict the result to or null to include all submissions.
      * @return array Array of all submission IDs together with the userid that were
      * made inside this assignment. Indexed by submissionid.
      *
+     * @throws \coding_exception If an empty refids list is given
      * @throws \dml_exception
      */
-    public function get_submissions(): array {
+    public function get_submissions(?array $refids = null): array {
         global $DB;
 
-        return $DB->get_records(
-            table: 'assign_submission',
-            conditions: [
-                'assignment' => $this->assignment->get_instance()->id,
+        // Optionally restrict to the given submission IDs.
+        $refidswhereclause = '';
+        $refidsparams = [];
+        if ($refids !== null) {
+            if (empty($refids)) {
+                throw new \coding_exception('List of targeted submission IDs must not be empty. Pass null instead.');
+            }
+
+            [$idsql, $refidsparams] = $DB->get_in_or_equal(
+                array_map('intval', $refids),
+                SQL_PARAMS_NAMED,
+                's'
+            );
+            $refidswhereclause = "AND id {$idsql}";
+        }
+
+        return $DB->get_records_sql(
+            "SELECT id AS submissionid, userid " .
+            "FROM {assign_submission} " .
+            "WHERE assignment = :assignmentid AND status = :status " . $refidswhereclause . " " .
+            "ORDER BY id ASC",
+            array_merge([
+                'assignmentid' => $this->assignment->get_instance()->id,
                 'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
-            ],
-            sort: 'id ASC',
-            fields: 'id AS submissionid, userid'
+            ], $refidsparams)
         );
     }
 
@@ -213,6 +238,55 @@ class assignment_manager {
             'assignment' => $this->assignment->get_instance()->id,
             'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
         ]);
+    }
+
+    /**
+     * Determines the ID of a submission that was submitted by the given user
+     * inside this assignment. If team submissions are enabled, the submission
+     * of the group the user submits for is returned.
+     *
+     * @param int $userid ID of the user to get the submission for
+     * @param int $attemptnumber Attempt number of the submission or -1 for the latest attempt
+     * @return int|null ID of the found submission or null if none exists
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function get_submission_id_for_user(int $userid, int $attemptnumber = -1): ?int {
+        // Prevent assign API from falling back to the current user.
+        if ($userid <= 0) {
+            return null;
+        }
+
+        if ($this->assignment->get_instance()->teamsubmission) {
+            $submission = $this->assignment->get_group_submission($userid, 0, false, $attemptnumber);
+        } else {
+            $submission = $this->assignment->get_user_submission($userid, false, $attemptnumber);
+        }
+
+        return $submission ? (int) $submission->id : null;
+    }
+
+    /**
+     * Determines the ID of the submission the given grade belongs to.
+     *
+     * @param int $gradeid ID of the assignment grade to get the submission for
+     * @return int|null ID of the graded submission or null if the grade does
+     * not belong to this assignment or no matching submission exists
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function get_submission_id_for_grade(int $gradeid): ?int {
+        global $DB;
+
+        $grade = $DB->get_record('assign_grades', [
+            'id' => $gradeid,
+            'assignment' => $this->assignment->get_instance()->id,
+        ], 'id, userid, attemptnumber');
+        if (!$grade) {
+            return null;
+        }
+
+        return $this->get_submission_id_for_user((int) $grade->userid, (int) $grade->attemptnumber);
     }
 
     /**

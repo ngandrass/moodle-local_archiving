@@ -25,7 +25,6 @@
 
 namespace local_archiving\form;
 
-use local_archiving\local\driver\driver_factory;
 use local_archiving\local\type\archive_filename_variable;
 use local_archiving\local\util\course_util;
 use local_archiving\local\util\plugin_util;
@@ -100,17 +99,6 @@ class job_create_form extends \moodleform {
                 );
                 return;
             }
-        }
-
-        // Prevent form from being displayed if manual archiving is disabled.
-        if (!driver_factory::archiving_trigger('manual')->is_enabled()) {
-            $this->_form->addElement(
-                'html',
-                '<div class="alert alert-warning">' .
-                    get_string('can_not_create_archive_manual_archiving_disabled', 'local_archiving') .
-                '</div>'
-            );
-            return;
         }
 
         // Basic settings.
@@ -383,6 +371,8 @@ class job_create_form extends \moodleform {
         $data = $this->_form->exportValues();
         unset($data['sesskey']);
         unset($data['_qf__' . $this->_formname]);
+
+        $data = $this->apply_presets($data);
 
         // Perform cleaning of current values to ensure the returned data is cast to the correct types.
         foreach ($data as $key => $value) {

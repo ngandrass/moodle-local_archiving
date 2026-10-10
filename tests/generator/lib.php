@@ -57,6 +57,7 @@ class local_archiving_generator extends \testing_data_generator {
             'trigger' => 'manual',
             'settings' => (object) ['foo' => 'bar'],
             'cleansettings' => true,
+            'refids' => null,
         ];
         $data = array_merge($jobdefaults, $params);
 
@@ -66,7 +67,8 @@ class local_archiving_generator extends \testing_data_generator {
             userid: $data['userid'],
             trigger: $data['trigger'],
             settings: $data['settings'],
-            cleansettings: $data['cleansettings']
+            cleansettings: $data['cleansettings'],
+            refids: $data['refids']
         );
     }
 

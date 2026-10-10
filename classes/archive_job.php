@@ -33,6 +33,7 @@ use local_archiving\local\type\activity_archiving_task_status;
 use local_archiving\local\type\archive_filename_variable;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
+use local_archiving\local\type\archive_job_fingerprint;
 use local_archiving\local\type\log_level;
 use local_archiving\local\util\course_util;
 use local_archiving\local\util\mod_util;
@@ -72,6 +73,8 @@ class archive_job {
      * @param string $trigger Name of the archiving trigger that created this job
      * @param int $timecreated Unix timestamp of creation
      * @param archive_job_status $status Current job status
+     * @param archive_job_fingerprint $fingerprint Fingerprint of this job
+     * @param int[]|null $refids IDs of the objects to archive or null for all objects
      */
     protected function __construct(
         /** @var int ID of this archive job */
@@ -86,6 +89,10 @@ class archive_job {
         protected readonly int $timecreated,
         /** @var archive_job_status $status Current job status */
         protected archive_job_status $status,
+        /** @var archive_job_fingerprint $fingerprint Fingerprint of this job */
+        protected readonly archive_job_fingerprint $fingerprint,
+        /** @var int[]|null $refids IDs of the objects to archive or null for all objects */
+        protected ?array $refids = null,
     ) {
         $this->courseid = $context->get_course_context()->instanceid;
         $this->cmid = $context->instanceid;
@@ -121,17 +128,22 @@ class archive_job {
      * @param string $trigger Name of the archiving trigger that creates this job
      * @param \stdClass $settings Job settings object
      * @param bool $cleansettings If true, the settings object will be cleared from any mform stuff
+     * @param int[]|null $refids IDs of the objects to archive (e.g., quiz attempt IDs). The
+     * actual reference is resolved by the respective activity archiving driver. If null, all
+     * objects of the targeted activity will be archived.
      * @return archive_job Created archive job instance
      *
      * @throws \dml_exception
      * @throws \moodle_exception
+     * @throws \JsonException On fingerprint calculation problems
      */
     public static function create(
         \context $context,
         int $userid,
         string $trigger,
         \stdClass $settings,
-        bool $cleansettings = true
+        bool $cleansettings = true,
+        ?array $refids = null
     ): archive_job {
         global $DB;
 
@@ -151,14 +163,23 @@ class archive_job {
 
         // Clean settings object.
         if ($cleansettings) {
-            $settings = (object) array_filter(
-                (array) $settings,
-                fn ($key) => !str_starts_with($key, 'mform_') && $key !== 'submitbutton',
-                ARRAY_FILTER_USE_KEY
-            );
+            $settings = self::preprocess_settings($settings);
         }
 
-        // Create object.
+        // Normalize refids.
+        if ($refids !== null) {
+            $refids = array_values(array_map('intval', $refids));
+            sort($refids);
+        }
+
+        $fingerprint = archive_job_fingerprint::generate(
+            $context->get_course_context()->instanceid,
+            $context->instanceid,
+            $settings,
+            $refids
+        );
+
+        // Create archive job entry in DB.
         $now = time();
         $jobstatus = archive_job_status::UNINITIALIZED;
         $id = $DB->insert_record(db_table::JOB->value, [
@@ -167,11 +188,13 @@ class archive_job {
             'origin' => $trigger,
             'status' => $jobstatus->value,
             'settings' => json_encode($settings),
+            'refids' => $refids === null ? null : json_encode($refids),
+            'fingerprint' => $fingerprint->get_raw_value(),
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
 
-        return new self($id, $context, $userid, $trigger, $now, $jobstatus);
+        return new self($id, $context, $userid, $trigger, $now, $jobstatus, $fingerprint, $refids);
     }
 
     /**
@@ -194,7 +217,16 @@ class archive_job {
             throw new \moodle_exception('invalidcontext', 'error');
         }
 
-        return new self($job->id, $context, $job->userid, $job->origin, $job->timecreated, archive_job_status::from($job->status));
+        return new self(
+            $job->id,
+            $context,
+            $job->userid,
+            $job->origin,
+            $job->timecreated,
+            archive_job_status::from($job->status),
+            archive_job_fingerprint::from_raw_value($job->fingerprint),
+            $job->refids === null ? null : array_map('intval', json_decode($job->refids, flags: JSON_THROW_ON_ERROR)),
+        );
     }
 
     /**
@@ -278,6 +310,21 @@ class archive_job {
     }
 
     /**
+     * Preprocesses a job settings object by removing all form-specific fields
+     * (e.g., mform_* and submitbutton) that are not part of the actual settings
+     *
+     * @param \stdClass $settings Raw job settings object
+     * @return \stdClass Preprocessed job settings object
+     */
+    public static function preprocess_settings(\stdClass $settings): \stdClass {
+        return (object) array_filter(
+            (array) $settings,
+            fn ($key) => !str_starts_with($key, 'mform_') && $key !== 'submitbutton',
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    /**
      * Calculates the number of archive jobs that are currently being actively
      * processed based on their status values.
      *
@@ -319,6 +366,35 @@ class archive_job {
         return $DB->count_records_sql(
             "SELECT COUNT(1) FROM {local_archiving_job} WHERE contextid = :contextid AND status {$insql}",
             array_merge(['contextid' => $ctx->id], $inparams)
+        );
+    }
+
+    /**
+     * Calculates the number of archive jobs with the given fingerprint that
+     * are either pending or active.
+     *
+     * This can be used to determine if an identical archive job is currently
+     * still running before creating an identical new one.
+     *
+     * @param archive_job_fingerprint $fingerprint Fingerprint to check existing archive jobs for
+     * @return int Number of incomplete archive jobs with the given fingerprint
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function get_incomplete_job_count_for_fingerprint(archive_job_fingerprint $fingerprint): int {
+        global $DB;
+
+        // Prepare status query parameters.
+        $pendingstatusvalues = array_map(
+            fn ($s) => $s->value,
+            array_merge(archive_job_status::get_idle_states(), archive_job_status::get_active_states())
+        );
+        [$insql, $inparams] = $DB->get_in_or_equal($pendingstatusvalues, SQL_PARAMS_NAMED);
+
+        // Count number of matching archive jobs that are not yet completed.
+        return $DB->count_records_sql(
+            "SELECT COUNT(1) FROM {local_archiving_job} WHERE fingerprint = :fingerprint AND status {$insql}",
+            array_merge(['fingerprint' => $fingerprint->get_raw_value()], $inparams)
         );
     }
 
@@ -388,9 +464,13 @@ class archive_job {
                     throw new yield_exception();
                 }
 
+                $this->set_metadata_entry('trigger', $this->trigger);
                 $this->get_logger()->trace(
                     "Initialized new archive job. Trigger: {$this->trigger} - Settings: \r\n" .
                     json_encode($this->get_settings(), JSON_PRETTY_PRINT)
+                );
+                $this->get_logger()->info(
+                    'Targeted objects (refids): ' . ($this->refids === null ? 'all' : implode(', ', $this->refids))
                 );
 
                 $this->set_status(archive_job_status::PRE_PROCESSING);
@@ -677,6 +757,7 @@ class archive_job {
         }
 
         $this->clear_settings(force: true);
+        $this->clear_refids(force: true);
     }
 
     /**
@@ -870,6 +951,15 @@ class archive_job {
      */
     public function get_trigger(): string {
         return $this->trigger;
+    }
+
+    /**
+     * Retrieves the fingerprint of this job
+     *
+     * @return archive_job_fingerprint Fingerprint of this job
+     */
+    public function get_fingerprint(): archive_job_fingerprint {
+        return $this->fingerprint;
     }
 
     /**
@@ -1125,6 +1215,45 @@ class archive_job {
         ]);
 
         $this->settings = new \stdClass();
+    }
+
+    /**
+     * Retrieves the IDs of explicitly targeted objects this job should archive
+     * (e.g., quiz attempt IDs or assignment submission IDs). The return value
+     * must be interpreted as follows:
+     *
+     * - null: All objects of the targeted activity should be archived. Archiving
+     *         driver decides about objects itself.
+     * - non-empty int[] list: Only the listed objects should be archived.
+     * - empty list: Invalid. Archive job without targets.
+     *
+     * Like the job settings, refids are only available while a job is active
+     * (not completed yet) and are cleared once the job reached a final state.
+     *
+     * @return int[]|null IDs of the objects to archive or null for all objects
+     */
+    public function get_refids(): ?array {
+        return $this->refids;
+    }
+
+    /**
+     * Clears the refids of this job inside the database. This option is irreversible.
+     *
+     * @param bool $force If true, force clear refids even if the job is not completed yet
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception If the job it not yet completed
+     */
+    public function clear_refids(bool $force = false): void {
+        global $DB;
+
+        if (!$this->is_completed() && !$force) {
+            throw new \moodle_exception('job_not_completed_yet', 'local_archiving');
+        }
+
+        $DB->set_field(db_table::JOB->value, 'refids', null, ['id' => $this->id]);
+
+        $this->refids = null;
     }
 
     /**

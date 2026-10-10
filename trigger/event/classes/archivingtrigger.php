@@ -98,6 +98,12 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
     public static function handle_event(\core\event\base $event): void {
         $eventname = $event->eventname;
 
+        // We need to manually ensure that this trigger is enabled because Moodle does dispatch
+        // events to all registered observers regardless of their enabled state.
+        if (!get_config('archivingtrigger_event', 'enabled')) {
+            return;
+        }
+
         // Ignore events that we are not sensitive to.
         $eventmap = self::get_enabled_events_mapping();
         if (!isset($eventmap[$eventname])) {
@@ -119,7 +125,7 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
         $drivername = $eventmap[$eventname];
         $driver = driver_factory::activity_archiving_driver($drivername, $ctx);
 
-        if (!$driver->can_be_archived()) {
+        if (!$driver->is_enabled() || !$driver::is_ready() || !$driver->can_be_archived()) {
             return;
         }
 

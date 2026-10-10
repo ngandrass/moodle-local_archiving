@@ -79,6 +79,37 @@ final class archivingtrigger_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that the trigger returns early when it is disabled.
+     *
+     * @covers \archivingtrigger_event\archivingtrigger
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_handle_event_returns_when_disabled(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        set_config('enabled', 0, 'archivingtrigger_event');
+
+        $data = $this->prepare_quiz_and_event_config();
+        $event = \mod_quiz\event\course_module_viewed::create([
+            'objectid' => $data->quiz->id,
+            'context' => $data->context,
+        ]);
+
+        archivingtrigger::handle_event($event);
+        $this->assertSame(
+            0,
+            $DB->count_records('local_archiving_job', ['contextid' => $data->context->id]),
+            'No job should be created for unconfigured events'
+        );
+    }
+
+    /**
      * Tests that events the trigger is not sensitive to do not create jobs.
      *
      * @covers \archivingtrigger_event\archivingtrigger

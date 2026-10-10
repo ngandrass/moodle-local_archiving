@@ -39,6 +39,8 @@ final class archivingtrigger_test extends \advanced_testcase {
 
         parent::setUp();
         $PAGE->set_url('/');
+        $this->resetAfterTest();
+        set_config('enabled', 1, 'archivingtrigger_event');
     }
 
     /**

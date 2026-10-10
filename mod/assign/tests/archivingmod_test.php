@@ -354,7 +354,7 @@ final class archivingmod_test extends \advanced_testcase {
     }
 
     /**
-     * Tests that submission_created events resolve to the created submission
+     * Tests that assessable_submitted events resolve to the submitted submission
      *
      * @covers \archivingmod_assign\archivingmod
      *
@@ -363,14 +363,14 @@ final class archivingmod_test extends \advanced_testcase {
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    public function test_get_refids_for_event_submission_created(): void {
+    public function test_get_refids_for_event_assessable_submitted(): void {
         global $DB;
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
         $testdata = $generator->create_assignment();
         $driver = new archivingmod(\context_module::instance($testdata->cm->id));
 
-        // Capture the submission_created event fired by the submission plugin.
+        // Capture the assessable_submitted event fired by the assignment (submission drafts are disabled).
         $sink = $this->redirectEvents();
         /** @var \mod_assign_generator $assigngen */
         $assigngen = $generator->get_plugin_generator('mod_assign');
@@ -380,13 +380,13 @@ final class archivingmod_test extends \advanced_testcase {
             'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
             'onlinetext' => 'Test submission text.',
         ]);
-        $events = array_filter($sink->get_events(), fn($e) => $e instanceof \mod_assign\event\submission_created);
+        $events = array_filter($sink->get_events(), fn($e) => $e instanceof \mod_assign\event\assessable_submitted);
         $sink->close();
-        $this->assertNotEmpty($events, 'Expected a submission_created event');
+        $this->assertNotEmpty($events, 'Expected an assessable_submitted event');
         $event = reset($events);
-        $submissionid = (int) $event->other['submissionid'];
+        $submissionid = (int) $event->objectid;
 
-        // Should resolve to the created submission.
+        // Should resolve to the submitted submission.
         $this->assertSame([$submissionid], $driver->get_refids_for_event($event), 'Submission of the assignment');
 
         // Submissions of other assignments are not targeted.

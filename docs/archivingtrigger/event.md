@@ -36,7 +36,7 @@ The following events are currently supported:
 | Quiz       | `\mod_quiz\event\attempt_graded`[^1]                  | The graded quiz attempt              |
 | Quiz       | `\mod_quiz\event\attempt_regraded`                    | The regraded quiz attempt            |
 | Quiz       | `\mod_quiz\event\attempt_manual_grading_completed`    | The manually graded quiz attempt     |
-| Assignment | `\mod_assign\event\submission_created`                | The created submission               |
+| Assignment | `\mod_assign\event\assessable_submitted`              | The submitted submission             |
 | Assignment | `\mod_assign\event\submission_graded`                 | The graded submission                |
 | Assignment | `\mod_assign\event\submission_locked`                 | The submission of the locked student |
 

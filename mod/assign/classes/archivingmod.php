@@ -100,8 +100,8 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     public function get_refids_for_event(\core\event\base $event): ?array {
         $assignmanager = assignment_manager::from_context($this->context);
 
-        if ($event instanceof \mod_assign\event\submission_created) {
-            $submissionid = (int) $event->other['submissionid'];
+        if ($event instanceof \mod_assign\event\assessable_submitted) {
+            $submissionid = (int) $event->objectid;
         } else if ($event instanceof \mod_assign\event\submission_graded) {
             $submissionid = $assignmanager->get_submission_id_for_grade((int) $event->objectid);
         } else if ($event instanceof \mod_assign\event\submission_locked) {
@@ -252,7 +252,7 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     #[\Override]
     public static function get_archiving_eventlist(): array {
         return [
-            \mod_assign\event\submission_created::class,
+            \mod_assign\event\assessable_submitted::class,
             \mod_assign\event\submission_graded::class,
             \mod_assign\event\submission_locked::class,
         ];

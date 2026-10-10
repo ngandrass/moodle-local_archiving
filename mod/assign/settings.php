@@ -47,12 +47,14 @@ if ($hassiteconfig) {
         ));
 
         // Enabled.
-        $settings->add(new admin_setting_configcheckbox(
+        $set = new admin_setting_configcheckbox(
             'archivingmod_assign/enabled',
             get_string('setting_enabled', 'archivingmod_assign'),
             get_string('setting_enabled_desc', 'archivingmod_assign'),
             '1'
-        ));
+        );
+        $set->set_updatedcallback('\\local_archiving\\plugininfo\\archivingmod::purge_event_observer_cache');
+        $settings->add($set);
 
         // Worker service.
         $settings->add(new admin_setting_heading(

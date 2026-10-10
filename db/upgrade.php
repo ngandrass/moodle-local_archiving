@@ -66,12 +66,12 @@ function xmldb_local_archiving_upgrade($oldversion) {
 
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
-        }
 
-        // Set fingerprint to default value for existing jobs and make column non-nullable.
-        $DB->set_field_select('local_archiving_job', 'fingerprint', str_repeat('0', 64), 'fingerprint IS NULL');
-        $field = new xmldb_field('fingerprint', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null, 'origin');
-        $dbman->change_field_notnull($table, $field);
+            // Set fingerprint to default value for existing jobs and make column non-nullable.
+            $DB->set_field_select('local_archiving_job', 'fingerprint', str_repeat('0', 64), 'fingerprint IS NULL');
+            $field = new xmldb_field('fingerprint', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null, 'origin');
+            $dbman->change_field_notnull($table, $field);
+        }
 
         // Create index on fingerprint column.
         $index = new xmldb_index('fingerprint', XMLDB_INDEX_NOTUNIQUE, ['fingerprint']);

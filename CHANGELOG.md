@@ -6,6 +6,7 @@
 - Add function for resolving targeted object IDs from Moodle event instances to activity archiving driver API
 - Add job fingerprints to identify archive jobs with identical course, activity, and settings
 - Store archive job trigger in job metadata section
+- Automatically purge event observer caches on plugin on programmatic sub-plugin enable / disable events
 
 
 

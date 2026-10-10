@@ -123,8 +123,8 @@ abstract class archivingmod extends base {
      * suitable events. All configuration is done by the archiving trigger sub-
      * plugins.
      *
-     * @return \core\event\base[] List of events that can be used to trigger an
-     * archiving job for this activity type.
+     * @return string[] List of fully qualified event class names that can be
+     * used to trigger an archiving job for this activity type.
      */
     public static function get_archiving_eventlist(): array {
         return [];

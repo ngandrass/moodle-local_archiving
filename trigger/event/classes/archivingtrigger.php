@@ -45,9 +45,10 @@ class archivingtrigger extends \local_archiving\local\driver\archivingtrigger {
      * The list will only contain events from activity archiving drivers that
      * are enabled and expose at least one event.
      *
-     * @return array{string, \core\event\base[]} A list of events grouped by
+     * @return array{string, string[]} A list of event class FQNs, grouped by
      * activity archiving driver name.
      * @throws \coding_exception
+     * @throws \moodle_exception
      */
     public static function get_eventlist(): array {
         $res = [];

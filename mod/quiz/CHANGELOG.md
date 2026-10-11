@@ -5,6 +5,7 @@
 - Only archive explicitly targeted quiz attempts if an archive job was scoped to a specific set of attempt IDs
 - Implement quiz attempt resolving for archiving trigger events
 - Automatically purge event observer caches on plugin enable / disable
+- Implement quiz-activity specific pluginfile URL access validator
 
 
 ## Version 1.1.1 (2026100600)

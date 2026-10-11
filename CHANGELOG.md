@@ -9,7 +9,7 @@
 - Automatically purge event observer caches on plugin on programmatic sub-plugin enable / disable events
 - Decouple manual archive trigger enabled state from job creation form instantiation
 - Allow site administrators to configure TLS certificate validation behavior for HTTPS requests (TSP signing, archive workers, ...). Default: Always validate.
-
+- Enable activity archiving drivers to specify additional access validation rules for core image inlining logic in report generators
 
 
 ## Version 1.1.1 (2026100600)

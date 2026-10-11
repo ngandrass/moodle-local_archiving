@@ -207,7 +207,7 @@ final class report_util_test extends \advanced_testcase {
         $url = new \moodle_url("/pluginfile.php/{$context->id}/local_archiving/unittest/0/test.png");
         $img = $this->make_img($url);
 
-        $this->assertTrue(report_util::convert_image_to_base64($img));
+        $this->assertTrue(report_util::convert_image_to_base64($img, pluginfileaccesscheck: fn() => true));
         $this->assertEquals('MOODLE_URL_PLUGINFILE', $img->getAttribute('x-url-type'));
         $this->assertEquals(
             'data:image/png;base64,' . base64_encode($imgdata),
@@ -239,7 +239,7 @@ final class report_util_test extends \advanced_testcase {
         $url = new \moodle_url("/pluginfile.php/{$context->id}/local_archiving/unittest/0/photo.jpeg");
         $img = $this->make_img($url);
 
-        $this->assertTrue(report_util::convert_image_to_base64($img));
+        $this->assertTrue(report_util::convert_image_to_base64($img, pluginfileaccesscheck: fn() => true));
         $this->assertStringStartsWith('data:image/jpeg;base64,', $img->getAttribute('src'));
     }
 
@@ -258,8 +258,131 @@ final class report_util_test extends \advanced_testcase {
         $url = new \moodle_url("/pluginfile.php/{$context->id}/local_archiving/unittest/0/nonexistent.png");
         $img = $this->make_img($url);
 
-        $this->assertFalse(report_util::convert_image_to_base64($img));
+        $this->assertFalse(report_util::convert_image_to_base64($img, pluginfileaccesscheck: fn() => true));
         $this->assertEquals('moodledata file not found', $img->getAttribute('x-debug-notice'));
+    }
+
+    /**
+     * Tests that pluginfile images are not inlined if no access check callback is given.
+     *
+     * @covers \local_archiving\local\util\report_util
+     * @return void
+     * @throws \DOMException
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_convert_pluginfile_image_without_access_check_denied(): void {
+        $this->resetAfterTest();
+
+        $context = \context_system::instance();
+        get_file_storage()->create_file_from_string([
+            'contextid' => $context->id,
+            'component' => 'local_archiving',
+            'filearea'  => 'unittest',
+            'itemid'    => 0,
+            'filepath'  => '/',
+            'filename'  => 'test.png',
+        ], 'FAKE_PNG_IMAGE_DATA');
+
+        $url = (new \moodle_url("/pluginfile.php/{$context->id}/local_archiving/unittest/0/test.png"))->out(false);
+        $img = $this->make_img($url);
+
+        $this->assertFalse(report_util::convert_image_to_base64($img));
+        $this->assertEquals('file access denied', $img->getAttribute('x-debug-notice'));
+        $this->assertEquals($url, $img->getAttribute('src'));
+    }
+
+    /**
+     * Tests that pluginfile images are not inlined if the access check callback denies access.
+     *
+     * @covers \local_archiving\local\util\report_util
+     * @return void
+     * @throws \DOMException
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_convert_pluginfile_image_access_check_denied(): void {
+        $this->resetAfterTest();
+
+        $context = \context_system::instance();
+        get_file_storage()->create_file_from_string([
+            'contextid' => $context->id,
+            'component' => 'local_archiving',
+            'filearea'  => 'unittest',
+            'itemid'    => 0,
+            'filepath'  => '/',
+            'filename'  => 'test.png',
+        ], 'FAKE_PNG_IMAGE_DATA');
+
+        $url = (new \moodle_url("/pluginfile.php/{$context->id}/local_archiving/unittest/0/test.png"))->out(false);
+        $img = $this->make_img($url);
+
+        $this->assertFalse(report_util::convert_image_to_base64($img, null, fn() => false));
+        $this->assertEquals('file access denied', $img->getAttribute('x-debug-notice'));
+        $this->assertEquals($url, $img->getAttribute('src'));
+    }
+
+    /**
+     * Tests that the access check callback receives the parsed parts of a regular pluginfile URL.
+     *
+     * @covers \local_archiving\local\util\report_util
+     * @return void
+     * @throws \DOMException
+     * @throws \dml_exception
+     */
+    public function test_convert_pluginfile_image_access_check_receives_url_parts(): void {
+        $this->resetAfterTest();
+
+        $context = \context_system::instance();
+        $url = new \moodle_url("/pluginfile.php/{$context->id}/mod_foo/bararea/42/my%20pic.png");
+        $img = $this->make_img($url);
+
+        $urlparts = null;
+        report_util::convert_image_to_base64($img, null, function (array $parts) use (&$urlparts): bool {
+            $urlparts = $parts;
+            return false;
+        });
+
+        $this->assertNotNull($urlparts, 'Access check callback was not called');
+        $this->assertEquals($context->id, $urlparts['contextid']);
+        $this->assertEquals('mod_foo', $urlparts['component']);
+        $this->assertEquals('bararea', $urlparts['filearea']);
+        $this->assertEquals(42, $urlparts['itemid']);
+        $this->assertEquals('my pic.png', $urlparts['filename']);
+    }
+
+    /**
+     * Tests that the access check callback receives the parsed parts of a question pluginfile URL.
+     *
+     * @covers \local_archiving\local\util\report_util
+     * @return void
+     * @throws \DOMException
+     * @throws \dml_exception
+     */
+    public function test_convert_question_pluginfile_access_check_receives_url_parts(): void {
+        $this->resetAfterTest();
+
+        $context = \context_system::instance();
+        $url = new \moodle_url("/pluginfile.php/{$context->id}/question/questiontext/13/7/42/qimg.png");
+        $img = $this->make_img($url);
+
+        $urlparts = null;
+        report_util::convert_image_to_base64($img, null, function (array $parts) use (&$urlparts): bool {
+            $urlparts = $parts;
+            return false;
+        });
+
+        $this->assertNotNull($urlparts, 'Access check callback was not called');
+        $this->assertEquals($context->id, $urlparts['contextid']);
+        $this->assertEquals('question', $urlparts['component']);
+        $this->assertEquals('questiontext', $urlparts['filearea']);
+        $this->assertEquals(13, $urlparts['qubaid']);
+        $this->assertEquals(7, $urlparts['slot']);
+        $this->assertEquals(42, $urlparts['itemid']);
+        $this->assertEquals('qimg.png', $urlparts['filename']);
+        $this->assertEquals('file access denied', $img->getAttribute('x-debug-notice'));
     }
 
     /**
@@ -290,7 +413,7 @@ final class report_util_test extends \advanced_testcase {
         $url = "$wwwroot/pluginfile.php/{$context->id}/local_archiving/unittest/0/icon.svg?forcedownload=1&lang=de";
         $img = $this->make_img($url);
 
-        $this->assertTrue(report_util::convert_image_to_base64($img, $wwwroot));
+        $this->assertTrue(report_util::convert_image_to_base64($img, $wwwroot, fn() => true));
         $this->assertStringStartsWith('data:image/svg+xml;base64,', $img->getAttribute('src'));
     }
 
@@ -319,11 +442,11 @@ final class report_util_test extends \advanced_testcase {
             'filename'  => 'qimg.png',
         ], $imgdata);
 
-        // URL format for question component: /contextid/question/filearea/qbankid/slot/itemid/filename.
+        // URL format for question component: /contextid/question/filearea/qubaid/slot/itemid/filename.
         $url = new \moodle_url("/pluginfile.php/{$context->id}/question/questiontext/1/2/0/qimg.png");
         $img = $this->make_img($url);
 
-        $this->assertTrue(report_util::convert_image_to_base64($img));
+        $this->assertTrue(report_util::convert_image_to_base64($img, pluginfileaccesscheck: fn() => true));
         $this->assertEquals(
             'data:image/png;base64,' . base64_encode($imgdata),
             $img->getAttribute('src')
@@ -347,8 +470,9 @@ final class report_util_test extends \advanced_testcase {
         $url = new \moodle_url("/pluginfile.php/{$context->id}/question/questiontext/1/path/notnumeric/qimg.png");
         $img = $this->make_img($url);
 
-        $this->assertFalse(report_util::convert_image_to_base64($img));
+        $this->assertFalse(report_util::convert_image_to_base64($img, pluginfileaccesscheck: fn() => true));
         $this->assertEquals('MOODLE_URL_PLUGINFILE_QUESTION_AND_QTYPE', $img->getAttribute('x-url-type'));
+        $this->assertEquals('malformed pluginfile URL for question/qtype file', $img->getAttribute('x-debug-notice'));
     }
 
     /**
@@ -379,7 +503,7 @@ final class report_util_test extends \advanced_testcase {
         $url = new \moodle_url("/pluginfile.php/{$context->id}/assignsubmission_onlinetext/submissions_onlinetext/42/test.png");
         $img = $this->make_img($url);
 
-        $this->assertTrue(report_util::convert_image_to_base64($img));
+        $this->assertTrue(report_util::convert_image_to_base64($img, pluginfileaccesscheck: fn() => true));
         $this->assertEquals('MOODLE_URL_PLUGINFILE', $img->getAttribute('x-url-type'));
         $this->assertEquals(
             'data:image/png;base64,' . base64_encode($imgdata),

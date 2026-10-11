@@ -43,7 +43,7 @@ class report_util {
     protected const REGEX_MOODLE_URL_PLUGINFILE = '/^(?P<wwwroot>https?:\/\/.+)?(\/pluginfile\.php)(?P<fullpath>\/(?P<contextid>[^\/]+)\/(?P<component>[^\/]+)\/(?P<filearea>[^\/]+)(\/(?P<itemid>\d+))?(?P<args>(\/[^\/]+)*)\/(?P<filename>[^\/\?\&\#]+))$/m';
 
     /** @var string Regex for Moodle file API URLs of specific types: component=(question|qtype_.*) */
-    protected const REGEX_MOODLE_URL_PLUGINFILE_QUESTION_AND_QTYPE = '/^(?P<wwwroot>https?:\/\/.+)?(\/pluginfile\.php)(?P<fullpath>\/(?P<contextid>[^\/]+)\/(?P<component>[^\/]+)\/(?P<filearea>[^\/]+)\/(?P<questionbank_id>[^\/]+)\/(?P<question_slot>[^\/]+)\/(?P<itemid>\d+)\/(?P<filename>[^\/\?\&\#]+))$/m';
+    protected const REGEX_MOODLE_URL_PLUGINFILE_QUESTION_AND_QTYPE = '/^(?P<wwwroot>https?:\/\/.+)?(\/pluginfile\.php)(?P<fullpath>\/(?P<contextid>[^\/]+)\/(?P<component>[^\/]+)\/(?P<filearea>[^\/]+)\/(?P<qubaid>[^\/]+)\/(?P<slot>[^\/]+)\/(?P<itemid>\d+)\/(?P<filename>[^\/\?\&\#]+))$/m';
 
     /** @var string Regex for Moodle theme image files */
     protected const REGEX_MOODLE_URL_THEME_IMAGE = '/^(?P<wwwroot>https?:\/\/.+)?(\/theme\/image\.php\/)(?P<themename>[^\/]+)\/(?P<component>[^\/]+)\/(?P<rev>[^\/]+)\/(?P<image>.+)$/m';
@@ -53,12 +53,24 @@ class report_util {
      * Tries to download and inline images of <img> tags with src attributes as base64 encoded strings. Replacement
      * happens in-place.
      *
+     * Images referenced via Moodle pluginfile URLs are only inlined if the given $pluginfileaccesscheck callback
+     * explicitly allows access to the referenced file. This is required beacuse different activity types have
+     * different file and permission layouts. If no callback is given, all pluginfile images are rejected by default.
+     * The callback receives the named regex groups of the parsed pluginfile URL (see report_util::REGEX_*) and must
+     * return true if the file may be inlined.
+     *
      * @param \DOMElement $img The <img> element to process
      * @param string|null $wwwroot Internal Moodle base URL to use instead of $CFG->wwwroot, or null to use $CFG->wwwroot
+     * @param callable|null $pluginfileaccesscheck Callback fn(array $urlparts): bool that decides whether a file
+     * referenced by a pluginfile URL may be inlined. If null, no pluginfile images are inlined at all.
      * @return bool true on success
      * @throws \dml_exception
      */
-    public static function convert_image_to_base64(\DOMElement $img, ?string $wwwroot = null): bool {
+    public static function convert_image_to_base64(
+        \DOMElement $img,
+        ?string $wwwroot = null,
+        ?callable $pluginfileaccesscheck = null
+    ): bool {
         global $CFG;
 
         // Only process images with src attribute.
@@ -108,18 +120,24 @@ class report_util {
                 // Link type: Moodle pluginfile URL.
                 $img->setAttribute('x-url-type', 'MOODLE_URL_PLUGINFILE');
 
-                // Edge case: question / qtype files follow another pattern,
-                // inserting questionbank_id and question_slot after filearea.
-                if ($regexmatches['component'] == 'question' || strpos($regexmatches['component'], 'qtype_') === 0) {
+                // Edge case: question / qtype files follow another pattern, inserting qubaid and slot after filearea.
+                if ($regexmatches['component'] == 'question' || str_starts_with($regexmatches['component'], 'qtype_')) {
                     $regexmatches = null;
+                    $img->setAttribute('x-url-type', 'MOODLE_URL_PLUGINFILE_QUESTION_AND_QTYPE');
                     if (!preg_match(self::REGEX_MOODLE_URL_PLUGINFILE_QUESTION_AND_QTYPE, $imgsrcurl, $regexmatches)) {
-                        $img->setAttribute('x-url-type', 'MOODLE_URL_PLUGINFILE_QUESTION_AND_QTYPE');
+                        $img->setAttribute('x-debug-notice', 'malformed pluginfile URL for question/qtype file');
                         return false;
                     }
                 }
 
                 // Decode RFC 3986 URL escaped sequences.
                 $regexmatches['filename'] = urldecode($regexmatches['filename']);
+
+                // Only inline files the caller explicitly allows access to.
+                if ($pluginfileaccesscheck === null || !$pluginfileaccesscheck($regexmatches)) {
+                    $img->setAttribute('x-debug-notice', 'file access denied');
+                    return false;
+                }
 
                 // Get file content via Moodle File API.
                 $fs = get_file_storage();

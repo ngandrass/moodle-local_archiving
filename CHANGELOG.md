@@ -8,6 +8,7 @@
 - Store archive job trigger in job metadata section
 - Automatically purge event observer caches on plugin on programmatic sub-plugin enable / disable events
 - Decouple manual archive trigger enabled state from job creation form instantiation
+- Allow site administrators to configure TLS certificate validation behavior for HTTPS requests (TSP signing, archive workers, ...). Default: Always validate.
 
 
 

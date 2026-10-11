@@ -172,7 +172,9 @@ class report_util {
 
             // No special local file access. Try to download via HTTP request.
             $c = new curl(['ignoresecurity' => $isinternalurl]);
-            $imgdata = $c->get($imgsrcurl);  // Curl handle automatically closed.
+            $imgdata = $c->get($imgsrcurl, [], [  // Curl handle automatically closed.
+                'CURLOPT_SSL_VERIFYPEER' => empty(get_config('local_archiving', 'skip_tls_verification')),
+            ]);
             if ($c->get_info()['http_code'] !== 200 || $imgdata === false) {
                 $img->setAttribute('x-debug-more', $imgdata);
                 $img->setAttribute('x-debug-notice', 'HTTP request failed');

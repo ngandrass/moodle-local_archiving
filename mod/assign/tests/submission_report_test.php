@@ -25,6 +25,7 @@
 namespace archivingmod_assign;
 
 use archivingmod_assign\local\type\submission_report_section;
+use local_archiving\local\util\report_util;
 
 /**
  * Tests for the submission_report class
@@ -38,6 +39,72 @@ final class submission_report_test extends \advanced_testcase {
     // phpcs:ignore
     public static function getDataGenerator(): \archivingmod_assign_generator {
         return parent::getDataGenerator()->get_plugin_generator('archivingmod_assign');
+    }
+
+    /**
+     * Creates a new assignment and a report for it
+     *
+     * @return array [submission_report $report, \stdClass $testdata]
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    protected static function create_blank_assignment_report(): array {
+        $testdata = self::getDataGenerator()->create_assignment();
+        $assign = new \assign(\context_module::instance($testdata->cm->id), $testdata->cm, $testdata->course);
+        return [new submission_report($testdata->course, $testdata->cm, $assign), $testdata];
+    }
+
+    /**
+     * Inlines an image with the given src using the pluginfile access check of the given report
+     *
+     * @param submission_report $report Report whose access check should be used
+     * @param string $src Value of the src attribute
+     * @return array [bool $success, \DOMElement $img]
+     * @throws \DOMException
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     */
+    protected static function inline_image(submission_report $report, string $src): array {
+        $accesscheck = new \ReflectionMethod(submission_report::class, 'is_pluginfile_access_allowed');
+        $img = (new \DOMDocument())->createElement('img');
+        $img->setAttribute('src', $src);
+        $success = report_util::convert_image_to_base64(
+            $img,
+            null,
+            fn(array $urlparts): bool => $accesscheck->invoke($report, $urlparts)
+        );
+        return [$success, $img];
+    }
+
+    /**
+     * Stores an image file with the given content and returns its pluginfile URL
+     *
+     * @param int $contextid Context ID of the file
+     * @param string $component Component of the file
+     * @param string $filearea Filearea of the file
+     * @param string $content Content of the file
+     * @param string $filename Name of the file
+     * @return string Pluginfile URL of the created file
+     * @throws \file_exception
+     * @throws \stored_file_creation_exception
+     */
+    protected static function create_image_with_pluginfile_url(
+        int $contextid,
+        string $component,
+        string $filearea,
+        string $content,
+        string $filename = 'pic.png'
+    ): string {
+        get_file_storage()->create_file_from_string([
+            'contextid' => $contextid,
+            'component' => $component,
+            'filearea' => $filearea,
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => $filename,
+        ], $content);
+        return \moodle_url::make_pluginfile_url($contextid, $component, $filearea, 0, '/', $filename)->out(false);
     }
 
     /**
@@ -853,5 +920,185 @@ final class submission_report_test extends \advanced_testcase {
             $html,
             'Grade not found'
         );
+    }
+
+    /**
+     * Tests that images from the assignment context itself are inlined
+     *
+     * @covers \archivingmod_assign\submission_report::is_pluginfile_access_allowed
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_inline_image_assignment_context_allowed(): void {
+        $this->resetAfterTest();
+        [$report, $testdata] = self::create_blank_assignment_report();
+        $url = self::create_image_with_pluginfile_url(
+            contextid: \context_module::instance($testdata->cm->id)->id,
+            component: 'mod_assign',
+            filearea: 'intro',
+            content: 'ASSIGN-IMAGE-DATA'
+        );
+
+        [$success, $img] = self::inline_image($report, $url);
+
+        $this->assertTrue($success);
+        $this->assertSame('data:image/png;base64,' . base64_encode('ASSIGN-IMAGE-DATA'), $img->getAttribute('src'));
+    }
+
+    /**
+     * Tests that images from the assignment course are inlined
+     *
+     * @covers \archivingmod_assign\submission_report::is_pluginfile_access_allowed
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_inline_image_inside_course_allowed(): void {
+        $this->resetAfterTest();
+        [$report, $testdata] = self::create_blank_assignment_report();
+        $url = self::create_image_with_pluginfile_url(
+            contextid: \context_course::instance($testdata->course->id)->id,
+            component: 'course',
+            filearea: 'summary',
+            content: 'COURSE-IMAGE-DATA'
+        );
+
+        [$success, $img] = self::inline_image($report, $url);
+
+        $this->assertTrue($success);
+        $this->assertSame('data:image/png;base64,' . base64_encode('COURSE-IMAGE-DATA'), $img->getAttribute('src'));
+    }
+
+    /**
+     * Tests that images from contexts outside the assignment course are not inlined
+     *
+     * @covers \archivingmod_assign\submission_report::is_pluginfile_access_allowed
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_inline_image_outside_course_rejected(): void {
+        $this->resetAfterTest();
+        [$report] = self::create_blank_assignment_report();
+        $victim = self::getDataGenerator()->create_user();
+        $url = self::create_image_with_pluginfile_url(
+            \context_user::instance($victim->id)->id,
+            'user',
+            'private',
+            'PRIVATE-IMAGE-DATA',
+            'scan.png'
+        );
+
+        [$success, $img] = self::inline_image($report, $url);
+
+        $this->assertFalse($success);
+        $this->assertSame($url, $img->getAttribute('src'));
+        $this->assertSame('file access denied', $img->getAttribute('x-debug-notice'));
+    }
+
+    /**
+     * Tests that images from another course are not inlined
+     *
+     * @covers \archivingmod_assign\submission_report::is_pluginfile_access_allowed
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_inline_image_other_course_rejected(): void {
+        $this->resetAfterTest();
+        [$report] = self::create_blank_assignment_report();
+        $othercourse = self::getDataGenerator()->create_course();
+        $url = self::create_image_with_pluginfile_url(
+            contextid: \context_course::instance($othercourse->id)->id,
+            component: 'course',
+            filearea: 'summary',
+            content: 'OTHER-COURSE'
+        );
+
+        [$success, $img] = self::inline_image($report, $url);
+
+        $this->assertFalse($success);
+        $this->assertSame($url, $img->getAttribute('src'));
+        $this->assertSame('file access denied', $img->getAttribute('x-debug-notice'));
+    }
+
+    /**
+     * Tests that images from other activities inside the assignment course are not inlined
+     *
+     * @covers \archivingmod_assign\submission_report::is_pluginfile_access_allowed
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \file_exception
+     * @throws \moodle_exception
+     * @throws \stored_file_creation_exception
+     */
+    public function test_inline_image_other_module_in_course_rejected(): void {
+        $this->resetAfterTest();
+        [$report, $testdata] = self::create_blank_assignment_report();
+        $page = self::getDataGenerator()->create_module('page', ['course' => $testdata->course->id]);
+        $url = self::create_image_with_pluginfile_url(
+            contextid: \context_module::instance($page->cmid)->id,
+            component: 'mod_page',
+            filearea: 'intro',
+            content: 'PAGE-IMAGE-DATA'
+        );
+
+        [$success, $img] = self::inline_image($report, $url);
+
+        $this->assertFalse($success);
+        $this->assertSame($url, $img->getAttribute('src'));
+        $this->assertSame('file access denied', $img->getAttribute('x-debug-notice'));
+    }
+
+    /**
+     * Tests that images referencing a non-existing context are not inlined
+     *
+     * @covers \archivingmod_assign\submission_report::is_pluginfile_access_allowed
+     *
+     * @return void
+     * @throws \DOMException
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_inline_image_invalid_context_rejected(): void {
+        $this->resetAfterTest();
+        [$report] = self::create_blank_assignment_report();
+        $url = \moodle_url::make_pluginfile_url(999999999, 'course', 'summary', 0, '/', 'pic.png')->out(false);
+
+        [$success, $img] = self::inline_image($report, $url);
+
+        $this->assertFalse($success);
+        $this->assertSame('file access denied', $img->getAttribute('x-debug-notice'));
     }
 }

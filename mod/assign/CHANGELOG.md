@@ -6,6 +6,7 @@
 - Fail archive jobs early if no submitted submissions were found to archive
 - Implement assignment submission resolving for archiving trigger events
 - Automatically purge event observer caches on plugin enable / disable
+- Implement assignment-activity specific pluginfile URL access validator
 
 
 ## Version 1.0.1 (2026100600)

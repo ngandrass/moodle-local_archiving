@@ -1,0 +1,77 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_archiving/components/job_table_search
+
+    Search and status filter form for the job overview table.
+
+    Example context (json):
+    {
+        "uniqueid": "job_overview_table_42",
+        "actionurl": "https://example.com/local/archiving/index.php",
+        "hiddenparams": [
+            {"name": "courseid", "value": 2}
+        ],
+        "search": "quiz",
+        "statusoptions": [
+            {"value": "inprogress", "name": "In progress", "selected": false},
+            {"value": "completed", "name": "Completed", "selected": true}
+        ],
+        "filteractive": true,
+        "reseturl": "https://example.com/local/archiving/index.php?courseid=2"
+    }
+}}
+<form method="get" action="{{actionurl}}" class="d-flex flex-wrap align-items-center mb-3" role="search">
+    {{! Keep all page parameters during submission }}
+    {{#hiddenparams}}
+        <input type="hidden" name="{{name}}" value="{{value}}">
+    {{/hiddenparams}}
+
+    {{! Free-text search input }}
+    <label for="{{uniqueid}}_search" class="sr-only visually-hidden">{{#str}} job_search_label, local_archiving {{/str}}</label>
+    <input
+        type="search"
+        id="{{uniqueid}}_search"
+        name="search"
+        value="{{search}}"
+        class="form-control mr-2 me-2 mb-2"
+        size="42"
+        style="max-width: 32rem;"
+        placeholder="{{#str}} job_search_placeholder, local_archiving {{/str}}"
+    >
+
+    {{! Status filter dropdown }}
+    <label for="{{uniqueid}}_status" class="sr-only visually-hidden">{{#str}} job_status_filter_label, local_archiving {{/str}}</label>
+    <select id="{{uniqueid}}_status" name="status" class="custom-select form-select w-auto mr-2 me-2 mb-2">
+        <option value="">{{#str}} job_status_filter_all, local_archiving {{/str}}</option>
+        {{#statusoptions}}
+            <option value="{{value}}"{{#selected}} selected{{/selected}}>{{name}}</option>
+        {{/statusoptions}}
+    </select>
+
+    {{! Action buttons }}
+    <button type="submit" class="btn btn-primary mr-2 me-2 mb-2">
+        <i class="fa fa-search" aria-hidden="true"></i>
+        {{#str}} search, moodle {{/str}}
+    </button>
+
+    {{#filteractive}}
+        <a href="{{reseturl}}" class="btn btn-secondary mb-2">
+            {{#str}} reset, moodle {{/str}}
+        </a>
+    {{/filteractive}}
+</form>

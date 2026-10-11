@@ -28,6 +28,7 @@ use core\exception\moodle_exception;
 use local_archiving\archive_job;
 use local_archiving\file_handle;
 use local_archiving\local\type\archive_job_status;
+use local_archiving\local\type\archive_job_status_filter;
 use local_archiving\local\type\db_table;
 
 // phpcs:ignore
@@ -43,6 +44,9 @@ require_once($CFG->libdir . '/tablelib.php');
  * Table renderer for the job overview table
  */
 class job_overview_table extends \table_sql {
+    /** @var string HTML for the file icon */
+    protected const FILE_ICON_HTML = '<i class="fa-regular fa-file-zipper" aria-hidden="true"></i>';
+
     /** @var \context_course Course context this table is associated with */
     protected \context_course $coursectx;
 
@@ -51,6 +55,15 @@ class job_overview_table extends \table_sql {
 
     /** @var bool Stores whether the viewing user has the capability to delete archive jobs */
     protected bool $usercandelete = false;
+
+    /** @var string Free-text search term */
+    protected string $search;
+
+    /** @var archive_job_status_filter|null Status category to filter jobs by, or null to show all */
+    protected ?archive_job_status_filter $statusfilter;
+
+    /** @var array<int, file_handle[]> Cached file handles, indexed by job ID */
+    protected array $filehandlecache = [];
 
     /**
      * Constructor
@@ -76,15 +89,19 @@ class job_overview_table extends \table_sql {
         $this->coursemodinfo = get_fast_modinfo($this->coursectx->instanceid);
         $this->usercandelete = has_capability('local/archiving:delete', $ctx);
 
+        // Read search and filter parameters.
+        $this->search = trim(optional_param('search', '', PARAM_TEXT));
+        $this->statusfilter = archive_job_status_filter::tryFrom(optional_param('status', '', PARAM_ALPHA));
+
         $refreshhtml = $OUTPUT->render_from_template('local_archiving/components/refresh_button', [
             'lastupdated' => time(),
-            'refreshurl' => $PAGE->url,
+            'refreshurl' => $this->add_filter_params($PAGE->url),
         ]);
 
         // Setup table.
         $this->define_columns([
-            'timecreated',
             'id',
+            'timecreated',
             'contextid',
             'user',
             'status',
@@ -92,8 +109,8 @@ class job_overview_table extends \table_sql {
         ]);
 
         $this->define_headers([
-            get_string('task_starttime', 'admin'),
             get_string('id', 'local_archiving'),
+            get_string('task_starttime', 'admin'),
             get_string('activity'),
             get_string('user'),
             get_string('status'),
@@ -102,23 +119,103 @@ class job_overview_table extends \table_sql {
 
         $this->column_class('actions', 'text-center');
 
+        // We match the context directly by id, or any of its children by path. The seperation is required because
+        // the path must have a trailing slash to avoid matching contexts with a similar path (e.g., /1/3/25 vs. /1/3/250).
+        $where = '(ctx.id = :ctxid OR ' . $DB->sql_like('ctx.path', ':ctxpath') . ')';
+        $params = [
+            'ctxid' => $ctx->id,
+            'ctxpath' => $ctx->path . '/%',
+        ];
+
+        // Restrict to the selected status category.
+        if ($this->statusfilter !== null) {
+            [$statussql, $statusparams] = $DB->get_in_or_equal(
+                array_map(fn ($s) => $s->value, $this->statusfilter->states()),
+                SQL_PARAMS_NAMED,
+                'js'
+            );
+            $where .= " AND j.status {$statussql}";
+            $params += $statusparams;
+        }
+
+        // Match search term against names of non-deleted files and activity names.
+        if ($this->search !== '') {
+            $searchconditions = [
+                'EXISTS (SELECT 1 FROM {' . db_table::FILE_HANDLE->value . '} f ' .
+                    'WHERE f.jobid = j.id AND f.deleted = 0 AND ' .
+                    $DB->sql_like('f.filename', ':jobsearchfile', false) . ')',
+            ];
+            $params['jobsearchfile'] = '%' . $DB->sql_like_escape($this->search) . '%';
+
+            $matchingctxids = $this->get_contextids_of_matching_activities($this->search);
+            if (!empty($matchingctxids)) {
+                [$cmsql, $cmparams] = $DB->get_in_or_equal($matchingctxids, SQL_PARAMS_NAMED, 'jobsearchctx');
+                $searchconditions[] = "j.contextid {$cmsql}";
+                $params += $cmparams;
+            }
+
+            $where .= ' AND (' . implode(' OR ', $searchconditions) . ')';
+        }
+
         $this->set_sql(
             'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, u.username',
             '{' . db_table::JOB->value . '} j ' .
                 'JOIN {user} u ON j.userid = u.id ' .
                 'JOIN {context} ctx ON ctx.id = j.contextid',
-            // We match the context directly by id, or any of its children by path. The seperation is required because
-            // the path must have a trailing slash to avoid matching contexts with a similar path (e.g., /1/3/25 vs. /1/3/250).
-            '(ctx.id = :ctxid OR ' . $DB->sql_like('ctx.path', ':ctxpath') . ')',
-            [
-                'ctxid' => $ctx->id,
-                'ctxpath' => $ctx->path . '/%',
-            ]
+            $where,
+            $params
         );
 
         $this->sortable(true, 'timecreated', SORT_DESC);
         $this->no_sorting('actions');
         $this->collapsible(false);
+    }
+
+    /**
+     * Defines the base URL of this table, retaining the current search and filter parameters
+     *
+     * @param string|\moodle_url $url Base URL of the table
+     * @return void
+     * @throws \moodle_exception
+     */
+    public function define_baseurl($url) {
+        parent::define_baseurl($this->add_filter_params(new \moodle_url($url)));
+    }
+
+    /**
+     * Renders the search form, followed by the table itself
+     *
+     * The search form is printed here, instead of in wrap_html_start(), to
+     * keep it visible even if the current filter yields no results.
+     *
+     * @param int $pagesize Number of rows per page
+     * @param bool $useinitialsbar Whether to show the initials bar
+     * @param string $downloadhelpbutton Download help button HTML
+     * @return void
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    public function out($pagesize, $useinitialsbar, $downloadhelpbutton = '') {
+        echo $this->render_search_form();
+        parent::out($pagesize, $useinitialsbar, $downloadhelpbutton);
+    }
+
+    /**
+     * Starts the table HTML output without rendering the paging bar above the table
+     *
+     * The paging bar below the table is unaffected, since use_pages is
+     * restored before finish_html() is called.
+     *
+     * @return void
+     */
+    public function start_html() {
+        $usepages = $this->use_pages;
+        $this->use_pages = false;
+        try {
+            parent::start_html();
+        } finally {
+            $this->use_pages = $usepages;
+        }
     }
 
     /**
@@ -146,7 +243,35 @@ class job_overview_table extends \table_sql {
         $modctx = \context::instance_by_id($values->contextid);
         $cm = $this->coursemodinfo->get_cm($modctx->instanceid);
 
-        return \html_writer::link($cm->get_url(), $cm->get_formatted_name());
+        $html = \html_writer::link($cm->get_url(), $cm->get_formatted_name());
+
+        // List names of all files that exist in storage.
+        $filenames = [];
+        foreach ($this->get_file_handles($values->id) as $file) {
+            if (!$file->deleted) {
+                $filenames[] = \html_writer::tag(
+                    'li',
+                    self::FILE_ICON_HTML . ' ' . s($file->filename),
+                    ['class' => 'list-group-item bg-transparent px-0 py-1 text-break']
+                );
+            }
+        }
+
+        if (empty($filenames)) {
+            $filenames[] = \html_writer::tag(
+                'li',
+                get_string('nothingtodisplay', 'moodle'),
+                ['class' => 'list-group-item bg-transparent px-0 py-1 text-break text-muted']
+            );
+        }
+
+        $html .= \html_writer::tag(
+            'ul',
+            implode('', $filenames),
+            ['class' => 'list-group list-group-flush small mb-0 mt-1']
+        );
+
+        return $html;
     }
 
     /**
@@ -215,7 +340,7 @@ class job_overview_table extends \table_sql {
 
         // Action: Download.
         $job = archive_job::get_by_id($values->id);
-        $files = file_handle::get_by_jobid($values->id);
+        $files = $this->get_file_handles($values->id);
         if ($job->is_completed() && count($files) > 0) {
             $downloadurl = new \moodle_url('/local/archiving/download.php', ['jobid' => $values->id]);
             $html .= $this->action_button($downloadurl, 'btn-success', get_string('download'), 'fa-download');
@@ -251,6 +376,21 @@ class job_overview_table extends \table_sql {
         }
 
         return $html;
+    }
+
+    /**
+     * Retrieves all file handles of the given job, caching them for subsequent column renderers
+     *
+     * @param int $jobid ID of the job to retrieve file handles for
+     * @return file_handle[] List of file handles associated with the job
+     * @throws \dml_exception
+     */
+    protected function get_file_handles(int $jobid): array {
+        if (!array_key_exists($jobid, $this->filehandlecache)) {
+            $this->filehandlecache[$jobid] = file_handle::get_by_jobid($jobid);
+        }
+
+        return $this->filehandlecache[$jobid];
     }
 
     /**
@@ -300,5 +440,88 @@ class job_overview_table extends \table_sql {
             "",
             $wrapperattributes
         );
+    }
+
+    /**
+     * Renders the search and status filter form for this table
+     *
+     * @return string HTML code of the search form
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    protected function render_search_form(): string {
+        global $OUTPUT;
+
+        // Preserve all page parameters except search, filter, and pagination.
+        $hiddenparams = [];
+        $excludedparams = ['search', 'status', $this->request[TABLE_VAR_PAGE]];
+        foreach ($this->baseurl->params() as $name => $value) {
+            if (!in_array($name, $excludedparams, true)) {
+                $hiddenparams[] = ['name' => $name, 'value' => $value];
+            }
+        }
+
+        $statusoptions = [];
+        foreach (archive_job_status_filter::cases() as $filter) {
+            $statusoptions[] = [
+                'value' => $filter->value,
+                'name' => $filter->name(),
+                'selected' => $filter === $this->statusfilter,
+            ];
+        }
+
+        $reseturl = new \moodle_url($this->baseurl);
+        $reseturl->remove_params('search', 'status');
+
+        return $OUTPUT->render_from_template('local_archiving/components/job_table_search', [
+            'uniqueid' => $this->uniqueid,
+            'actionurl' => $this->baseurl->out_omit_querystring(),
+            'hiddenparams' => $hiddenparams,
+            'search' => $this->search,
+            'statusoptions' => $statusoptions,
+            'filteractive' => $this->search !== '' || $this->statusfilter !== null,
+            'reseturl' => $reseturl->out(false),
+        ]);
+    }
+
+    /**
+     * Returns a copy of the given URL with the current search and filter parameters added
+     *
+     * @param \moodle_url $url URL to add the parameters to
+     * @return \moodle_url New URL with the search and filter parameters set
+     * @throws \moodle_exception
+     */
+    protected function add_filter_params(\moodle_url $url): \moodle_url {
+        $url = new \moodle_url($url);
+        $url->remove_params('search', 'status');
+
+        if ($this->search !== '') {
+            $url->param('search', $this->search);
+        }
+        if ($this->statusfilter !== null) {
+            $url->param('status', $this->statusfilter->value);
+        }
+
+        return $url;
+    }
+
+    /**
+     * Determines the context IDs of all activities within the current course
+     * whose name contains the given search term (case-insensitive)
+     *
+     * @param string $search Search term
+     * @return int[] Context IDs of matching activities
+     */
+    protected function get_contextids_of_matching_activities(string $search): array {
+        $search = \core_text::strtolower($search);
+        $ctxids = [];
+
+        foreach ($this->coursemodinfo->get_cms() as $cm) {
+            if (\core_text::strpos(\core_text::strtolower($cm->get_formatted_name()), $search) !== false) {
+                $ctxids[] = $cm->context->id;
+            }
+        }
+
+        return $ctxids;
     }
 }

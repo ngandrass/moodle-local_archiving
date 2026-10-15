@@ -44,9 +44,6 @@ require_once($CFG->libdir . '/tablelib.php');
  * Table renderer for the job overview table
  */
 class job_overview_table extends \table_sql {
-    /** @var string HTML for the file icon */
-    protected const FILE_ICON_HTML = '<i class="fa-regular fa-file-zipper" aria-hidden="true"></i>';
-
     /** @var \context_course Course context this table is associated with */
     protected \context_course $coursectx;
 
@@ -251,7 +248,7 @@ class job_overview_table extends \table_sql {
             if (!$file->deleted) {
                 $filenames[] = \html_writer::tag(
                     'li',
-                    self::FILE_ICON_HTML . ' ' . s($file->filename),
+                    '<i class="fa-regular fa-file-zipper" aria-hidden="true"></i>&nbsp;' . s($file->filename),
                     ['class' => 'list-group-item bg-transparent px-0 py-1 text-break']
                 );
             }

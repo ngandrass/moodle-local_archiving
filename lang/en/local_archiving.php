@@ -214,6 +214,7 @@ $string['no_supported_activity_archiving_driver_found'] = 'No supported activity
 $string['not_ready'] = 'Not ready';
 $string['not_signed'] = 'Not signed';
 $string['notset'] = 'Not set';
+$string['number_of_archived_objects'] = 'Number of archived objects (e.g., quiz attempts)';
 $string['plugin_version'] = 'Plugin version';
 $string['pluginname'] = 'Archiving';
 $string['privacy:metadata:core_backup'] = 'Course and activity backups are created on behalf of the user that initiated an archive job and are included in the created archive.';

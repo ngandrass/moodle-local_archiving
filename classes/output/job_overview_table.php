@@ -176,7 +176,10 @@ class job_overview_table extends \table_sql {
         }
 
         $this->set_sql(
-            'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, j.origin, u.username',
+            'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, j.origin, u.username, ' .
+                '(SELECT COUNT(c.id) FROM {' . db_table::CONTENT->value . '} c ' .
+                    'JOIN {' . db_table::ACTIVITY_TASK->value . '} t ON t.id = c.taskid ' .
+                    'WHERE t.jobid = j.id) AS contentcount',
             '{' . db_table::JOB->value . '} j ' .
                 'JOIN {user} u ON j.userid = u.id ' .
                 'JOIN {context} ctx ON ctx.id = j.contextid',
@@ -262,6 +265,23 @@ class job_overview_table extends \table_sql {
         $cm = $this->coursemodinfo->get_cm($modctx->instanceid);
 
         $html = \html_writer::link($cm->get_url(), $cm->get_formatted_name());
+
+        // Show number of archived objects, if known.
+        if ($values->contentcount > 0) {
+            $contenticon = $values->contentcount > 1 ? 'fa-solid fa-cubes' : 'fa-solid fa-cube fa-xs mr-1';
+            $html .= \html_writer::tag(
+                'small',
+                s($values->contentcount) . '<i class="' . $contenticon . ' ml-2" aria-hidden="true"></i>',
+                [
+                    'class' => 'text-muted ml-1 float-right',
+                    'data-toggle' => 'tooltip',
+                    'data-bs-toggle' => 'tooltip',
+                    'data-placement' => 'top',
+                    'data-bs-placement' => 'top',
+                    'title' => get_string('number_of_archived_objects', 'local_archiving'),
+                ]
+            );
+        }
 
         // List names of all files that exist in storage.
         $filenames = [];

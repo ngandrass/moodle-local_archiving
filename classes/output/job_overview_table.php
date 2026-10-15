@@ -100,7 +100,7 @@ class job_overview_table extends \table_sql {
             'id',
             'timecreated',
             'contextid',
-            'user',
+            'origin',
             'status',
             'actions',
         ]);
@@ -109,7 +109,7 @@ class job_overview_table extends \table_sql {
             get_string('id', 'local_archiving'),
             get_string('task_starttime', 'admin'),
             get_string('activity'),
-            get_string('user'),
+            get_string('trigger', 'local_archiving'),
             get_string('status'),
             $refreshhtml,
         ]);
@@ -155,7 +155,7 @@ class job_overview_table extends \table_sql {
         }
 
         $this->set_sql(
-            'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, u.username',
+            'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, j.origin, u.username',
             '{' . db_table::JOB->value . '} j ' .
                 'JOIN {user} u ON j.userid = u.id ' .
                 'JOIN {context} ctx ON ctx.id = j.contextid',
@@ -272,14 +272,42 @@ class job_overview_table extends \table_sql {
     }
 
     /**
-     * Column renderer for the user column
+     * Column renderer for the origin / user column
      *
      * @param \stdClass $values Values of the current row
      * @return string HTML code to be displayed
      * @throws \moodle_exception
      */
-    public function col_user($values) {
-        return \html_writer::link(new \moodle_url('/user/profile.php', ['id' => $values->userid]), s($values->username));
+    public function col_origin($values) {
+        // Add initiating user if the job was triggered manually.
+        if ($values->origin === 'manual') {
+            $badgecolor = 'primary';
+            $posthtml = \html_writer::link(
+                new \moodle_url('/user/profile.php', ['id' => $values->userid]),
+                s($values->username)
+            );
+        } else {
+            $badgecolor = 'secondary';
+            $posthtml = \html_writer::tag(
+                'small',
+                get_string('coresystem', 'moodle'),
+                ['class' => 'text-muted fst-italic font-italic']
+            );
+        }
+
+        // Localize trigger name.
+        if (get_string_manager()->string_exists("pluginname", "archivingtrigger_{$values->origin}")) {
+            $originlabel = get_string('pluginname', "archivingtrigger_{$values->origin}");
+        } else {
+            $originlabel = s($values->origin);
+        }
+
+        // Render origin pill.
+        $html = \html_writer::span($originlabel, 'badge badge-' . $badgecolor);
+        $html .= \html_writer::empty_tag('br');
+        $html .= $posthtml;
+
+        return $html;
     }
 
     /**

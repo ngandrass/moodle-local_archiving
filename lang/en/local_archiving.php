@@ -206,6 +206,7 @@ $string['manage_components_archivingtrigger_desc'] = 'Archiving triggers are dif
 $string['never_archived'] = 'Never archived';
 $string['new_changes'] = 'New changes';
 $string['no_activity_artifacts_found'] = 'No activity archive artifacts were found for this archive job.';
+$string['no_files_attached'] = 'No files attached';
 $string['no_logs_available_desc'] = 'There are no logs available for this archive job. If you need more information, please ask your system administrator to increase the log level on the admin settings page of this plugin.';
 $string['no_supported_activity_archiving_driver_found'] = 'No supported activity archiving driver was found for this activity type.';
 $string['not_ready'] = 'Not ready';

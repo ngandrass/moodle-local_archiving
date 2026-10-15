@@ -260,7 +260,7 @@ class job_overview_table extends \table_sql {
         if (empty($filenames)) {
             $filenames[] = \html_writer::tag(
                 'li',
-                get_string('nothingtodisplay', 'moodle'),
+                get_string('no_files_attached', 'local_archiving'),
                 ['class' => 'list-group-item bg-transparent px-0 py-1 text-break text-muted']
             );
         }

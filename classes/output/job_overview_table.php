@@ -30,6 +30,7 @@ use local_archiving\file_handle;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\archive_job_status_filter;
 use local_archiving\local\type\db_table;
+use local_archiving\local\util\plugin_util;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -58,6 +59,12 @@ class job_overview_table extends \table_sql {
 
     /** @var archive_job_status_filter|null Status category to filter jobs by, or null to show all */
     protected ?archive_job_status_filter $statusfilter;
+
+    /** @var string|null Name of the archivingtrigger plugin to filter jobs by, or null to show all */
+    protected ?string $originfilter;
+
+    /** @var array<string, string> Display names of all installed archivingtrigger plugins, indexed by plugin name */
+    protected array $triggernames = [];
 
     /** @var array<int, file_handle[]> Cached file handles, indexed by job ID */
     protected array $filehandlecache = [];
@@ -89,6 +96,14 @@ class job_overview_table extends \table_sql {
         // Read search and filter parameters.
         $this->search = trim(optional_param('search', '', PARAM_TEXT));
         $this->statusfilter = archive_job_status_filter::tryFrom(optional_param('status', '', PARAM_ALPHA));
+
+        // Build trigger / origin filter.
+        foreach (plugin_util::get_archiving_triggers() as $name => $trigger) {
+            $this->triggernames[$name] = $trigger['displayname'];
+        }
+        \core_collator::asort($this->triggernames);
+        $origin = optional_param('origin', '', PARAM_PLUGIN);
+        $this->originfilter = array_key_exists($origin, $this->triggernames) ? $origin : null;
 
         $refreshhtml = $OUTPUT->render_from_template('local_archiving/components/refresh_button', [
             'lastupdated' => time(),
@@ -133,6 +148,12 @@ class job_overview_table extends \table_sql {
             );
             $where .= " AND j.status {$statussql}";
             $params += $statusparams;
+        }
+
+        // Restrict to the selected trigger.
+        if ($this->originfilter !== null) {
+            $where .= ' AND j.origin = :joborigin';
+            $params['joborigin'] = $this->originfilter;
         }
 
         // Match search term against names of non-deleted files and activity names.
@@ -295,15 +316,11 @@ class job_overview_table extends \table_sql {
             );
         }
 
-        // Localize trigger name.
-        if (get_string_manager()->string_exists("pluginname", "archivingtrigger_{$values->origin}")) {
-            $originlabel = get_string('pluginname', "archivingtrigger_{$values->origin}");
-        } else {
-            $originlabel = s($values->origin);
-        }
-
         // Render origin pill.
-        $html = \html_writer::span($originlabel, 'badge badge-' . $badgecolor);
+        $html = \html_writer::span(
+            s($this->triggernames[$values->origin] ?? $values->origin),
+            'badge badge-' . $badgecolor
+        );
         $html .= \html_writer::empty_tag('br');
         $html .= $posthtml;
 
@@ -479,7 +496,7 @@ class job_overview_table extends \table_sql {
 
         // Preserve all page parameters except search, filter, and pagination.
         $hiddenparams = [];
-        $excludedparams = ['search', 'status', $this->request[TABLE_VAR_PAGE]];
+        $excludedparams = ['search', 'status', 'origin', $this->request[TABLE_VAR_PAGE]];
         foreach ($this->baseurl->params() as $name => $value) {
             if (!in_array($name, $excludedparams, true)) {
                 $hiddenparams[] = ['name' => $name, 'value' => $value];
@@ -495,8 +512,17 @@ class job_overview_table extends \table_sql {
             ];
         }
 
+        $originoptions = [];
+        foreach ($this->triggernames as $name => $displayname) {
+            $originoptions[] = [
+                'value' => $name,
+                'name' => $displayname,
+                'selected' => $name === $this->originfilter,
+            ];
+        }
+
         $reseturl = new \moodle_url($this->baseurl);
-        $reseturl->remove_params('search', 'status');
+        $reseturl->remove_params('search', 'status', 'origin');
 
         return $OUTPUT->render_from_template('local_archiving/components/job_table_search', [
             'uniqueid' => $this->uniqueid,
@@ -504,7 +530,8 @@ class job_overview_table extends \table_sql {
             'hiddenparams' => $hiddenparams,
             'search' => $this->search,
             'statusoptions' => $statusoptions,
-            'filteractive' => $this->search !== '' || $this->statusfilter !== null,
+            'originoptions' => $originoptions,
+            'filteractive' => $this->search !== '' || $this->statusfilter !== null || $this->originfilter !== null,
             'reseturl' => $reseturl->out(false),
         ]);
     }
@@ -518,13 +545,16 @@ class job_overview_table extends \table_sql {
      */
     protected function add_filter_params(\moodle_url $url): \moodle_url {
         $url = new \moodle_url($url);
-        $url->remove_params('search', 'status');
+        $url->remove_params('search', 'status', 'origin');
 
         if ($this->search !== '') {
             $url->param('search', $this->search);
         }
         if ($this->statusfilter !== null) {
             $url->param('status', $this->statusfilter->value);
+        }
+        if ($this->originfilter !== null) {
+            $url->param('origin', $this->originfilter);
         }
 
         return $url;

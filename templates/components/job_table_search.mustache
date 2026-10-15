@@ -17,7 +17,7 @@
 {{!
     @template local_archiving/components/job_table_search
 
-    Search and status filter form for the job overview table.
+    Filter form for the job overview table.
 
     Example context (json):
     {
@@ -30,6 +30,10 @@
         "statusoptions": [
             {"value": "inprogress", "name": "In progress", "selected": false},
             {"value": "completed", "name": "Completed", "selected": true}
+        ],
+        "originoptions": [
+            {"value": "cron", "name": "Scheduled archiving", "selected": false},
+            {"value": "manual", "name": "Manual archiving", "selected": true}
         ],
         "filteractive": true,
         "reseturl": "https://example.com/local/archiving/index.php?courseid=2"
@@ -53,6 +57,15 @@
         style="max-width: 32rem;"
         placeholder="{{#str}} job_search_placeholder, local_archiving {{/str}}"
     >
+
+    {{! Trigger filter dropdown }}
+    <label for="{{uniqueid}}_origin" class="sr-only visually-hidden">{{#str}} job_trigger_filter_label, local_archiving {{/str}}</label>
+    <select id="{{uniqueid}}_origin" name="origin" class="custom-select form-select w-auto mr-2 me-2 mb-2">
+        <option value="">{{#str}} job_trigger_filter_all, local_archiving {{/str}}</option>
+        {{#originoptions}}
+            <option value="{{value}}"{{#selected}} selected{{/selected}}>{{name}}</option>
+        {{/originoptions}}
+    </select>
 
     {{! Status filter dropdown }}
     <label for="{{uniqueid}}_status" class="sr-only visually-hidden">{{#str}} job_status_filter_label, local_archiving {{/str}}</label>

@@ -26,6 +26,7 @@ namespace local_archiving\output;
 
 use core\exception\moodle_exception;
 use local_archiving\archive_job;
+use local_archiving\external\get_archive_users;
 use local_archiving\file_handle;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\archive_job_status_filter;
@@ -45,8 +46,8 @@ require_once($CFG->libdir . '/tablelib.php');
  * Table renderer for the job overview table
  */
 class job_overview_table extends \table_sql {
-    /** @var \context_course Course context this table is associated with */
-    protected \context_course $coursectx;
+    /** @var \context Context for which archive jobs are shown */
+    protected \context $ctx;
 
     /** @var \course_modinfo Cached course_modinfo object */
     protected \course_modinfo $coursemodinfo;
@@ -62,6 +63,9 @@ class job_overview_table extends \table_sql {
 
     /** @var string|null Name of the archivingtrigger plugin to filter jobs by, or null to show all */
     protected ?string $originfilter;
+
+    /** @var \stdClass|null Exported user to filter jobs by archived content, or null to show all */
+    protected ?\stdClass $userfilter;
 
     /** @var array<string, string> Display names of all installed archivingtrigger plugins, indexed by plugin name */
     protected array $triggernames = [];
@@ -89,8 +93,8 @@ class job_overview_table extends \table_sql {
             throw new \coding_exception(get_string('invalidcontext', 'error'));
         }
 
-        $this->coursectx = $ctx->get_course_context();
-        $this->coursemodinfo = get_fast_modinfo($this->coursectx->instanceid);
+        $this->ctx = $ctx;
+        $this->coursemodinfo = get_fast_modinfo($ctx->get_course_context()->instanceid);
         $this->usercandelete = has_capability('local/archiving:delete', $ctx);
 
         // Read search and filter parameters.
@@ -104,6 +108,10 @@ class job_overview_table extends \table_sql {
         \core_collator::asort($this->triggernames);
         $origin = optional_param('origin', '', PARAM_PLUGIN);
         $this->originfilter = array_key_exists($origin, $this->triggernames) ? $origin : null;
+
+        // Build user filter. Only existing users are accepted.
+        $userid = optional_param('userid', 0, PARAM_INT);
+        $this->userfilter = $userid > 0 ? get_archive_users::get_exported_user($userid, $ctx) : null;
 
         $refreshhtml = $OUTPUT->render_from_template('local_archiving/components/refresh_button', [
             'lastupdated' => time(),
@@ -154,6 +162,14 @@ class job_overview_table extends \table_sql {
         if ($this->originfilter !== null) {
             $where .= ' AND j.origin = :joborigin';
             $params['joborigin'] = $this->originfilter;
+        }
+
+        // Restrict to jobs that contain archived data of the selected user.
+        if ($this->userfilter !== null) {
+            $where .= ' AND EXISTS (SELECT 1 FROM {' . db_table::CONTENT->value . '} uc ' .
+                'JOIN {' . db_table::ACTIVITY_TASK->value . '} ut ON ut.id = uc.taskid ' .
+                'WHERE ut.jobid = j.id AND uc.userid = :jobcontentuser)';
+            $params['jobcontentuser'] = $this->userfilter->id;
         }
 
         // Match search term against names of non-deleted files and activity names.
@@ -516,7 +532,7 @@ class job_overview_table extends \table_sql {
 
         // Preserve all page parameters except search, filter, and pagination.
         $hiddenparams = [];
-        $excludedparams = ['search', 'status', 'origin', $this->request[TABLE_VAR_PAGE]];
+        $excludedparams = ['search', 'status', 'origin', 'userid', $this->request[TABLE_VAR_PAGE]];
         foreach ($this->baseurl->params() as $name => $value) {
             if (!in_array($name, $excludedparams, true)) {
                 $hiddenparams[] = ['name' => $name, 'value' => $value];
@@ -542,16 +558,30 @@ class job_overview_table extends \table_sql {
         }
 
         $reseturl = new \moodle_url($this->baseurl);
-        $reseturl->remove_params('search', 'status', 'origin');
+        $reseturl->remove_params('search', 'status', 'origin', 'userid');
+
+        $selecteduser = null;
+        if ($this->userfilter !== null) {
+            $selecteduser = [
+                'id' => $this->userfilter->id,
+                'fullname' => $this->userfilter->fullname,
+                'label' => $OUTPUT->render_from_template('core_user/form_user_selector_suggestion', $this->userfilter),
+            ];
+        }
 
         return $OUTPUT->render_from_template('local_archiving/components/job_table_search', [
             'uniqueid' => $this->uniqueid,
+            'contextid' => $this->ctx->id,
             'actionurl' => $this->baseurl->out_omit_querystring(),
             'hiddenparams' => $hiddenparams,
             'search' => $this->search,
             'statusoptions' => $statusoptions,
             'originoptions' => $originoptions,
-            'filteractive' => $this->search !== '' || $this->statusfilter !== null || $this->originfilter !== null,
+            'selecteduser' => $selecteduser,
+            'filteractive' => $this->search !== '' ||
+                $this->statusfilter !== null ||
+                $this->originfilter !== null ||
+                $this->userfilter !== null,
             'reseturl' => $reseturl->out(false),
         ]);
     }
@@ -565,7 +595,7 @@ class job_overview_table extends \table_sql {
      */
     protected function add_filter_params(\moodle_url $url): \moodle_url {
         $url = new \moodle_url($url);
-        $url->remove_params('search', 'status', 'origin');
+        $url->remove_params('search', 'status', 'origin', 'userid');
 
         if ($this->search !== '') {
             $url->param('search', $this->search);
@@ -575,6 +605,9 @@ class job_overview_table extends \table_sql {
         }
         if ($this->originfilter !== null) {
             $url->param('origin', $this->originfilter);
+        }
+        if ($this->userfilter !== null) {
+            $url->param('userid', $this->userfilter->id);
         }
 
         return $url;

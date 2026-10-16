@@ -19,7 +19,6 @@ namespace local_archiving\external;
 use core\exception\coding_exception;
 use core_external\external_api;
 use core_external\restricted_context_exception;
-use local_archiving\local\type\task_content_metadata;
 
 /**
  * Tests for the get_archive_users external function.
@@ -73,31 +72,10 @@ final class get_archive_users_test extends \advanced_testcase {
         $this->generator()->enrol_user($data->othercourse->id, $othercourse->id, 'student');
 
         // Users with archived data, but without enrolment.
-        $this->create_archived_content($course, $cm1, $data->archivedcm1->id);
-        $this->create_archived_content($course, $cm2, $data->archivedcm2->id);
+        $this->generator()->mock_archived_content($data->archivedcm1->id, $course, $cm1);
+        $this->generator()->mock_archived_content($data->archivedcm2->id, $course, $cm2);
 
         return $data;
-    }
-
-    /**
-     * Creates an archive job inside the given activity that holds content of the given user
-     *
-     * @param \stdClass $course Course the activity belongs to
-     * @param \stdClass $cm Activity to create the archive job for
-     * @param int $userid ID of the user that owns the archived content
-     * @return \local_archiving\archive_job Created archive job
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \moodle_exception
-     */
-    private function create_archived_content(\stdClass $course, \stdClass $cm, int $userid): \local_archiving\archive_job {
-        $job = $this->generator()->create_archive_job([], $course, $cm);
-        $task = $this->generator()->create_activity_archiving_task([], $job);
-        $task->store_task_content_metadata([
-            new task_content_metadata($task->get_id(), $userid, null, null, 'Test content'),
-        ]);
-
-        return $job;
     }
 
     /**

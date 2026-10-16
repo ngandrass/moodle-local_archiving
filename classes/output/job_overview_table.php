@@ -55,6 +55,15 @@ class job_overview_table extends \table_sql {
     /** @var bool Stores whether the viewing user has the capability to delete archive jobs */
     protected bool $usercandelete = false;
 
+    /** @var array<string, string> Display names of all installed archivingtrigger plugins, indexed by plugin name */
+    protected array $triggernames = [];
+
+    /** @var array<int, file_handle[]> Cached file handles, indexed by job ID */
+    protected array $filehandlecache = [];
+
+    /** @var string[] Names of all URL parameters used for searching and filtering */
+    protected const FILTER_PARAMS = ['search', 'status', 'origin', 'userid'];
+
     /** @var string Free-text search term */
     protected string $search;
 
@@ -66,12 +75,6 @@ class job_overview_table extends \table_sql {
 
     /** @var \stdClass|null Exported user to filter jobs by archived content, or null to show all */
     protected ?\stdClass $userfilter;
-
-    /** @var array<string, string> Display names of all installed archivingtrigger plugins, indexed by plugin name */
-    protected array $triggernames = [];
-
-    /** @var array<int, file_handle[]> Cached file handles, indexed by job ID */
-    protected array $filehandlecache = [];
 
     /**
      * Constructor
@@ -192,7 +195,7 @@ class job_overview_table extends \table_sql {
         }
 
         $this->set_sql(
-            'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, j.origin, u.username, ' .
+            'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, j.origin, u.username, ctx.instanceid AS cmid, ' .
                 '(SELECT COUNT(c.id) FROM {' . db_table::CONTENT->value . '} c ' .
                     'JOIN {' . db_table::ACTIVITY_TASK->value . '} t ON t.id = c.taskid ' .
                     'WHERE t.jobid = j.id) AS contentcount',
@@ -277,8 +280,7 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_contextid($values) {
-        $modctx = \context::instance_by_id($values->contextid);
-        $cm = $this->coursemodinfo->get_cm($modctx->instanceid);
+        $cm = $this->coursemodinfo->get_cm($values->cmid);
 
         $html = \html_writer::link($cm->get_url(), $cm->get_formatted_name());
 
@@ -288,14 +290,8 @@ class job_overview_table extends \table_sql {
             $html .= \html_writer::tag(
                 'small',
                 s($values->contentcount) . '<i class="' . $contenticon . ' ml-2" aria-hidden="true"></i>',
-                [
-                    'class' => 'text-muted ml-1 float-right',
-                    'data-toggle' => 'tooltip',
-                    'data-bs-toggle' => 'tooltip',
-                    'data-placement' => 'top',
-                    'data-bs-placement' => 'top',
-                    'title' => get_string('number_of_archived_objects', 'local_archiving'),
-                ]
+                ['class' => 'text-muted ml-1 float-right'] +
+                    $this->tooltip_attributes(get_string('number_of_archived_objects', 'local_archiving'))
             );
         }
 
@@ -376,11 +372,7 @@ class job_overview_table extends \table_sql {
         $job = archive_job::get_by_id($values->id);
         $status = archive_job_status::from($values->status)->status_display_args();
 
-        $html = \html_writer::span($status->text, 'badge badge-' . $status->color, [
-            'data-toggle' => 'tooltip',
-            'data-placement' => 'top',
-            'title' => $status->help,
-        ]);
+        $html = \html_writer::span($status->text, 'badge badge-' . $status->color, $this->tooltip_attributes($status->help));
         $html .= \html_writer::empty_tag('br');
 
         $progress = $job->get_progress();
@@ -389,12 +381,7 @@ class job_overview_table extends \table_sql {
             $html .= \html_writer::span(
                 \html_writer::tag('i', '', ['class' => 'fa fa-spinner', 'aria-hidden' => 'true']) . '&nbsp;' . $progress . '%',
                 '',
-                [
-                    'title' => $progresslabel,
-                    'aria-label' => $progresslabel,
-                    'data-toggle' => 'tooltip',
-                    'data-placement' => 'top',
-                ]
+                ['aria-label' => $progresslabel] + $this->tooltip_attributes($progresslabel)
             );
             $html .= \html_writer::empty_tag('br');
         }
@@ -417,9 +404,8 @@ class job_overview_table extends \table_sql {
         $html = '';
 
         // Action: Download.
-        $job = archive_job::get_by_id($values->id);
         $files = $this->get_file_handles($values->id);
-        if ($job->is_completed() && count($files) > 0) {
+        if (archive_job_status::from($values->status)->is_final() && count($files) > 0) {
             $downloadurl = new \moodle_url('/local/archiving/download.php', ['jobid' => $values->id]);
             $html .= $this->action_button($downloadurl, 'btn-success', get_string('download'), 'fa-download');
         } else {
@@ -491,14 +477,6 @@ class job_overview_table extends \table_sql {
             'title' => $label,
             'aria-label' => $label,
         ];
-        $wrapperattributes = [
-            'class' => 'd-inline-block',
-            'title' => $label,
-            'data-toggle' => 'tooltip',
-            'data-bs-toggle' => 'tooltip',
-            'data-placement' => 'top',
-            'data-bs-placement' => 'top',
-        ];
 
         // Render buttons with null URLs as disabled.
         if ($url === null) {
@@ -515,8 +493,8 @@ class job_overview_table extends \table_sql {
 
         return \html_writer::span(
             $buttonhtml,
-            "",
-            $wrapperattributes
+            'd-inline-block',
+            $this->tooltip_attributes($label)
         );
     }
 
@@ -532,7 +510,7 @@ class job_overview_table extends \table_sql {
 
         // Preserve all page parameters except search, filter, and pagination.
         $hiddenparams = [];
-        $excludedparams = ['search', 'status', 'origin', 'userid', $this->request[TABLE_VAR_PAGE]];
+        $excludedparams = [...self::FILTER_PARAMS, $this->request[TABLE_VAR_PAGE]];
         foreach ($this->baseurl->params() as $name => $value) {
             if (!in_array($name, $excludedparams, true)) {
                 $hiddenparams[] = ['name' => $name, 'value' => $value];
@@ -558,7 +536,7 @@ class job_overview_table extends \table_sql {
         }
 
         $reseturl = new \moodle_url($this->baseurl);
-        $reseturl->remove_params('search', 'status', 'origin', 'userid');
+        $reseturl->remove_params(...self::FILTER_PARAMS);
 
         $selecteduser = null;
         if ($this->userfilter !== null) {
@@ -595,7 +573,7 @@ class job_overview_table extends \table_sql {
      */
     protected function add_filter_params(\moodle_url $url): \moodle_url {
         $url = new \moodle_url($url);
-        $url->remove_params('search', 'status', 'origin', 'userid');
+        $url->remove_params(...self::FILTER_PARAMS);
 
         if ($this->search !== '') {
             $url->param('search', $this->search);
@@ -631,5 +609,23 @@ class job_overview_table extends \table_sql {
         }
 
         return $ctxids;
+    }
+
+    /**
+     * Builds the HTML attributes required to show a tooltip on an element
+     *
+     * Both Bootstrap 4 and Bootstrap 5 data attributes are set to support all current Moodle versions.
+     *
+     * @param string $title Text of the tooltip
+     * @return array<string, string> HTML attributes
+     */
+    protected function tooltip_attributes(string $title): array {
+        return [
+            'title' => $title,
+            'data-toggle' => 'tooltip',
+            'data-bs-toggle' => 'tooltip',
+            'data-placement' => 'top',
+            'data-bs-placement' => 'top',
+        ];
     }
 }

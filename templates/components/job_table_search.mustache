@@ -112,6 +112,11 @@ require(['core/form-autocomplete'], function(autocomplete) {
         false,
         true,
         {{#quote}}{{#str}} job_user_filter_all, local_archiving {{/str}}{{/quote}}
-    );
+    ).then(function() {
+        // Make the autocomplete input look and behave like a regular select.
+        var input = document.querySelector({{#quote}}#{{uniqueid}}_user ~ .form-autocomplete-input input{{/quote}});
+        input.classList.add('custom-select', 'form-select');
+        input.addEventListener('click', () => input.nextElementSibling.click());
+    });
 });
 {{/js}}

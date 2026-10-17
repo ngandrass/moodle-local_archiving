@@ -13,3 +13,8 @@
     /* Hide input field if a user is selected */
     display: none !important;
 }
+
+.local_archiving-user-filter .form-autocomplete-downarrow {
+    /* Bootstrap's select indicator is shown instead to match other dropdowns */
+    color: transparent;
+}

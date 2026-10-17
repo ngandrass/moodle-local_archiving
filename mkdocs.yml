@@ -128,7 +128,8 @@ nav:
     - usage/index.md
     - usage/overview.md
     - usage/archive-creation.md
-    - usage/download.md
+    - "Downloading Files": usage/download.md
+    - "Automatic Deletion (GDPR)": usage/automatic-deletion.md
     - usage/logs.md
     - usage/archive-signing.md
 

@@ -203,16 +203,72 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
 
         $res = [];
         foreach ($assignmentmanager->get_submissions($task->get_job()->get_refids()) as $submission) {
-            $res[] = new task_content_metadata(
-                taskid: $task->get_id(),
-                userid: $submission->userid,
-                reftable: 'assign_submission',
-                refid: $submission->submissionid,
-                summary: null
-            );
+            // Store an entry for every user that took part in the submission.
+            foreach ($assignmentmanager->get_submission_userids($submission) as $userid) {
+                $res[] = new task_content_metadata(
+                    taskid: $task->get_id(),
+                    userid: $userid,
+                    reftable: 'assign_submission',
+                    refid: $submission->submissionid,
+                    summary: null
+                );
+            }
         }
 
         return $res;
+    }
+
+    #[\Override]
+    public function get_task_content_metadata_labels(array $metadata): array {
+        global $DB;
+
+        // Determine which of the referenced submissions still exist.
+        $submissionids = array_unique(array_filter(array_column($metadata, 'refid')));
+        $submissions = $DB->get_records_list(
+            'assign_submission',
+            'id',
+            $submissionids,
+            '',
+            'id, attemptnumber, timemodified'
+        );
+
+        // Label all submissions and link them to the grading page, if they still exist.
+        $res = [];
+        foreach ($metadata as $entry) {
+            $submission = $submissions[$entry->refid] ?? null;
+            $res[$entry->id] = (object) [
+                'label' => get_string('task_content_label', 'archivingmod_assign', $entry->refid),
+                'url' => $submission
+                    ? new \moodle_url('/mod/assign/view.php', [
+                        'id' => $this->cmid,
+                        'action' => 'grading',
+                        'userid' => $entry->userid,
+                    ])
+                    : null,
+                'details' => $submission ? $this->render_submission_details($submission) : null,
+            ];
+        }
+
+        return $res;
+    }
+
+    /**
+     * Renders the details of a single assignment submission
+     *
+     * @param \stdClass $submission Submission record with at least the fields
+     * attemptnumber and timemodified
+     * @return string HTML code of the rendered submission details
+     * @throws \coding_exception
+     */
+    protected function render_submission_details(\stdClass $submission): string {
+        $summary = get_string('task_content_details', 'archivingmod_assign', $submission->attemptnumber + 1);
+
+        return
+            \html_writer::div(s($summary)) .
+            \html_writer::div(
+                s(userdate($submission->timemodified, get_string('strftimedatemonthtimeshort', 'langconfig'))),
+                'small text-muted'
+            );
     }
 
     /**

@@ -151,8 +151,9 @@ class assignment_manager {
      * submissions that are not submitted are silently discarded.
      *
      * @param int[]|null $refids IDs of the submissions to restrict the result to or null to include all submissions.
-     * @return array Array of all submission IDs together with the userid that were
-     * made inside this assignment. Indexed by submissionid.
+     * @return array Array of all submission IDs together with the userid and
+     * groupid that were made inside this assignment. Indexed by submissionid.
+     * The userid is 0 for group submissions.
      *
      * @throws \coding_exception If an empty refids list is given
      * @throws \dml_exception
@@ -177,7 +178,7 @@ class assignment_manager {
         }
 
         return $DB->get_records_sql(
-            "SELECT id AS submissionid, userid " .
+            "SELECT id AS submissionid, userid, groupid " .
             "FROM {assign_submission} " .
             "WHERE assignment = :assignmentid AND status = :status " . $refidswhereclause . " " .
             "ORDER BY id ASC",
@@ -186,6 +187,29 @@ class assignment_manager {
                 'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
             ], $refidsparams)
         );
+    }
+
+    /**
+     * Determines the IDs of all users the given submission belongs to
+     *
+     * Individual submissions belong to the submitting user. Group submissions
+     * belong to all members of the submitting group.
+     *
+     * @param \stdClass $submission Submission record with at least the fields
+     * userid and groupid
+     * @return int[] IDs of all users the submission belongs to
+     */
+    public function get_submission_userids(\stdClass $submission): array {
+        // Single user submission.
+        if ($submission->userid > 0) {
+            return [(int) $submission->userid];
+        }
+
+        // Group submission.
+        return array_values(array_map(
+            fn ($member) => (int) $member->id,
+            $this->assignment->get_submission_group_members($submission->groupid, true)
+        ));
     }
 
     /**

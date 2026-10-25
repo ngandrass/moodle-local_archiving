@@ -18,6 +18,12 @@
 - Allow to filter archive jobs by trigger type and job status
 - Add filter option to display only archive jobs that contain data of a specific user
 - Improve messages shown when no data is available
+- Allow activity archiving drivers to provide human-readable labels and links for archived objects
+- Allow activity archiving drivers to provide additional details for archived objects (e.g., attempt attachments)
+- Add archive job details page that lists all archived objects (e.g., quiz attempts) and the users they belong to
+- Move archive job metadata from the job logs page to the new job details page
+- Make archive job contents searchable by user
+- Improve usability of archive job overview table on small screens
 
 
 ## Version 1.1.1 (2026100600)

@@ -26,6 +26,7 @@
 
 $string['a'] = '{$a}';
 $string['archived'] = 'Archived';
+$string['attachments'] = 'Attachments';
 $string['error_invalid_attempt_filename_pattern'] = 'Invalid attempt report filename pattern. Please correct your input and try again.';
 $string['error_invalid_attempt_foldername_pattern'] = 'Invalid attempt report folder name pattern. Please correct your input and try again.';
 $string['error_no_attempts_left_after_filtering'] = 'No quiz attempts were left for export after the selected filters were applied.';
@@ -82,6 +83,8 @@ $string['task_attempt_foldername_pattern_help'] = 'Name of the folder(s) the gen
 $string['task_attempts_filter'] = 'Filters';
 $string['task_attempts_filter_latest'] = 'Export only latest attempts';
 $string['task_attempts_filter_latest_help'] = 'If selected, only the most recent attempt will be exported for each user. Older attempts will automatically be omitted.';
+$string['task_content_details_attempt'] = 'Attempt no. {$a}';
+$string['task_content_label'] = 'Attempt ID {$a}';
 $string['task_correction_margin'] = 'Correction margin';
 $string['task_correction_margin_help'] = 'When enabled, a correction margin will be added to the right side of attempt reports. The size of the margin scales automatically with the selected paper size.';
 $string['task_export_attempts'] = 'Export quiz attempts';

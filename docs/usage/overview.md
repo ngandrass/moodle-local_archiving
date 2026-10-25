@@ -17,5 +17,7 @@ the archive creation form for the respective activity.
 ![Course archiving overview page](../assets/screenshots/course_archiving_overview.png)
 
 The table at the bottom lists all existing archive jobs that target an activity inside the current course. You can use
-the action buttons to the right to [download archives](download.md), [inspect logs](logs.md), or delete an archive job
-including all stored data. The list can be refreshed using the blue arrow symbol at the top right.
+the action buttons to the right to [download archives](download.md), [view job details](job-details.md),
+[inspect logs](logs.md), or delete an archive job including all stored data. Clicking on the number of archived objects
+next to the activity name also takes you to the [job details page](job-details.md). The list can be refreshed using the
+blue arrow symbol at the top right.

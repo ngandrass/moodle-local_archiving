@@ -287,9 +287,12 @@ class job_overview_table extends \table_sql {
         // Show number of archived objects, if known.
         if ($values->contentcount > 0) {
             $contenticon = $values->contentcount > 1 ? 'fa-solid fa-cubes' : 'fa-solid fa-cube fa-xs mr-1';
-            $html .= \html_writer::tag(
-                'small',
-                s($values->contentcount) . '<i class="' . $contenticon . ' ml-2" aria-hidden="true"></i>',
+            $html .= \html_writer::link(
+                new \moodle_url('/local/archiving/job.php', ['id' => $values->id]),
+                \html_writer::tag(
+                    'small',
+                    s($values->contentcount) . '<i class="' . $contenticon . ' ml-2" aria-hidden="true"></i>'
+                ),
                 ['class' => 'text-muted ml-1 float-right'] +
                     $this->tooltip_attributes(get_string('number_of_archived_objects', 'local_archiving'))
             );
@@ -401,7 +404,10 @@ class job_overview_table extends \table_sql {
      */
     public function col_actions($values) {
         global $PAGE;
-        $html = '';
+
+        // First button group.
+        $groupclass = 'd-block d-lg-inline-block text-nowrap';
+        $html = \html_writer::start_span($groupclass);
 
         // Action: Download.
         $files = $this->get_file_handles($values->id);
@@ -416,6 +422,18 @@ class job_overview_table extends \table_sql {
                 'fa-download'
             );
         }
+
+        // Action: Show job details.
+        $html .= $this->action_button(
+            new \moodle_url('/local/archiving/job.php', ['id' => $values->id]),
+            'btn-primary',
+            get_string('details', 'moodle'),
+            'fa-magnifying-glass'
+        );
+
+        // Second button gruop.
+        $html .= \html_writer::end_span();
+        $html .= \html_writer::start_span($groupclass);
 
         // Action: Show logs.
         $logurl = new \moodle_url('/local/archiving/logs.php', ['jobid' => $values->id]);
@@ -438,6 +456,8 @@ class job_overview_table extends \table_sql {
                 'fa-trash'
             );
         }
+
+        $html .= \html_writer::end_span();
 
         return $html;
     }
@@ -472,7 +492,7 @@ class job_overview_table extends \table_sql {
      */
     protected function action_button(?\moodle_url $url, string $btnclass, string $label, string $icon): string {
         $btnattributes = [
-            'class' => "btn {$btnclass} mx-1",
+            'class' => "btn {$btnclass} m-1",
             'role' => 'button',
             'title' => $label,
             'aria-label' => $label,

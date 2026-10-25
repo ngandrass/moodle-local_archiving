@@ -315,10 +315,15 @@ final class activity_archiving_task_test extends \advanced_testcase {
         $task->store_task_content_metadata($metadata);
         $this->assertCount(count($metadata), $task->get_task_content_metadata(), 'Task should have stored content metadata');
         $this->assertEquals(
-            array_values($metadata),
-            array_values($task->get_task_content_metadata()),
+            $this->strip_metadata_ids($metadata),
+            $this->strip_metadata_ids($task->get_task_content_metadata()),
             'Retrieved content metadata should match stored metadata'
         );
+
+        // Retrieved metadata must carry the IDs of the respective database records.
+        foreach ($task->get_task_content_metadata() as $id => $entry) {
+            $this->assertSame($id, $entry->id, 'Retrieved content metadata should contain its database ID');
+        }
 
         // Add some more metadata.
         $moremetadata = [
@@ -327,10 +332,20 @@ final class activity_archiving_task_test extends \advanced_testcase {
         ];
         $task->store_task_content_metadata($moremetadata);
         $this->assertEquals(
-            array_values(array_merge($metadata, $moremetadata)),
-            array_values($task->get_task_content_metadata()),
+            $this->strip_metadata_ids(array_merge($metadata, $moremetadata)),
+            $this->strip_metadata_ids($task->get_task_content_metadata()),
             'Task should have stored more content metadata'
         );
+    }
+
+    /**
+     * Converts the given task content metadata entries to arrays without their IDs
+     *
+     * @param task_content_metadata[] $metadata Task content metadata entries to convert
+     * @return array[] List of task content metadata arrays without IDs
+     */
+    private function strip_metadata_ids(array $metadata): array {
+        return array_values(array_map(fn ($entry) => array_diff_key($entry->as_array(), ['id' => null]), $metadata));
     }
 
     /**

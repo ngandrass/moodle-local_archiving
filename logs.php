@@ -49,7 +49,6 @@ $PAGE->set_url(new moodle_url(
 $PAGE->activityheader->disable();
 
 // Render output.
-$jobmeta = $job->get_metadata_entries();
 $renderer = $PAGE->get_renderer('local_archiving');
 echo $OUTPUT->header();
 echo $renderer->render_from_template('local_archiving/job_logs', [
@@ -64,16 +63,6 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
             $job->get_logger()->get_logs(limitnum: 99999),
             fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
             ""
-        ),
-        // TODO (MDL-0): Move this to a separate archive inspection page.
-        "metadata" => array_map(
-            fn($key, $value): array => [
-                'key' => $key,
-                'humankey' => get_string("job_metadata_{$key}", 'local_archiving'),
-                'value' => $value,
-            ],
-            array_keys($jobmeta),
-            array_values($jobmeta)
         ),
     ],
     'urls' => [

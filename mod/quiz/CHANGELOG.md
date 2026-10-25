@@ -6,6 +6,8 @@
 - Implement quiz attempt resolving for archiving trigger events
 - Automatically purge event observer caches on plugin enable / disable
 - Implement quiz-activity specific pluginfile URL access validator
+- Provide human-readable labels and links for archived quiz attempts
+- Display quiz attempt number, date, and attachments in the details column of the archive contents table
 
 
 ## Version 1.1.1 (2026100600)

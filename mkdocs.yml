@@ -126,12 +126,13 @@ nav:
 
   - "Usage":
     - usage/index.md
-    - usage/overview.md
-    - usage/archive-creation.md
+    - "Course Overview": usage/overview.md
+    - "Archibe Creation": usage/archive-creation.md
     - "Downloading Files": usage/download.md
+    - "Inspecting Job Details": usage/job-details.md
+    - "Inspecting Job Logs": usage/logs.md
     - "Automatic Deletion (GDPR)": usage/automatic-deletion.md
-    - usage/logs.md
-    - usage/archive-signing.md
+    - "Archive Signing (TSP)": usage/archive-signing.md
 
   - "Activities":
     - archivingmod/index.md

@@ -269,6 +269,70 @@ final class archivingmod_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that team submissions are stored once for every member of the
+     * submitting group.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     * @covers \archivingmod_assign\assignment_manager
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_task_content_metadata_team_submission(): void {
+        global $DB;
+
+        // Create a team assignment with a group of two students.
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $generator = $this->getDataGenerator();
+        $testdata = $generator->create_assignment();
+        $DB->set_field('assign', 'teamsubmission', 1, ['id' => $testdata->assignment->id]);
+        $context = \context_module::instance($testdata->cm->id);
+
+        $otherstudent = $generator->create_and_enrol($testdata->course, 'student');
+        $group = $generator->create_group(['courseid' => $testdata->course->id]);
+        $generator->create_group_member(['groupid' => $group->id, 'userid' => $testdata->student->id]);
+        $generator->create_group_member(['groupid' => $group->id, 'userid' => $otherstudent->id]);
+
+        // Create a team submission that is not bound to a single user.
+        $submissionid = $DB->insert_record('assign_submission', [
+            'assignment' => $testdata->assignment->id,
+            'userid' => 0,
+            'groupid' => $group->id,
+            'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
+            'attemptnumber' => 0,
+            'latest' => 1,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+
+        // Create job and task.
+        $job = archive_job::create($context, get_admin()->id, 'manual', new \stdClass());
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $context,
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'assign'
+        );
+        $metadata = (new archivingmod($context))->get_task_content_metadata($task);
+
+        $this->assertCount(2, $metadata, 'Team submission should be stored for every group member');
+        $this->assertEqualsCanonicalizing(
+            [$testdata->student->id, $otherstudent->id],
+            array_column($metadata, 'userid'),
+            'Content metadata should reference all group members'
+        );
+        $this->assertEquals(
+            [$submissionid, $submissionid],
+            array_column($metadata, 'refid'),
+            'All content metadata entries should reference the team submission'
+        );
+    }
+
+    /**
      * Tests that task execution only considers the submissions explicitly targeted
      * by the job (refids) and fails if no targeted submission is left.
      *
@@ -500,8 +564,8 @@ final class archivingmod_test extends \advanced_testcase {
 
         // Generate labels for an existing and a deleted entry.
         $labels = $driver->get_task_content_metadata_labels([
-            new task_content_metadata($taskid, 2, 'assign_submission', $refid, null, 11),
-            new task_content_metadata($taskid, 2, 'assign_submission', $refid + 1000, null, 12),
+            new task_content_metadata($taskid, $mocks->student->id, 'assign_submission', $refid, null, 11),
+            new task_content_metadata($taskid, $mocks->student->id, 'assign_submission', $refid + 1000, null, 12),
         ]);
 
         $this->assertEqualsCanonicalizing([11, 12], array_keys($labels), 'Labels should be indexed by metadata ID.');

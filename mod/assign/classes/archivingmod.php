@@ -203,13 +203,16 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
 
         $res = [];
         foreach ($assignmentmanager->get_submissions($task->get_job()->get_refids()) as $submission) {
-            $res[] = new task_content_metadata(
-                taskid: $task->get_id(),
-                userid: $submission->userid,
-                reftable: 'assign_submission',
-                refid: $submission->submissionid,
-                summary: null
-            );
+            // Store an entry for every user that took part in the submission.
+            foreach ($assignmentmanager->get_submission_userids($submission) as $userid) {
+                $res[] = new task_content_metadata(
+                    taskid: $task->get_id(),
+                    userid: $userid,
+                    reftable: 'assign_submission',
+                    refid: $submission->submissionid,
+                    summary: null
+                );
+            }
         }
 
         return $res;
@@ -226,7 +229,7 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
             'id',
             $submissionids,
             '',
-            'id, userid, attemptnumber, timemodified'
+            'id, attemptnumber, timemodified'
         );
 
         // Label all submissions and link them to the grading page, if they still exist.
@@ -239,7 +242,7 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
                     ? new \moodle_url('/mod/assign/view.php', [
                         'id' => $this->cmid,
                         'action' => 'grading',
-                        'userid' => $submission->userid,
+                        'userid' => $entry->userid,
                     ])
                     : null,
                 'details' => $submission ? $this->render_submission_details($submission) : null,

@@ -8,6 +8,7 @@
 - Automatically purge event observer caches on plugin enable / disable
 - Implement assignment-activity specific pluginfile URL access validator
 - Provide human-readable labels and links for archived assignment submissions
+- Display submission attempt number and date in the details column of the archive contents table
 
 
 ## Version 1.0.1 (2026100600)

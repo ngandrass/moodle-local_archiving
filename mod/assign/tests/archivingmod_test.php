@@ -517,5 +517,13 @@ final class archivingmod_test extends \advanced_testcase {
         );
         $this->assertSame('Submission #' . ($refid + 1000), $labels[12]->label);
         $this->assertNull($labels[12]->url, 'Deleted submissions should not be linked.');
+
+        // Validate details.
+        $this->assertStringContainsString(
+            s(get_string('task_content_details', 'archivingmod_assign', $mocks->submission->attemptnumber + 1)),
+            $labels[11]->details,
+            'Details should contain the attempt number.'
+        );
+        $this->assertNull($labels[12]->details, 'Deleted submissions should not have details.');
     }
 }

@@ -69,6 +69,7 @@ $string['task_attachment_type_feedback'] = 'Feedback files';
 $string['task_attachment_type_feedback_help'] = 'Include feedback files uploaded by the grader. This does not include PDFs that were annotated by the grader within Moodle.';
 $string['task_attachment_type_submission'] = 'Submission files';
 $string['task_attachment_type_submission_help'] = 'Include files submitted by the student during the submission.';
+$string['task_content_details'] = 'Attempt no. {$a}';
 $string['task_content_label'] = 'Submission #{$a}';
 $string['task_correction_margin'] = 'Correction margin';
 $string['task_correction_margin_help'] = 'When enabled, a correction margin will be added to the right side of submission reports. The size of the margin scales automatically with the selected paper size.';

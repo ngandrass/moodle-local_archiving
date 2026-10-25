@@ -124,6 +124,7 @@ final class job_content_table_test extends \advanced_testcase {
         $this->assertStringContainsString('Bob Backup', $output, 'User B should be listed');
         $this->assertStringContainsString('quiz_attempts #1337', $output, 'Default label should be shown');
         $this->assertStringContainsString('Custom summary', $output, 'Summary should be shown as fallback label');
+        $this->assertStringContainsString(get_string('details'), $output, 'Details column header should be shown');
     }
 
     /**

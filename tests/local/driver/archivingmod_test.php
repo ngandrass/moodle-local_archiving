@@ -443,5 +443,7 @@ final class archivingmod_test extends \advanced_testcase {
         );
         $this->assertNull($labels[11]->url, 'No URL should be provided by default.');
         $this->assertNull($labels[12]->url, 'No URL should be provided by default.');
+        $this->assertNull($labels[11]->details, 'No details should be provided by default.');
+        $this->assertNull($labels[12]->details, 'No details should be provided by default.');
     }
 }

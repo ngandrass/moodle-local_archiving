@@ -48,7 +48,7 @@
     {{#showattachments}}
         <div class="d-flex align-items-center flex-wrap mt-1">
             <span class="small me-1 mr-1">{{#str}} attachments, archivingmod_quiz {{/str}}:</span>
-            <span class="badge {{#hasattachments}} bg-success{{/hasattachments}}{{^hasattachments}} bg-danger{{/hasattachments}} py-1 px-2">
+            <span class="badge {{#hasattachments}} badge-success bg-success{{/hasattachments}}{{^hasattachments}} badge-danger bg-danger{{/hasattachments}} py-1 px-2">
                 {{numattachments}}
             </span>
             {{#attachments}}

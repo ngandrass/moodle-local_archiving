@@ -61,15 +61,7 @@
     >
 
     {{! User filter autocomplete }}
-    <div class="local_archiving-user-filter d-flex align-items-center mr-2 me-2 mb-2">
-        <label for="{{uniqueid}}_user" class="sr-only visually-hidden">{{#str}} job_user_filter_label, local_archiving {{/str}}</label>
-        <select id="{{uniqueid}}_user" name="userid" data-contextid="{{contextid}}" class="custom-select form-select" style="min-width: 15rem;">
-            <option value="">{{#str}} job_user_filter_placeholder, local_archiving {{/str}}</option>
-            {{#selecteduser}}
-                <option value="{{id}}" data-html="{{label}}" selected>{{fullname}}</option>
-            {{/selecteduser}}
-        </select>
-    </div>
+    {{> local_archiving/components/user_search_field }}
 
     {{! Trigger filter dropdown }}
     <label for="{{uniqueid}}_origin" class="sr-only visually-hidden">{{#str}} job_trigger_filter_label, local_archiving {{/str}}</label>
@@ -101,23 +93,3 @@
         </a>
     {{/filteractive}}
 </form>
-
-{{#js}}
-require(['core/form-autocomplete', 'core/notification'], function(autocomplete, Notification) {
-    autocomplete.enhance(
-        {{#quote}}#{{uniqueid}}_user{{/quote}},
-        false,
-        'local_archiving/job_user_selector',
-        {{#quote}}{{#str}} job_user_filter_placeholder, local_archiving {{/str}}{{/quote}},
-        false,
-        true,
-        {{#quote}}{{#str}} job_user_filter_all, local_archiving {{/str}}{{/quote}}
-    ).then(function() {
-        // Make the autocomplete input look and behave like a regular select.
-        var input = document.querySelector({{#quote}}#{{uniqueid}}_user ~ .form-autocomplete-input input{{/quote}});
-        input.classList.add('custom-select', 'form-select');
-        input.addEventListener('click', () => input.nextElementSibling.click());
-        return;
-    }).catch(Notification.exception);
-});
-{{/js}}

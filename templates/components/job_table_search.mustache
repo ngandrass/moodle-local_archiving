@@ -103,7 +103,7 @@
 </form>
 
 {{#js}}
-require(['core/form-autocomplete'], function(autocomplete) {
+require(['core/form-autocomplete', 'core/notification'], function(autocomplete, Notification) {
     autocomplete.enhance(
         {{#quote}}#{{uniqueid}}_user{{/quote}},
         false,
@@ -117,6 +117,7 @@ require(['core/form-autocomplete'], function(autocomplete) {
         var input = document.querySelector({{#quote}}#{{uniqueid}}_user ~ .form-autocomplete-input input{{/quote}});
         input.classList.add('custom-select', 'form-select');
         input.addEventListener('click', () => input.nextElementSibling.click());
-    });
+        return;
+    }).catch(Notification.exception);
 });
 {{/js}}

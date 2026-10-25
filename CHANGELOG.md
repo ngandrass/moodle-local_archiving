@@ -10,6 +10,14 @@
 - Decouple manual archive trigger enabled state from job creation form instantiation
 - Allow site administrators to configure TLS certificate validation behavior for HTTPS requests (TSP signing, archive workers, ...). Default: Always validate.
 - Enable activity archiving drivers to specify additional access validation rules for core image inlining logic in report generators
+- Rework archive job overview UI and add search / filter bar
+- Display attached archive files inline in archive job overview table
+- Show trigger and user that created an archive job in the job overview table
+- List number of archived objects in archive job overview table
+- Allow to search archive jobs by activity title and archive file names
+- Allow to filter archive jobs by trigger type and job status
+- Add filter option to display only archive jobs that contain data of a specific user
+- Improve messages shown when no data is available
 
 
 ## Version 1.1.1 (2026100600)

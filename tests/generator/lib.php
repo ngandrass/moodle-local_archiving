@@ -18,6 +18,7 @@ use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
 use local_archiving\local\type\activity_archiving_task_status;
 use local_archiving\local\type\cm_state_fingerprint;
+use local_archiving\local\type\task_content_metadata;
 
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
@@ -111,6 +112,27 @@ class local_archiving_generator extends \testing_data_generator {
             settings: $data['settings'],
             status: $data['status']
         );
+    }
+
+    /**
+     * Creates a new archive job that holds archived content of the given user.
+     *
+     * @param int $userid ID of the user that owns the archived content
+     * @param \stdClass|null $course Optional course object to use. If not provided, a new course will be created.
+     * @param \stdClass|null $cm Optional course module object to use. If not provided, a new quiz module will be created.
+     * @return archive_job Archive job that holds the archived content.
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    public function mock_archived_content(int $userid, ?\stdClass $course = null, ?\stdClass $cm = null): archive_job {
+        $job = $this->create_archive_job([], $course, $cm);
+        $task = $this->create_activity_archiving_task([], $job);
+        $task->store_task_content_metadata([
+            new task_content_metadata($task->get_id(), $userid, null, null, 'Test content'),
+        ]);
+
+        return $job;
     }
 
     /**

@@ -1,0 +1,123 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_archiving/components/job_table_search
+
+    Filter form for the job overview table.
+
+    Example context (json):
+    {
+        "uniqueid": "job_overview_table_42",
+        "contextid": 42,
+        "actionurl": "https://example.com/local/archiving/index.php",
+        "hiddenparams": [
+            {"name": "courseid", "value": 2}
+        ],
+        "search": "quiz",
+        "statusoptions": [
+            {"value": "inprogress", "name": "In progress", "selected": false},
+            {"value": "completed", "name": "Completed", "selected": true}
+        ],
+        "originoptions": [
+            {"value": "cron", "name": "Scheduled archiving", "selected": false},
+            {"value": "manual", "name": "Manual archiving", "selected": true}
+        ],
+        "selecteduser": {"id": 3, "fullname": "Max Mustermann", "label": "<span>Max Mustermann <small>max@example.com</small></span>"},
+        "filteractive": true,
+        "reseturl": "https://example.com/local/archiving/index.php?courseid=2"
+    }
+}}
+<form method="get" action="{{actionurl}}" class="d-flex flex-wrap align-items-center mb-3" role="search">
+    {{! Keep all page parameters during submission }}
+    {{#hiddenparams}}
+        <input type="hidden" name="{{name}}" value="{{value}}">
+    {{/hiddenparams}}
+
+    {{! Free-text search input }}
+    <label for="{{uniqueid}}_search" class="sr-only visually-hidden">{{#str}} job_search_label, local_archiving {{/str}}</label>
+    <input
+        type="search"
+        id="{{uniqueid}}_search"
+        name="search"
+        value="{{search}}"
+        class="form-control mr-2 me-2 mb-2"
+        size="32"
+        style="max-width: 32rem;"
+        placeholder="{{#str}} job_search_placeholder, local_archiving {{/str}}"
+    >
+
+    {{! User filter autocomplete }}
+    <div class="local_archiving-user-filter d-flex align-items-center mr-2 me-2 mb-2">
+        <label for="{{uniqueid}}_user" class="sr-only visually-hidden">{{#str}} job_user_filter_label, local_archiving {{/str}}</label>
+        <select id="{{uniqueid}}_user" name="userid" data-contextid="{{contextid}}" class="custom-select form-select" style="min-width: 15rem;">
+            <option value="">{{#str}} job_user_filter_placeholder, local_archiving {{/str}}</option>
+            {{#selecteduser}}
+                <option value="{{id}}" data-html="{{label}}" selected>{{fullname}}</option>
+            {{/selecteduser}}
+        </select>
+    </div>
+
+    {{! Trigger filter dropdown }}
+    <label for="{{uniqueid}}_origin" class="sr-only visually-hidden">{{#str}} job_trigger_filter_label, local_archiving {{/str}}</label>
+    <select id="{{uniqueid}}_origin" name="origin" class="custom-select form-select w-auto mr-2 me-2 mb-2">
+        <option value="">{{#str}} job_trigger_filter_all, local_archiving {{/str}}</option>
+        {{#originoptions}}
+            <option value="{{value}}"{{#selected}} selected{{/selected}}>{{name}}</option>
+        {{/originoptions}}
+    </select>
+
+    {{! Status filter dropdown }}
+    <label for="{{uniqueid}}_status" class="sr-only visually-hidden">{{#str}} job_status_filter_label, local_archiving {{/str}}</label>
+    <select id="{{uniqueid}}_status" name="status" class="custom-select form-select w-auto mr-2 me-2 mb-2">
+        <option value="">{{#str}} job_status_filter_all, local_archiving {{/str}}</option>
+        {{#statusoptions}}
+            <option value="{{value}}"{{#selected}} selected{{/selected}}>{{name}}</option>
+        {{/statusoptions}}
+    </select>
+
+    {{! Action buttons }}
+    <button type="submit" class="btn btn-primary mr-2 me-2 mb-2">
+        <i class="fa fa-search" aria-hidden="true"></i>
+        {{#str}} search, moodle {{/str}}
+    </button>
+
+    {{#filteractive}}
+        <a href="{{reseturl}}" class="btn btn-secondary mb-2">
+            {{#str}} reset, moodle {{/str}}
+        </a>
+    {{/filteractive}}
+</form>
+
+{{#js}}
+require(['core/form-autocomplete', 'core/notification'], function(autocomplete, Notification) {
+    autocomplete.enhance(
+        {{#quote}}#{{uniqueid}}_user{{/quote}},
+        false,
+        'local_archiving/job_user_selector',
+        {{#quote}}{{#str}} job_user_filter_placeholder, local_archiving {{/str}}{{/quote}},
+        false,
+        true,
+        {{#quote}}{{#str}} job_user_filter_all, local_archiving {{/str}}{{/quote}}
+    ).then(function() {
+        // Make the autocomplete input look and behave like a regular select.
+        var input = document.querySelector({{#quote}}#{{uniqueid}}_user ~ .form-autocomplete-input input{{/quote}});
+        input.classList.add('custom-select', 'form-select');
+        input.addEventListener('click', () => input.nextElementSibling.click());
+        return;
+    }).catch(Notification.exception);
+});
+{{/js}}

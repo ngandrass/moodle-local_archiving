@@ -404,7 +404,10 @@ class job_overview_table extends \table_sql {
      */
     public function col_actions($values) {
         global $PAGE;
-        $html = '';
+
+        // First button group.
+        $groupclass = 'd-block d-lg-inline-block text-nowrap';
+        $html = \html_writer::start_span($groupclass);
 
         // Action: Download.
         $files = $this->get_file_handles($values->id);
@@ -428,6 +431,10 @@ class job_overview_table extends \table_sql {
             'fa-magnifying-glass'
         );
 
+        // Second button gruop.
+        $html .= \html_writer::end_span();
+        $html .= \html_writer::start_span($groupclass);
+
         // Action: Show logs.
         $logurl = new \moodle_url('/local/archiving/logs.php', ['jobid' => $values->id]);
         $html .= $this->action_button($logurl, 'btn-info', get_string('logs'), 'fa-file-waveform');
@@ -449,6 +456,8 @@ class job_overview_table extends \table_sql {
                 'fa-trash'
             );
         }
+
+        $html .= \html_writer::end_span();
 
         return $html;
     }
@@ -483,7 +492,7 @@ class job_overview_table extends \table_sql {
      */
     protected function action_button(?\moodle_url $url, string $btnclass, string $label, string $icon): string {
         $btnattributes = [
-            'class' => "btn {$btnclass} mx-1",
+            'class' => "btn {$btnclass} m-1",
             'role' => 'button',
             'title' => $label,
             'aria-label' => $label,

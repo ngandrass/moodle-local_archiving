@@ -114,18 +114,21 @@ abstract class archivingmod extends base {
     abstract public function get_task_content_metadata(activity_archiving_task $task): array;
 
     /**
-     * Returns a human-readable label (e.g., "Attempt #1234") and an optional
-     * link to the referenced data for each of the given task content metadata
-     * entries.
+     * Returns a human-readable label (e.g., "Attempt #1234"), an optional
+     * link to the referenced data, and optional details for each of the given
+     * task content metadata entries.
      *
      * This function should be overridden by activity archiving drivers to
-     * provide meaningful labels and links to the archived data.
+     * provide meaningful labels, links, and details for the archived data.
      *
      * @param task_content_metadata[] $metadata Task content metadata entries to
      * label (must have an ID)
-     * @return \stdClass[] Objects with properties label (plain text) and url
+     * @return \stdClass[] Objects with properties label (plain text), url
      * (\moodle_url, or null if the referenced data does not exist (anymore)),
-     * indexed by task content metadata ID
+     * and details (sanitized HTML with additional information about the
+     * referenced data, or null if none is available), indexed by task content
+     * metadata ID. Drivers are responsible for escaping all user data that is
+     * part of the details.
      */
     public function get_task_content_metadata_labels(array $metadata): array {
         $res = [];
@@ -133,6 +136,7 @@ abstract class archivingmod extends base {
             $res[$entry->id] = (object) [
                 'label' => $entry->summary ?: "{$entry->reftable} #{$entry->refid}",
                 'url' => null,
+                'details' => null,
             ];
         }
 

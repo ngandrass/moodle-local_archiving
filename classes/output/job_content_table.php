@@ -103,11 +103,13 @@ class job_content_table extends \table_sql {
         $this->define_columns([
             'fullname',
             'refid',
+            'details',
         ]);
 
         $this->define_headers([
             get_string('user'),
             get_string('archived_data', 'local_archiving'),
+            get_string('details'),
         ]);
 
         $userfields = \core_user\fields::for_userpic()->with_identity($this->ctx, false);
@@ -134,6 +136,7 @@ class job_content_table extends \table_sql {
         );
 
         $this->sortable(true, 'lastname', SORT_ASC);
+        $this->no_sorting('details');
         $this->collapsible(false);
     }
 
@@ -204,6 +207,7 @@ class job_content_table extends \table_sql {
                 $this->labels[$entry->id] = (object) [
                     'label' => $entry->summary ?: "{$entry->reftable} #{$entry->refid}",
                     'url' => null,
+                    'details' => null,
                 ];
             }
         }
@@ -259,6 +263,17 @@ class job_content_table extends \table_sql {
         }
 
         return \html_writer::link($label->url, s($label->label));
+    }
+
+    /**
+     * Column renderer for the details column
+     *
+     * @param \stdClass $values Values of the current row
+     * @return string HTML code to be displayed
+     */
+    public function col_details($values) {
+        // Details are trusted HTML provided by the activity archiving driver.
+        return $this->labels[$values->id]->details ?? '';
     }
 
     /**

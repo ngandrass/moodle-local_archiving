@@ -526,7 +526,8 @@ final class activity_archiving_task {
             userid: $row->userid,
             reftable: $row->reftable,
             refid: $row->refid,
-            summary: $row->summary
+            summary: $row->summary,
+            id: $row->id
         ), $rawrecords);
     }
 

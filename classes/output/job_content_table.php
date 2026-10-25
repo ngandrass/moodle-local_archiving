@@ -262,7 +262,7 @@ class job_content_table extends \table_sql {
             return s($label->label);
         }
 
-        return \html_writer::link($label->url, s($label->label));
+        return \html_writer::link($label->url, s($label->label), ['target' => '_blank']);
     }
 
     /**

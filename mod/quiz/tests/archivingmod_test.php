@@ -571,6 +571,8 @@ final class archivingmod_test extends \advanced_testcase {
      * @throws \moodle_exception
      */
     public function test_get_task_content_metadata_labels(): void {
+        global $DB;
+
         // Create a mock task with an existing attempt.
         $this->resetAfterTest();
         $mocks = $this->getDataGenerator()->create_mock_task();
@@ -593,5 +595,19 @@ final class archivingmod_test extends \advanced_testcase {
         );
         $this->assertSame('Attempt #' . ($refid + 1000), $labels[12]->label);
         $this->assertNull($labels[12]->url, 'Deleted attempts should not be linked.');
+
+        // Validate details.
+        $attemptnumber = $DB->get_field('quiz_attempts', 'attempt', ['id' => $refid], MUST_EXIST);
+        $this->assertStringContainsString(
+            s(get_string('task_content_details_attempt', 'archivingmod_quiz', $attemptnumber)),
+            $labels[11]->details,
+            'Details should contain the attempt number.'
+        );
+        $this->assertStringContainsString(
+            get_string('attachments', 'archivingmod_quiz'),
+            $labels[11]->details,
+            'Details should contain the attachments section.'
+        );
+        $this->assertNull($labels[12]->details, 'Deleted attempts should not have details.');
     }
 }

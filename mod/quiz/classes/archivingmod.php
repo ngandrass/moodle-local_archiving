@@ -234,20 +234,69 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
 
         // Determine which of the referenced attempts still exist.
         $attemptids = array_unique(array_filter(array_column($metadata, 'refid')));
-        $attempts = $DB->get_records_list('quiz_attempts', 'id', $attemptids, '', 'id');
+        $attempts = $DB->get_records_list('quiz_attempts', 'id', $attemptids, '', 'id, attempt, timestart, timefinish');
 
         // Label all attempts and link them to their review page, if they still exist.
         $res = [];
         foreach ($metadata as $entry) {
+            $attempt = $attempts[$entry->refid] ?? null;
             $res[$entry->id] = (object) [
                 'label' => get_string('task_content_label', 'archivingmod_quiz', $entry->refid),
-                'url' => isset($attempts[$entry->refid])
-                    ? new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->refid])
-                    : null,
+                'url' => $attempt ? new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->refid]) : null,
+                'details' => $attempt ? $this->render_attempt_details($attempt) : null,
             ];
         }
 
         return $res;
+    }
+
+    /**
+     * Renders the details of a single quiz attempt, including its attachments
+     *
+     * @param \stdClass $attempt Quiz attempt record with at least the fields
+     * id, attempt, timestart, and timefinish
+     * @return string HTML code of the rendered attempt details
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    protected function render_attempt_details(\stdClass $attempt): string {
+        global $OUTPUT;
+
+        // Collect all files attached to the attempt.
+        $attachments = [];
+        try {
+            foreach (quiz_manager::get_attempt_attachments($attempt->id) as $attachment) {
+                /** @var \stored_file $file */
+                $file = $attachment['file'];
+                $attachments[] = [
+                    'title' => $file->get_filename() . ' (' . display_size($file->get_filesize()) . ')',
+                    'url' => \moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $attachment['itemid'],
+                        $file->get_filepath(),
+                        $file->get_filename(),
+                        true
+                    )->out(false),
+                ];
+            }
+            $showattachments = true;
+        } catch (\moodle_exception $e) {
+            $showattachments = false;
+        }
+
+        $dateformat = get_string('strftimedatemonthtimeshort', 'langconfig');
+
+        return $OUTPUT->render_from_template('archivingmod_quiz/components/task_content_details', [
+            'summary' => get_string('task_content_details_attempt', 'archivingmod_quiz', $attempt->attempt),
+            'timestart' => userdate($attempt->timestart, $dateformat),
+            'timefinish' => $attempt->timefinish > 0 ? userdate($attempt->timefinish, $dateformat) : null,
+            'showattachments' => $showattachments,
+            'numattachments' => count($attachments),
+            'hasattachments' => !empty($attachments),
+            'attachments' => $attachments,
+        ]);
     }
 
     /**

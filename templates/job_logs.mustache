@@ -29,10 +29,6 @@
                 "help": "The job has been completed.",
                 "color": "success"
             },
-            "metadata": [
-                {"key": "foo", "humankey": "Foo value", "value": "bar"},
-                {"key": "lorem", "humankey": "The Lorem Gauge", "value": "ipsum"}
-            ],
             "completed": 1,
             "timecreated": 1747836796,
             "timemodified": 1747836808,
@@ -52,58 +48,10 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-6">
+        <div class="col-12">
             <div style="max-width: 600px;">
-                <table class="table">
-                    <tr>
-                        <td>{{#str}} jobid, local_archiving {{/str}}</td>
-                        <td>{{job.id}}</td>
-                    </tr>
-                    <tr>
-                        <td>{{#str}} trigger, local_archiving {{/str}}</td>
-                        <td>{{job.triggername}}</td>
-                    </tr>
-                    <tr>
-                        <td>{{#str}} status {{/str}}</td>
-                        <td>
-                            <span class="badge badge-{{job.status.color}}"
-                                  data-toggle="tooltip"
-                                  data-placement="top"
-                                  title="{{job.status.help}}"
-                            >
-                                {{job.status.text}}
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{#str}} timecreated {{/str}}</td>
-                        <td>
-                            {{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{#str}} lastmodified {{/str}}</td>
-                        <td>
-                            {{#userdate}} {{job.timemodified}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
-                        </td>
-                    </tr>
-                </table>
+                {{> local_archiving/components/job_info }}
             </div>
-        </div>
-        <div class="col-6">
-            <ul class="list-group small">
-                {{#job.metadata}}
-                    <li class="list-group-item">
-                        {{humankey}}
-                        <span class="badge badge-secondary">{{value}}</span>
-                    </li>
-                {{/job.metadata}}
-                {{^job.metadata}}
-                    <li class="list-group-item">
-                        <span class="text-muted">Nothing to show yet ...</span>
-                    </li>
-                {{/job.metadata}}
-            </ul>
         </div>
     </div>
     <div class="row">

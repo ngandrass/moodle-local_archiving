@@ -1,7 +1,7 @@
 /* Job table user search bar customizations */
 .local_archiving-user-filter .form-autocomplete-input {
     /* Remove conditional double-margin */
-    margin-right: 0 !important;
+    margin-right: 0 !important; /* stylelint-disable-line declaration-no-important */
 }
 .local_archiving-user-filter .form-autocomplete-selection:not(:has([role="option"]:not([data-value=""]))) {
     /* Hide selection pill if no user is selected */
@@ -11,7 +11,7 @@
 
 .local_archiving-user-filter:has(.form-autocomplete-selection [role="option"]:not([data-value=""])) .form-autocomplete-input {
     /* Hide input field if a user is selected */
-    display: none !important;
+    display: none !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .local_archiving-user-filter .form-autocomplete-downarrow {

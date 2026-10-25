@@ -75,6 +75,19 @@ abstract class archivingmod extends base {
     abstract public function can_be_archived(): bool;
 
     /**
+     * Creates a new fingerprint for the current state of the referenced course
+     * module.
+     *
+     * Those fingerprints are used to determine if the course module has changed
+     * since the last archive job. For information on cm_state_fingerprints and
+     * their creation, see the cm_state_fingerprint class documentation.
+     *
+     * @return cm_state_fingerprint Fingerprint for the current state of the
+     * referenced course module
+     */
+    abstract public function fingerprint(): cm_state_fingerprint;
+
+    /**
      * Executes the given task
      *
      * This function has to be implemented by the respective activity archiving
@@ -101,17 +114,30 @@ abstract class archivingmod extends base {
     abstract public function get_task_content_metadata(activity_archiving_task $task): array;
 
     /**
-     * Creates a new fingerprint for the current state of the referenced course
-     * module.
+     * Returns a human-readable label (e.g., "Attempt #1234") and an optional
+     * link to the referenced data for each of the given task content metadata
+     * entries.
      *
-     * Those fingerprints are used to determine if the course module has changed
-     * since the last archive job. For information on cm_state_fingerprints and
-     * their creation, see the cm_state_fingerprint class documentation.
+     * This function should be overridden by activity archiving drivers to
+     * provide meaningful labels and links to the archived data.
      *
-     * @return cm_state_fingerprint Fingerprint for the current state of the
-     * referenced course module
+     * @param task_content_metadata[] $metadata Task content metadata entries to
+     * label (must have an ID)
+     * @return \stdClass[] Objects with properties label (plain text) and url
+     * (\moodle_url, or null if the referenced data does not exist (anymore)),
+     * indexed by task content metadata ID
      */
-    abstract public function fingerprint(): cm_state_fingerprint;
+    public function get_task_content_metadata_labels(array $metadata): array {
+        $res = [];
+        foreach ($metadata as $entry) {
+            $res[$entry->id] = (object) [
+                'label' => $entry->summary ?: "{$entry->reftable} #{$entry->refid}",
+                'url' => null,
+            ];
+        }
+
+        return $res;
+    }
 
     /**
      * Returns a list of Moodle events that are fired by the targeted activity

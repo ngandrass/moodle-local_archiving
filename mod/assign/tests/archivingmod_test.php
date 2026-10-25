@@ -505,7 +505,7 @@ final class archivingmod_test extends \advanced_testcase {
         ]);
 
         $this->assertEqualsCanonicalizing([11, 12], array_keys($labels), 'Labels should be indexed by metadata ID.');
-        $this->assertSame("Submission #{$refid}", $labels[11]->label);
+        $this->assertSame("Submission ID {$refid}", $labels[11]->label);
         $this->assertSame(
             (new \moodle_url('/mod/assign/view.php', [
                 'id' => $mocks->context->instanceid,
@@ -515,7 +515,7 @@ final class archivingmod_test extends \advanced_testcase {
             $labels[11]->url->out(false),
             'Existing submissions should be linked.'
         );
-        $this->assertSame('Submission #' . ($refid + 1000), $labels[12]->label);
+        $this->assertSame('Submission ID ' . ($refid + 1000), $labels[12]->label);
         $this->assertNull($labels[12]->url, 'Deleted submissions should not be linked.');
 
         // Validate details.

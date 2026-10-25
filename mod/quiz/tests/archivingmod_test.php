@@ -587,13 +587,13 @@ final class archivingmod_test extends \advanced_testcase {
         ]);
 
         $this->assertEqualsCanonicalizing([11, 12], array_keys($labels), 'Labels should be indexed by metadata ID.');
-        $this->assertSame("Attempt #{$refid}", $labels[11]->label);
+        $this->assertSame("Attempt ID {$refid}", $labels[11]->label);
         $this->assertSame(
             (new \moodle_url('/mod/quiz/review.php', ['attempt' => $refid]))->out(false),
             $labels[11]->url->out(false),
             'Existing attempts should be linked.'
         );
-        $this->assertSame('Attempt #' . ($refid + 1000), $labels[12]->label);
+        $this->assertSame('Attempt ID ' . ($refid + 1000), $labels[12]->label);
         $this->assertNull($labels[12]->url, 'Deleted attempts should not be linked.');
 
         // Validate details.

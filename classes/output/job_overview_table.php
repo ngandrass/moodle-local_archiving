@@ -287,9 +287,12 @@ class job_overview_table extends \table_sql {
         // Show number of archived objects, if known.
         if ($values->contentcount > 0) {
             $contenticon = $values->contentcount > 1 ? 'fa-solid fa-cubes' : 'fa-solid fa-cube fa-xs mr-1';
-            $html .= \html_writer::tag(
-                'small',
-                s($values->contentcount) . '<i class="' . $contenticon . ' ml-2" aria-hidden="true"></i>',
+            $html .= \html_writer::link(
+                new \moodle_url('/local/archiving/job.php', ['id' => $values->id]),
+                \html_writer::tag(
+                    'small',
+                    s($values->contentcount) . '<i class="' . $contenticon . ' ml-2" aria-hidden="true"></i>'
+                ),
                 ['class' => 'text-muted ml-1 float-right'] +
                     $this->tooltip_attributes(get_string('number_of_archived_objects', 'local_archiving'))
             );
@@ -416,6 +419,14 @@ class job_overview_table extends \table_sql {
                 'fa-download'
             );
         }
+
+        // Action: Show job details.
+        $html .= $this->action_button(
+            new \moodle_url('/local/archiving/job.php', ['id' => $values->id]),
+            'btn-primary',
+            get_string('details', 'moodle'),
+            'fa-magnifying-glass'
+        );
 
         // Action: Show logs.
         $logurl = new \moodle_url('/local/archiving/logs.php', ['jobid' => $values->id]);

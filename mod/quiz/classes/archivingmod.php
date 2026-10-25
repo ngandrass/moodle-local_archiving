@@ -228,6 +228,28 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         return $res;
     }
 
+    #[\Override]
+    public function get_task_content_metadata_labels(array $metadata): array {
+        global $DB;
+
+        // Determine which of the referenced attempts still exist.
+        $attemptids = array_unique(array_filter(array_column($metadata, 'refid')));
+        $attempts = $DB->get_records_list('quiz_attempts', 'id', $attemptids, '', 'id');
+
+        // Label all attempts and link them to their review page, if they still exist.
+        $res = [];
+        foreach ($metadata as $entry) {
+            $res[$entry->id] = (object) [
+                'label' => get_string('task_content_label', 'archivingmod_quiz', $entry->refid),
+                'url' => isset($attempts[$entry->refid])
+                    ? new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->refid])
+                    : null,
+            ];
+        }
+
+        return $res;
+    }
+
     /**
      * Returns a fingerprint for the current state of the referenced quiz.
      *

@@ -215,6 +215,32 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         return $res;
     }
 
+    #[\Override]
+    public function get_task_content_metadata_labels(array $metadata): array {
+        global $DB;
+
+        // Determine which of the referenced submissions still exist.
+        $submissionids = array_unique(array_filter(array_column($metadata, 'refid')));
+        $submissions = $DB->get_records_list('assign_submission', 'id', $submissionids, '', 'id, userid');
+
+        // Label all submissions and link them to the grading page, if they still exist.
+        $res = [];
+        foreach ($metadata as $entry) {
+            $res[$entry->id] = (object) [
+                'label' => get_string('task_content_label', 'archivingmod_assign', $entry->refid),
+                'url' => isset($submissions[$entry->refid])
+                    ? new \moodle_url('/mod/assign/view.php', [
+                        'id' => $this->cmid,
+                        'action' => 'grading',
+                        'userid' => $submissions[$entry->refid]->userid,
+                    ])
+                    : null,
+            ];
+        }
+
+        return $res;
+    }
+
     /**
      * Creates a new fingerprint for the current state of the referenced course
      * module.

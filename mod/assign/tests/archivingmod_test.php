@@ -29,6 +29,7 @@ use local_archiving\activity_archiving_task;
 use local_archiving\archive_job;
 use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\activity_archiving_task_status;
+use local_archiving\local\type\task_content_metadata;
 
 /**
  * Tests for the archivingmod class
@@ -478,5 +479,43 @@ final class archivingmod_test extends \advanced_testcase {
         ]);
 
         $this->assertNull((new archivingmod($context))->get_refids_for_event($event));
+    }
+
+    /**
+     * Tests the labels and links of task content metadata entries.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_task_content_metadata_labels(): void {
+        // Create a mock task with an existing submission.
+        $this->resetAfterTest();
+        $mocks = $this->getDataGenerator()->create_mock_task(populateassignment: true);
+        $driver = new archivingmod($mocks->context);
+        $refid = $mocks->submission->id;
+        $taskid = $mocks->task->get_id();
+
+        // Generate labels for an existing and a deleted entry.
+        $labels = $driver->get_task_content_metadata_labels([
+            new task_content_metadata($taskid, 2, 'assign_submission', $refid, null, 11),
+            new task_content_metadata($taskid, 2, 'assign_submission', $refid + 1000, null, 12),
+        ]);
+
+        $this->assertEqualsCanonicalizing([11, 12], array_keys($labels), 'Labels should be indexed by metadata ID.');
+        $this->assertSame("Submission #{$refid}", $labels[11]->label);
+        $this->assertSame(
+            (new \moodle_url('/mod/assign/view.php', [
+                'id' => $mocks->context->instanceid,
+                'action' => 'grading',
+                'userid' => $mocks->student->id,
+            ]))->out(false),
+            $labels[11]->url->out(false),
+            'Existing submissions should be linked.'
+        );
+        $this->assertSame('Submission #' . ($refid + 1000), $labels[12]->label);
+        $this->assertNull($labels[12]->url, 'Deleted submissions should not be linked.');
     }
 }

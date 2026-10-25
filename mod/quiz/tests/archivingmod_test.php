@@ -30,6 +30,7 @@ use local_archiving\archive_job;
 use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\activity_archiving_task_status;
 use archivingmod_quiz\local\type\attempts_filter;
+use local_archiving\local\type\task_content_metadata;
 
 /**
  * Tests for the archivingmod class
@@ -558,5 +559,39 @@ final class archivingmod_test extends \advanced_testcase {
         ]);
 
         $this->assertNull((new archivingmod($context))->get_refids_for_event($event));
+    }
+
+    /**
+     * Tests the labels and links of task content metadata entries.
+     *
+     * @covers \archivingmod_quiz\archivingmod::get_task_content_metadata_labels
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_task_content_metadata_labels(): void {
+        // Create a mock task with an existing attempt.
+        $this->resetAfterTest();
+        $mocks = $this->getDataGenerator()->create_mock_task();
+        $driver = new archivingmod($mocks->context);
+        $refid = $mocks->attempts[0]->attemptid;
+        $taskid = $mocks->task->get_id();
+
+        // Generate labels for an existing and a deleted entry.
+        $labels = $driver->get_task_content_metadata_labels([
+            new task_content_metadata($taskid, 2, 'quiz_attempts', $refid, null, 11),
+            new task_content_metadata($taskid, 2, 'quiz_attempts', $refid + 1000, null, 12),
+        ]);
+
+        $this->assertEqualsCanonicalizing([11, 12], array_keys($labels), 'Labels should be indexed by metadata ID.');
+        $this->assertSame("Attempt #{$refid}", $labels[11]->label);
+        $this->assertSame(
+            (new \moodle_url('/mod/quiz/review.php', ['attempt' => $refid]))->out(false),
+            $labels[11]->url->out(false),
+            'Existing attempts should be linked.'
+        );
+        $this->assertSame('Attempt #' . ($refid + 1000), $labels[12]->label);
+        $this->assertNull($labels[12]->url, 'Deleted attempts should not be linked.');
     }
 }

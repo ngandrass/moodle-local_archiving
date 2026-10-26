@@ -552,10 +552,14 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
     }
 
     /**
-     * Tests that files from the draft area of different users are rejected and not touched
+     * Tests that only artifacts from the draft area of the calling webservice
+     * user are processed and foreign draft files are left untouched
      *
+     * @dataProvider foreign_draft_file_data_provider
      * @covers \archivingmod_quiz\external\process_uploaded_artifact
      *
+     * @param bool $foreigncontext If true, the artifact resides in the draft area of another user
+     * @param array $overrides Request parameters to override
      * @return void
      * @throws \coding_exception
      * @throws \dml_exception
@@ -564,46 +568,65 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
      * @throws \moodle_exception
      * @throws \stored_file_creation_exception
      */
-    public function test_rejection_of_foreign_draft_area(): void {
-        // Create task for the admin user and a draft file that belongs to another user.
+    public function test_rejection_of_foreign_draft_file(bool $foreigncontext, array $overrides): void {
+        // Create task for the admin user and a draft file that belongs to either the admin or another user.
         $this->resetAfterTest();
         $this->setAdminUser();
         $mocks = $this->getDataGenerator()->create_mock_task('TEST-WS-TOKEN');
-        $artifact = $this->getDataGenerator()->get_plugin_generator('local_archiving')->create_draft_file('foreign.tar.gz');
-        $this->assertNotEquals(get_admin()->id, $artifact->get_userid());
+        $artifact = $this->getDataGenerator()->get_plugin_generator('local_archiving')->create_draft_file(
+            'foreign.tar.gz',
+            userid: $foreigncontext ? null : get_admin()->id
+        );
+        $taskstatusbefore = activity_archiving_task::get_by_id($mocks->task->get_id())->get_status();
 
-        // Execute test call that would delete the file if accepted.
-        $r = $this->generate_valid_request('10000000-1337-0000-0000-000000000001', $mocks->task, 1);
+        // Execute test call with a mismatching checksum that would delete the draft file if it was processed.
+        $r = array_merge([
+            'artifact_component' => $artifact->get_component(),
+            'artifact_contextid' => $artifact->get_contextid(),
+            'artifact_userid' => (int) $artifact->get_userid(), // Int cast is required since Moodle likes to return strings here...
+            'artifact_filearea' => $artifact->get_filearea(),
+        ], $overrides);
         $_GET['wstoken'] = 'TEST-WS-TOKEN';
         $res = process_uploaded_artifact::execute(
-            $r['uuid'],
-            $r['taskid'],
-            $artifact->get_component(),
-            $artifact->get_contextid(),
-            (int) $artifact->get_userid(),
-            $artifact->get_filearea(),
+            '10000000-1337-0000-0000-000000000001',
+            $mocks->task->get_id(),
+            $r['artifact_component'],
+            $r['artifact_contextid'],
+            $r['artifact_userid'],
+            $r['artifact_filearea'],
             $artifact->get_filename(),
             $artifact->get_filepath(),
             $artifact->get_itemid(),
             '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-            $r['artifact_count']
+            1
         );
         $this->assertSame(
             webservice_status::E_ACCESS_DENIED->name,
             $res['status'],
-            'Artifact from the draft area of another user was falsely accepted'
+            'Artifact outside of the draft area of the webservice user was falsely accepted'
         );
-        $this->assertNotFalse(
-            get_file_storage()->get_file(
-                $artifact->get_contextid(),
-                $artifact->get_component(),
-                $artifact->get_filearea(),
-                $artifact->get_itemid(),
-                $artifact->get_filepath(),
-                $artifact->get_filename()
-            ),
-            'Draft file of another user must not be modified'
+
+        // Ensure that neither the draft file nor the task were touched.
+        $this->assertNotEmpty(get_file_storage()->get_file_by_id($artifact->get_id()), 'Draft file was falsely deleted');
+        $this->assertSame(
+            $taskstatusbefore,
+            activity_archiving_task::get_by_id($mocks->task->get_id())->get_status(),
+            'Task status was falsely changed'
         );
+    }
+
+    /**
+     * Data provider for test_rejection_of_foreign_draft_file
+     *
+     * @return array[] Test data
+     */
+    public static function foreign_draft_file_data_provider(): array {
+        return [
+            'Draft area of another user' => ['foreigncontext' => true, 'overrides' => []],
+            'Wrong component' => ['foreigncontext' => false, 'overrides' => ['artifact_component' => 'archivingmod_quiz']],
+            'Wrong filearea' => ['foreigncontext' => false, 'overrides' => ['artifact_filearea' => 'private']],
+            'Wrong userid' => ['foreigncontext' => false, 'overrides' => ['artifact_userid' => -1]],
+        ];
     }
 
     /**

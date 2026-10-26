@@ -199,7 +199,13 @@ class process_uploaded_artifact extends external_api {
 
         // Only accept files from the draft area of the user this request is authenticated as.
         $draftcontext = \context_user::instance($USER->id, IGNORE_MISSING);
-        if (!$draftcontext || $params['artifact_contextid'] !== (int) $draftcontext->id) {
+        if (
+            !$draftcontext ||
+            $params['artifact_component'] !== 'user' ||
+            $params['artifact_filearea'] !== 'draft' ||
+            $params['artifact_userid'] !== (int) $USER->id ||
+            $params['artifact_contextid'] !== (int) $draftcontext->id
+        ) {
             return ['status' => webservice_status::E_ACCESS_DENIED->name];
         }
 

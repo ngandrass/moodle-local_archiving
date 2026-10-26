@@ -9,6 +9,7 @@
 - Provide human-readable labels and links for archived quiz attempts
 - Display quiz attempt number, date, and attachments in the details column of the archive contents table
 - Fail artifact uploads early with a descriptive error message if referenced Moodle upload draft file is out of scope
+- Switch worker task UUID parameters of all external functions from `PARAM_TEXT` to `PARAM_ALPHANUMEXT`
 
 
 ## Version 1.1.1 (2026100600)

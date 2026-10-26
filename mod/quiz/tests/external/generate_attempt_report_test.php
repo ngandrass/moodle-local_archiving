@@ -181,13 +181,14 @@ final class generate_attempt_report_test extends \advanced_testcase {
         $_GET['wstoken'] = $wstoken;
 
         // Execute the request.
-        if (in_array($invalidparameterkey, ['sections'])) {
-            // Empty array is actually already detected by Moodle parameter validation so we expect an exception here.
+        if (in_array($invalidparameterkey, ['uuid', 'sections'])) {
+            // Invalid UUID characters and empty arrays are already detected by Moodle parameter validation so we expect an
+            // exception here.
             $this->expectException(\invalid_parameter_exception::class);
             $this->expectExceptionMessageMatches('/.*' . $invalidparameterkey . '.*/');
         }
         $res = generate_attempt_report::execute(
-            $uuid,
+            $invalidparameterkey === 'uuid' ? '20000000-0000-0000-0000-0123456789ab; DROP' : $r['uuid'],
             $invalidparameterkey == 'taskid' ? 0 : $r['taskid'],
             $invalidparameterkey == 'attemptid' ? 0 : $r['attemptid'],
             $invalidparameterkey == 'foldername pattern' ? 'invalid-${pattern' : $r['foldernamepattern'],
@@ -209,6 +210,7 @@ final class generate_attempt_report_test extends \advanced_testcase {
      */
     public static function parameter_validation_data_provider(): array {
         return [
+            'Invalid uuid' => ['uuid'],
             'Invalid taskid' => ['taskid'],
             'Invalid attemptid' => ['attemptid'],
             'Invalid foldernamepattern' => ['foldername pattern'],

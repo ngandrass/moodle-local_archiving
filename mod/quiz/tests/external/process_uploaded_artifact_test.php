@@ -252,7 +252,7 @@ final class process_uploaded_artifact_test extends \advanced_testcase {
                 'shouldfail' => false,
             ]),
             'Invalid uuid' => array_merge($base, [
-                'uuid' => '<a href="localhost">Foo</a>',
+                'uuid' => '20000000-0000-0000-0000-0123456789ab; DROP',
                 'shouldfail' => true,
             ]),
             'Invalid artifact_component' => array_merge($base, [

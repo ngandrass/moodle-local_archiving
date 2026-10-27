@@ -480,10 +480,6 @@ class job_overview_table extends \table_sql {
     /**
      * Renders an icon-only action button.
      *
-     * We create a wrapper span around the button to ensure that the tooltip is
-     * displayed even when the button is disabled. Otherwise pointer events will
-     * be ignored by the browser.
-     *
      * @param \moodle_url|null $url Target of the button, or null to render a disabled button
      * @param string $btnclass Bootstrap button class (e.g. 'btn-success')
      * @param string $label Accessible label and tooltip of the button
@@ -491,30 +487,16 @@ class job_overview_table extends \table_sql {
      * @return string HTML code of the button
      */
     protected function action_button(?\moodle_url $url, string $btnclass, string $label, string $icon): string {
-        $btnattributes = [
-            'class' => "btn {$btnclass} m-1",
-            'role' => 'button',
-            'title' => $label,
-            'aria-label' => $label,
-        ];
+        global $OUTPUT;
 
-        // Render buttons with null URLs as disabled.
-        if ($url === null) {
-            $btnattributes['class'] .= ' disabled';
-            $btnattributes['aria-disabled'] = 'true';
-            $btnattributes['tabindex'] = '-1';
-        }
-
-        $buttonhtml = \html_writer::link(
-            $url ?? '#',
-            \html_writer::tag('i', '', ['class' => "fa {$icon}", 'aria-hidden' => 'true']),
-            $btnattributes
-        );
-
-        return \html_writer::span(
-            $buttonhtml,
-            'd-inline-block',
-            $this->tooltip_attributes($label)
+        return $OUTPUT->render_from_template(
+            'local_archiving/components/action_button',
+            [
+                'label' => $label,
+                'btnclass' => $btnclass,
+                'url' => $url ? $url->out(false) : null,
+                'icon' => $icon,
+            ],
         );
     }
 

@@ -58,13 +58,21 @@ ob_end_clean();
 
 // Render output.
 $jobmeta = $job->get_metadata_entries();
+$jobstatus = $job->get_status()->status_display_args();
+$jobprogress = $job->get_progress();
 $renderer = $PAGE->get_renderer('local_archiving');
 echo $OUTPUT->header();
 echo $renderer->render_from_template('local_archiving/job_details', [
     'job' => [
         'id' => $job->get_id(),
         'triggername' => get_string('pluginname', 'archivingtrigger_' . $job->get_trigger()) ?: $job->get_trigger(),
-        'status' => $job->get_status()->status_display_args(),
+        'status' => [
+            'badge_text' => $jobstatus->text,
+            'badge_color' => $jobstatus->color,
+            'tooltip_text' => $jobstatus->help,
+            'progress' => $jobprogress ?? null,
+            'has_progress' => ($jobprogress ?? null) != null && $jobprogress < 100,
+        ],
         'timecreated' => $job->get_timecreated(),
         'timemodified' => $job->get_timemodified(),
         'metadata' => array_map(

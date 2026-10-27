@@ -32,6 +32,8 @@ global $OUTPUT, $PAGE, $USER;
 // Try to find job.
 $jobid = required_param('jobid', PARAM_INT);
 $job = archive_job::get_by_id($jobid);
+$jobstatus = $job->get_status()->status_display_args();
+$jobprogress = $job->get_progress();
 $ctx = $job->get_context();
 [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
 
@@ -55,7 +57,13 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
     'job' => [
         'id' => $job->get_id(),
         'triggername' => get_string('pluginname', 'archivingtrigger_' . $job->get_trigger()) ?: $job->get_trigger(),
-        'status' => $job->get_status()->status_display_args(),
+        'status' => [
+            'badge_text' => $jobstatus->text,
+            'badge_color' => $jobstatus->color,
+            'tooltip_text' => $jobstatus->help,
+            'progress' => $jobprogress ?? null,
+            'has_progress' => ($jobprogress ?? null) != null && $jobprogress < 100,
+        ],
         'completed' => $job->is_completed(),
         'timecreated' => $job->get_timecreated(),
         'timemodified' => $job->get_timemodified(),

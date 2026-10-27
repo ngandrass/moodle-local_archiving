@@ -372,26 +372,24 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_status($values) {
+        global $OUTPUT;
+
         $job = archive_job::get_by_id($values->id);
         $status = archive_job_status::from($values->status)->status_display_args();
-
-        $html = \html_writer::span($status->text, 'badge badge-' . $status->color, $this->tooltip_attributes($status->help));
-        $html .= \html_writer::empty_tag('br');
-
         $progress = $job->get_progress();
-        if ($progress !== null && $progress < 100) {
-            $progresslabel = get_string('progress', 'local_archiving');
-            $html .= \html_writer::span(
-                \html_writer::tag('i', '', ['class' => 'fa fa-spinner', 'aria-hidden' => 'true']) . '&nbsp;' . $progress . '%',
-                '',
-                ['aria-label' => $progresslabel] + $this->tooltip_attributes($progresslabel)
-            );
-            $html .= \html_writer::empty_tag('br');
-        }
 
-        $html .= \html_writer::tag('small', userdate($values->timemodified, '%H:%M:%S'));
-
-        return $html;
+        return $OUTPUT->render_from_template(
+            'local_archiving/components/job_status',
+            [
+                'badge_text' => $status->text,
+                'badge_color' => $status->color,
+                'tooltip_text' => $status->help,
+                'progress' => $progress ?? null,
+                'has_progress' => ($progress ?? null) != null && $progress < 100,
+                'time_modified' => $values->timemodified,
+                'layout_vertical' => true,
+            ],
+        );
     }
 
     /**

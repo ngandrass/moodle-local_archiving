@@ -280,51 +280,32 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_contextid($values) {
+        global $OUTPUT;
+
         $cm = $this->coursemodinfo->get_cm($values->cmid);
-
-        $html = \html_writer::link($cm->get_url(), $cm->get_formatted_name());
-
-        // Show number of archived objects, if known.
-        if ($values->contentcount > 0) {
-            $contenticon = $values->contentcount > 1 ? 'fa-solid fa-cubes' : 'fa-solid fa-cube fa-xs mr-1';
-            $html .= \html_writer::link(
-                new \moodle_url('/local/archiving/job.php', ['id' => $values->id]),
-                \html_writer::tag(
-                    'small',
-                    s($values->contentcount) . '<i class="' . $contenticon . ' ml-2" aria-hidden="true"></i>'
-                ),
-                ['class' => 'text-muted ml-1 float-right'] +
-                    $this->tooltip_attributes(get_string('number_of_archived_objects', 'local_archiving'))
-            );
-        }
-
-        // List names of all files that exist in storage.
+        $cmurl = $cm->get_url();
+        $cmname = $cm->get_formatted_name();
         $filenames = [];
         foreach ($this->get_file_handles($values->id) as $file) {
             if (!$file->deleted) {
-                $filenames[] = \html_writer::tag(
-                    'li',
-                    '<i class="fa-regular fa-file-zipper" aria-hidden="true"></i>&nbsp;' . s($file->filename),
-                    ['class' => 'list-group-item bg-transparent px-0 py-1 text-break']
-                );
+                $filenames[] = $file->filename;
             }
         }
 
-        if (empty($filenames)) {
-            $filenames[] = \html_writer::tag(
-                'li',
-                get_string('no_files_attached', 'local_archiving'),
-                ['class' => 'list-group-item bg-transparent px-0 py-1 text-break text-muted']
-            );
-        }
-
-        $html .= \html_writer::tag(
-            'ul',
-            implode('', $filenames),
-            ['class' => 'list-group list-group-flush small mb-0 mt-1']
+        return $OUTPUT->render_from_template(
+            'local_archiving/components/job_activity',
+            [
+                'cm_url' => $cmurl->out(false),
+                'cm_name' => $cmname,
+                'job_url' => (new \moodle_url(
+                    '/local/archiving/job.php',
+                    ['id' => $values->id]
+                ))->out(false),
+                'content_count' => ($values->contentcount > 0) ? $values->contentcount : null,
+                'content_is_multiple' => $values->contentcount > 1,
+                'files' => $filenames,
+            ],
         );
-
-        return $html;
     }
 
     /**

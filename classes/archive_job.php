@@ -983,6 +983,23 @@ class archive_job {
     }
 
     /**
+     * Sets the unix timestamp when this job was last modified. Defaults to now
+     * if no value is provided.
+     *
+     * @param int|null $timestamp (optional) Unix timestamp last modification time should be set to.
+     * @throws \dml_exception
+     */
+    public function set_timemodified(int|null $timestamp = null): void {
+        global $DB;
+
+        if (!$timestamp) {
+            $timestamp = time();
+        }
+
+        $DB->set_field(db_table::JOB->value, 'timemodified', $timestamp, ['id' => $this->id]);
+    }
+
+    /**
      * Retrieves the current job status
      *
      * @param bool $usecached If true, the cached status will be used instead of querying the database

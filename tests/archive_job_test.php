@@ -1609,4 +1609,31 @@ final class archive_job_test extends \advanced_testcase {
 
         return $res;
     }
+
+    /**
+     * Tests setting and retrieving the job modification time.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_set_timemodified(): void {
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+
+        // Setting an explicit timestamp should be persisted verbatim.
+        $explicit = 1234567890;
+        $job->set_timemodified($explicit);
+        $this->assertSame($explicit, $job->get_timemodified(), 'Timemodified should be set to the explicit timestamp');
+
+        // Calling without an argument should default to "now", which is after the past timestamp.
+        $job->set_timemodified();
+        $this->assertGreaterThan(
+            $explicit,
+            $job->get_timemodified(),
+            'Timemodified should default to the current time'
+        );
+    }
 }

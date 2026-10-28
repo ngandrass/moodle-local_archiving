@@ -507,9 +507,11 @@ final class archive_job_test extends \advanced_testcase {
             try {
                 $job->execute();
 
-                // Check job progress.
-                $this->assertGreaterThanOrEqual(0, $job->get_progress(), 'Job progress should be non-negative');
-                $this->assertLessThanOrEqual(100, $job->get_progress(), 'Job progress should not exceed 100%');
+                // Check job progress. A queued job has no progress yet (null), so
+                // treat that as 0 when validating the 0-100% range.
+                $progress = $job->get_progress();
+                $this->assertGreaterThanOrEqual(0, $progress ?? 0, 'Job progress should be non-negative');
+                $this->assertLessThanOrEqual(100, $progress ?? 0, 'Job progress should not exceed 100%');
 
                 // Let backups async backups complete.
                 while ($task = \core\task\manager::get_next_adhoc_task(time())) {
@@ -601,7 +603,7 @@ final class archive_job_test extends \advanced_testcase {
 
         // Validate that the job was indeed postponed.
         $this->assertSame(archive_job_status::QUEUED, $job->get_status(), 'Job should remain in QUEUED status');
-        $this->assertSame(0, $job->get_progress(), 'Job progress should remain at 0%');
+        $this->assertNull($job->get_progress(), 'A postponed (queued) job should have no progress');
 
         $logs = $job->get_logger()->get_logs();
         $jobwaitlogged = false;
@@ -867,9 +869,9 @@ final class archive_job_test extends \advanced_testcase {
         $job = $this->generator()->create_archive_job();
 
         // Check initial progress.
-        $this->assertSame(0, $job->get_progress(), 'Initial job progress should be 0%');
+        $this->assertNull($job->get_progress(), 'An uninitialized job should have no progress yet');
         $job->set_status(archive_job_status::QUEUED);
-        $this->assertSame(0, $job->get_progress(), 'Queued jobs are still at 0% progress');
+        $this->assertNull($job->get_progress(), 'A queued job has not started and should have no progress');
 
         // Ensure we get progress during activity.
         $intermetiatestates = [

@@ -1090,8 +1090,6 @@ class archive_job {
      */
     public function get_progress(): ?int {
         switch ($this->get_status()) {
-            case archive_job_status::UNINITIALIZED:
-            case archive_job_status::QUEUED:
             case archive_job_status::PRE_PROCESSING:
                 return 0;
             case archive_job_status::ACTIVITY_ARCHIVING:

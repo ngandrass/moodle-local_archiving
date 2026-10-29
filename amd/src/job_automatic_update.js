@@ -128,6 +128,7 @@ const updateJobs = async(jobIds) => {
             await Promise.all([
                 renderStatus(jobMetadata.job),
                 renderTimeModified(jobMetadata.job),
+                renderLogs(jobMetadata.job),
             ]);
 
             // Queue any unfinished job for next polling cycle.
@@ -251,4 +252,32 @@ const renderTimeModified = async(job) => {
         window.console.error("Could not format date:", error);
         Notification.exception(error);
     });
+};
+
+/**
+ * Re-renders the logs element content related to provided job with its freshly
+ * fetched data.
+ *
+ * @param {object} job The job data as returned by the webservice to update
+ * @returns {Promise<void>}
+ */
+const renderLogs = async(job) => {
+    const logsElement = document.querySelector(
+        getSpanSelector(job.id, "logs-content")
+    );
+    // In case no such element exists, exit early.
+    if (!logsElement){
+        return;
+    }
+
+    logsElement.textContent = job.logs ?? "";
+
+    // If job is complete, remove pending dots.
+    if (job.complete){
+        document.querySelector(
+            getSpanSelector(job.id, "logs-pending")
+        ).innerHTML = "";
+    }
+
+    return;
 };

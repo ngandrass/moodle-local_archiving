@@ -477,4 +477,84 @@ final class get_job_metadata_test extends \advanced_testcase {
         // Timeouts have no meaningful progress, so the optional progress field is absent.
         $this->assertArrayNotHasKey('progress', $jobdata);
     }
+
+    /**
+     * Tests that a job with no log entries does not return a logs field
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_returns_job_without_logs(): void {
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $this->setAdminUser();
+
+        // Create a job and leave it in its initial UNINITIALIZED state (no logs).
+        $job = $this->generator()->create_archive_job(['userid' => get_admin()->id]);
+
+        $res = $this->call_webservice($job->get_id());
+
+        $this->assertSame('OK', $res['status']);
+        $this->assertArrayNotHasKey(
+            'logs',
+            $res['job'],
+            'A job with no log entries must not include a logs field.'
+        );
+    }
+
+    /**
+     * Tests that job log entries are returned intact, including angle brackets
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_returns_job_with_logs(): void {
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $this->setAdminUser();
+
+        $job = $this->make_job(archive_job_status::ACTIVITY_ARCHIVING);
+
+        // Add a controlled log entry that contains angle brackets.
+        $job->get_logger()->info('Processing <file.xml> for user [id=42]');
+        $job->get_logger()->info('Job status: Completed (100)');
+
+        $res = $this->call_webservice($job->get_id());
+
+        $this->assertSame('OK', $res['status']);
+        $this->assertArrayHasKey(
+            'logs',
+            $res['job'],
+            'A job with log entries must include a logs field.'
+        );
+        $logstext = $res['job']['logs'];
+
+        // The log message must be present and its angle brackets must survive
+        // PARAM_RAW cleaning (PARAM_TEXT would strip them via strip_tags).
+        $this->assertStringContainsString(
+            'Processing <file.xml> for user [id=42]',
+            $logstext,
+            'Log entries must be returned intact, including angle brackets.'
+        );
+        // Multiple entries are separated by \r\n.
+        $this->assertStringContainsString(
+            "\r\n",
+            $logstext,
+            'Log entries must be newline-separated.'
+        );
+    }
 }

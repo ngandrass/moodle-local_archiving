@@ -73,20 +73,22 @@
                 </a>
             </h3>
             <p>{{#str}} archive_job_logs_desc, local_archiving {{/str}}</p>
-            <div class="p-2 mb-2" style="background-color: #efefef; overflow: auto; max-height: 80vh;">
+            <div class="p-2 mb-2" style="background-color: #efefef; overflow: auto; max-height: 80vh; display: flex; flex-direction: column-reverse;">
+                {{^job.completed}}
+                    <span data-jobid="{{job.id}}" data-ref="logs-pending">
+                        <div class="d-flex py-2 pl-1 text-black-50">
+                            <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
+                            <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
+                            <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
+                        </div>
+                    </span>
+                {{/job.completed}}
                 {{#job.logs}}
-                    <pre class="m-0" style="overflow: unset;">{{#job.logs}}{{.}}{{/job.logs}}</pre>
+                    <pre class="m-0" style="overflow: unset;"><span data-jobid="{{job.id}}" data-ref="logs-content">{{#job.logs}}{{.}}{{/job.logs}}</span></pre>
                 {{/job.logs}}
                 {{^job.logs}}
                     <p>{{#str}} no_logs_available_desc, local_archiving {{/str}}</p>
                 {{/job.logs}}
-                {{^job.completed}}
-                    <div class="d-flex py-2 pl-1 text-black-50">
-                        <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
-                        <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
-                        <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
-                    </div>
-                {{/job.completed}}
             </div>
         </div>
     </div>

@@ -33,6 +33,7 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 use local_archiving\archive_job;
+use local_archiving\local\logging\logger;
 use local_archiving\local\type\archive_job_status;
 
 /**
@@ -122,6 +123,11 @@ class get_job_metadata extends external_api {
                             'Timestamp of the job\'s last update',
                             VALUE_REQUIRED,
                         ),
+                        'logs' => new external_value(
+                            PARAM_RAW,
+                            'Log lines related to the archiving activity of the job',
+                            VALUE_OPTIONAL,
+                        ),
                     ],
                     'Complete data about the job, suitable for any client-side consumption',
                     VALUE_OPTIONAL,
@@ -184,6 +190,15 @@ class get_job_metadata extends external_api {
         $progress = $job->get_progress();
         if ($progress !== null) {
             $jobdata['progress'] = $progress;
+        }
+
+        $logs = array_reduce(
+            $job->get_logger()->get_logs(limitnum: 99999),
+            fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
+            ""
+        );
+        if ($logs !== '') {
+            $jobdata['logs'] = $logs;
         }
 
         return [

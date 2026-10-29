@@ -37,12 +37,10 @@
             "logs": "raw log data here"
         },
         "urls": {
-            "back": "https://foo.bar.baz",
-            "refresh": "https://foo.bar.baz/whatever.php"
+            "back": "https://foo.bar.baz"
         }
     }
 }}
-
 <div class="container">
     <div class="row">
         <div class="col-12">
@@ -58,20 +56,7 @@
     </div>
     <div class="row">
         <div class="col-12">
-            <h3>
-                {{#str}} logs {{/str}}
-                <a
-                    href="{{{urls.refresh}}}"
-                    class="h4 mx-1"
-                    title="{{#str}} refresh, moodle {{/str}}"
-                    data-toggle="tooltip"
-                    data-placement="top"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                >
-                    <i class="fa fa-rotate-right"></i>
-                </a>
-            </h3>
+            <h3>{{#str}} logs {{/str}}</h3>
             <p>{{#str}} archive_job_logs_desc, local_archiving {{/str}}</p>
             <div class="p-2 mb-2" style="background-color: #efefef; overflow: auto; max-height: 80vh; display: flex; flex-direction: column-reverse;">
                 {{^job.completed}}

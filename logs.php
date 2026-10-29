@@ -75,7 +75,6 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
     ],
     'urls' => [
         'back' => new moodle_url('/local/archiving/index.php', ['courseid' => $course->id]),
-        'refresh' => $PAGE->url,
     ],
 ]);
 echo $OUTPUT->footer();

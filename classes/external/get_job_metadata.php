@@ -170,6 +170,31 @@ class get_job_metadata extends external_api {
                             'Names of the artifact files',
                             VALUE_REQUIRED,
                         ),
+                        'metadata' => new external_multiple_structure(
+                            new external_single_structure(
+                                [
+                                    'key' => new external_value(
+                                        PARAM_TEXT,
+                                        'Key of the metadata',
+                                        VALUE_REQUIRED,
+                                    ),
+                                    'humankey' => new external_value(
+                                        PARAM_TEXT,
+                                        'Human readable key of the metadata',
+                                        VALUE_REQUIRED,
+                                    ),
+                                    'value' => new external_value(
+                                        PARAM_TEXT,
+                                        'Value of the metadata',
+                                        VALUE_REQUIRED,
+                                    ),
+                                ],
+                                'Metadata elements',
+                                VALUE_OPTIONAL,
+                            ),
+                            'Metadata of the job',
+                            VALUE_REQUIRED,
+                        ),
                     ],
                     'Complete data about the job, suitable for any client-side consumption',
                     VALUE_OPTIONAL,
@@ -218,6 +243,8 @@ class get_job_metadata extends external_api {
 
         // Build response.
         $status = $job->get_status();
+        $jobmeta = $job->get_metadata_entries();
+
         $jobdata = [
             'id' => $job->get_id(),
             'complete' => $job->is_completed(),
@@ -231,6 +258,15 @@ class get_job_metadata extends external_api {
                 )->out(false),
             ],
             'content_count' => $job->get_content_count(),
+            'metadata' => array_map(
+                fn($key, $value): array => [
+                    'key' => $key,
+                    'humankey' => get_string("job_metadata_{$key}", 'local_archiving'),
+                    'value' => $value,
+                ],
+                array_keys($jobmeta),
+                array_values($jobmeta)
+            ),
         ];
 
         // ... Jobs progress, if any.

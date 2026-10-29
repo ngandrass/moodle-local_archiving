@@ -56,7 +56,9 @@
             {{> local_archiving/components/job_info }}
         </div>
         <div class="col-6">
-            {{> local_archiving/components/job_metadata }}
+            <span data-jobid="{{job.id}}" data-ref="metadata">
+                {{> local_archiving/components/job_metadata }}
+            </span>
         </div>
     </div>
     <div class="row">

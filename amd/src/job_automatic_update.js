@@ -138,9 +138,10 @@ const updateJobs = async(jobIds) => {
                 continue;
             }
 
-            // Job is complete, update job overview table action
+            // Job is complete, update job overview table action and metadata table.
             await Promise.all([
                 renderDownloadAction(jobMetadata.job),
+                renderMetadata(jobMetadata.job),
             ]);
         } catch (error) {
             window.console.error(`Failed to update job ${jobId}:`, error);
@@ -362,6 +363,36 @@ const renderDownloadAction = async(job) => {
         Templates.replaceNodeContents(spanSelector, html, js);
     }).catch((error) => {
         window.console.error('Template render failure for download action:', error);
+        Notification.exception(error);
+    });
+};
+
+/**
+ * Re-renders a jobs metadata table for the given job with its freshly fetched
+ * data.
+ *
+ * @param {object} job The job data as returned by the webservice to update
+ * @returns {Promise<void>}
+ */
+const renderMetadata = async(job) => {
+    const spanSelector = getSpanSelector(job.id, 'metadata');
+
+    // In case no such element exists, exit early.
+    if (!document.querySelector(spanSelector)){
+        return;
+    }
+
+    await Templates.renderForPromise(
+        'local_archiving/components/job_metadata',
+        {
+            job: {
+                'metadata': job.metadata ?? [],
+            }
+        },
+    ).then(({html, js}) => {
+        Templates.replaceNodeContents(spanSelector, html, js);
+    }).catch((error) => {
+        window.console.error('Template render failure for metadata table:', error);
         Notification.exception(error);
     });
 };

@@ -688,4 +688,78 @@ final class get_job_metadata_test extends \advanced_testcase {
             'Deleted files must be excluded from the reported file list.'
         );
     }
+
+    /**
+     * Tests that a job without metadata entries returns an empty metadata array
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_returns_job_without_metadata(): void {
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $this->setAdminUser();
+
+        $job = $this->make_job(archive_job_status::COMPLETED);
+
+        $res = $this->call_webservice($job->get_id());
+
+        $this->assertSame('OK', $res['status']);
+        $this->assertIsArray($res['job']['metadata'], 'The metadata field must always be present as an array.');
+        $this->assertSame([], $res['job']['metadata'], 'A job without metadata entries must return an empty array.');
+    }
+
+    /**
+     * Tests that stored metadata entries are returned with correct key, humankey,
+     * and value.
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_returns_job_with_metadata(): void {
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $this->setAdminUser();
+
+        $job = $this->make_job(archive_job_status::COMPLETED);
+        $job->set_metadata_entry('trigger', 'manual');
+        $job->set_metadata_entry('num_attempts', 3);
+
+        $res = $this->call_webservice($job->get_id());
+
+        $this->assertSame('OK', $res['status']);
+        $metadata = $res['job']['metadata'];
+        $this->assertCount(2, $metadata, 'The metadata array must contain one entry per stored key.');
+
+        // Build a key-indexed map for easier assertions.
+        $bymap = array_column($metadata, null, 'key');
+
+        // Trigger entry.
+        $this->assertArrayHasKey('trigger', $bymap, 'The trigger metadata entry must be present.');
+        $this->assertSame('Trigger', $bymap['trigger']['humankey'], 'Human-readable key must come from the lang string.');
+        $this->assertSame('manual', $bymap['trigger']['value'], 'The stored value must be returned as-is.');
+
+        // Num attempts entry (integer value cast to string by PARAM_TEXT).
+        $this->assertArrayHasKey('num_attempts', $bymap, 'The num_attempts metadata entry must be present.');
+        $this->assertSame(
+            'Number of attempts',
+            $bymap['num_attempts']['humankey'],
+            'Human-readable key must match the lang string.',
+        );
+        $this->assertSame('3', $bymap['num_attempts']['value'], 'Integer values must be returned as strings.');
+    }
 }

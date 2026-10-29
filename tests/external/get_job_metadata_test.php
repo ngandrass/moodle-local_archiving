@@ -370,6 +370,11 @@ final class get_job_metadata_test extends \advanced_testcase {
             $jobdata,
             'A queued job has not started running and must not report a progress value.'
         );
+        $this->assertArrayNotHasKey(
+            'download',
+            $res['job']['action_urls'],
+            'A queued job must not expose a download URL.'
+        );
     }
 
     /**
@@ -412,6 +417,11 @@ final class get_job_metadata_test extends \advanced_testcase {
             (int) $jobdata['progress'],
             'A running job must not yet report 100% progress.'
         );
+        $this->assertArrayNotHasKey(
+            'download',
+            $res['job']['action_urls'],
+            'A running job must not expose a download URL.'
+        );
     }
 
     /**
@@ -447,6 +457,12 @@ final class get_job_metadata_test extends \advanced_testcase {
         $this->assertNotSame('', $jobdata['status_display_args']['text']);
         $this->assertNotSame('', $jobdata['status_display_args']['color']);
         $this->assertNotSame('', $jobdata['status_display_args']['help']);
+        $this->assertArrayHasKey('action_urls', $jobdata);
+        $this->assertArrayNotHasKey(
+            'download',
+            $jobdata['action_urls'],
+            'A completed job without artifacts must not expose a download URL.'
+        );
     }
 
     /**
@@ -476,6 +492,11 @@ final class get_job_metadata_test extends \advanced_testcase {
         $this->assertSame((int) archive_job_status::TIMEOUT->value, (int) $jobdata['status']);
         // Timeouts have no meaningful progress, so the optional progress field is absent.
         $this->assertArrayNotHasKey('progress', $jobdata);
+        $this->assertArrayNotHasKey(
+            'download',
+            $res['job']['action_urls'],
+            'A timed-out job must not expose a download URL.'
+        );
     }
 
     /**

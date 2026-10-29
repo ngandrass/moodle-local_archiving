@@ -33,6 +33,7 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 use local_archiving\archive_job;
+use local_archiving\file_handle;
 use local_archiving\local\logging\logger;
 use local_archiving\local\type\archive_job_status;
 
@@ -128,6 +129,17 @@ class get_job_metadata extends external_api {
                             'Log lines related to the archiving activity of the job',
                             VALUE_OPTIONAL,
                         ),
+                        'action_urls' => new external_single_structure(
+                            [
+                                'download' => new external_value(
+                                    PARAM_RAW,
+                                    'URL to download the job artifacts, present only when the download is available',
+                                    VALUE_OPTIONAL,
+                                ),
+                            ],
+                            'Action URLs for this job',
+                            VALUE_REQUIRED,
+                        ),
                     ],
                     'Complete data about the job, suitable for any client-side consumption',
                     VALUE_OPTIONAL,
@@ -185,6 +197,7 @@ class get_job_metadata extends external_api {
             'status_display_args' => (array) $status->status_display_args(),
             'timecreated' => $job->get_timecreated(),
             'timemodified' => $job->get_timemodified(),
+            'action_urls' => [],
         ];
 
         $progress = $job->get_progress();
@@ -199,6 +212,18 @@ class get_job_metadata extends external_api {
         );
         if ($logs !== '') {
             $jobdata['logs'] = $logs;
+        }
+
+        if (
+            archive_job_status::from($status->value)->is_final() &&
+            count(file_handle::get_by_jobid($job->get_id())) > 0
+        ) {
+            $jobdata['action_urls']['download'] = (
+                new \moodle_url(
+                    '/local/archiving/download.php',
+                    ['jobid' => $job->get_id()],
+                )
+            )->out(false);
         }
 
         return [

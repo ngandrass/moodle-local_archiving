@@ -136,6 +136,9 @@ const updateJobs = async(jobIds) => {
                 pendingJobIds.push(jobId);
                 continue;
             }
+
+            // Job is complete: update the download action button.
+            await renderDownloadAction(jobMetadata.job);
         } catch (error) {
             window.console.error(`Failed to update job ${jobId}:`, error);
             Notification.exception(error);
@@ -280,4 +283,42 @@ const renderLogs = async(job) => {
     }
 
     return;
+};
+
+/**
+ * Re-renders the download action button for the given job with its freshly
+ * fetched data.
+ *
+ * @param {object} job The job data as returned by the webservice to update
+ * @returns {Promise<void>}
+ */
+const renderDownloadAction = async(job) => {
+    const hasurl = (job.action_urls?.download ?? null) !== null;
+
+    // NOTE: The button class, icon and label are fixed; only the action URL is
+    //       provided by the webservice and only when the download is available.
+    const templateContext = {
+        label: hasurl
+            ? await getString('download')
+            : await getString('files_require_successful_job', 'local_archiving'),
+        btnclass: hasurl ? 'btn-success' : 'btn-outline-success',
+        icon: 'fa-download',
+    };
+    if (hasurl) {
+        templateContext.url = job.action_urls.download;
+    }
+
+    await Templates.renderForPromise(
+        'local_archiving/components/action_button',
+        templateContext,
+    ).then(({html, js}) => {
+        Templates.replaceNodeContents(
+            getSpanSelector(job.id, 'action-download'),
+            html,
+            js,
+        );
+    }).catch((error) => {
+        window.console.error('Template render failure for download action:', error);
+        Notification.exception(error);
+    });
 };

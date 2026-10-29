@@ -404,6 +404,12 @@ class job_overview_table extends \table_sql {
         $html = \html_writer::start_span($groupclass);
 
         // Action: Download.
+        $html .= \html_writer::start_span( // Identifiable span for dynamic updates.
+            attributes: [
+                'data-jobid' => $values->id,
+                'data-ref' => 'action-download',
+            ],
+        );
         $files = $this->get_file_handles($values->id);
         if (archive_job_status::from($values->status)->is_final() && count($files) > 0) {
             $downloadurl = new \moodle_url('/local/archiving/download.php', ['jobid' => $values->id]);
@@ -416,6 +422,7 @@ class job_overview_table extends \table_sql {
                 'fa-download'
             );
         }
+        $html .= \html_writer::end_span(); // End of identifiable span for dynamic updates.
 
         // Action: Show job details.
         $html .= $this->action_button(

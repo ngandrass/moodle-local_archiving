@@ -49,9 +49,11 @@
     <tr>
         <td>{{#str}} status {{/str}}</td>
         <td>
-            {{#job.status}}
-                {{> local_archiving/components/job_status }}
-            {{/job.status}}
+            <span data-jobid="{{job.id}}" data-ref="status">
+                {{#job.status}}
+                    {{> local_archiving/components/job_status }}
+                {{/job.status}}
+            </span>
         </td>
     </tr>
     <tr>

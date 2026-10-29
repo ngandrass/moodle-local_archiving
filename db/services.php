@@ -36,4 +36,12 @@ $functions = [
         'capabilities' => 'local/archiving:view',
         'services' => [],
     ],
+    'local_archiving_get_job_metadata' => [
+        'classname' => 'local_archiving\external\get_job_metadata',
+        'description' => 'Retrieves the current metadata of an archive job for client-side polling',
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => 'local/archiving:view',
+        'services' => [],
+    ],
 ];

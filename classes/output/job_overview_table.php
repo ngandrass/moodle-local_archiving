@@ -359,7 +359,18 @@ class job_overview_table extends \table_sql {
         $status = archive_job_status::from($values->status)->status_display_args();
         $progress = $job->get_progress();
 
-        return $OUTPUT->render_from_template(
+        // Identifiable span for dynamic updates.
+        $spanattributes = [
+            'data-jobid' => $values->id,
+            'data-ref' => 'status',
+            'data-layout' => 'vertical',
+        ];
+        if ($job->is_completed()) {
+            $spanattributes['data-finalized'] = 'true';
+        }
+        $html = \html_writer::start_span(attributes: $spanattributes);
+
+        $html .= $OUTPUT->render_from_template(
             'local_archiving/components/job_status',
             [
                 'badge_text' => $status->text,
@@ -371,6 +382,10 @@ class job_overview_table extends \table_sql {
                 'layout_vertical' => true,
             ],
         );
+
+        $html .= \html_writer::end_span();
+
+        return $html;
     }
 
     /**

@@ -24,6 +24,8 @@
  */
 
 import Ajax from 'core/ajax';
+import {getString} from 'core/str';
+import UserDate from 'core/user_date';
 import Templates from 'core/templates';
 import Notification from 'core/notification';
 
@@ -122,8 +124,11 @@ const updateJobs = async(jobIds) => {
                 continue;
             }
 
-            // Update any per page status element of this job.
-            await renderStatus(jobMetadata.job);
+            // Update all per-page elements of this job in parallel.
+            await Promise.all([
+                renderStatus(jobMetadata.job),
+                renderTimeModified(jobMetadata.job),
+            ]);
 
             // Queue any unfinished job for next polling cycle.
             if (!jobMetadata.job.complete) {
@@ -218,4 +223,32 @@ const renderStatus = async(job) => {
             Notification.exception(error);
         }
     );
+};
+
+/**
+ * Re-renders any "last modified" element related to provided job with its
+ * freshly fetched data.
+ *
+ * @param {object} job The job data as returned by the webservice to update
+ * @returns {Promise<void>}
+ */
+const renderTimeModified = async(job) => {
+    const timemodifiedElement = document.querySelector(
+        getSpanSelector(job.id, "timemodified")
+    );
+    // NOTE: In case no such element exists, exit early.
+    if (!timemodifiedElement){
+        return;
+    }
+    getString('strftimedatetimeaccurate', 'core_langconfig').then(
+        (formatString) => UserDate.get(
+            [{'timestamp': job.timemodified, 'format': formatString}]
+        )
+    ).then((formattedDates) => {
+        timemodifiedElement.textContent = formattedDates[0];
+        return;
+    }).catch((error) => {
+        window.console.error("Could not format date:", error);
+        Notification.exception(error);
+    });
 };

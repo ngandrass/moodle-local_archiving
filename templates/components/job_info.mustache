@@ -59,13 +59,15 @@
     <tr>
         <td>{{#str}} timecreated {{/str}}</td>
         <td>
-            {{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
+            {{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetimeaccurate, core_langconfig {{/str}} {{/userdate}}
         </td>
     </tr>
     <tr>
         <td>{{#str}} lastmodified {{/str}}</td>
         <td>
-            {{#userdate}} {{job.timemodified}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
+            <span data-jobid="{{job.id}}" data-ref="timemodified">
+                {{#userdate}} {{job.timemodified}}, {{#str}} strftimedatetimeaccurate, core_langconfig {{/str}} {{/userdate}}
+            </span>
         </td>
     </tr>
 </table>

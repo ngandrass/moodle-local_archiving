@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die(); // @codeCoverageIgnore
 
 use core_external\external_api;
 use core_external\external_function_parameters;
+use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use local_archiving\archive_job;
@@ -136,8 +137,37 @@ class get_job_metadata extends external_api {
                                     'URL to download the job artifacts, present only when the download is available',
                                     VALUE_OPTIONAL,
                                 ),
+                                'cm' => new external_value(
+                                    PARAM_RAW,
+                                    'URL to the related activity',
+                                    VALUE_REQUIRED,
+                                ),
+                                'job' => new external_value(
+                                    PARAM_RAW,
+                                    'URL to the job details page',
+                                    VALUE_REQUIRED,
+                                ),
                             ],
                             'Action URLs for this job',
+                            VALUE_REQUIRED,
+                        ),
+                        'cm_name' => new external_value(
+                            PARAM_TEXT,
+                            'Display name of the related activity',
+                            VALUE_REQUIRED,
+                        ),
+                        'content_count' => new external_value(
+                            PARAM_INT,
+                            'Number of archived objects (0 if none)',
+                            VALUE_REQUIRED,
+                        ),
+                        'files' => new external_multiple_structure(
+                            new external_value(
+                                PARAM_TEXT,
+                                'Name of an artifact file',
+                                VALUE_REQUIRED,
+                            ),
+                            'Names of the artifact files',
                             VALUE_REQUIRED,
                         ),
                     ],
@@ -186,10 +216,8 @@ class get_job_metadata extends external_api {
             $job->set_status(archive_job_status::TIMEOUT);
         }
 
-        // Prepare data.
-        $status = $job->get_status();
-
         // Build response.
+        $status = $job->get_status();
         $jobdata = [
             'id' => $job->get_id(),
             'complete' => $job->is_completed(),
@@ -197,14 +225,21 @@ class get_job_metadata extends external_api {
             'status_display_args' => (array) $status->status_display_args(),
             'timecreated' => $job->get_timecreated(),
             'timemodified' => $job->get_timemodified(),
-            'action_urls' => [],
+            'action_urls' => [
+                'job' => (
+                    new \moodle_url('/local/archiving/job.php', ['id' => $job->get_id()])
+                )->out(false),
+            ],
+            'content_count' => $job->get_content_count(),
         ];
 
+        // ... Jobs progress, if any.
         $progress = $job->get_progress();
         if ($progress !== null) {
             $jobdata['progress'] = $progress;
         }
 
+        // ... Formatted logs blob, if any.
         $logs = array_reduce(
             $job->get_logger()->get_logs(limitnum: 99999),
             fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
@@ -214,10 +249,12 @@ class get_job_metadata extends external_api {
             $jobdata['logs'] = $logs;
         }
 
-        if (
-            archive_job_status::from($status->value)->is_final() &&
-            count(file_handle::get_by_jobid($job->get_id())) > 0
-        ) {
+        $filehandles = file_handle::get_by_jobid($job->get_id());
+        [, $cm] = get_course_and_cm_from_cmid($job->get_cmid());
+
+        // ... Action URLs.
+        $jobdata['action_urls']['cm'] = $cm->get_url()->out(false);
+        if ($status->is_final() && count($filehandles) > 0) {
             $jobdata['action_urls']['download'] = (
                 new \moodle_url(
                     '/local/archiving/download.php',
@@ -226,6 +263,16 @@ class get_job_metadata extends external_api {
             )->out(false);
         }
 
+        // ... Course module name.
+        $jobdata['cm_name'] = $cm->get_formatted_name();
+
+        // ... Associated (not deleted) artifact file names, if any.
+        $jobdata['files'] = array_values(array_map(
+            fn ($handle) => $handle->filename,
+            array_filter($filehandles, fn ($handle) => !$handle->deleted)
+        ));
+
+        // Send successfull response.
         return [
             'status' => 'OK',
             'job' => $jobdata,

@@ -21,6 +21,7 @@ use local_archiving\local\type\archive_job_fingerprint;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
+use local_archiving\local\type\task_content_metadata;
 use local_archiving\local\util\course_util;
 use local_archiving\task\process_archive_job;
 use local_archiving\task\retrieve_remote_file;
@@ -900,6 +901,42 @@ final class archive_job_test extends \advanced_testcase {
             $job->set_status($state);
             $this->assertSame(100, $job->get_progress(), "Progress should be 100% after {$state->name} state");
         }
+    }
+
+    /**
+     * Tests that the content count includes all activity tasks of a job.
+     *
+     * @covers \local_archiving\archive_job::get_content_count
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_content_count(): void {
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $userid = get_admin()->id;
+
+        // A fresh job has no archived content yet.
+        $this->assertSame(0, $job->get_content_count(), 'A job without any task content should count as zero.');
+
+        // Archive two objects across two tasks.
+        $task1 = $this->generator()->create_activity_archiving_task([], $job);
+        $task1->store_task_content_metadata([
+            new task_content_metadata($task1->get_id(), $userid, null, null, 'Content 1'),
+            new task_content_metadata($task1->get_id(), $userid, null, null, 'Content 2'),
+        ]);
+        $task2 = $this->generator()->create_activity_archiving_task([], $job);
+        $task2->store_task_content_metadata([
+            new task_content_metadata($task2->get_id(), $userid, null, null, 'Content 3'),
+        ]);
+
+        $this->assertSame(
+            3,
+            $job->get_content_count(),
+            'The content count must span all tasks of the job.'
+        );
     }
 
     /**

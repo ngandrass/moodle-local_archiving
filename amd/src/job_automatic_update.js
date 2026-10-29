@@ -127,6 +127,7 @@ const updateJobs = async(jobIds) => {
             // Update all per-page elements of this job in parallel.
             await Promise.all([
                 renderStatus(jobMetadata.job),
+                renderActivity(jobMetadata.job),
                 renderTimeModified(jobMetadata.job),
                 renderLogs(jobMetadata.job),
             ]);
@@ -137,8 +138,10 @@ const updateJobs = async(jobIds) => {
                 continue;
             }
 
-            // Job is complete: update the download action button.
-            await renderDownloadAction(jobMetadata.job);
+            // Job is complete, update job overview table action
+            await Promise.all([
+                renderDownloadAction(jobMetadata.job),
+            ]);
         } catch (error) {
             window.console.error(`Failed to update job ${jobId}:`, error);
             Notification.exception(error);
@@ -230,6 +233,43 @@ const renderStatus = async(job) => {
 };
 
 /**
+ * Re-renders the activity column for the given job with its freshly fetched
+ * data.
+ *
+ * @param {object} job The job data as returned by the webservice to update
+ * @returns {Promise<void>}
+ */
+const renderActivity = async(job) => {
+    const spanSelector = getSpanSelector(job.id, 'activity');
+
+    // In case no such element exists, exit early.
+    if (!document.querySelector(spanSelector)){
+        return;
+    }
+
+    await Templates.renderForPromise(
+        'local_archiving/components/job_activity',
+        {
+            cm_url: job.action_urls.cm,
+            cm_name: job.cm_name,
+            job_url: job.action_urls.job,
+            content_count: (job.content_count ?? 0) > 0 ? job.content_count : null,
+            content_is_multiple: job.content_count > 1,
+            files: job.files ?? [],
+        },
+    ).then(({html, js}) => {
+        Templates.replaceNodeContents(
+            spanSelector,
+            html,
+            js,
+        );
+    }).catch((error) => {
+        window.console.error('Template render failure for activity column:', error);
+        Notification.exception(error);
+    });
+};
+
+/**
  * Re-renders any "last modified" element related to provided job with its
  * freshly fetched data.
  *
@@ -293,6 +333,13 @@ const renderLogs = async(job) => {
  * @returns {Promise<void>}
  */
 const renderDownloadAction = async(job) => {
+    const spanSelector = getSpanSelector(job.id, 'action-download');
+
+    // In case no such element exists, exit early.
+    if (!document.querySelector(spanSelector)){
+        return;
+    }
+
     const hasurl = (job.action_urls?.download ?? null) !== null;
 
     // NOTE: The button class, icon and label are fixed; only the action URL is
@@ -312,11 +359,7 @@ const renderDownloadAction = async(job) => {
         'local_archiving/components/action_button',
         templateContext,
     ).then(({html, js}) => {
-        Templates.replaceNodeContents(
-            getSpanSelector(job.id, 'action-download'),
-            html,
-            js,
-        );
+        Templates.replaceNodeContents(spanSelector, html, js);
     }).catch((error) => {
         window.console.error('Template render failure for download action:', error);
         Notification.exception(error);

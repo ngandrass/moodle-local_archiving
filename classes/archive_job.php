@@ -935,6 +935,14 @@ class archive_job {
         return $this->context;
     }
 
+    /** Retrieves the course module the archive job relates to.
+     *
+     * @return int ID of the course module.
+     */
+    public function get_cmid(): int {
+        return $this->cmid;
+    }
+
     /**
      * Retrieves the ID of the user that owns this job
      *
@@ -1115,6 +1123,23 @@ class archive_job {
             default:
                 return null; // @codeCoverageIgnore
         }
+    }
+
+    /**
+     * Counts the number of archived objects associated with this job.
+     *
+     * @return int Number of archived objects for this job
+     * @throws \dml_exception
+     */
+    public function get_content_count(): int {
+        global $DB;
+
+        return $DB->count_records_sql(
+            'SELECT COUNT(c.id) FROM {' . db_table::CONTENT->value . '} c ' .
+                'JOIN {' . db_table::ACTIVITY_TASK->value . '} t ON t.id = c.taskid ' .
+                'WHERE t.jobid = :jobid',
+            ['jobid' => $this->id]
+        );
     }
 
     /**

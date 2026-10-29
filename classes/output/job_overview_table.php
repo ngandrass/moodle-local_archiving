@@ -292,7 +292,15 @@ class job_overview_table extends \table_sql {
             }
         }
 
-        return $OUTPUT->render_from_template(
+        // Identifiable span for dynamic updates.
+        $html = \html_writer::start_span(
+            attributes: [
+                'data-jobid' => $values->id,
+                'data-ref' => 'activity',
+            ],
+        );
+
+        $html .= $OUTPUT->render_from_template(
             'local_archiving/components/job_activity',
             [
                 'cm_url' => $cmurl->out(false),
@@ -306,6 +314,10 @@ class job_overview_table extends \table_sql {
                 'files' => $filenames,
             ],
         );
+
+        $html .= \html_writer::end_span();
+
+        return $html;
     }
 
     /**

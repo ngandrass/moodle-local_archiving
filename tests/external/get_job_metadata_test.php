@@ -22,6 +22,7 @@ use core_external\external_function_parameters;
 use local_archiving\archive_job;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
+use local_archiving\local\type\task_content_metadata;
 
 /**
  * Tests for the get_job_metadata external function.
@@ -375,6 +376,9 @@ final class get_job_metadata_test extends \advanced_testcase {
             $res['job']['action_urls'],
             'A queued job must not expose a download URL.'
         );
+        $this->assertNotSame('', $jobdata['cm_name']);
+        $this->assertNotSame('', $jobdata['action_urls']['cm']);
+        $this->assertNotSame('', $jobdata['action_urls']['job']);
     }
 
     /**
@@ -422,6 +426,9 @@ final class get_job_metadata_test extends \advanced_testcase {
             $res['job']['action_urls'],
             'A running job must not expose a download URL.'
         );
+        $this->assertNotSame('', $jobdata['cm_name']);
+        $this->assertNotSame('', $jobdata['action_urls']['cm']);
+        $this->assertNotSame('', $jobdata['action_urls']['job']);
     }
 
     /**
@@ -463,6 +470,11 @@ final class get_job_metadata_test extends \advanced_testcase {
             $jobdata['action_urls'],
             'A completed job without artifacts must not expose a download URL.'
         );
+        $this->assertNotSame('', $jobdata['cm_name']);
+        $this->assertNotSame('', $jobdata['action_urls']['cm']);
+        $this->assertNotSame('', $jobdata['action_urls']['job']);
+        $this->assertSame([], $jobdata['files'], 'A job without files must have an empty files list.');
+        $this->assertSame(0, $jobdata['content_count'], 'A job without archived content must have a content count of zero.');
     }
 
     /**
@@ -497,6 +509,9 @@ final class get_job_metadata_test extends \advanced_testcase {
             $res['job']['action_urls'],
             'A timed-out job must not expose a download URL.'
         );
+        $this->assertNotSame('', $jobdata['cm_name']);
+        $this->assertNotSame('', $jobdata['action_urls']['cm']);
+        $this->assertNotSame('', $jobdata['action_urls']['job']);
     }
 
     /**
@@ -576,6 +591,101 @@ final class get_job_metadata_test extends \advanced_testcase {
             "\r\n",
             $logstext,
             'Log entries must be newline-separated.'
+        );
+    }
+
+    /**
+     * Tests that a completed job with content and artifacts reports the
+     * activity column data.
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_returns_completed_job_with_content_and_files(): void {
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $this->setAdminUser();
+
+        $job = $this->make_job(archive_job_status::COMPLETED);
+        $userid = get_admin()->id;
+
+        // Archive two objects across two tasks and one artifact file.
+        $task1 = $this->generator()->create_activity_archiving_task([], $job);
+        $task1->store_task_content_metadata([
+            new task_content_metadata($task1->get_id(), $userid, null, null, 'Content 1'),
+            new task_content_metadata($task1->get_id(), $userid, null, null, 'Content 2'),
+        ]);
+        $task2 = $this->generator()->create_activity_archiving_task([], $job);
+        $task2->store_task_content_metadata([
+            new task_content_metadata($task2->get_id(), $userid, null, null, 'Content 3'),
+        ]);
+        $this->generator()->create_file_handle([
+            'jobid' => $job->get_id(),
+            'filename' => 'archive-42.zip',
+        ]);
+
+        $res = $this->call_webservice($job->get_id());
+
+        $this->assertSame('OK', $res['status']);
+        $jobdata = $res['job'];
+        $this->assertNotSame('', $jobdata['cm_name']);
+        $this->assertNotSame('', $jobdata['action_urls']['cm']);
+        $this->assertNotSame('', $jobdata['action_urls']['job']);
+        $this->assertSame(
+            3,
+            (int) $jobdata['content_count'],
+            'The content count must span all tasks of the job.'
+        );
+        $this->assertSame(['archive-42.zip'], $jobdata['files']);
+
+        // With a final status and an artifact, the download action is available.
+        $this->assertArrayHasKey('download', $jobdata['action_urls']);
+    }
+
+    /**
+     * Tests that deleted artifact files are excluded from the reported file
+     * list.
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_excludes_deleted_files(): void {
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $this->setAdminUser();
+
+        $job = $this->make_job(archive_job_status::COMPLETED);
+        $this->generator()->create_file_handle([
+            'jobid' => $job->get_id(),
+            'filename' => 'kept.zip',
+        ]);
+        $deleted = $this->generator()->create_file_handle([
+            'jobid' => $job->get_id(),
+            'filename' => 'removed.zip',
+        ]);
+        $deleted->mark_as_deleted();
+
+        $res = $this->call_webservice($job->get_id());
+
+        $this->assertSame('OK', $res['status']);
+        $this->assertSame(
+            ['kept.zip'],
+            $res['job']['files'],
+            'Deleted files must be excluded from the reported file list.'
         );
     }
 }

@@ -201,6 +201,7 @@ const getJobMetadata = async(job) => {
 const renderStatus = async(job) => {
     const spanSelector = getSpanSelector(job.id, "status");
     const statusDisplayArgs = job.status_display_args;
+    const layout = document.querySelector(spanSelector)?.dataset.layout ?? null;
 
     let templateContext = {
         "badge_text": statusDisplayArgs.text,
@@ -208,14 +209,13 @@ const renderStatus = async(job) => {
         "tooltip_text": statusDisplayArgs.help,
         "progress": job.progress ?? null,
         "has_progress": (job.progress ?? null) !== null && job.progress < 100,
-    };
 
-    // Omit modified time when the vertical layout is used.
-    const statusElement = document.querySelector(spanSelector);
-    if ((statusElement.dataset.layout ?? null) == "vertical"){
-        templateContext["layout_vertical"] = true;
-        templateContext["time_modified"] = job.timemodified;
-    }
+        // Omit modified time when the vertical layout is used.
+        // NOTE: This is ugly but wins a battle with the linting gods, that do
+        //       neither accept bracket notation nor camel case identifiers.
+        "layout_vertical": (layout == "vertical") ? true : null,
+        "time_modified": (layout == "vertical") ? job.timemodified : null,
+    };
 
     await Templates.renderForPromise(
         'local_archiving/components/job_status',
@@ -244,19 +244,19 @@ const renderActivity = async(job) => {
     const spanSelector = getSpanSelector(job.id, 'activity');
 
     // In case no such element exists, exit early.
-    if (!document.querySelector(spanSelector)){
+    if (!document.querySelector(spanSelector)) {
         return;
     }
 
     await Templates.renderForPromise(
         'local_archiving/components/job_activity',
         {
-            cm_url: job.action_urls.cm,
-            cm_name: job.cm_name,
-            job_url: job.action_urls.job,
-            content_count: (job.content_count ?? 0) > 0 ? job.content_count : null,
-            content_is_multiple: job.content_count > 1,
-            files: job.files ?? [],
+            "cm_url": job.action_urls.cm,
+            "cm_name": job.cm_name,
+            "job_url": job.action_urls.job,
+            "content_count": (job.content_count ?? 0) > 0 ? job.content_count : null,
+            "content_is_multiple": job.content_count > 1,
+            "files": job.files ?? [],
         },
     ).then(({html, js}) => {
         Templates.replaceNodeContents(
@@ -264,6 +264,7 @@ const renderActivity = async(job) => {
             html,
             js,
         );
+        return;
     }).catch((error) => {
         window.console.error('Template render failure for activity column:', error);
         Notification.exception(error);
@@ -282,7 +283,7 @@ const renderTimeModified = async(job) => {
         getSpanSelector(job.id, "timemodified")
     );
     // NOTE: In case no such element exists, exit early.
-    if (!timemodifiedElement){
+    if (!timemodifiedElement) {
         return;
     }
     getString('strftimedatetimeaccurate', 'core_langconfig').then(
@@ -310,14 +311,14 @@ const renderLogs = async(job) => {
         getSpanSelector(job.id, "logs-content")
     );
     // In case no such element exists, exit early.
-    if (!logsElement){
+    if (!logsElement) {
         return;
     }
 
     logsElement.textContent = job.logs ?? "";
 
     // If job is complete, remove pending dots.
-    if (job.complete){
+    if (job.complete) {
         document.querySelector(
             getSpanSelector(job.id, "logs-pending")
         ).innerHTML = "";
@@ -337,7 +338,7 @@ const renderDownloadAction = async(job) => {
     const spanSelector = getSpanSelector(job.id, 'action-download');
 
     // In case no such element exists, exit early.
-    if (!document.querySelector(spanSelector)){
+    if (!document.querySelector(spanSelector)) {
         return;
     }
 
@@ -361,6 +362,7 @@ const renderDownloadAction = async(job) => {
         templateContext,
     ).then(({html, js}) => {
         Templates.replaceNodeContents(spanSelector, html, js);
+        return;
     }).catch((error) => {
         window.console.error('Template render failure for download action:', error);
         Notification.exception(error);
@@ -378,7 +380,7 @@ const renderMetadata = async(job) => {
     const spanSelector = getSpanSelector(job.id, 'metadata');
 
     // In case no such element exists, exit early.
-    if (!document.querySelector(spanSelector)){
+    if (!document.querySelector(spanSelector)) {
         return;
     }
 
@@ -391,6 +393,7 @@ const renderMetadata = async(job) => {
         },
     ).then(({html, js}) => {
         Templates.replaceNodeContents(spanSelector, html, js);
+        return;
     }).catch((error) => {
         window.console.error('Template render failure for metadata table:', error);
         Notification.exception(error);

@@ -24,6 +24,10 @@
 - Move archive job metadata from the job logs page to the new job details page
 - Make archive job contents searchable by user
 - Improve usability of archive job overview table on small screens
+- Automatically update the details of an unfinished archive job in the job overview table without needing to reload the page
+- Automatically update logs on the job details page without needing to reload the page
+- Show spinning progress indicator and dynamically updated progress in percent for running archive jobs
+- Add new AJAX web service function `local_archiving_get_job_metadata` to query the current state of an archive job
 
 
 ## Version 1.1.1 (2026100600)

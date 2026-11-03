@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.5 Chrome/138.0.7204.251 Electron/37.6.1 Safari/537.36">
   <diagram name="Page-1" id="lW3aPd_w3BEKXG8VRajk">
-    <mxGraphModel dx="1227" dy="1397" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1310" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="1165" dy="1327" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1310" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -23,12 +23,12 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-7" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=30;collapsible=0;container=0;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Worker Services&lt;/font&gt;" vertex="1">
-          <mxGeometry height="150" width="440" x="540" y="680" as="geometry" />
+          <mxGeometry height="150" width="440" x="430" y="680" as="geometry" />
         </mxCell>
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-46" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="670" y="589.9999999999999" as="sourcePoint" />
-            <mxPoint x="670" y="740" as="targetPoint" />
+            <mxPoint x="560" y="589.9999999999999" as="sourcePoint" />
+            <mxPoint x="560" y="740" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-1" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=30;swimlaneLine=1;collapsible=0;container=0;fillColor=default;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Moodle&lt;/font&gt;" vertex="1">
@@ -91,8 +91,8 @@
         </mxCell>
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-47" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="640" y="740" as="sourcePoint" />
-            <mxPoint x="640" y="600" as="targetPoint" />
+            <mxPoint x="530" y="740" as="sourcePoint" />
+            <mxPoint x="530" y="600" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="H9DcRYAXyD7V10C6q45s-21" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=30;collapsible=0;" value="&lt;span style=&quot;font-size: 18px;&quot;&gt;External Systems&lt;/span&gt;" vertex="1">
@@ -130,11 +130,11 @@
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-44" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="850" y="630" />
-              <mxPoint x="850" y="630" />
+              <mxPoint x="740" y="630" />
+              <mxPoint x="740" y="630" />
             </Array>
-            <mxPoint x="850" y="740" as="sourcePoint" />
-            <mxPoint x="850" y="580" as="targetPoint" />
+            <mxPoint x="740" y="740" as="sourcePoint" />
+            <mxPoint x="740" y="580" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="NRSCf0xzdUJ-CUg3j_1p-6" edge="1" parent="1" source="zBMR9Xl9BZe3JkmsXcy5-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NRSCf0xzdUJ-CUg3j_1p-1">
@@ -161,8 +161,8 @@
         </mxCell>
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-28" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;fillColor=#f5f5f5;strokeColor=#666666;entryX=0.581;entryY=0.033;entryDx=0;entryDy=0;entryPerimeter=0;" target="zBMR9Xl9BZe3JkmsXcy5-14">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="880" y="590" as="sourcePoint" />
-            <mxPoint x="880" y="950" as="targetPoint" />
+            <mxPoint x="770" y="590" as="sourcePoint" />
+            <mxPoint x="770" y="950" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;spacing=2;dashed=1;opacity=70;textOpacity=70;shadow=0;container=0;" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 12px;&quot;&gt;&amp;lt;&amp;lt;&amp;nbsp;&lt;/font&gt;&lt;span style=&quot;font-family: &amp;quot;Courier New&amp;quot;;&quot;&gt;Activity Archiving Driver&lt;/span&gt;&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 12px;&quot;&gt;&amp;nbsp;&amp;gt;&amp;gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;Another Archiver&lt;/div&gt;" vertex="1">
@@ -189,10 +189,10 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;spacing=2;opacity=70;dashed=1;textOpacity=70;container=0;" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 12px;&quot;&gt;&amp;lt;&amp;lt; Worker Service &amp;gt;&amp;gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;Another Archive Worker&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="180" x="775" y="740" as="geometry" />
+          <mxGeometry height="60" width="180" x="665" y="740" as="geometry" />
         </mxCell>
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;spacing=2;shadow=1;container=0;" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 12px;&quot;&gt;&amp;lt;&amp;lt; Worker Service &amp;gt;&amp;gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;Moodle Archiving Worker&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="180" x="565" y="740" as="geometry" />
+          <mxGeometry height="60" width="180" x="455" y="740" as="geometry" />
         </mxCell>
         <mxCell id="zBMR9Xl9BZe3JkmsXcy5-12" parent="1" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.02564102564102564;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;container=0;" value="&lt;font face=&quot;Courier New&quot;&gt;&amp;lt;&amp;lt; Core API &amp;gt;&amp;gt;&lt;/font&gt;&lt;br&gt;&lt;div&gt;Moodle Webservices / External API&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="600" x="353.75" y="540" as="geometry" />
@@ -236,6 +236,16 @@
         </mxCell>
         <mxCell id="W_B_JT6DtsSxAwiwUtmw-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;spacing=2;shadow=0;container=0;opacity=70;dashed=1;textOpacity=70;" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 12px;&quot;&gt;&amp;lt;&amp;lt; Archiving Trigger &amp;gt;&amp;gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;Another Trigger&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="180" x="775" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="FZcW50C4JzaOZnjqMJ-u-1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" x="-0.1604" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="520" />
+              <mxPoint x="440" y="520" />
+            </Array>
+            <mxPoint x="439.87" y="539.78" as="sourcePoint" />
+            <mxPoint x="440.02857142857147" y="470" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>

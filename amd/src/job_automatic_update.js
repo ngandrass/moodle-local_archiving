@@ -319,9 +319,12 @@ const renderLogs = async(job) => {
 
     // If job is complete, remove pending dots.
     if (job.complete) {
-        document.querySelector(
+        const logsPendingElement = document.querySelector(
             getElementSelector(job.id, "logs-pending")
-        ).innerHTML = "";
+        );
+        if (logsPendingElement) {
+            logsPendingElement.innerHTML = "";
+        }
     }
 
     return;

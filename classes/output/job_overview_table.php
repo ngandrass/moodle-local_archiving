@@ -117,7 +117,6 @@ class job_overview_table extends \table_sql {
         $this->userfilter = $userid > 0 ? get_archive_users::get_exported_user($userid, $ctx) : null;
 
         $refreshhtml = $OUTPUT->render_from_template('local_archiving/components/refresh_button', [
-            'lastupdated' => time(),
             'refreshurl' => $this->add_filter_params($PAGE->url),
         ]);
 

@@ -31,6 +31,7 @@
                 "progress": "42",
                 "has_progress": true
             },
+            "completed": 1,
             "timecreated": 1747836796,
             "timemodified": 1747836808
         }
@@ -49,7 +50,11 @@
     <tr>
         <td>{{#str}} status {{/str}}</td>
         <td>
-            <div data-jobid="{{job.id}}" data-ref="status">
+            <div
+                data-jobid="{{job.id}}"
+                data-ref="status"
+                {{#job.completed}} data-finalized="true" {{/job.completed}}
+            >
                 {{#job.status}}
                     {{> local_archiving/components/job_status }}
                 {{/job.status}}

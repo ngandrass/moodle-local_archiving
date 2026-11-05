@@ -73,6 +73,7 @@ echo $renderer->render_from_template('local_archiving/job_details', [
             'progress' => $jobprogress ?? null,
             'has_progress' => ($jobprogress ?? null) != null && $jobprogress < 100,
         ],
+        'completed' => $job->is_completed(),
         'timecreated' => $job->get_timecreated(),
         'timemodified' => $job->get_timemodified(),
         'metadata' => array_map(

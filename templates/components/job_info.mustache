@@ -49,11 +49,11 @@
     <tr>
         <td>{{#str}} status {{/str}}</td>
         <td>
-            <span data-jobid="{{job.id}}" data-ref="status">
+            <div data-jobid="{{job.id}}" data-ref="status">
                 {{#job.status}}
                     {{> local_archiving/components/job_status }}
                 {{/job.status}}
-            </span>
+            </div>
         </td>
     </tr>
     <tr>
@@ -65,9 +65,9 @@
     <tr>
         <td>{{#str}} lastmodified {{/str}}</td>
         <td>
-            <span data-jobid="{{job.id}}" data-ref="timemodified">
+            <div data-jobid="{{job.id}}" data-ref="timemodified">
                 {{#userdate}} {{job.timemodified}}, {{#str}} strftimedatetimeaccurate, core_langconfig {{/str}} {{/userdate}}
-            </span>
+            </div>
         </td>
     </tr>
 </table>

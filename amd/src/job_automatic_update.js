@@ -36,7 +36,7 @@ import Notification from 'core/notification';
  * aliasing it polls at double that frequency. It is delibertly a multiple of
  * two seconds, since the spinner animation takes that long for one rotation.
  */
-let JOB_STATUS_POLLING_MS = 6000;
+const JOB_STATUS_POLLING_MS = 6000;
 
 
 /**
@@ -56,13 +56,13 @@ export const init = () => {
 };
 
 /**
- * Builds a CSS selector that targets a specific updatable span element.
+ * Builds a CSS selector that targets a specific updatable element.
  *
  * @param {string} jobId The ID of the job the targeted element belongs to
- * @param {string} ref The reference of target updatable span element
- * @returns {string} A CSS selector matching the targeted span
+ * @param {string} ref The reference of target updatable element
+ * @returns {string} A CSS selector matching the targeted element
  */
-const getSpanSelector = (jobId, ref) => `span[data-jobid="${jobId}"][data-ref="${ref}"]`;
+const getElementSelector = (jobId, ref) => `[data-jobid="${jobId}"][data-ref="${ref}"]`;
 
 /**
  * Collects the IDs of all jobs whose status is not yet finalized.
@@ -74,7 +74,7 @@ const getSpanSelector = (jobId, ref) => `span[data-jobid="${jobId}"][data-ref="$
  */
 const getUnfinishedJobIds = () => {
     const statusElements = document.querySelectorAll(
-        'span[data-ref="status"]:not([data-finalized])',
+        '[data-ref="status"]:not([data-finalized])',
     );
 
     let unfinishedJobIds = [];
@@ -199,9 +199,9 @@ const getJobMetadata = async(job) => {
  * @returns {Promise<void>}
  */
 const renderStatus = async(job) => {
-    const spanSelector = getSpanSelector(job.id, "status");
+    const elementSelector = getElementSelector(job.id, "status");
     const statusDisplayArgs = job.status_display_args;
-    const layout = document.querySelector(spanSelector)?.dataset.layout ?? null;
+    const layout = document.querySelector(elementSelector)?.dataset.layout ?? null;
 
     let templateContext = {
         "badge_text": statusDisplayArgs.text,
@@ -222,7 +222,7 @@ const renderStatus = async(job) => {
         templateContext,
     ).then(
         ({html, js}) => {
-            Templates.replaceNodeContents(spanSelector, html, js,);
+            Templates.replaceNodeContents(elementSelector, html, js,);
             return;
         }
     ).catch(
@@ -241,10 +241,10 @@ const renderStatus = async(job) => {
  * @returns {Promise<void>}
  */
 const renderActivity = async(job) => {
-    const spanSelector = getSpanSelector(job.id, 'activity');
+    const elementSelector = getElementSelector(job.id, 'activity');
 
     // In case no such element exists, exit early.
-    if (!document.querySelector(spanSelector)) {
+    if (!document.querySelector(elementSelector)) {
         return;
     }
 
@@ -260,7 +260,7 @@ const renderActivity = async(job) => {
         },
     ).then(({html, js}) => {
         Templates.replaceNodeContents(
-            spanSelector,
+            elementSelector,
             html,
             js,
         );
@@ -280,7 +280,7 @@ const renderActivity = async(job) => {
  */
 const renderTimeModified = async(job) => {
     const timemodifiedElement = document.querySelector(
-        getSpanSelector(job.id, "timemodified")
+        getElementSelector(job.id, "timemodified")
     );
     // NOTE: In case no such element exists, exit early.
     if (!timemodifiedElement) {
@@ -308,7 +308,7 @@ const renderTimeModified = async(job) => {
  */
 const renderLogs = async(job) => {
     const logsElement = document.querySelector(
-        getSpanSelector(job.id, "logs-content")
+        getElementSelector(job.id, "logs-content")
     );
     // In case no such element exists, exit early.
     if (!logsElement) {
@@ -320,7 +320,7 @@ const renderLogs = async(job) => {
     // If job is complete, remove pending dots.
     if (job.complete) {
         document.querySelector(
-            getSpanSelector(job.id, "logs-pending")
+            getElementSelector(job.id, "logs-pending")
         ).innerHTML = "";
     }
 
@@ -335,10 +335,10 @@ const renderLogs = async(job) => {
  * @returns {Promise<void>}
  */
 const renderDownloadAction = async(job) => {
-    const spanSelector = getSpanSelector(job.id, 'action-download');
+    const elementSelector = getElementSelector(job.id, 'action-download');
 
     // In case no such element exists, exit early.
-    if (!document.querySelector(spanSelector)) {
+    if (!document.querySelector(elementSelector)) {
         return;
     }
 
@@ -361,7 +361,7 @@ const renderDownloadAction = async(job) => {
         'local_archiving/components/action_button',
         templateContext,
     ).then(({html, js}) => {
-        Templates.replaceNodeContents(spanSelector, html, js);
+        Templates.replaceNodeContents(elementSelector, html, js);
         return;
     }).catch((error) => {
         window.console.error('Template render failure for download action:', error);
@@ -377,10 +377,10 @@ const renderDownloadAction = async(job) => {
  * @returns {Promise<void>}
  */
 const renderMetadata = async(job) => {
-    const spanSelector = getSpanSelector(job.id, 'metadata');
+    const elementSelector = getElementSelector(job.id, 'metadata');
 
     // In case no such element exists, exit early.
-    if (!document.querySelector(spanSelector)) {
+    if (!document.querySelector(elementSelector)) {
         return;
     }
 
@@ -392,7 +392,7 @@ const renderMetadata = async(job) => {
             }
         },
     ).then(({html, js}) => {
-        Templates.replaceNodeContents(spanSelector, html, js);
+        Templates.replaceNodeContents(elementSelector, html, js);
         return;
     }).catch((error) => {
         window.console.error('Template render failure for metadata table:', error);

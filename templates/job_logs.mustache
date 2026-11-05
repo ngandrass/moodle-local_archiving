@@ -60,13 +60,13 @@
             <p>{{#str}} archive_job_logs_desc, local_archiving {{/str}}</p>
             <div class="p-2 mb-2" style="background-color: #efefef; overflow: auto; max-height: 80vh; display: flex; flex-direction: column-reverse;">
                 {{^job.completed}}
-                    <span data-jobid="{{job.id}}" data-ref="logs-pending">
+                    <div data-jobid="{{job.id}}" data-ref="logs-pending">
                         <div class="d-flex py-2 pl-1 text-black-50">
                             <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
                             <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
                             <div class="spinner-grow mr-1" style="width: 0.4rem; height: 0.4rem; animation-duration: 1s;" role="status"></div>
                         </div>
-                    </span>
+                    </div>
                 {{/job.completed}}
                 {{#job.logs}}
                     <pre class="m-0" style="overflow: unset;"><span data-jobid="{{job.id}}" data-ref="logs-content">{{#job.logs}}{{.}}{{/job.logs}}</span></pre>

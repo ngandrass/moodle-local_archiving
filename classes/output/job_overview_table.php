@@ -291,8 +291,8 @@ class job_overview_table extends \table_sql {
             }
         }
 
-        // Identifiable span for dynamic updates.
-        $html = \html_writer::start_span(
+        // Identifiable element for dynamic updates.
+        $html = \html_writer::start_div(
             attributes: [
                 'data-jobid' => $values->id,
                 'data-ref' => 'activity',
@@ -314,7 +314,7 @@ class job_overview_table extends \table_sql {
             ],
         );
 
-        $html .= \html_writer::end_span();
+        $html .= \html_writer::end_div();
 
         return $html;
     }
@@ -387,8 +387,8 @@ class job_overview_table extends \table_sql {
                 'badge_text' => $status->text,
                 'badge_color' => $status->color,
                 'tooltip_text' => $status->help,
-                'progress' => $progress ?? null,
-                'has_progress' => ($progress ?? null) != null && $progress < 100,
+                'progress' => $progress,
+                'has_progress' => $progress !== null && $progress < 100,
                 'time_modified' => $values->timemodified,
                 'layout_vertical' => true,
             ],

@@ -40,9 +40,9 @@ const JOB_STATUS_POLLING_MS = 6000;
 
 
 /**
- * Initializes automatic job status polling for the quiz archiver report page.
+ * Initializes automatic job status polling for any job listings page.
  *
- * Scans the job overview table for jobs that have not reached a final state
+ * Scans the page for jobs that have not reached a final state
  * yet and, if any are found, schedules the first status update.
  *
  * @returns {void}
@@ -286,7 +286,8 @@ const renderTimeModified = async(job) => {
     if (!timemodifiedElement) {
         return;
     }
-    getString('strftimedatetimeaccurate', 'core_langconfig').then(
+
+    await getString('strftimedatetimeaccurate', 'core_langconfig').then(
         (formatString) => UserDate.get(
             [{'timestamp': job.timemodified, 'format': formatString}]
         )

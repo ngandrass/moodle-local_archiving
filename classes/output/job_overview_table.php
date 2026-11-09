@@ -283,7 +283,7 @@ class job_overview_table extends \table_sql {
 
         $cm = $this->coursemodinfo->get_cm($values->cmid);
         $cmurl = $cm->get_url();
-        $cmname = $cm->get_formatted_name();
+        $cmname = $cm->get_formatted_name(['escape' => false]);
         $filenames = [];
         foreach ($this->get_file_handles($values->id) as $file) {
             if (!$file->deleted) {

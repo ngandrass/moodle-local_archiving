@@ -295,7 +295,7 @@ class get_job_metadata extends external_api {
         }
 
         // ... Course module name.
-        $jobdata['cm_name'] = $cm->get_formatted_name();
+        $jobdata['cm_name'] = $cm->get_formatted_name(['escape' => false]);
 
         // ... Associated (not deleted) artifact file names, if any.
         $jobdata['files'] = array_values(array_map(

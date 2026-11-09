@@ -382,6 +382,34 @@ final class get_job_metadata_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that the activity name is returned unescaped, since it is escaped
+     * by the Mustache template that renders it on the client side
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_returns_unescaped_cm_name(): void {
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $cm = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id, 'name' => 'Q & A "Session"']);
+        $job = $this->generator()->create_archive_job(['userid' => get_admin()->id], $course, $cm);
+
+        $res = $this->call_webservice($job->get_id());
+
+        $this->assertSame('OK', $res['status']);
+        $this->assertSame('Q & A "Session"', $res['job']['cm_name'], 'Activity name must not be HTML-escaped by the webservice.');
+    }
+
+    /**
      * Tests that a running job is reported as incomplete with partial progress
      *
      * @covers \local_archiving\external\get_job_metadata::execute

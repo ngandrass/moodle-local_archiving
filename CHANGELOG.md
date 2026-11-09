@@ -2,14 +2,10 @@
 
 ## Version X.Y.Z (YYYYMMDDHH)
 
-- Allow scoping archive jobs to a specific set of objects by passing a reference ID list during creation
-- Add function for resolving targeted object IDs from Moodle event instances to activity archiving driver API
-- Add job fingerprints to identify archive jobs with identical course, activity, and settings
-- Store archive job trigger in job metadata section
-- Automatically purge event observer caches on plugin on programmatic sub-plugin enable / disable events
-- Decouple manual archive trigger enabled state from job creation form instantiation
-- Allow site administrators to configure TLS certificate validation behavior for HTTPS requests (TSP signing, archive workers, ...). Default: Always validate.
-- Enable activity archiving drivers to specify additional access validation rules for core image inlining logic in report generators
+Listed changes are split into categories, reflecting the affected component / (sub-)plugin.
+
+### Archiving Core (`local_archiving`)
+
 - Rework archive job overview UI and add search / filter bar
 - Display attached archive files inline in archive job overview table
 - Show trigger and user that created an archive job in the job overview table
@@ -17,21 +13,66 @@
 - Allow to search archive jobs by activity title and archive file names
 - Allow to filter archive jobs by trigger type and job status
 - Add filter option to display only archive jobs that contain data of a specific user
-- Improve messages shown when no data is available
-- Allow activity archiving drivers to provide human-readable labels and links for archived objects
-- Allow activity archiving drivers to provide additional details for archived objects (e.g., attempt attachments)
+- Automatically update the details of an unfinished archive job in the job overview table without needing to reload the page
+- Automatically update logs on the job details page without needing to reload the page
+- Show spinning progress indicator and dynamically updated progress in percent for running archive jobs
+- Include activity archiving task updates in jobs modification timestamps, always showing the latest modification time
+- Show no 0% progress indicators for jobs that have not yet been started (e.g., queued jobs)
 - Add archive job details page that lists all archived objects (e.g., quiz attempts) and the users they belong to
 - Move archive job metadata from the job logs page to the new job details page
 - Make archive job contents searchable by user
 - Improve usability of archive job overview table on small screens
-- Automatically update the details of an unfinished archive job in the job overview table without needing to reload the page
-- Automatically update logs on the job details page without needing to reload the page
-- Show spinning progress indicator and dynamically updated progress in percent for running archive jobs
+- Allow activity archiving drivers to provide human-readable labels and links for archived objects
+- Allow activity archiving drivers to provide additional details for archived objects (e.g., attempt attachments)
+- Improve messages shown when no data is available
+- Allow scoping archive jobs to a specific set of objects by passing a reference ID list during creation
+- Add function for resolving targeted object IDs from Moodle event instances to activity archiving driver API
+- Add job fingerprints to identify archive jobs with identical course, activity, and settings
+- Store archive job trigger in job metadata section
+- Allow site administrators to configure TLS certificate validation behavior for HTTPS requests (TSP signing, archive workers, ...). Default: Always validate.
+- Enable activity archiving drivers to specify additional access validation rules for core image inlining logic in report generators
+- Decouple manual archive trigger enabled state from job creation form instantiation
+- Automatically purge event observer caches on plugin on programmatic sub-plugin enable / disable events
 - Add new AJAX web service function `local_archiving_get_job_metadata` to query the current state of an archive job
 - Add new AJAX web service function `local_archiving_get_archive_users` to query the users that have archived objects in a specific archive job
-- Include activity archiving task updates in jobs modification timestamps, always showing the latest modification time
 - Fix job status badge tooltip rendering for Moodle 5 (with Bootstrap 5)
-- Show no 0% progress indicators for jobs that have not yet been started (e.g., queued jobs)
+
+### Sub-Plugins
+
+#### Activity Archiving Driver: Assign (`archivingmod_assign`)
+
+- Add support for partial archiving by passing explicit submission IDs
+- Display submission attempt number and date in the details column of the archive contents table
+- Provide human-readable labels and links for archived assignment submissions
+- Expose Moodle events that can trigger archive jobs
+- Fix handling of group submissions
+- Implement assignment submission resolving for archiving trigger events
+- Automatically purge event observer caches on plugin enable / disable
+- Implement assignment-activity specific pluginfile URL access validator
+- Fail archive jobs early if no submitted submissions were found to archive
+- Fail artifact uploads early with a descriptive error message if referenced Moodle upload draft file is out of scope
+- Switch worker task UUID parameters of all external functions from `PARAM_TEXT` to `PARAM_ALPHANUMEXT`
+
+#### Activity Archiving Driver: Quiz (`archivingmod_quiz`)
+
+- Only archive explicitly targeted quiz attempts if an archive job was scoped to a specific set of attempt IDs
+- Display quiz attempt number, date, and attachments in the details column of the archive contents table
+- Provide human-readable labels and links for archived quiz attempts
+- Expose Moodle events that can trigger archive jobs
+- Implement quiz attempt resolving for archiving trigger events
+- Automatically purge event observer caches on plugin enable / disable
+- Implement quiz-activity specific pluginfile URL access validator
+- Fail artifact uploads early with a descriptive error message if referenced Moodle upload draft file is out of scope
+- Switch worker task UUID parameters of all external functions from `PARAM_TEXT` to `PARAM_ALPHANUMEXT`
+
+#### Archiving Trigger: Event-based (`archivingtrigger_event`)
+
+- Initial release of the event-based archiving trigger
+- Automatically creates archive jobs whenever selected Moodle events occur inside supported activities (e.g., a submitted quiz attempt or a graded assignment submission)
+- Freely selectable events per activity type, as exposed by the respective activity archiving drivers
+- Only archives the object that triggered the event (e.g., a single quiz attempt or assignment submission)
+- Supports the configured archive job presets for all created archive jobs
+- Prevents the creation of identical archive jobs while a previous one is still pending
 
 
 ## Version 1.1.1 (2026100600)

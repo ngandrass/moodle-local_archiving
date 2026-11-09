@@ -669,7 +669,7 @@ final class activity_archiving_task {
      * Setting this to 100 does not automatically complete the task. Completion
      * is exclusively determined by task status. The progress value is solely
      * an additional feedback indicator. Updating the progress sets the last
-     * modified timestamp of this task and the corresponding job to now.
+     * modified timestamp of this task to now.
      *
      * @param int $progress New task progress in percent (0 to 100)
      * @return void
@@ -688,8 +688,6 @@ final class activity_archiving_task {
             'progress' => $progress,
             'timemodified' => time(),
         ]);
-
-        $this->get_job()->set_timemodified();
 
         $this->get_logger()->info("Activity archiving task {$this->taskid} progress updated: {$progress}%");
     }

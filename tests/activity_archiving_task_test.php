@@ -474,8 +474,7 @@ final class activity_archiving_task_test extends \advanced_testcase {
     }
 
     /**
-     * Tests setting and getting progress of an activity archiving task with its
-     * side effects.
+     * Tests setting and getting progress of an activity archiving task.
      *
      * @covers \local_archiving\activity_archiving_task
      * @dataProvider progress_data_provider
@@ -489,7 +488,6 @@ final class activity_archiving_task_test extends \advanced_testcase {
     public function test_progress(int $progress, bool $isvalid): void {
         $this->resetAfterTest();
         $task = $this->generator()->create_activity_archiving_task();
-        $job = $task->get_job();
 
         if (!$isvalid) {
             $this->expectException(\moodle_exception::class, 'Task should not allow invalid progress values');
@@ -498,20 +496,9 @@ final class activity_archiving_task_test extends \advanced_testcase {
         // Task should start with 0% progress.
         $this->assertSame(0, $task->get_progress(), 'Initial progress should be 0%');
 
-        // Pin the job modification time so we can detect the update.
-        $baseline = time() - 3600;
-        $job->set_timemodified($baseline);
-
         // Set progress and check if it is set correctly.
         $task->set_progress($progress);
         $this->assertSame($progress, $task->get_progress(), 'Progress should match set value');
-
-        // Updating the progress should bump the job modification time.
-        $this->assertGreaterThan(
-            $baseline,
-            $job->get_timemodified(),
-            "Job modification time should be updated when the task progress changes"
-        );
     }
 
     /**

@@ -1650,29 +1650,46 @@ final class archive_job_test extends \advanced_testcase {
     }
 
     /**
-     * Tests setting and retrieving the job modification time.
+     * Tests retrieving the job modification time with and without taking its
+     * activity archiving tasks into account.
      *
-     * @covers \local_archiving\archive_job
+     * @covers \local_archiving\archive_job::get_timemodified
      *
      * @return void
+     * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    public function test_set_timemodified(): void {
+    public function test_get_timemodified_includes_tasks(): void {
+        global $DB;
         $this->resetAfterTest();
         $job = $this->generator()->create_archive_job();
+        $jobtime = 1000000000;
+        $DB->set_field(db_table::JOB->value, 'timemodified', $jobtime, ['id' => $job->get_id()]);
 
-        // Setting an explicit timestamp should be persisted verbatim.
-        $explicit = 1234567890;
-        $job->set_timemodified($explicit);
-        $this->assertSame($explicit, $job->get_timemodified(), 'Timemodified should be set to the explicit timestamp');
+        // Without any tasks, both variants return the job time.
+        $this->assertSame($jobtime, $job->get_timemodified(), 'Job time should be returned');
+        $this->assertSame($jobtime, $job->get_timemodified(includetasks: true), 'Job time should be returned without tasks');
 
-        // Calling without an argument should default to "now", which is after the past timestamp.
-        $job->set_timemodified();
-        $this->assertGreaterThan(
-            $explicit,
-            $job->get_timemodified(),
-            'Timemodified should default to the current time'
+        // Create two tasks, one of them newer than the job.
+        $task1 = $this->generator()->create_activity_archiving_task([], $job);
+        $task2 = $this->generator()->create_activity_archiving_task([], $job);
+        $DB->set_field(db_table::ACTIVITY_TASK->value, 'timemodified', $jobtime - 100, ['id' => $task1->get_id()]);
+        $DB->set_field(db_table::ACTIVITY_TASK->value, 'timemodified', $jobtime + 100, ['id' => $task2->get_id()]);
+
+        $this->assertSame($jobtime, $job->get_timemodified(), 'Tasks must be ignored by default');
+        $this->assertSame(
+            $jobtime + 100,
+            $job->get_timemodified(includetasks: true),
+            'The newest task time should be returned if it is newer than the job time'
+        );
+
+        // Make the job newer than all of its tasks.
+        $DB->set_field(db_table::JOB->value, 'timemodified', $jobtime + 200, ['id' => $job->get_id()]);
+        $this->assertSame(
+            $jobtime + 200,
+            $job->get_timemodified(includetasks: true),
+            'The job time should be returned if it is newer than all task times'
         );
     }
 }

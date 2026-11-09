@@ -983,25 +983,31 @@ class archive_job {
     /**
      * Retrieves the unix timestamp this job was last modified
      *
+     * @param bool $includetasks If true, tiemmodified of associated activity
+     * archiving tasks are also taken into account. The newest timestamp of
+     * either the job or any of its tasks is returned.
      * @return int Unix timestamp of last modification time
      * @throws \dml_exception
      */
-    public function get_timemodified(): int {
-        global $DB;
-        return $DB->get_field(db_table::JOB->value, 'timemodified', ['id' => $this->id], MUST_EXIST);
-    }
-
-    /**
-     * Sets the unix timestamp when this job was last modified. Defaults to now
-     * if no value is provided.
-     *
-     * @param int|null $timestamp (optional) Unix timestamp last modification time should be set to.
-     * @throws \dml_exception
-     */
-    public function set_timemodified(?int $timestamp = null): void {
+    public function get_timemodified(bool $includetasks = false): int {
         global $DB;
 
-        $DB->set_field(db_table::JOB->value, 'timemodified', $timestamp ?? time(), ['id' => $this->id]);
+        // Only job.
+        if (!$includetasks) {
+            return $DB->get_field(db_table::JOB->value, 'timemodified', ['id' => $this->id], MUST_EXIST);
+        }
+
+        // Job and tasks.
+        $record = $DB->get_record_sql(
+            'SELECT j.timemodified AS jobtime, ' .
+                '(SELECT MAX(t.timemodified) FROM {' . db_table::ACTIVITY_TASK->value . '} t WHERE t.jobid = j.id) AS tasktime ' .
+            'FROM {' . db_table::JOB->value . '} j ' .
+            'WHERE j.id = :id',
+            ['id' => $this->id],
+            MUST_EXIST
+        );
+
+        return max((int) $record->jobtime, (int) $record->tasktime);
     }
 
     /**

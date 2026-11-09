@@ -998,14 +998,10 @@ class archive_job {
      * @param int|null $timestamp (optional) Unix timestamp last modification time should be set to.
      * @throws \dml_exception
      */
-    public function set_timemodified(int|null $timestamp = null): void {
+    public function set_timemodified(?int $timestamp = null): void {
         global $DB;
 
-        if (!$timestamp) {
-            $timestamp = time();
-        }
-
-        $DB->set_field(db_table::JOB->value, 'timemodified', $timestamp, ['id' => $this->id]);
+        $DB->set_field(db_table::JOB->value, 'timemodified', $timestamp ?? time(), ['id' => $this->id]);
     }
 
     /**

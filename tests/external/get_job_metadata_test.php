@@ -75,11 +75,15 @@ final class get_job_metadata_test extends \advanced_testcase {
      * Calls execute() and cleans the result against the declared return structure
      *
      * @param int $jobid Job ID to request
+     * @param bool $includelogs Whether to fetch job logs
+     * @param bool $includemetadata Wheter to fetch job metadata table entries
+     * @param bool $includefiles Whether to include file information
      * @return array
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
      * @throws \invalid_response_exception
+     * @throws \moodle_exception
      * @throws \required_capability_exception
      */
     private function call_webservice(

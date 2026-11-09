@@ -65,6 +65,15 @@ export const init = () => {
 const getElementSelector = (jobId, ref) => `[data-jobid="${jobId}"][data-ref="${ref}"]`;
 
 /**
+ * Checks whether a specific updatable element exists on the current page.
+ *
+ * @param {string} jobId The ID of the job the targeted element belongs to
+ * @param {string} ref The reference of target updatable element
+ * @returns {boolean} True if the targeted element exists
+ */
+const hasElement = (jobId, ref) => document.querySelector(getElementSelector(jobId, ref)) !== null;
+
+/**
  * Collects the IDs of all jobs whose status is not yet finalized.
  *
  * A job is considered unfinished as long as its status cell does not carry
@@ -159,6 +168,9 @@ const updateJobs = async(jobIds) => {
  * Fetches the current status of a single job from the "local_archiving_get_job_metadata"
  * webservice.
  *
+ * Optional (expensive) data is only requested if the current page contains an
+ * element that renders it.
+ *
  * Failures are reported to the user via a notification.
  *
  * @param {string} job The ID of the job to fetch the status for
@@ -172,7 +184,12 @@ const getJobMetadata = async(job) => {
         const data = await Ajax.call(
             [{
                 methodname: 'local_archiving_get_job_metadata',
-                args: {jobid: job},
+                args: {
+                    jobid: job,
+                    includelogs: hasElement(job, 'logs-content'),
+                    includemetadata: hasElement(job, 'metadata'),
+                    includefiles: hasElement(job, 'activity'),
+                },
             }],
             true, // Async.
             true, // Login required.

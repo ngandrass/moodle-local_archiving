@@ -82,11 +82,42 @@ final class get_job_metadata_test extends \advanced_testcase {
      * @throws \invalid_response_exception
      * @throws \required_capability_exception
      */
-    private function call_webservice(int $jobid): array {
+    private function call_webservice(
+        int $jobid,
+        bool $includelogs = true,
+        bool $includemetadata = true,
+        bool $includefiles = true,
+    ): array {
         return external_api::clean_returnvalue(
             get_job_metadata::execute_returns(),
-            get_job_metadata::execute($jobid)
+            get_job_metadata::execute($jobid, $includelogs, $includemetadata, $includefiles)
         );
+    }
+
+    /**
+     * Creates a completed archive job that has logs, metadata, archived
+     * content and an artifact file attached
+     *
+     * @return archive_job
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    private function make_job_with_optional_data(): archive_job {
+        $job = $this->make_job(archive_job_status::COMPLETED);
+        $job->get_logger()->info('Some log entry');
+        $job->set_metadata_entry('trigger', 'manual');
+
+        $task = $this->generator()->create_activity_archiving_task([], $job);
+        $task->store_task_content_metadata([
+            new task_content_metadata($task->get_id(), get_admin()->id, null, null, 'Content 1'),
+        ]);
+        $this->generator()->create_file_handle([
+            'jobid' => $job->get_id(),
+            'filename' => 'archive-42.zip',
+        ]);
+
+        return $job;
     }
 
     /**
@@ -740,5 +771,110 @@ final class get_job_metadata_test extends \advanced_testcase {
             'Human-readable key must match the lang string.',
         );
         $this->assertSame('3', $bymap['num_attempts']['value'], 'Integer values must be returned as strings.');
+    }
+
+    /**
+     * Tests that optional data is omitted if not explicitly requested, while
+     * all always-present fields are still returned
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_omits_optional_data_by_default(): void {
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $this->setAdminUser();
+
+        $job = $this->make_job_with_optional_data();
+
+        // Call without any include flags to test the parameter defaults.
+        $res = external_api::clean_returnvalue(
+            get_job_metadata::execute_returns(),
+            get_job_metadata::execute($job->get_id())
+        );
+
+        $this->assertSame('OK', $res['status']);
+        $jobdata = $res['job'];
+
+        // Optional data must be absent.
+        foreach (['logs', 'metadata', 'files', 'content_count'] as $key) {
+            $this->assertArrayNotHasKey($key, $jobdata, "Field '{$key}' must not be present unless requested.");
+        }
+
+        // Always-present data must be returned.
+        $this->assertTrue($jobdata['complete']);
+        $this->assertSame(100, (int) $jobdata['progress']);
+        $this->assertGreaterThan(0, (int) $jobdata['timemodified']);
+        $this->assertNotSame('', $jobdata['cm_name']);
+        $this->assertNotSame('', $jobdata['action_urls']['cm']);
+        $this->assertNotSame('', $jobdata['action_urls']['job']);
+        $this->assertArrayHasKey(
+            'download',
+            $jobdata['action_urls'],
+            'The download URL must be present for final jobs with artifacts, even if files are not requested.'
+        );
+    }
+
+    /**
+     * Tests that each include flag only adds its own group of optional data
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     * @dataProvider optional_data_flags_provider
+     *
+     * @param bool $includelogs Whether to request logs
+     * @param bool $includemetadata Whether to request metadata
+     * @param bool $includefiles Whether to request files and content count
+     * @param array $expectedkeys Optional keys that are expected to be present
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_includes_only_requested_optional_data(
+        bool $includelogs,
+        bool $includemetadata,
+        bool $includefiles,
+        array $expectedkeys,
+    ): void {
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $this->setAdminUser();
+
+        $job = $this->make_job_with_optional_data();
+
+        $res = $this->call_webservice($job->get_id(), $includelogs, $includemetadata, $includefiles);
+
+        $this->assertSame('OK', $res['status']);
+        foreach (['logs', 'metadata', 'files', 'content_count'] as $key) {
+            if (in_array($key, $expectedkeys)) {
+                $this->assertArrayHasKey($key, $res['job'], "Requested field '{$key}' must be present.");
+            } else {
+                $this->assertArrayNotHasKey($key, $res['job'], "Unrequested field '{$key}' must not be present.");
+            }
+        }
+    }
+
+    /**
+     * Data provider for test_execute_includes_only_requested_optional_data
+     *
+     * @return array[] Test cases
+     */
+    public static function optional_data_flags_provider(): array {
+        return [
+            'Logs only' => [true, false, false, ['logs']],
+            'Metadata only' => [false, true, false, ['metadata']],
+            'Files only' => [false, false, true, ['files', 'content_count']],
+            'Everything' => [true, true, true, ['logs', 'metadata', 'files', 'content_count']],
+        ];
     }
 }

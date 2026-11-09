@@ -56,6 +56,24 @@ class get_job_metadata extends external_api {
                 'ID of the job',
                 VALUE_REQUIRED,
             ),
+            'includelogs' => new external_value(
+                PARAM_BOOL,
+                'Whether to include the formatted job logs in the response',
+                VALUE_DEFAULT,
+                false,
+            ),
+            'includemetadata' => new external_value(
+                PARAM_BOOL,
+                'Whether to include the job metadata entries in the response',
+                VALUE_DEFAULT,
+                false,
+            ),
+            'includefiles' => new external_value(
+                PARAM_BOOL,
+                'Whether to include the artifact file names and archived object count in the response',
+                VALUE_DEFAULT,
+                false,
+            ),
         ]);
     }
 
@@ -126,7 +144,7 @@ class get_job_metadata extends external_api {
                         ),
                         'logs' => new external_value(
                             PARAM_RAW,
-                            'Log lines related to the archiving activity of the job',
+                            'Log lines of the job. Only present if includelogs is set and logs exist',
                             VALUE_OPTIONAL,
                         ),
                         'action_urls' => new external_single_structure(
@@ -157,8 +175,8 @@ class get_job_metadata extends external_api {
                         ),
                         'content_count' => new external_value(
                             PARAM_INT,
-                            'Number of archived objects (0 if none)',
-                            VALUE_REQUIRED,
+                            'Number of archived objects (0 if none). Only present if includefiles is set',
+                            VALUE_OPTIONAL,
                         ),
                         'files' => new external_multiple_structure(
                             new external_value(
@@ -166,8 +184,8 @@ class get_job_metadata extends external_api {
                                 'Name of an artifact file',
                                 VALUE_REQUIRED,
                             ),
-                            'Names of the artifact files',
-                            VALUE_REQUIRED,
+                            'Names of the artifact files. Only present if includefiles is set',
+                            VALUE_OPTIONAL,
                         ),
                         'metadata' => new external_multiple_structure(
                             new external_single_structure(
@@ -191,8 +209,8 @@ class get_job_metadata extends external_api {
                                 'Metadata elements',
                                 VALUE_OPTIONAL,
                             ),
-                            'Metadata of the job',
-                            VALUE_REQUIRED,
+                            'Metadata of the job. Only present if includemetadata is set',
+                            VALUE_OPTIONAL,
                         ),
                     ],
                     'Complete data about the job, suitable for any client-side consumption',
@@ -207,7 +225,10 @@ class get_job_metadata extends external_api {
     /**
      * Execute the webservice function
      *
-     * @param int $jobidraw
+     * @param int $jobidraw ID of the job
+     * @param bool $includelogsraw Whether to include the formatted job logs
+     * @param bool $includemetadataraw Whether to include the job metadata entries
+     * @param bool $includefilesraw Whether to include artifact file names and archived object count
      * @return array
      * @throws \coding_exception
      * @throws \dml_exception
@@ -217,10 +238,16 @@ class get_job_metadata extends external_api {
      */
     public static function execute(
         int $jobidraw,
+        bool $includelogsraw = false,
+        bool $includemetadataraw = false,
+        bool $includefilesraw = false,
     ): array {
         // Validate request.
         $params = self::validate_parameters(self::execute_parameters(), [
             'jobid' => $jobidraw,
+            'includelogs' => $includelogsraw,
+            'includemetadata' => $includemetadataraw,
+            'includefiles' => $includefilesraw,
         ]);
 
         // Validate that the job exists.
@@ -237,8 +264,6 @@ class get_job_metadata extends external_api {
 
         // Build response.
         $status = $job->get_status();
-        $jobmeta = $job->get_metadata_entries();
-
         $jobdata = [
             'id' => $job->get_id(),
             'complete' => $job->is_completed(),
@@ -251,16 +276,6 @@ class get_job_metadata extends external_api {
                     new \moodle_url('/local/archiving/job.php', ['id' => $job->get_id()])
                 )->out(false),
             ],
-            'content_count' => $job->get_content_count(),
-            'metadata' => array_map(
-                fn($key, $value): array => [
-                    'key' => $key,
-                    'humankey' => get_string("job_metadata_{$key}", 'local_archiving'),
-                    'value' => $value,
-                ],
-                array_keys($jobmeta),
-                array_values($jobmeta)
-            ),
         ];
 
         // ... Jobs progress, if any.
@@ -269,17 +284,34 @@ class get_job_metadata extends external_api {
             $jobdata['progress'] = $progress;
         }
 
-        // ... Formatted logs blob, if any.
-        $logs = array_reduce(
-            $job->get_logger()->get_logs(limitnum: 99999),
-            fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
-            ""
-        );
-        if ($logs !== '') {
-            $jobdata['logs'] = $logs;
+        // ... Metadata entries, if requested.
+        if ($params['includemetadata']) {
+            $jobmeta = $job->get_metadata_entries();
+            $jobdata['metadata'] = array_map(
+                fn($key, $value): array => [
+                    'key' => $key,
+                    'humankey' => get_string("job_metadata_{$key}", 'local_archiving'),
+                    'value' => $value,
+                ],
+                array_keys($jobmeta),
+                array_values($jobmeta)
+            );
         }
 
-        $filehandles = file_handle::get_by_jobid($job->get_id());
+        // ... Formatted logs blob, if requested and any.
+        if ($params['includelogs']) {
+            $logs = array_reduce(
+                $job->get_logger()->get_logs(limitnum: 99999),
+                fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
+                ""
+            );
+            if ($logs !== '') {
+                $jobdata['logs'] = $logs;
+            }
+        }
+
+        // File handles are only required for the download URL of final jobs or if files were explicitly requested.
+        $filehandles = ($status->is_final() || $params['includefiles']) ? file_handle::get_by_jobid($job->get_id()) : [];
         [, $cm] = get_course_and_cm_from_cmid($job->get_cmid());
 
         // ... Action URLs.
@@ -296,13 +328,16 @@ class get_job_metadata extends external_api {
         // ... Course module name.
         $jobdata['cm_name'] = $cm->get_formatted_name(['escape' => false]);
 
-        // ... Associated (not deleted) artifact file names, if any.
-        $jobdata['files'] = array_values(array_map(
-            fn ($handle) => $handle->filename,
-            array_filter($filehandles, fn ($handle) => !$handle->deleted)
-        ));
+        // ... Archived object count and associated (not deleted) artifact file names, if requested.
+        if ($params['includefiles']) {
+            $jobdata['content_count'] = $job->get_content_count();
+            $jobdata['files'] = array_values(array_map(
+                fn ($handle) => $handle->filename,
+                array_filter($filehandles, fn ($handle) => !$handle->deleted)
+            ));
+        }
 
-        // Send successfull response.
+        // Send successful response.
         return [
             'status' => 'OK',
             'job' => $jobdata,

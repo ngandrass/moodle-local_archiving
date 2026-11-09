@@ -19,6 +19,7 @@ namespace local_archiving\local\driver;
 use local_archiving\activity_archiving_task;
 use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\activity_archiving_task_status;
+use local_archiving\local\type\task_content_metadata;
 
 /**
  * Tests for the archivingmod driver base.
@@ -368,5 +369,81 @@ final class archivingmod_test extends \advanced_testcase {
             $archivingmod->is_all_tasks_for_job_completed($job->get_id()),
             'With both tasks completed, the job should be considered completed.'
         );
+    }
+
+    /**
+     * Tests that the base archivingmod class does not ship any Moodle events
+     * for now.
+     *
+     * @covers \local_archiving\local\driver\archivingmod
+     *
+     * @return void
+     */
+    public function test_get_archiving_eventlist(): void {
+        $this->assertSame(
+            [],
+            archivingmod::get_archiving_eventlist(),
+            'The base class should not provide any archiving events by default.'
+        );
+    }
+
+    /**
+     * Tests that the base archivingmod class does not resolve any refids from
+     * events and thereby targets the whole activity by default.
+     *
+     * @covers \local_archiving\local\driver\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     */
+    public function test_get_refids_for_event_default(): void {
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $context = \context_module::instance($cm->cmid);
+
+        $event = \mod_quiz\event\course_module_viewed::create([
+            'objectid' => $cm->id,
+            'context' => $context,
+        ]);
+
+        $this->assertNull(
+            $this->instance($context)->get_refids_for_event($event),
+            'The base class should target the whole activity by default.'
+        );
+    }
+
+    /**
+     * Tests the default labels of task content metadata entries.
+     *
+     * @covers \local_archiving\local\driver\archivingmod
+     *
+     * @return void
+     * @throws \moodle_exception
+     */
+    public function test_get_task_content_metadata_labels(): void {
+        // Prepare course with cm.
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $archivingmod = $this->instance(\context_module::instance($cm->cmid));
+
+        // Generate labels.
+        $labels = $archivingmod->get_task_content_metadata_labels([
+            new task_content_metadata(1, 2, 'foo_table', 3, 'Test summary', 11),
+            new task_content_metadata(1, 2, 'foo_table', 3, null, 12),
+        ]);
+
+        $this->assertEqualsCanonicalizing([11, 12], array_keys($labels), 'Labels should be indexed by metadata ID.');
+        $this->assertSame('Test summary', $labels[11]->label, 'The summary should be used as label if present.');
+        $this->assertSame(
+            'foo_table #3',
+            $labels[12]->label,
+            'The referenced table and ID should be used as label if no summary is present.'
+        );
+        $this->assertNull($labels[11]->url, 'No URL should be provided by default.');
+        $this->assertNull($labels[12]->url, 'No URL should be provided by default.');
+        $this->assertNull($labels[11]->details, 'No details should be provided by default.');
+        $this->assertNull($labels[12]->details, 'No details should be provided by default.');
     }
 }

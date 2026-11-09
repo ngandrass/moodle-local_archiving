@@ -95,6 +95,29 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         return ['assign'];
     }
 
+
+    #[\Override]
+    public function get_refids_for_event(\core\event\base $event): ?array {
+        $assignmanager = assignment_manager::from_context($this->context);
+
+        if ($event instanceof \mod_assign\event\assessable_submitted) {
+            $submissionid = (int) $event->objectid;
+        } else if ($event instanceof \mod_assign\event\submission_graded) {
+            $submissionid = $assignmanager->get_submission_id_for_grade((int) $event->objectid);
+        } else if ($event instanceof \mod_assign\event\submission_locked) {
+            $submissionid = $assignmanager->get_submission_id_for_user((int) $event->relateduserid);
+        } else {
+            return parent::get_refids_for_event($event);
+        }
+
+        // Only target submitted submissions that are part of this assignment.
+        if ($submissionid === null || !$assignmanager->submission_exists($submissionid)) {
+            return [];
+        }
+
+        return [$submissionid];
+    }
+
     #[\Override]
     public function get_job_create_form(string $handler, \cm_info $cminfo): \local_archiving\form\job_create_form {
         return new form\job_create_form($handler, $cminfo);
@@ -126,7 +149,10 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         if ($task->get_status(usecached: true) == activity_archiving_task_status::CREATED) {
             // Prepare access to assignment and webservice.
             $assignmanager = assignment_manager::from_context($task->get_context());
-            $submissions = $assignmanager->get_submissions();
+            $submissions = $assignmanager->get_submissions($task->get_job()->get_refids());
+            if (count($submissions) == 0) {
+                throw new \RuntimeException(get_string('error_no_submissions_left_after_filtering', 'archivingmod_assign'));
+            }
 
             $wstoken = $task->create_webservice_token(
                 webserviceid: self::get_webserviceid(),
@@ -176,17 +202,73 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         $assignmentmanager = assignment_manager::from_context($task->get_context());
 
         $res = [];
-        foreach ($assignmentmanager->get_submissions() as $submission) {
-            $res[] = new task_content_metadata(
-                taskid: $task->get_id(),
-                userid: $submission->userid,
-                reftable: 'assign_submission',
-                refid: $submission->submissionid,
-                summary: null
-            );
+        foreach ($assignmentmanager->get_submissions($task->get_job()->get_refids()) as $submission) {
+            // Store an entry for every user that took part in the submission.
+            foreach ($assignmentmanager->get_submission_userids($submission) as $userid) {
+                $res[] = new task_content_metadata(
+                    taskid: $task->get_id(),
+                    userid: $userid,
+                    reftable: 'assign_submission',
+                    refid: $submission->submissionid,
+                    summary: null
+                );
+            }
         }
 
         return $res;
+    }
+
+    #[\Override]
+    public function get_task_content_metadata_labels(array $metadata): array {
+        global $DB;
+
+        // Determine which of the referenced submissions still exist.
+        $submissionids = array_unique(array_filter(array_column($metadata, 'refid')));
+        $submissions = $DB->get_records_list(
+            'assign_submission',
+            'id',
+            $submissionids,
+            '',
+            'id, attemptnumber, timemodified'
+        );
+
+        // Label all submissions and link them to the grading page, if they still exist.
+        $res = [];
+        foreach ($metadata as $entry) {
+            $submission = $submissions[$entry->refid] ?? null;
+            $res[$entry->id] = (object) [
+                'label' => get_string('task_content_label', 'archivingmod_assign', $entry->refid),
+                'url' => $submission
+                    ? new \moodle_url('/mod/assign/view.php', [
+                        'id' => $this->cmid,
+                        'action' => 'grading',
+                        'userid' => $entry->userid,
+                    ])
+                    : null,
+                'details' => $submission ? $this->render_submission_details($submission) : null,
+            ];
+        }
+
+        return $res;
+    }
+
+    /**
+     * Renders the details of a single assignment submission
+     *
+     * @param \stdClass $submission Submission record with at least the fields
+     * attemptnumber and timemodified
+     * @return string HTML code of the rendered submission details
+     * @throws \coding_exception
+     */
+    protected function render_submission_details(\stdClass $submission): string {
+        $summary = get_string('task_content_details', 'archivingmod_assign', $submission->attemptnumber + 1);
+
+        return
+            \html_writer::div(s($summary)) .
+            \html_writer::div(
+                s(userdate($submission->timemodified, get_string('strftimedatemonthtimeshort', 'langconfig'))),
+                'small text-muted'
+            );
     }
 
     /**
@@ -221,6 +303,15 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
             'assignmenttimemodified' => $assignmenttimemodified,
             'submissiontimemodified' => $submissiontimemodified,
         ]);
+    }
+
+    #[\Override]
+    public static function get_archiving_eventlist(): array {
+        return [
+            \mod_assign\event\assessable_submitted::class,
+            \mod_assign\event\submission_graded::class,
+            \mod_assign\event\submission_locked::class,
+        ];
     }
 
     /**

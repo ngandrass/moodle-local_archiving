@@ -102,4 +102,14 @@ final class cm_state_fingerprint {
     public function get_raw_value(): string {
         return $this->fingerprint;
     }
+
+    /**
+     * Determines if this fingerprint is identical to the given one.
+     *
+     * @param cm_state_fingerprint $other Fingerprint to compare against
+     * @return bool True if both fingerprints are identical
+     */
+    public function equals(cm_state_fingerprint $other): bool {
+        return $this->fingerprint === $other->get_raw_value();
+    }
 }

@@ -172,8 +172,13 @@ final class update_task_status_test extends \advanced_testcase {
         $_GET['wstoken'] = $wstoken;
 
         // Execute the request.
+        if ($invalidparameterkey === 'uuid') {
+            // Non-alphanumeric UUID characters (except dashes and underscores) are rejected by Moodle parameter validation.
+            $this->expectException(\invalid_parameter_exception::class);
+            $this->expectExceptionMessageMatches('/.*uuid.*/');
+        }
         $res = update_task_status::execute(
-            $r['uuid'],
+            $invalidparameterkey === 'uuid' ? '20000000-0000-0000-0000-0123456789ab; DROP' : $r['uuid'],
             $invalidparameterkey == 'taskid' ? 0 : $r['taskid'],
             $invalidparameterkey == 'status' ? 9999 : $r['status'],
             $invalidparameterkey == 'progress' ? 101 : $r['status']
@@ -192,6 +197,7 @@ final class update_task_status_test extends \advanced_testcase {
      */
     public static function parameter_validation_data_provider(): array {
         return [
+            'Invalid uuid' => ['uuid'],
             'Invalid taskid' => ['taskid'],
             'Invalid status' => ['status'],
             'Invalid progress' => ['progress'],

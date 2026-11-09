@@ -26,8 +26,10 @@ namespace archivingmod_assign;
 
 
 use local_archiving\activity_archiving_task;
+use local_archiving\archive_job;
 use local_archiving\local\exception\yield_exception;
 use local_archiving\local\type\activity_archiving_task_status;
+use local_archiving\local\type\task_content_metadata;
 
 /**
  * Tests for the archivingmod class
@@ -214,6 +216,172 @@ final class archivingmod_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that task execution fails if the assignment has no submissions.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_execute_fails_without_submissions(): void {
+        $this->resetAfterTest();
+        $mocks = $this->getDataGenerator()->create_mock_task(populateassignment: false);
+
+        $this->expectException(\RuntimeException::class);
+        (new archivingmod($mocks->context))->execute_task($mocks->task);
+    }
+
+    /**
+     * Tests that task content metadata only contains the submissions explicitly
+     * targeted by the job (refids).
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_task_content_metadata_respects_refids(): void {
+        $this->resetAfterTest();
+        $testdata = $this->getDataGenerator()->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+
+        // Target the existing submission as well as a submission ID that does not exist.
+        $job = archive_job::create($context, get_admin()->id, 'manual', new \stdClass(), refids: [$testdata->submission->id, -1]);
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $context,
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'assign'
+        );
+        $metadata = (new archivingmod($context))->get_task_content_metadata($task);
+
+        $this->assertCount(1, $metadata, 'Only targeted submissions should be part of the content metadata');
+        $this->assertEquals(
+            $testdata->submission->id,
+            $metadata[0]->refid,
+            'Content metadata should reference the targeted submission'
+        );
+    }
+
+    /**
+     * Tests that team submissions are stored once for every member of the
+     * submitting group.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     * @covers \archivingmod_assign\assignment_manager
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_task_content_metadata_team_submission(): void {
+        global $DB;
+
+        // Create a team assignment with a group of two students.
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $generator = $this->getDataGenerator();
+        $testdata = $generator->create_assignment();
+        $DB->set_field('assign', 'teamsubmission', 1, ['id' => $testdata->assignment->id]);
+        $context = \context_module::instance($testdata->cm->id);
+
+        $otherstudent = $generator->create_and_enrol($testdata->course, 'student');
+        $group = $generator->create_group(['courseid' => $testdata->course->id]);
+        $generator->create_group_member(['groupid' => $group->id, 'userid' => $testdata->student->id]);
+        $generator->create_group_member(['groupid' => $group->id, 'userid' => $otherstudent->id]);
+
+        // Create a team submission that is not bound to a single user.
+        $submissionid = $DB->insert_record('assign_submission', [
+            'assignment' => $testdata->assignment->id,
+            'userid' => 0,
+            'groupid' => $group->id,
+            'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
+            'attemptnumber' => 0,
+            'latest' => 1,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+
+        // Create job and task.
+        $job = archive_job::create($context, get_admin()->id, 'manual', new \stdClass());
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $context,
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'assign'
+        );
+        $metadata = (new archivingmod($context))->get_task_content_metadata($task);
+
+        $this->assertCount(2, $metadata, 'Team submission should be stored for every group member');
+        $this->assertEqualsCanonicalizing(
+            [$testdata->student->id, $otherstudent->id],
+            array_column($metadata, 'userid'),
+            'Content metadata should reference all group members'
+        );
+        $this->assertEquals(
+            [$submissionid, $submissionid],
+            array_column($metadata, 'refid'),
+            'All content metadata entries should reference the team submission'
+        );
+    }
+
+    /**
+     * Tests that task execution only considers the submissions explicitly targeted
+     * by the job (refids) and fails if no targeted submission is left.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_execute_respects_refids(): void {
+        $this->resetAfterTest();
+        $testdata = $this->getDataGenerator()->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+        $driver = new archivingmod($context);
+
+        // Target the existing submission.
+        $job = archive_job::create($context, get_admin()->id, 'manual', new \stdClass(), refids: [$testdata->submission->id]);
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $context,
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'assign'
+        );
+        try {
+            $driver->execute_task($task);
+            $this->fail('Expected task to yield for processing.');
+        } catch (yield_exception) {
+            $this->assertEquals(
+                1,
+                $task->get_job()->get_metadata_entry('num_attempts'),
+                'Only the targeted submission should be counted'
+            );
+        }
+
+        // Target only submissions that do not exist.
+        $job = archive_job::create($context, get_admin()->id, 'manual', new \stdClass(), refids: [-1, -2]);
+        $task = activity_archiving_task::create(
+            $job->get_id(),
+            $context,
+            \local_archiving\local\type\cm_state_fingerprint::from_raw_value(str_repeat('0', 64)),
+            get_admin()->id,
+            'assign'
+        );
+        $this->expectException(\RuntimeException::class);
+        $driver->execute_task($task);
+    }
+
+    /**
      * Tests that fingerprinting works correctly.
      *
      * @covers \archivingmod_assign\archivingmod
@@ -248,5 +416,178 @@ final class archivingmod_test extends \advanced_testcase {
         $this->assertNotEquals($fingerprint2, $fingerprint3, 'Fingerprint should change when a submission is modified.');
         $this->assertNotEquals($fingerprint1, $fingerprint3, 'Fingerprint should change when a submission is modified.');
         $this->assertEquals($fingerprint3, $driver->fingerprint(), 'Fingerprint should be stable if nothing changes.');
+    }
+
+    /**
+     * Tests that assessable_submitted events resolve to the submitted submission
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_refids_for_event_assessable_submitted(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $testdata = $generator->create_assignment();
+        $driver = new archivingmod(\context_module::instance($testdata->cm->id));
+
+        // Capture the assessable_submitted event fired by the assignment (submission drafts are disabled).
+        $sink = $this->redirectEvents();
+        /** @var \mod_assign_generator $assigngen */
+        $assigngen = $generator->get_plugin_generator('mod_assign');
+        $assigngen->create_submission([
+            'cmid' => $testdata->cm->id,
+            'userid' => $testdata->student->id,
+            'status' => ASSIGN_SUBMISSION_STATUS_SUBMITTED,
+            'onlinetext' => 'Test submission text.',
+        ]);
+        $events = array_filter($sink->get_events(), fn($e) => $e instanceof \mod_assign\event\assessable_submitted);
+        $sink->close();
+        $this->assertNotEmpty($events, 'Expected an assessable_submitted event');
+        $event = reset($events);
+        $submissionid = (int) $event->objectid;
+
+        // Should resolve to the submitted submission.
+        $this->assertSame([$submissionid], $driver->get_refids_for_event($event), 'Submission of the assignment');
+
+        // Submissions of other assignments are not targeted.
+        $otherdata = $generator->create_assignment();
+        $otherdriver = new archivingmod(\context_module::instance($otherdata->cm->id));
+        $this->assertSame([], $otherdriver->get_refids_for_event($event), 'Submission of another assignment');
+
+        // Submissions that are not submitted are not targeted.
+        $DB->set_field('assign_submission', 'status', ASSIGN_SUBMISSION_STATUS_DRAFT, ['id' => $submissionid]);
+        $this->assertSame([], $driver->get_refids_for_event($event), 'Draft submission');
+    }
+
+    /**
+     * Tests that submission_graded events resolve to the graded submission.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_refids_for_event_submission_graded(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $testdata = $generator->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+        $assign = new \assign($context, $testdata->cm, $testdata->course);
+        $driver = new archivingmod($context);
+
+        // Graded submission.
+        $grade = $generator->grade_submission($testdata);
+        $event = \mod_assign\event\submission_graded::create_from_grade($assign, $grade);
+        $this->assertSame([(int) $testdata->submission->id], $driver->get_refids_for_event($event));
+
+        // Grade without any submission.
+        $otheruser = $generator->create_and_enrol($testdata->course, 'student');
+        $othergrade = $assign->get_user_grade($otheruser->id, true);
+        $event = \mod_assign\event\submission_graded::create_from_grade($assign, $othergrade);
+        $this->assertSame([], $driver->get_refids_for_event($event), 'Grade without submission');
+    }
+
+    /**
+     * Tests that submission_locked events resolve to the latest submission of the locked user.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_refids_for_event_submission_locked(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $testdata = $generator->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+        $assign = new \assign($context, $testdata->cm, $testdata->course);
+        $driver = new archivingmod($context);
+
+        // User with submission.
+        $event = \mod_assign\event\submission_locked::create_from_user($assign, $testdata->student);
+        $this->assertSame([(int) $testdata->submission->id], $driver->get_refids_for_event($event), 'User with submission');
+
+        // User without submission.
+        $otheruser = $generator->create_and_enrol($testdata->course, 'student');
+        $event = \mod_assign\event\submission_locked::create_from_user($assign, $otheruser);
+        $this->assertSame([], $driver->get_refids_for_event($event), 'User without submission');
+    }
+
+    /**
+     * Tests that events that do not reference submissions target the whole assignment.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_refids_for_event_unrelated_event(): void {
+        $this->resetAfterTest();
+        $testdata = $this->getDataGenerator()->create_assignment_with_text_submission();
+        $context = \context_module::instance($testdata->cm->id);
+
+        $event = \mod_assign\event\course_module_viewed::create([
+            'objectid' => $testdata->assignment->id,
+            'context' => $context,
+        ]);
+
+        $this->assertNull((new archivingmod($context))->get_refids_for_event($event));
+    }
+
+    /**
+     * Tests the labels and links of task content metadata entries.
+     *
+     * @covers \archivingmod_assign\archivingmod
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_task_content_metadata_labels(): void {
+        // Create a mock task with an existing submission.
+        $this->resetAfterTest();
+        $mocks = $this->getDataGenerator()->create_mock_task(populateassignment: true);
+        $driver = new archivingmod($mocks->context);
+        $refid = $mocks->submission->id;
+        $taskid = $mocks->task->get_id();
+
+        // Generate labels for an existing and a deleted entry.
+        $labels = $driver->get_task_content_metadata_labels([
+            new task_content_metadata($taskid, $mocks->student->id, 'assign_submission', $refid, null, 11),
+            new task_content_metadata($taskid, $mocks->student->id, 'assign_submission', $refid + 1000, null, 12),
+        ]);
+
+        $this->assertEqualsCanonicalizing([11, 12], array_keys($labels), 'Labels should be indexed by metadata ID.');
+        $this->assertSame("Submission ID {$refid}", $labels[11]->label);
+        $this->assertSame(
+            (new \moodle_url('/mod/assign/view.php', [
+                'id' => $mocks->context->instanceid,
+                'action' => 'grading',
+                'userid' => $mocks->student->id,
+            ]))->out(false),
+            $labels[11]->url->out(false),
+            'Existing submissions should be linked.'
+        );
+        $this->assertSame('Submission ID ' . ($refid + 1000), $labels[12]->label);
+        $this->assertNull($labels[12]->url, 'Deleted submissions should not be linked.');
+
+        // Validate details.
+        $this->assertStringContainsString(
+            s(get_string('task_content_details', 'archivingmod_assign', $mocks->submission->attemptnumber + 1)),
+            $labels[11]->details,
+            'Details should contain the attempt number.'
+        );
+        $this->assertNull($labels[12]->details, 'Deleted submissions should not have details.');
     }
 }

@@ -102,7 +102,9 @@
                                                 class="badge badge-success text-bg-success pb-1 px-2"
                                                 title="{{#str}} badge_archived_help, local_archiving {{/str}}"
                                                 data-toggle="tooltip"
+                                                data-bs-toggle="tooltip"
                                                 data-placement="top"
+                                                data-bs-placement="top"
                                             >
                                                 <i class="fa-solid fa-check"></i>
                                                 {{#str}} archived, local_archiving {{/str}}:
@@ -113,7 +115,9 @@
                                                     class="badge badge-danger text-bg-danger pb-1 px-2"
                                                     title="{{#str}} badge_new_changes_help, local_archiving {{/str}}"
                                                     data-toggle="tooltip"
+                                                    data-bs-toggle="tooltip"
                                                     data-placement="top"
+                                                    data-bs-placement="top"
                                                 >
                                                 <i class="fa-solid fa-exclamation-triangle"></i>
                                                     {{#str}} new_changes, local_archiving {{/str}}
@@ -125,7 +129,9 @@
                                                 class="badge badge-warning text-bg-warning pb-1 px-2"
                                                 title="{{#str}} badge_never_archived_help, local_archiving {{/str}}"
                                                 data-toggle="tooltip"
+                                                data-bs-toggle="tooltip"
                                                 data-placement="top"
+                                                data-bs-placement="top"
                                             >
                                                 <i class="fa-solid fa-exclamation-triangle"></i>
                                                 {{#str}} never_archived, local_archiving {{/str}}
@@ -138,7 +144,9 @@
                                                 class="badge badge-muted text-bg-light pb-1 px-2"
                                                 title="{{#str}} badge_unsupported_help, local_archiving {{/str}}"
                                                 data-toggle="tooltip"
+                                                data-bs-toggle="tooltip"
                                                 data-placement="top"
+                                                data-bs-placement="top"
                                             >
                                                 <i class="fa-solid fa-bolt"></i>
                                                 {{#str}} unsupported, local_archiving {{/str}}
@@ -150,7 +158,9 @@
                                                     class="badge badge-muted text-bg-light pb-1 px-2"
                                                     title="{{#str}} badge_disabled_help, local_archiving {{/str}}"
                                                     data-toggle="tooltip"
+                                                    data-bs-toggle="tooltip"
                                                     data-placement="top"
+                                                    data-bs-placement="top"
                                                 >
                                                     <i class="fa-regular fa-eye-slash"></i>
                                                     {{#str}} disabled, local_archiving {{/str}}
@@ -162,7 +172,9 @@
                                                         class="badge badge-danger text-bg-danger pb-1 px-2"
                                                         title="{{#str}} badge_not_ready_help, local_archiving {{/str}}"
                                                         data-toggle="tooltip"
+                                                        data-bs-toggle="tooltip"
                                                         data-placement="top"
+                                                        data-bs-placement="top"
                                                     >
                                                         <i class="fa-solid fa-pause"></i>
                                                         {{#str}} not_ready, local_archiving {{/str}}
@@ -173,7 +185,9 @@
                                                         class="badge badge-danger text-bg-danger pb-1 px-2"
                                                         title="{{#str}} badge_cannot_be_archived_help, local_archiving {{/str}}"
                                                         data-toggle="tooltip"
+                                                        data-bs-toggle="tooltip"
                                                         data-placement="top"
+                                                        data-bs-placement="top"
                                                     >
                                                     <i class="fa-solid fa-bolt"></i>
                                                         {{#str}} cant_archive, local_archiving {{/str}}
@@ -232,3 +246,7 @@
         </div>
     </div>
 </div>
+
+{{#js}}
+    require(['local_archiving/job_automatic_update'], (JobUpdate) => JobUpdate.init());
+{{/js}}

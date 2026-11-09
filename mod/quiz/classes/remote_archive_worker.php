@@ -190,6 +190,7 @@ class remote_archive_worker {
         // Ignore URL filter since we require custom ports and the URL is only configurable by admins.
         $c = new curl(['ignoresecurity' => true]);
         $result = $c->post($this->serverurl . '/archive/archivingmod_quiz', $payload, [
+            'CURLOPT_SSL_VERIFYPEER' => empty(get_config('local_archiving', 'skip_tls_verification')),
             'CURLOPT_CONNECTTIMEOUT' => $this->connectiontimeoutsec,
             'CURLOPT_TIMEOUT' => $this->requesttimeoutsec,
             'CURLOPT_HTTPHEADER' => [

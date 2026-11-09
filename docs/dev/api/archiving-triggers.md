@@ -56,8 +56,8 @@ classDiagram
 
 Each archiving trigger must implement the {{ source_file('classes/local/driver/archivingtrigger.php',
 '\\local_archiving\\local\\driver\\archivingtrigger') }} interface with a class, placed at the following location:
-`/local/archiving/local/driver/trigger/<pluginname>/classes/archivingtrigger.php`, where `<pluginname>` is the name of
-the archiving trigger (e.g., `manual`, `cron`, ...).
+`/local/archiving/trigger/<pluginname>/classes/archivingtrigger.php`, where `<pluginname>` is the name of the archiving
+trigger (e.g., `manual`, `cron`, `event`, ...).
 
 Due to the flexible nature of archiving triggers, there are no common methods each trigger implementation must adhere to
 besides the ones inherited from the base class.

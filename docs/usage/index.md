@@ -20,8 +20,10 @@ For more in-depth information and advanced topics, refer to the other subsection
 
 [:material-download: Downloading Archived Files](download.md){ .md-button }
 
-[:material-delete-clock-outline: Automatic Deletion](automatic-deletion.md){ .md-button }
+[:material-file-document-outline: Inspecting Job Details](job-details.md){ .md-button }
 
 [:material-file-search-outline: Inspecting Job Logs](logs.md){ .md-button }
+
+[:material-delete-clock-outline: Automatic Deletion (GDPR)](automatic-deletion.md){ .md-button }
 
 [:material-file-certificate-outline: Archive Signing (TSP)](archive-signing.md){ .md-button }

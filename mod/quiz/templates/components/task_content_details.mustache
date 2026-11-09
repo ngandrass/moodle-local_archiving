@@ -1,0 +1,63 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template archivingmod_quiz/components/task_content_details
+
+    Details of a single archived quiz attempt, including its start and finish
+    times, as well as all files that were attached to the attempt.
+    Rendered inside the details column of the job content table.
+
+    Example context (json):
+    {
+        "summary": "Attempt 2",
+        "timestart": "25 Oct, 10:00",
+        "timefinish": "25 Oct, 11:30",
+        "showattachments": true,
+        "numattachments": 1,
+        "hasattachments": true,
+        "attachments": [
+            {
+                "title": "essay.pdf (1.2 MB)",
+                "url": "https://example.com/pluginfile.php/1/question/response_attachments/1/1/1/essay.pdf?forcedownload=1"
+            }
+        ]
+    }
+}}
+
+<div class="archivingmod_quiz-task-content-details">
+    <div>
+        {{summary}}
+    </div>
+    <div class="small text-muted">
+        {{timestart}}{{#timefinish}} &ndash; {{timefinish}}{{/timefinish}}
+    </div>
+    {{#showattachments}}
+        <div class="d-flex align-items-center flex-wrap mt-1">
+            <span class="small me-1 mr-1">{{#str}} attachments, archivingmod_quiz {{/str}}:</span>
+            <span class="badge {{#hasattachments}} badge-success bg-success{{/hasattachments}}{{^hasattachments}} badge-danger bg-danger{{/hasattachments}} py-1 px-2">
+                {{numattachments}}
+            </span>
+            {{#attachments}}
+                <a href="{{url}}" target="_blank" class="btn btn-sm btn-outline-primary ms-1 ml-1" role="button"
+                   data-toggle="tooltip" data-placement="top" data-bs-toggle="tooltip" data-bs-placement="top"
+                   title="{{title}}" aria-label="{{title}}">
+                    <i class="fa fa-file" aria-hidden="true"></i>
+                </a>
+            {{/attachments}}
+        </div>
+    {{/showattachments}}
+</div>

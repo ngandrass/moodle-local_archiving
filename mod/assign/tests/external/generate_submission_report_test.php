@@ -177,7 +177,7 @@ final class generate_submission_report_test extends \advanced_testcase {
 
         // Execute the request.
         if ($invalidparameterkey === 'uuid') {
-            // A UUID containing HTML tags is detected by Moodle parameter validation so we expect an exception here.
+            // Non-alphanumeric UUID characters (except dashes and underscores) are rejected by Moodle parameter validation.
             $this->expectException(\invalid_parameter_exception::class);
             $this->expectExceptionMessageMatches('/.*uuid.*/');
         }
@@ -187,7 +187,7 @@ final class generate_submission_report_test extends \advanced_testcase {
             $this->expectExceptionMessageMatches('/.*sections.*/');
         }
         $res = generate_submission_report::execute(
-            $invalidparameterkey === 'uuid' ? '<a href="localhost">not-a-uuid</a>' : $r['uuid'],
+            $invalidparameterkey === 'uuid' ? '20000000-0000-0000-0000-0123456789ab; DROP' : $r['uuid'],
             $invalidparameterkey === 'taskid' ? 0 : $r['taskid'],
             $invalidparameterkey === 'submissionid' ? 0 : $r['submissionid'],
             $invalidparameterkey === 'foldernamepattern' ? 'invalid-${pattern' : $r['foldernamepattern'],

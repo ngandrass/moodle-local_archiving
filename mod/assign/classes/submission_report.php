@@ -452,13 +452,41 @@ class submission_report {
         if ($inlineimages) {
             $wwwroot = get_config('archivingmod_assign')->internal_wwwroot ?: null;
             foreach ($dom->getElementsByTagName('img') as $img) {
-                if (!report_util::convert_image_to_base64($img, $wwwroot)) {
+                if (!report_util::convert_image_to_base64($img, $wwwroot, $this->is_pluginfile_access_allowed(...))) {
                     $img->setAttribute('x-debug-inlining-failed', 'true');
                 }
             }
         }
 
         return $dom->saveHTML();
+    }
+
+    /**
+     * Checks whether a file referenced by a pluginfile URL may be inlined into a report of this assignment
+     *
+     * Allowed are only files within this assignment and its course.
+     *
+     * @param array $urlparts Matched named regex groups of the parsed pluginfile URL (see report_util)
+     * @return bool True if the file may be inlined
+     * @throws \coding_exception
+     */
+    protected function is_pluginfile_access_allowed(array $urlparts): bool {
+        // Validate file context.
+        $contextid = clean_param($urlparts['contextid'], PARAM_INT);
+        $filectx = $contextid ? \context::instance_by_id($contextid, IGNORE_MISSING) : null;
+        if (!$filectx) {
+            return false;
+        }
+
+        // Allow files directly inside the assignment and course.
+        $assignctx = $this->assignment->get_context();
+        $coursectx = $assignctx->get_course_context();
+
+        if ($filectx->id === $assignctx->id || $filectx->id === $coursectx->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

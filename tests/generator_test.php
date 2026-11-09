@@ -94,6 +94,51 @@ final class generator_test extends \advanced_testcase {
     }
 
     /**
+     * Tests creating an archive job that holds archived content of a given user.
+     *
+     * @covers \local_archiving_generator
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_create_archived_content(): void {
+        // Create archived content within a given course and activity.
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $user = $this->generator()->create_user();
+        $job = $this->generator()->mock_archived_content($user->id, $course, $cm);
+
+        // Check that the job was created inside the given activity.
+        $this->assertEquals(
+            \context_module::instance($cm->cmid)->id,
+            $job->get_context()->id,
+            'The job should be created inside the given activity'
+        );
+
+        // Check that exactly one task with exactly one content entry of the user exists.
+        $tasks = activity_archiving_task::get_by_jobid($job->get_id());
+        $this->assertCount(1, $tasks, 'The job should have exactly one task');
+        $task = reset($tasks);
+        $contents = $task->get_task_content_metadata();
+        $this->assertCount(1, $contents, 'The task should have exactly one content entry');
+        $content = reset($contents);
+        $this->assertEquals($user->id, $content->userid, 'The content should belong to the given user');
+        $this->assertSame($task->get_id(), $content->taskid, 'The content should belong to the created task');
+
+        // Create archived content with a freshly created course and activity.
+        $job = $this->generator()->mock_archived_content($user->id);
+        $this->assertEquals(CONTEXT_MODULE, $job->get_context()->contextlevel, 'The job should be created inside an activity');
+        $tasks = activity_archiving_task::get_by_jobid($job->get_id());
+        $this->assertCount(1, $tasks, 'The job should have exactly one task');
+        $contents = reset($tasks)->get_task_content_metadata();
+        $this->assertCount(1, $contents, 'The task should have exactly one content entry');
+        $this->assertEquals($user->id, reset($contents)->userid, 'The content should belong to the given user');
+    }
+
+    /**
      * Tests creating a file handle record and then creating an actual file handle from it.
      *
      * @covers \local_archiving_generator

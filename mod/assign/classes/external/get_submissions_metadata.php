@@ -50,7 +50,7 @@ class get_submissions_metadata extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'uuid' => new external_value(
-                PARAM_TEXT,
+                PARAM_ALPHANUMEXT,
                 'UUID assigned to this task by the worker service',
                 VALUE_REQUIRED
             ),

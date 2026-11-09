@@ -75,6 +75,19 @@ abstract class archivingmod extends base {
     abstract public function can_be_archived(): bool;
 
     /**
+     * Creates a new fingerprint for the current state of the referenced course
+     * module.
+     *
+     * Those fingerprints are used to determine if the course module has changed
+     * since the last archive job. For information on cm_state_fingerprints and
+     * their creation, see the cm_state_fingerprint class documentation.
+     *
+     * @return cm_state_fingerprint Fingerprint for the current state of the
+     * referenced course module
+     */
+    abstract public function fingerprint(): cm_state_fingerprint;
+
+    /**
      * Executes the given task
      *
      * This function has to be implemented by the respective activity archiving
@@ -101,17 +114,67 @@ abstract class archivingmod extends base {
     abstract public function get_task_content_metadata(activity_archiving_task $task): array;
 
     /**
-     * Creates a new fingerprint for the current state of the referenced course
-     * module.
+     * Returns a human-readable label (e.g., "Attempt #1234"), an optional
+     * link to the referenced data, and optional details for each of the given
+     * task content metadata entries.
      *
-     * Those fingerprints are used to determine if the course module has changed
-     * since the last archive job. For information on cm_state_fingerprints and
-     * their creation, see the cm_state_fingerprint class documentation.
+     * This function should be overridden by activity archiving drivers to
+     * provide meaningful labels, links, and details for the archived data.
      *
-     * @return cm_state_fingerprint Fingerprint for the current state of the
-     * referenced course module
+     * @param task_content_metadata[] $metadata Task content metadata entries to
+     * label (must have an ID)
+     * @return \stdClass[] Objects with properties label (plain text), url
+     * (\moodle_url, or null if the referenced data does not exist (anymore)),
+     * and details (sanitized HTML with additional information about the
+     * referenced data, or null if none is available), indexed by task content
+     * metadata ID. Drivers are responsible for escaping all user data that is
+     * part of the details.
      */
-    abstract public function fingerprint(): cm_state_fingerprint;
+    public function get_task_content_metadata_labels(array $metadata): array {
+        $res = [];
+        foreach ($metadata as $entry) {
+            $res[$entry->id] = (object) [
+                'label' => $entry->summary ?: "{$entry->reftable} #{$entry->refid}",
+                'url' => null,
+                'details' => null,
+            ];
+        }
+
+        return $res;
+    }
+
+    /**
+     * Returns a list of Moodle events that are fired by the targeted activity
+     * and can be used to trigger an archiving job for this activity type.
+     *
+     * All events listed here can be used by archiving trigger sub-plugins to
+     * automatically create new archive jobs. This archivingmod sub-plugin must
+     * not do anything with those events, it just needs to provide a list of
+     * suitable events. All configuration is done by the archiving trigger sub-
+     * plugins.
+     *
+     * @return string[] List of fully qualified event class names that can be
+     * used to trigger an archiving job for this activity type.
+     */
+    public static function get_archiving_eventlist(): array {
+        return [];
+    }
+
+    /**
+     * Resolves a given Moodle event instance to the IDs that should be archived based on it.
+     *
+     * The types of IDs returned are specific to the respective archivingmod implementation,
+     * e.g., quiz attempt IDs for the archivingmod_quiz plugin. All events listed in
+     * get_archiving_eventlist() must be handeled by this function. For all other events,
+     * simply returning null is sufficient.
+     *
+     * @param \core\event\base $event Event to resolve the targeted objects for
+     * @return int[]|null IDs of the referenced objects, null for all objects,
+     * or an empty list if nothing should be archived
+     */
+    public function get_refids_for_event(\core\event\base $event): ?array {
+        return null;
+    }
 
     /**
      * Provides access to the Moodle form that holds all settings for creating a

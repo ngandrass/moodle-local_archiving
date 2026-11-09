@@ -92,6 +92,18 @@ class archivingmod_quiz_mock extends \local_archiving\local\driver\archivingmod 
     }
 
     #[\Override]
+    public function get_refids_for_event(\core\event\base $event): ?array {
+        if ($event instanceof \mod_quiz\event\attempt_submitted) {
+            $attemptid = (int) $event->objectid;
+            $attempts = quiz_manager::from_context($this->context)->get_attempts([], [$attemptid]);
+
+            return empty($attempts) ? [] : [$attemptid];
+        }
+
+        return parent::get_refids_for_event($event);
+    }
+
+    #[\Override]
     public function get_job_create_form(string $handler, \cm_info $cminfo): \local_archiving\form\job_create_form {
         return new \local_archiving\form\job_create_form($handler, $cminfo);
     }
@@ -123,7 +135,7 @@ class archivingmod_quiz_mock extends \local_archiving\local\driver\archivingmod 
         $quizmanager = quiz_manager::from_context($task->get_context());
 
         $res = [];
-        foreach ($quizmanager->get_all_attempts() as $attempt) {
+        foreach ($quizmanager->get_attempts() as $attempt) {
             $res[] = new task_content_metadata(
                 taskid: $task->get_id(),
                 userid: $attempt->userid,

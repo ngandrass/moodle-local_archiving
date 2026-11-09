@@ -17,9 +17,11 @@
 namespace local_archiving;
 
 use local_archiving\local\exception\yield_exception;
+use local_archiving\local\type\archive_job_fingerprint;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
+use local_archiving\local\type\task_content_metadata;
 use local_archiving\local\util\course_util;
 use local_archiving\task\process_archive_job;
 use local_archiving\task\retrieve_remote_file;
@@ -123,6 +125,162 @@ final class archive_job_test extends \advanced_testcase {
         $this->assertEquals(get_admin()->id, $retrievedjob->get_userid(), 'User ID should match');
         $this->assertEquals($settings, $retrievedjob->get_settings(), 'Settings should match');
         $this->assertEquals('manual', $retrievedjob->get_trigger(), 'Trigger should match');
+    }
+
+    /**
+     * Tests that the job fingerprint is calculated, stored, and restored correctly.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_fingerprint_stored_and_retrieved(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Prepare course, activity, and job.
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $settings = (object) [
+            'foo' => 'bar',
+            'attemptids' => [1, 2, 3],
+            'nested' => (object) ['lorem' => 'ipsum'],
+        ];
+        $job = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'settings' => $settings,
+        ], $course, $cm);
+
+        // Validate calculated fingerprint.
+        $expected = archive_job_fingerprint::generate($course->id, $cm->cmid, $settings);
+        $this->assertTrue(
+            $expected->equals($job->get_fingerprint()),
+            'Job fingerprint should match the fingerprint generated from course, cm, and settings'
+        );
+
+        // Validate stored fingerprint.
+        $this->assertSame(
+            $job->get_fingerprint()->get_raw_value(),
+            $DB->get_field(db_table::JOB->value, 'fingerprint', ['id' => $job->get_id()], MUST_EXIST),
+            'Stored fingerprint should match the job fingerprint'
+        );
+
+        // Validate restored fingerprint.
+        $retrievedjob = archive_job::get_by_id($job->get_id());
+        $this->assertTrue(
+            $job->get_fingerprint()->equals($retrievedjob->get_fingerprint()),
+            'Retrieved job fingerprint should match the created job fingerprint'
+        );
+    }
+
+    /**
+     * Tests that jobs targeting the same course module with identical settings
+     * share a fingerprint, while jobs targeting different course modules do not.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_fingerprint_matches_for_same_target_and_settings(): void {
+        $this->resetAfterTest();
+
+        // Prepare course and activities.
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $othercm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+
+        // Create jobs for the same cm that only differ in key order, trigger, and user.
+        $job = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'trigger' => 'manual',
+            'settings' => (object) ['foo' => 'bar', 'attemptids' => [1, 2, 3]],
+        ], $course, $cm);
+        $samejob = $this->generator()->create_archive_job([
+            'userid' => $this->generator()->create_user()->id,
+            'trigger' => 'event',
+            'settings' => (object) ['attemptids' => [3, 2, 1], 'foo' => 'bar'],
+        ], $course, $cm);
+        $this->assertTrue(
+            $job->get_fingerprint()->equals($samejob->get_fingerprint()),
+            'Jobs targeting the same cm with identical settings should share a fingerprint'
+        );
+
+        // Create job with identical settings for a different cm.
+        $otherjob = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'settings' => (object) ['foo' => 'bar', 'attemptids' => [1, 2, 3]],
+        ], $course, $othercm);
+        $this->assertFalse(
+            $job->get_fingerprint()->equals($otherjob->get_fingerprint()),
+            'Jobs targeting different cms should not share a fingerprint'
+        );
+    }
+
+    /**
+     * Tests that mform specific settings, which are removed during settings
+     * cleaning, do not influence the job fingerprint.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_fingerprint_ignores_cleaned_mform_settings(): void {
+        $this->resetAfterTest();
+
+        // Prepare course and activity.
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+
+        // Create jobs with and without mform specific settings.
+        $job = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'settings' => (object) ['foo' => 'bar'],
+            'cleansettings' => true,
+        ], $course, $cm);
+        $mformjob = $this->generator()->create_archive_job([
+            'userid' => get_admin()->id,
+            'settings' => (object) [
+                'foo' => 'bar',
+                'mform_isexpanded_id_header' => 1,
+                'submitbutton' => 'Submit',
+            ],
+            'cleansettings' => true,
+        ], $course, $cm);
+
+        $this->assertTrue(
+            $job->get_fingerprint()->equals($mformjob->get_fingerprint()),
+            'Cleaned mform settings should not influence the job fingerprint'
+        );
+    }
+
+    /**
+     * Tests that preprocessing job settings removes form-specific fields.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     */
+    public function test_preprocess_settings(): void {
+        $settings = (object) [
+            'foo' => 'bar',
+            'attemptids' => [1, 2, 3],
+            'mform_isexpanded_id_header' => 1,
+            'submitbutton' => 'Submit',
+        ];
+
+        $this->assertEquals(
+            (object) ['foo' => 'bar', 'attemptids' => [1, 2, 3]],
+            archive_job::preprocess_settings($settings),
+            'Form-specific fields should be removed from job settings'
+        );
     }
 
     /**
@@ -350,9 +508,11 @@ final class archive_job_test extends \advanced_testcase {
             try {
                 $job->execute();
 
-                // Check job progress.
-                $this->assertGreaterThanOrEqual(0, $job->get_progress(), 'Job progress should be non-negative');
-                $this->assertLessThanOrEqual(100, $job->get_progress(), 'Job progress should not exceed 100%');
+                // Check job progress. A queued job has no progress yet (null), so
+                // treat that as 0 when validating the 0-100% range.
+                $progress = $job->get_progress();
+                $this->assertGreaterThanOrEqual(0, $progress ?? 0, 'Job progress should be non-negative');
+                $this->assertLessThanOrEqual(100, $progress ?? 0, 'Job progress should not exceed 100%');
 
                 // Let backups async backups complete.
                 while ($task = \core\task\manager::get_next_adhoc_task(time())) {
@@ -444,7 +604,7 @@ final class archive_job_test extends \advanced_testcase {
 
         // Validate that the job was indeed postponed.
         $this->assertSame(archive_job_status::QUEUED, $job->get_status(), 'Job should remain in QUEUED status');
-        $this->assertSame(0, $job->get_progress(), 'Job progress should remain at 0%');
+        $this->assertNull($job->get_progress(), 'A postponed (queued) job should have no progress');
 
         $logs = $job->get_logger()->get_logs();
         $jobwaitlogged = false;
@@ -710,9 +870,9 @@ final class archive_job_test extends \advanced_testcase {
         $job = $this->generator()->create_archive_job();
 
         // Check initial progress.
-        $this->assertSame(0, $job->get_progress(), 'Initial job progress should be 0%');
+        $this->assertNull($job->get_progress(), 'An uninitialized job should have no progress yet');
         $job->set_status(archive_job_status::QUEUED);
-        $this->assertSame(0, $job->get_progress(), 'Queued jobs are still at 0% progress');
+        $this->assertNull($job->get_progress(), 'A queued job has not started and should have no progress');
 
         // Ensure we get progress during activity.
         $intermetiatestates = [
@@ -741,6 +901,42 @@ final class archive_job_test extends \advanced_testcase {
             $job->set_status($state);
             $this->assertSame(100, $job->get_progress(), "Progress should be 100% after {$state->name} state");
         }
+    }
+
+    /**
+     * Tests that the content count includes all activity tasks of a job.
+     *
+     * @covers \local_archiving\archive_job::get_content_count
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_content_count(): void {
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $userid = get_admin()->id;
+
+        // A fresh job has no archived content yet.
+        $this->assertSame(0, $job->get_content_count(), 'A job without any task content should count as zero.');
+
+        // Archive two objects across two tasks.
+        $task1 = $this->generator()->create_activity_archiving_task([], $job);
+        $task1->store_task_content_metadata([
+            new task_content_metadata($task1->get_id(), $userid, null, null, 'Content 1'),
+            new task_content_metadata($task1->get_id(), $userid, null, null, 'Content 2'),
+        ]);
+        $task2 = $this->generator()->create_activity_archiving_task([], $job);
+        $task2->store_task_content_metadata([
+            new task_content_metadata($task2->get_id(), $userid, null, null, 'Content 3'),
+        ]);
+
+        $this->assertSame(
+            3,
+            $job->get_content_count(),
+            'The content count must span all tasks of the job.'
+        );
     }
 
     /**
@@ -976,6 +1172,148 @@ final class archive_job_test extends \advanced_testcase {
         $this->expectException(\moodle_exception::class, 'Job settings should not be cleared for incomplete jobs');
         $job->clear_settings();
         $this->assertNotEmpty($job->get_settings(), 'Job settings should not be cleared for incomplete jobs');
+    }
+
+    /**
+     * Tests that refids are stored and restored correctly.
+     *
+     * @covers \local_archiving\archive_job
+     * @dataProvider refids_data_provider
+     *
+     * @param array|null $refids Refids to create the job with
+     * @param array|null $expected Expected refids after retrieval
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_refids_create_and_retrieve(?array $refids, ?array $expected): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        $createdjob = $this->generator()->create_archive_job(['refids' => $refids]);
+        $this->assertSame($expected, $createdjob->get_refids(), 'Created job should hold the given refids');
+        $this->assertSame(
+            $expected === null ? null : json_encode($expected),
+            $DB->get_field(db_table::JOB->value, 'refids', ['id' => $createdjob->get_id()]),
+            'Refids should be stored normalized and sorted inside the database'
+        );
+
+        $retrievedjob = archive_job::get_by_id($createdjob->get_id());
+        $this->assertSame($expected, $retrievedjob->get_refids(), 'Retrieved job should hold the given refids');
+    }
+
+    /**
+     * Data provider for test_refids_create_and_retrieve.
+     *
+     * @return array Test data
+     */
+    public static function refids_data_provider(): array {
+        return [
+            'No refids (all objects)' => [null, null],
+            'Empty refids' => [[], []],
+            'Single refid' => [[42], [42]],
+            'Multiple sorted refids' => [[1, 2, 3], [1, 2, 3]],
+            'Multiple unsorted refids' => [[3, 1, 2], [1, 2, 3]],
+            'Numeric strings and keys' => [['a' => '7', 'b' => 5, 'c' => '13'], [5, 7, 13]],
+        ];
+    }
+
+    /**
+     * Tests that refids influence the job fingerprint.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_refids_fingerprint(): void {
+        $this->resetAfterTest();
+
+        $course = $this->generator()->create_course();
+        $cm = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $settings = (object) ['foo' => 'bar'];
+
+        $joball = $this->generator()->create_archive_job(['settings' => $settings], $course, $cm);
+        $jobrefids = $this->generator()->create_archive_job(['settings' => $settings, 'refids' => [1, 2]], $course, $cm);
+
+        $this->assertFalse(
+            $joball->get_fingerprint()->equals($jobrefids->get_fingerprint()),
+            'Jobs with and without refids should have different fingerprints'
+        );
+        $this->assertTrue(
+            archive_job_fingerprint::generate($course->id, $cm->cmid, $settings, [2, 1])->equals($jobrefids->get_fingerprint()),
+            'Job fingerprint should include refids'
+        );
+    }
+
+    /**
+     * Tests clearing refids of a job.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_clear_refids(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Clearing refids of incomplete jobs must fail without force.
+        $job = $this->generator()->create_archive_job(['refids' => [1, 2, 3]]);
+        try {
+            $job->clear_refids();
+            $this->fail('Refids should not be cleared for incomplete jobs');
+        } catch (\moodle_exception $e) {
+            $this->assertSame([1, 2, 3], $job->get_refids(), 'Refids should not be cleared for incomplete jobs');
+        }
+
+        // Clearing refids of completed jobs must work.
+        $job->set_status(archive_job_status::COMPLETED);
+        $job->clear_refids();
+        $this->assertNull($job->get_refids(), 'Refids should be cleared');
+        $this->assertNull(
+            $DB->get_field(db_table::JOB->value, 'refids', ['id' => $job->get_id()]),
+            'Refids should be cleared from the database'
+        );
+        $this->assertNull(archive_job::get_by_id($job->get_id())->get_refids(), 'Refids should stay cleared after reload');
+
+        // Force clearing refids of incomplete jobs must work.
+        $job = $this->generator()->create_archive_job(['refids' => [4, 5]]);
+        $job->clear_refids(force: true);
+        $this->assertNull($job->get_refids(), 'Refids should be cleared when forced');
+    }
+
+    /**
+     * Tests that refids are cleared when a job is aborted.
+     *
+     * @covers \local_archiving\archive_job
+     *
+     * @return void
+     * @throws \Throwable
+     */
+    public function test_refids_cleared_on_abort(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Create a timed-out job with refids.
+        $job = $this->generator()->create_archive_job(['refids' => [1, 2, 3]]);
+        $job->set_status(archive_job_status::QUEUED);
+        $DB->set_field(db_table::JOB->value, 'timecreated', time() - (2 * MINSECS), ['id' => $job->get_id()]);
+        set_config('job_timeout_min', 1, 'local_archiving');
+        $job = archive_job::get_by_id($job->get_id());
+
+        // Execute job to trigger abort due to timeout.
+        $job->execute();
+        $this->assertSame(archive_job_status::TIMEOUT, $job->get_status(), 'Job should have timed out');
+        $this->assertNull($job->get_refids(), 'Refids should be cleared once the job is aborted');
+        $this->assertNull(
+            $DB->get_field(db_table::JOB->value, 'refids', ['id' => $job->get_id()]),
+            'Refids should be cleared from the database once the job is aborted'
+        );
     }
 
     /**
@@ -1258,6 +1596,100 @@ final class archive_job_test extends \advanced_testcase {
             0,
             archive_job::get_incomplete_job_count_for_context($ctx2),
             'There should be 0 incomplete jobs for context 2'
+        );
+    }
+
+    /**
+     * Tests that not yet completed jobs are counted correctly by their fingerprint.
+     *
+     * @covers \local_archiving\archive_job
+     * @dataProvider status_by_completion_data_provider
+     *
+     * @param archive_job_status $status Status of the existing job
+     * @param bool $incomplete Whether the job is expected to count as incomplete
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_incomplete_job_count_for_fingerprint(archive_job_status $status, bool $incomplete): void {
+        $this->resetAfterTest();
+        $course = $this->generator()->create_course();
+        $cm1 = $this->generator()->create_module('quiz', ['course' => $course->id]);
+        $cm2 = $this->generator()->create_module('quiz', ['course' => $course->id]);
+
+        // Create a job with the given status.
+        $job = $this->generator()->create_archive_job(['settings' => (object) ['foo' => 'bar']], $course, $cm1);
+        $job->set_status($status);
+
+        // Create pending jobs that differ in settings or targeted cm.
+        $this->generator()->create_archive_job(['settings' => (object) ['bar' => 'baz']], $course, $cm1)
+            ->set_status(archive_job_status::QUEUED);
+        $this->generator()->create_archive_job(['settings' => (object) ['foo' => 'bar']], $course, $cm2)
+            ->set_status(archive_job_status::QUEUED);
+
+        $this->assertSame(
+            $incomplete ? 1 : 0,
+            archive_job::get_incomplete_job_count_for_fingerprint($job->get_fingerprint()),
+            'Only the identical job should be counted, and only if it is incomplete'
+        );
+    }
+
+    /**
+     * Data provider for test_get_incomplete_job_count_for_fingerprint.
+     *
+     * @return array List of all job status values and whether they count as incomplete
+     */
+    public static function status_by_completion_data_provider(): array {
+        $res = [];
+        foreach (archive_job_status::cases() as $status) {
+            $res[$status->name] = [$status, !$status->is_final()];
+        }
+
+        return $res;
+    }
+
+    /**
+     * Tests retrieving the job modification time with and without taking its
+     * activity archiving tasks into account.
+     *
+     * @covers \local_archiving\archive_job::get_timemodified
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_timemodified_includes_tasks(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $jobtime = 1000000000;
+        $DB->set_field(db_table::JOB->value, 'timemodified', $jobtime, ['id' => $job->get_id()]);
+
+        // Without any tasks, both variants return the job time.
+        $this->assertSame($jobtime, $job->get_timemodified(), 'Job time should be returned');
+        $this->assertSame($jobtime, $job->get_timemodified(includetasks: true), 'Job time should be returned without tasks');
+
+        // Create two tasks, one of them newer than the job.
+        $task1 = $this->generator()->create_activity_archiving_task([], $job);
+        $task2 = $this->generator()->create_activity_archiving_task([], $job);
+        $DB->set_field(db_table::ACTIVITY_TASK->value, 'timemodified', $jobtime - 100, ['id' => $task1->get_id()]);
+        $DB->set_field(db_table::ACTIVITY_TASK->value, 'timemodified', $jobtime + 100, ['id' => $task2->get_id()]);
+
+        $this->assertSame($jobtime, $job->get_timemodified(), 'Tasks must be ignored by default');
+        $this->assertSame(
+            $jobtime + 100,
+            $job->get_timemodified(includetasks: true),
+            'The newest task time should be returned if it is newer than the job time'
+        );
+
+        // Make the job newer than all of its tasks.
+        $DB->set_field(db_table::JOB->value, 'timemodified', $jobtime + 200, ['id' => $job->get_id()]);
+        $this->assertSame(
+            $jobtime + 200,
+            $job->get_timemodified(includetasks: true),
+            'The job time should be returned if it is newer than all task times'
         );
     }
 }

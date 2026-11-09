@@ -87,6 +87,14 @@ if ($hassiteconfig) {
             get_string('setting_coursecat_whitelist_desc', 'local_archiving'),
         ));
 
+        // Common: Skip TLS certificate verification.
+        $commonpage->add(new admin_setting_configcheckbox(
+            'local_archiving/skip_tls_verification',
+            get_string('setting_skip_tls_verification', 'local_archiving'),
+            get_string('setting_skip_tls_verification_desc', 'local_archiving'),
+            '0'
+        ));
+
         // Common: Job Presets.
         $commonpage->add(new admin_setting_heading(
             'local_archiving/header_job_presets',

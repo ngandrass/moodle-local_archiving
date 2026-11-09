@@ -154,12 +154,12 @@ final class get_submissions_metadata_test extends \advanced_testcase {
 
         // Execute the request.
         if ($invalidparameterkey === 'uuid') {
-            // A UUID containing HTML tags is detected by Moodle parameter validation so we expect an exception here.
+            // Non-alphanumeric UUID characters (except dashes and underscores) are rejected by Moodle parameter validation.
             $this->expectException(\invalid_parameter_exception::class);
             $this->expectExceptionMessageMatches('/.*uuid.*/');
         }
         $res = get_submissions_metadata::execute(
-            $invalidparameterkey === 'uuid' ? '<a href="localhost">not-a-uuid</a>' : $r['uuid'],
+            $invalidparameterkey === 'uuid' ? '20000000-0000-0000-0000-0123456789ab; DROP' : $r['uuid'],
             $invalidparameterkey === 'taskid' ? 0 : $r['taskid'],
             $invalidparameterkey === 'submissionids' ? [] : $r['submissionids'],
         );

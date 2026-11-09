@@ -95,4 +95,23 @@ final class cm_state_fingerprint_test extends \advanced_testcase {
         $this->expectException(\coding_exception::class);
         cm_state_fingerprint::from_raw_value('invalidhash');
     }
+
+    /**
+     * Tests comparing fingerprints.
+     *
+     * @covers \local_archiving\local\type\cm_state_fingerprint
+     *
+     * @return void
+     * @throws \JsonException
+     * @throws \coding_exception
+     */
+    public function test_equals(): void {
+        $a = cm_state_fingerprint::generate(['foo' => 'bar', 'baz' => 42]);
+        $b = cm_state_fingerprint::generate(['foo' => 'bar', 'baz' => 42]);
+        $c = cm_state_fingerprint::generate(['foo' => 'bar', 'baz' => 43]);
+
+        $this->assertTrue($a->equals($b), 'Fingerprints of identical data must be equal.');
+        $this->assertTrue($a->equals(cm_state_fingerprint::from_raw_value($a->get_raw_value())), 'Loaded fingerprint must equal.');
+        $this->assertFalse($a->equals($c), 'Fingerprints of different data must not be equal.');
+    }
 }

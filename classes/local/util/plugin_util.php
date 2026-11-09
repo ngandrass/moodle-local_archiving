@@ -56,6 +56,7 @@ class plugin_util {
      *
      * @return array List of installed archivingmod plugins
      * @throws \coding_exception
+     * @throws \moodle_exception
      */
     public static function get_activity_archiving_drivers(): array {
         // Retrieve list of installed archivingmod plugins.
@@ -78,6 +79,7 @@ class plugin_util {
                 'rootdir' => $plugin->rootdir,
                 'class' => $pluginclass,
                 'activities' => $pluginclass::get_supported_activities(),
+                'events' => array_map(fn($cls): string => "\\" . ltrim($cls, '\\'), $pluginclass::get_archiving_eventlist()),
                 'enabled' => $plugin->is_enabled() ?? false,
                 'ready' => $pluginclass::is_ready() ?? false,
                 'version' => $plugin->versiondb,

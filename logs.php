@@ -32,6 +32,8 @@ global $OUTPUT, $PAGE, $USER;
 // Try to find job.
 $jobid = required_param('jobid', PARAM_INT);
 $job = archive_job::get_by_id($jobid);
+$jobstatus = $job->get_status()->status_display_args();
+$jobprogress = $job->get_progress();
 $ctx = $job->get_context();
 [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
 
@@ -49,36 +51,30 @@ $PAGE->set_url(new moodle_url(
 $PAGE->activityheader->disable();
 
 // Render output.
-$jobmeta = $job->get_metadata_entries();
 $renderer = $PAGE->get_renderer('local_archiving');
 echo $OUTPUT->header();
 echo $renderer->render_from_template('local_archiving/job_logs', [
     'job' => [
         'id' => $job->get_id(),
         'triggername' => get_string('pluginname', 'archivingtrigger_' . $job->get_trigger()) ?: $job->get_trigger(),
-        'status' => $job->get_status()->status_display_args(),
+        'status' => [
+            'badge_text' => $jobstatus->text,
+            'badge_color' => $jobstatus->color,
+            'tooltip_text' => $jobstatus->help,
+            'progress' => $jobprogress,
+            'has_progress' => $jobprogress !== null && $jobprogress < 100,
+        ],
         'completed' => $job->is_completed(),
         'timecreated' => $job->get_timecreated(),
-        'timemodified' => $job->get_timemodified(),
+        'timemodified' => $job->get_timemodified(includetasks: true),
         'logs' => array_reduce(
             $job->get_logger()->get_logs(limitnum: 99999),
             fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
             ""
         ),
-        // TODO (MDL-0): Move this to a separate archive inspection page.
-        "metadata" => array_map(
-            fn($key, $value): array => [
-                'key' => $key,
-                'humankey' => get_string("job_metadata_{$key}", 'local_archiving'),
-                'value' => $value,
-            ],
-            array_keys($jobmeta),
-            array_values($jobmeta)
-        ),
     ],
     'urls' => [
         'back' => new moodle_url('/local/archiving/index.php', ['courseid' => $course->id]),
-        'refresh' => $PAGE->url,
     ],
 ]);
 echo $OUTPUT->footer();

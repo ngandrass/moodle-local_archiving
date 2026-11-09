@@ -111,6 +111,24 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     }
 
     #[\Override]
+    public function get_refids_for_event(\core\event\base $event): ?array {
+        if (
+            $event instanceof \mod_quiz\event\attempt_submitted ||
+            $event instanceof \mod_quiz\event\attempt_graded ||
+            $event instanceof \mod_quiz\event\attempt_regraded ||
+            $event instanceof \mod_quiz\event\attempt_manual_grading_completed
+        ) {
+            // Only target attempts that are part of this quiz and are not previews.
+            $attemptid = (int) $event->objectid;
+            $attempts = quiz_manager::from_context($this->context)->get_attempts([], [$attemptid]);
+
+            return empty($attempts) ? [] : [$attemptid];
+        }
+
+        return parent::get_refids_for_event($event);
+    }
+
+    #[\Override]
     public function get_job_create_form(string $handler, \cm_info $cminfo): \local_archiving\form\job_create_form {
         return new form\job_create_form($handler, $cminfo); // @codeCoverageIgnore
     }
@@ -124,10 +142,9 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         if ($task->get_status(usecached: true) == activity_archiving_task_status::CREATED) {
             // Prepare access to quiz and webservice.
             $quizmanager = quiz_manager::from_context($task->get_context());
-            $attempts = $quizmanager->get_filtered_attempts(
-                self::build_attempts_filters_from_formdata(
-                    $task->get_job()->get_settings()
-                )
+            $attempts = $quizmanager->get_attempts(
+                self::build_attempts_filters_from_formdata($task->get_job()->get_settings()),
+                $task->get_job()->get_refids()
             );
             if (count($attempts) == 0) {
                 throw new \RuntimeException(get_string('error_no_attempts_left_after_filtering', 'archivingmod_quiz'));
@@ -192,11 +209,9 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
     #[\Override]
     public function get_task_content_metadata(activity_archiving_task $task): array {
         $quizmanager = quiz_manager::from_context($task->get_context());
-
-        $attempts = $quizmanager->get_filtered_attempts(
-            self::build_attempts_filters_from_formdata(
-                $task->get_job()->get_settings()
-            )
+        $attempts = $quizmanager->get_attempts(
+            self::build_attempts_filters_from_formdata($task->get_job()->get_settings()),
+            $task->get_job()->get_refids()
         );
 
         $res = [];
@@ -211,6 +226,77 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
         }
 
         return $res;
+    }
+
+    #[\Override]
+    public function get_task_content_metadata_labels(array $metadata): array {
+        global $DB;
+
+        // Determine which of the referenced attempts still exist.
+        $attemptids = array_unique(array_filter(array_column($metadata, 'refid')));
+        $attempts = $DB->get_records_list('quiz_attempts', 'id', $attemptids, '', 'id, attempt, timestart, timefinish');
+
+        // Label all attempts and link them to their review page, if they still exist.
+        $res = [];
+        foreach ($metadata as $entry) {
+            $attempt = $attempts[$entry->refid] ?? null;
+            $res[$entry->id] = (object) [
+                'label' => get_string('task_content_label', 'archivingmod_quiz', $entry->refid),
+                'url' => $attempt ? new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->refid]) : null,
+                'details' => $attempt ? $this->render_attempt_details($attempt) : null,
+            ];
+        }
+
+        return $res;
+    }
+
+    /**
+     * Renders the details of a single quiz attempt, including its attachments
+     *
+     * @param \stdClass $attempt Quiz attempt record with at least the fields
+     * id, attempt, timestart, and timefinish
+     * @return string HTML code of the rendered attempt details
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    protected function render_attempt_details(\stdClass $attempt): string {
+        global $OUTPUT;
+
+        // Collect all files attached to the attempt.
+        $attachments = [];
+        try {
+            foreach (quiz_manager::get_attempt_attachments($attempt->id) as $attachment) {
+                /** @var \stored_file $file */
+                $file = $attachment['file'];
+                $attachments[] = [
+                    'title' => $file->get_filename() . ' (' . display_size($file->get_filesize()) . ')',
+                    'url' => \moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $attachment['itemid'],
+                        $file->get_filepath(),
+                        $file->get_filename(),
+                        true
+                    )->out(false),
+                ];
+            }
+            $showattachments = true;
+        } catch (\moodle_exception $e) {
+            $showattachments = false;
+        }
+
+        $dateformat = get_string('strftimedatemonthtimeshort', 'langconfig');
+
+        return $OUTPUT->render_from_template('archivingmod_quiz/components/task_content_details', [
+            'summary' => get_string('task_content_details_attempt', 'archivingmod_quiz', $attempt->attempt),
+            'timestart' => userdate($attempt->timestart, $dateformat),
+            'timefinish' => $attempt->timefinish > 0 ? userdate($attempt->timefinish, $dateformat) : null,
+            'showattachments' => $showattachments,
+            'numattachments' => count($attachments),
+            'hasattachments' => !empty($attachments),
+            'attachments' => $attachments,
+        ]);
     }
 
     /**
@@ -244,6 +330,25 @@ class archivingmod extends \local_archiving\local\driver\archivingmod {
             'quiztimemodified' => $quiztimemodified,
             'attempttimemodified' => $attempttimemodified,
         ]);
+    }
+
+    #[\Override]
+    public static function get_archiving_eventlist(): array {
+        global $CFG;
+
+        $events = array_merge([
+            \mod_quiz\event\attempt_submitted::class,
+            \mod_quiz\event\attempt_manual_grading_completed::class,
+            \mod_quiz\event\attempt_regraded::class,
+        ], parent::get_archiving_eventlist());
+
+        // Moodle <= 4.5: attempt_submitted includes attempt_graded.
+        // Moodle >= 5.0: attempt_graded was introduced.
+        if ($CFG->branch >= 500) {
+            $events[] = \mod_quiz\event\attempt_graded::class;
+        }
+
+        return $events;
     }
 
     /**

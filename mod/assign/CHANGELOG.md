@@ -1,5 +1,20 @@
 # Changelog
 
+## Version 1.1.0 (2026110900)
+
+- Add support for partial archiving by passing explicit submission IDs
+- Display submission attempt number and date in the details column of the archive contents table
+- Provide human-readable labels and links for archived assignment submissions
+- Expose Moodle events that can trigger archive jobs
+- Fix handling of group submissions
+- Implement assignment submission resolving for archiving trigger events
+- Automatically purge event observer caches on plugin enable / disable
+- Implement assignment-activity specific pluginfile URL access validator
+- Fail archive jobs early if no submitted submissions were found to archive
+- Fail artifact uploads early with a descriptive error message if referenced Moodle upload draft file is out of scope
+- Switch worker task UUID parameters of all external functions from `PARAM_TEXT` to `PARAM_ALPHANUMEXT`
+
+
 ## Version 1.0.1 (2026100600)
 
 - Ensure compatibility with Moodle 5.3

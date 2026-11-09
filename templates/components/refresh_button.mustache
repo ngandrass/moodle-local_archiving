@@ -21,7 +21,6 @@
 
     Example context (json):
     {
-        "lastupdated": 1747836796,
         "refreshurl": "https://example.com/local/foo/index.php"
     }
 }}
@@ -29,8 +28,7 @@
 
 <div class="d-flex">
     <div class="flex-grow-1 align-self-center text-right small">
-        {{#str}} last_updated, local_archiving {{/str}}:
-        {{#userdate}} {{lastupdated}}, %T {{/userdate}}
+        {{#str}} reload_jobs_table, local_archiving {{/str}}:
     </div>
     <div class="flex-grow-0">
         <a

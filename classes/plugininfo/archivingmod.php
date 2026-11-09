@@ -80,13 +80,29 @@ class archivingmod extends \core\plugininfo\base {
         // Enable or disable the plugin.
         if ($enabled && !$wasenabled) {
             set_config('enabled', 1, "archivingmod_{$pluginname}");
-            return true;
         } else if (!$enabled && $wasenabled) {
             set_config('enabled', 0, "archivingmod_{$pluginname}");
-            return true;
+        } else {
+            return false;
         }
 
-        return false;
+        self::purge_event_observer_cache();
+
+        return true;
+    }
+
+    /**
+     * Purges the core event observer cache.
+     *
+     * Event observers registered by archivingtrigger_event depend on the set of enabled drivers but are cached by core.
+     * Therefore, this must be called whenever an archivingmod plugin is enabled or disabled. Can be used as an admin
+     * setting update callback.
+     *
+     * @param string|null $settingname Full name of the updated admin setting, if called as an admin setting callback
+     * @return void
+     */
+    public static function purge_event_observer_cache(?string $settingname = null): void {
+        \cache::make('core', 'observers')->purge();
     }
 
     /**

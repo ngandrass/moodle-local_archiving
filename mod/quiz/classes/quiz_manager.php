@@ -128,44 +128,49 @@ class quiz_manager {
     }
 
     /**
-     * Get all attempts for all users inside this quiz, excluding previews
+     * Get attempts for this quiz, excluding previews
      *
-     * @return array Array of all attempt IDs together with the userid that were
-     * made inside this quiz. Indexed by attemptid.
+     * The returned attempts can be narrowed down by attempt filters and list of explicitly
+     * targeted attempt IDs (refids). All given restrictions are combined using an and-operator.
      *
+     * Ref-IDs that do not belong to this quiz or reference previews are silently discarded.
+     *
+     * @param array $filterkeys List of attempts_filter values / keys to apply.
+     * @param int[]|null $refids IDs of the attempts to restrict the result to or null to include all attempts.
+     * @return array Array of all attempts IDs together with the ID of the attempt user.
+     *
+     * @throws \coding_exception If an unknown filter or an empty refids list is given
      * @throws \dml_exception
      */
-    public function get_all_attempts(): array {
+    public function get_attempts(array $filterkeys = [], ?array $refids = null): array {
         global $DB;
 
-        return $DB->get_records_sql(
-            "SELECT id AS attemptid, userid " .
-            "FROM {quiz_attempts} " .
-            "WHERE preview = 0 AND quiz = :quizid",
-            [
-                "quizid" => $this->quiz->id,
-            ]
-        );
-    }
+        // Build base set of attempts, optionally restricted to the given attempt IDs.
+        $refidswhereclause = '';
+        $refidsparams = [];
+        if ($refids !== null) {
+            if (empty($refids)) {
+                throw new \coding_exception('List of targeted attempt IDs must not be empty. Pass null instead.');
+            }
 
-    /**
-     * Get filtered attempts for this quiz, excluding previews
-     *
-     * @param array $filterkeys List of filter keys to filter attempts by.
-     * @return array Array of all attempts IDs together with the userid that were
-     * made inside this quiz.
-     *
-     * @throws \coding_exception
-     * @throws \dml_exception
-     */
-    public function get_filtered_attempts(array $filterkeys): array {
-        // Exit early if we have no filters given.
-        if (empty($filterkeys)) {
-            return array_values($this->get_all_attempts());
+            [$idsql, $refidsparams] = $DB->get_in_or_equal(
+                array_map('intval', $refids),
+                SQL_PARAMS_NAMED,
+                'a'
+            );
+            $refidswhereclause = "AND id {$idsql}";
         }
 
+        $filterattempts = [
+            $DB->get_records_sql(
+                "SELECT id AS attemptid, userid " .
+                "FROM {quiz_attempts} " .
+                "WHERE preview = 0 AND quiz = :quizid " . $refidswhereclause,
+                array_merge(["quizid" => $this->quiz->id], $refidsparams)
+            ),
+        ];
+
         // Perform the actual filtering, de-duplicating requested filters.
-        $filterattempts = [];
         foreach (array_unique($filterkeys) as $filter) {
             switch ($filter) {
                 case attempts_filter::LATEST->value:

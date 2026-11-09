@@ -13,7 +13,7 @@ the question mark symbol next to each setting.
 To create the archiving job, click the {{ mform_element('Create archive', 'button') }} button at the bottom of the
 form. You should now see a confirmation message and a newly created job in the table at the bottom of the page. You can
 monitor the progress of the archive job by clicking on the refresh button in the top right corner of the table or by
-navigating to the job logs page of the respective archive job.
+navigating to the [job details](job-details.md) or [job logs](logs.md) page of the respective archive job.
 
 If you wish to select another activity, use the {{ mform_element('Cancel', 'button') }} button to return to the
 archiving overview without creating a new job.

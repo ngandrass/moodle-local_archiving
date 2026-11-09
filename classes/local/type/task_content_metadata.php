@@ -48,6 +48,8 @@ final class task_content_metadata {
      * if not applicable
      * @param string|null $summary Summary of the referenced data (e.g., "Quiz
      * attempt 1234"), or null if not applicable
+     * @param int|null $id ID of this metadata entry in the database, or null if
+     * it was not stored yet
      * @throws \moodle_exception If neither a summary nor a reference table and ID is provided
      */
     public function __construct(
@@ -60,7 +62,9 @@ final class task_content_metadata {
         /** @var int|null ID of the referenced data in the reftable, or null if not applicable */
         public readonly ?int $refid,
         /** @var string|null Summary of the referenced data (e.g., "Quiz attempt 1234"), or null if not applicable */
-        public readonly ?string $summary
+        public readonly ?string $summary,
+        /** @var int|null ID of this metadata entry in the database, or null if it was not stored yet */
+        public readonly ?int $id = null
     ) {
         // Ensure that at least a summary or a reference table and ID is provided.
         if (empty($this->summary) && (empty($this->reftable) || empty($this->refid))) {

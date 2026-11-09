@@ -29,8 +29,11 @@ classDiagram
         +can_be_archived() bool
         +execute_task(task: activity_archiving_task) void
         +get_task_content_metadata(task: activity_archiving_task) task_content_metadata[]
+        +get_task_content_metadata_labels(metadata: task_content_metadata[]) stdClass[]
         +fingerprint() cm_state_fingerprint
         +get_job_create_form(handler: string, cminfo: cm_info) job_create_form
+        +get_archiving_eventlist()$ string[]
+        +get_refids_for_event(event: core_event_base) int[]|null
     }
     
     class base {
@@ -86,9 +89,13 @@ classDiagram
         #userid: int
         #status: archive_job_status
         #settings: stdClass
+        #refids: int[]|null
+        #fingerprint: archive_job_fingerprint
         
         +create() archive_job
         +get(id: int) archive_job
+        +get_settings() stdClass
+        +get_refids() int[]|null
         +delete() void
         +enqueue() void
         +execute() void
@@ -130,8 +137,8 @@ classDiagram
 
 Each activity archiving driver must implement the {{ source_file('classes/local/driver/archivingmod.php',
 '\\local_archiving\\local\\driver\\archivingmod') }} interface with a class, placed at the following location:
-`/local/archiving/local/driver/mod/<pluginname>/classes/archivingmod.php`, where `<pluginname>` is the name of the 
-activity archiving driver (e.g., `quiz`, `assign`, ...).
+`/local/archiving/mod/<pluginname>/classes/archivingmod.php`, where `<pluginname>` is the name of the activity archiving
+driver (e.g., `quiz`, `assign`, ...).
 
 Each activity archiving driver specifies the mod types that it supports via the `get_supported_activities()` method.
 During creation, each activity archiving driver instance is bound to a specific activity instance by its respective
@@ -149,8 +156,53 @@ in time, the `get_task_content_metadata()` method can be used to retrieve metada
 by a specific activity archiving task. This metadata will be processed by the archiving manager and stored inside the
 archive jobs metadata record.
 
+To display archived objects to the user (e.g., on the [archive job details page](../../usage/job-details.md)), the
+`get_task_content_metadata_labels()` method resolves a list of stored task content metadata entries to human-readable
+information. For each entry, it returns an object with the following properties, indexed by the metadata entry ID:
+
+- `label`: Plain text label that identifies the archived object (e.g., "Attempt ID 1234").
+- `url`: A `\moodle_url` pointing to the referenced object, or `null` if it does not exist (anymore).
+- `details`: Sanitized HTML with additional information about the archived object (e.g., attempt number, date, or
+  attachments), or `null` if none is available. Drivers are responsible for escaping all user data within the details.
+
 The `fingerprint()` method creates a hash that represents the current state of the referenced activity. Such
 fingerprints are used to determine if the course module has changed since the last archive job. They are based on a
 minimalistic set of data that guarantees to change whenever the activity is changed in any way (e.g., new quiz attempt,
 regrading, changed questions, ...). The given data must be serializable and is used to calculate the final fingerprint
 hash.
+
+
+### Partial archiving
+
+Archive jobs can be scoped to a specific set of objects (e.g., quiz attempts or assignment submissions) by passing a
+list of reference IDs (`refids`) during job creation. The meaning of these IDs is defined by the respective activity
+archiving driver (e.g., quiz attempt IDs for `archivingmod_quiz` or submission IDs for `archivingmod_assign`). The
+reference IDs of a job can be retrieved via `$task->get_job()->get_refids()` and must be interpreted as follows:
+
+- `null`: No restriction. All objects of the targeted activity should be archived.
+- Non-empty list of IDs: Only the listed objects should be archived.
+
+Activity archiving drivers must respect the reference IDs within both `execute_task()` and
+`get_task_content_metadata()`. Like the job settings, reference IDs are cleared once an archive job reaches a final
+state.
+
+
+### Event-based archiving
+
+Activity archiving drivers can expose Moodle events that are suitable to trigger the creation of new archive jobs via
+the static `get_archiving_eventlist()` method. It returns a list of fully qualified event class names (e.g.,
+`\mod_quiz\event\attempt_submitted`). The activity archiving driver itself must not observe or handle these events.
+Instead, archiving triggers (e.g., the [event-based trigger](../../archivingtrigger/event.md)) use this list to allow
+administrators to select events and to create archive jobs once they occur.
+
+For each exposed event, the `get_refids_for_event()` method must resolve a given event instance to the IDs of the
+objects that should be archived (see [partial archiving](#partial-archiving)). The return value must be interpreted as
+follows:
+
+- `null`: All objects of the targeted activity should be archived.
+- Non-empty list of IDs: Only the listed objects should be archived.
+- Empty list: The event does not reference any archivable object (e.g., a quiz preview attempt) and no archive job
+  should be created.
+
+The default implementations of both methods expose no events and return `null` respectively, so that implementing
+event-based archiving is optional for activity archiving drivers.

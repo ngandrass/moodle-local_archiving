@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 1.2.0 (2026110900)
+
+- Only archive explicitly targeted quiz attempts if an archive job was scoped to a specific set of attempt IDs
+- Display quiz attempt number, date, and attachments in the details column of the archive contents table
+- Provide human-readable labels and links for archived quiz attempts
+- Expose Moodle events that can trigger archive jobs
+- Implement quiz attempt resolving for archiving trigger events
+- Automatically purge event observer caches on plugin enable / disable
+- Implement quiz-activity specific pluginfile URL access validator
+- Fail artifact uploads early with a descriptive error message if referenced Moodle upload draft file is out of scope
+- Switch worker task UUID parameters of all external functions from `PARAM_TEXT` to `PARAM_ALPHANUMEXT`
+
+
 ## Version 1.1.1 (2026100600)
 
 - Ensure compatibility with Moodle 5.3

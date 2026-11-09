@@ -26,6 +26,9 @@ This section contains screenshots of the pages that are visible to trainers and 
 ### Downloading archived data
 ![Screenshot of the artifact download page](assets/screenshots/course_quiz_archive_download_artifacts.png)
 
+### Archive job details
+![Screenshot of the archive job details page](assets/screenshots/course_archive_job_details.png)
+
 ### Inspecting archive job logs
 ![Screenshot of the archive job log inspection page](assets/screenshots/course_archive_job_logs.png)
 

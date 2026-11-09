@@ -87,13 +87,13 @@ final class quiz_manager_test extends \advanced_testcase {
      * @throws \moodle_exception
      * @throws \restore_controller_exception
      */
-    public function test_get_all_attempts(): void {
+    public function test_get_attempts(): void {
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
         $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['default']);
 
         $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
-        $attempts = $quiz->get_all_attempts();
+        $attempts = $quiz->get_attempts();
 
         $this->assertNotEmpty($attempts, 'No attempts found');
         $this->assertCount(count($rc->attemptids), $attempts, 'Incorrect number of attempts found');
@@ -102,14 +102,14 @@ final class quiz_manager_test extends \advanced_testcase {
     /**
      * Tests to get filtered attempts of a quiz
      *
-     * @covers \archivingmod_quiz\quiz_manager::get_filtered_attempts
+     * @covers \archivingmod_quiz\quiz_manager
      *
      * @return void
      * @throws \dml_exception
      * @throws \moodle_exception
      * @throws \restore_controller_exception
      */
-    public function test_get_filtered_attempts(): void {
+    public function test_get_attempts_filtered(): void {
 
         // NOTE: Because there is currently only one filter available
         // NOTE: the combination of different filter results can not be properly
@@ -123,12 +123,82 @@ final class quiz_manager_test extends \advanced_testcase {
         $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
 
         $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
-        $attempts = $quiz->get_all_attempts();
-        $filteredattempts = $quiz->get_filtered_attempts([attempts_filter::LATEST->value]);
+        $attempts = $quiz->get_attempts();
+        $filteredattempts = $quiz->get_attempts([attempts_filter::LATEST->value]);
 
         $this->assertNotEmpty($attempts, 'No attempts found');
         $this->assertNotEmpty($filteredattempts, 'No attempts found for filter');
         $this->assertTrue(count($attempts) > count($filteredattempts), 'Filtering should reduce number of attempts');
+    }
+
+    /**
+     * Tests to list attempts of a quiz filtered by a refids list.
+     *
+     * @covers \archivingmod_quiz\quiz_manager
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_get_attempts_by_refids(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
+        $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
+
+        // Restrict to a subset of attempts, including IDs that do not belong to this quiz.
+        $allattemptids = array_column($quiz->get_attempts(), 'attemptid');
+        $this->assertGreaterThan(1, count($allattemptids), 'Fixture must contain multiple attempts');
+        $targetid = reset($allattemptids);
+
+        $attempts = $quiz->get_attempts(refids: [$targetid, -1, -2]);
+        $this->assertCount(1, $attempts, 'Only the targeted attempt should be returned');
+        $this->assertEquals($targetid, $attempts[0]->attemptid, 'Targeted attempt ID does not match');
+
+        // Refids that resolve to no attempt yield an empty result.
+        $this->assertEmpty($quiz->get_attempts(refids: [-1, -2]), 'Invalid refids should not resolve to any attempt');
+
+        // An empty list of refids is invalid.
+        $this->expectException(\coding_exception::class);
+        $quiz->get_attempts(refids: []);
+    }
+
+    /**
+     * Tests that targeted attempt IDs and attempt filters are combined using an and-operator
+     *
+     * @covers \archivingmod_quiz\quiz_manager
+     *
+     * @return void
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \restore_controller_exception
+     */
+    public function test_get_attempts_by_refids_and_filters(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $rc = $generator->import_reference_course(...$generator::QUIZ_FIXTURES['multiattempt']);
+        $quiz = new quiz_manager($rc->course->id, $rc->cm->id);
+
+        // Determine a latest and a non-latest attempt.
+        $latestids = array_column($quiz->get_attempts([attempts_filter::LATEST->value]), 'attemptid');
+        $nonlatestids = array_values(array_diff(array_column($quiz->get_attempts(), 'attemptid'), $latestids));
+        $this->assertNotEmpty($nonlatestids, 'Fixture must contain non-latest attempts');
+
+        // Targeted latest attempt must be kept.
+        $attempts = $quiz->get_attempts([attempts_filter::LATEST->value], [$latestids[0]]);
+        $this->assertCount(1, $attempts, 'Targeted latest attempt should be kept');
+        $this->assertEquals($latestids[0], $attempts[0]->attemptid, 'Targeted latest attempt ID does not match');
+
+        // Targeted non-latest attempt must be dropped by the filter.
+        $this->assertEmpty(
+            $quiz->get_attempts([attempts_filter::LATEST->value], [$nonlatestids[0]]),
+            'Targeted non-latest attempt should be dropped by the LATEST filter'
+        );
+
+        // Mixed targets only keep the latest one.
+        $attempts = $quiz->get_attempts([attempts_filter::LATEST->value], [$latestids[0], $nonlatestids[0]]);
+        $this->assertEquals([$latestids[0]], array_column($attempts, 'attemptid'), 'Only the latest attempt should be kept');
     }
 
     /**

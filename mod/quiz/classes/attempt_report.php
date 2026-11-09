@@ -488,14 +488,82 @@ class attempt_report {
         // Convert all local images to base64 if desired.
         if ($inlineimages) {
             $wwwroot = get_config('archivingmod_quiz')->internal_wwwroot ?: null;
+            $attemptobj = quiz_create_attempt_handling_errors($attemptid, $this->cm->id);
+            $quba = \question_engine::load_questions_usage_by_activity($attemptobj->get_uniqueid());
+            $accesscheck = fn(array $urlparts): bool => $this->is_pluginfile_access_allowed($urlparts, $quba);
+
             foreach ($dom->getElementsByTagName('img') as $img) {
-                if (!report_util::convert_image_to_base64($img, $wwwroot)) {
+                if (!report_util::convert_image_to_base64($img, $wwwroot, $accesscheck)) {
                     $img->setAttribute('x-debug-inlining-failed', 'true');
                 }
             }
         }
 
         return $dom->saveHTML();
+    }
+
+    /**
+     * Checks whether a file referenced by a pluginfile URL may be inlined into a report of this quiz
+     *
+     * Allowed are files within this quiz and its course as well as question files from the context of a
+     * question that is used in the given attempt (e.g., a shared question bank in another course).
+     * The check for question-related files is delegated to the question's own file access check logic.
+     *
+     * @param array $urlparts Matched named regex groups of the parsed pluginfile URL (see report_util)
+     * @param \question_usage_by_activity $quba The question usage by activity of the attempt this report is for
+     * @return bool True if the file may be inlined
+     * @throws \coding_exception
+     */
+    protected function is_pluginfile_access_allowed(array $urlparts, \question_usage_by_activity $quba): bool {
+        // Parse common URL parts.
+        $contextid = clean_param($urlparts['contextid'], PARAM_INT);
+        $component = clean_param($urlparts['component'], PARAM_TEXT);
+        $filearea = clean_param($urlparts['filearea'], PARAM_TEXT);
+
+        // Validate file context.
+        $filectx = $contextid ? \context::instance_by_id($contextid, IGNORE_MISSING) : null;
+        if (!$filectx) {
+            return false;
+        }
+
+        $quizctx = \context_module::instance($this->cm->id);
+        $coursectx = $quizctx->get_course_context();
+
+        // Validate question files: Must belong to a question of this attempt and pass the question's own access checks.
+        if ($component === 'question' || str_starts_with($component, 'qtype_')) {
+            $qubaid = clean_param($urlparts['qubaid'] ?? 0, PARAM_INT);
+            $slot = clean_param($urlparts['slot'] ?? 0, PARAM_INT);
+
+            // File must match attempt quba and one of its slots.
+            if ($qubaid !== (int) $quba->get_id()) {
+                return false;
+            }
+
+            if (!in_array($slot, $quba->get_slots())) {
+                return false;
+            }
+
+            // Delegate access check to the question's own file access check logic.
+            $options = new \question_display_options();
+            $options->readonly = true;
+            $options->history = \question_display_options::VISIBLE;
+
+            return $quba->check_file_access(
+                $slot,
+                $options,
+                $component,
+                $filearea,
+                [$urlparts['itemid'], $urlparts['filename']],
+                false
+            );
+        }
+
+        // Allow files directly inside the quiz and course.
+        if ($filectx->id === $quizctx->id || $filectx->id === $coursectx->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

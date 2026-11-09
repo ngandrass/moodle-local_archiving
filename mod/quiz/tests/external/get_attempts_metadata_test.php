@@ -160,8 +160,13 @@ final class get_attempts_metadata_test extends \advanced_testcase {
         $_GET['wstoken'] = $wstoken;
 
         // Execute the request.
+        if ($invalidparameterkey === 'uuid') {
+            // Non-alphanumeric UUID characters (except dashes and underscores) are rejected by Moodle parameter validation.
+            $this->expectException(\invalid_parameter_exception::class);
+            $this->expectExceptionMessageMatches('/.*uuid.*/');
+        }
         $res = get_attempts_metadata::execute(
-            $r['uuid'],
+            $invalidparameterkey === 'uuid' ? '20000000-0000-0000-0000-0123456789ab; DROP' : $r['uuid'],
             $invalidparameterkey == 'taskid' ? 0 : $r['taskid'],
             $invalidparameterkey == 'attemptids' ? [] : $r['attemptids'],
         );
@@ -179,6 +184,7 @@ final class get_attempts_metadata_test extends \advanced_testcase {
      */
     public static function parameter_validation_data_provider(): array {
         return [
+            'Invalid uuid' => ['uuid'],
             'Invalid taskid' => ['taskid'],
             'Invalid attemptids' => ['attemptids'],
         ];

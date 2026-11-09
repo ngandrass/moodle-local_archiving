@@ -39,7 +39,7 @@ import {Bootstrap} from 'theme_boost/loader';
  * aliasing it polls at double that frequency. It is delibertly a multiple of
  * two seconds, since the spinner animation takes that long for one rotation.
  */
-const JOB_STATUS_POLLING_MS = 6000;
+const JOB_STATUS_POLLING_MS = 10000;
 
 /**
  * Selector matching Bootstrap tooltip triggers.

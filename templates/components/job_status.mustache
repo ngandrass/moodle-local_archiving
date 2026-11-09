@@ -45,8 +45,15 @@
 </span>
 {{#layout_vertical}}<br>{{/layout_vertical}}
 {{#has_progress}}
-    <span title="{{#str}} progress, local_archiving {{/str}}">
-        <i class="fa fa-spinner fa-spin"></i>&nbsp;{{progress}}%
+    <span
+        title="{{#str}} progress, local_archiving {{/str}}"
+        aria-label="{{#str}} progress, local_archiving {{/str}}"
+        data-toggle="tooltip"
+        data-bs-toggle="tooltip"
+        data-placement="top"
+        data-bs-placement="top"
+    >
+        <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>&nbsp;{{progress}}%
     </span>
     {{#layout_vertical}}<br>{{/layout_vertical}}
 {{/has_progress}}

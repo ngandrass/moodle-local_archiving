@@ -28,7 +28,10 @@
 - Automatically update logs on the job details page without needing to reload the page
 - Show spinning progress indicator and dynamically updated progress in percent for running archive jobs
 - Add new AJAX web service function `local_archiving_get_job_metadata` to query the current state of an archive job
+- Add new AJAX web service function `local_archiving_get_archive_users` to query the users that have archived objects in a specific archive job
 - Include activity archiving task updates in jobs modification timestamps, always showing the latest modification time
+- Fix job status badge tooltip rendering for Moodle 5 (with Bootstrap 5)
+- Show no 0% progress indicators for jobs that have not yet been started (e.g., queued jobs)
 
 
 ## Version 1.1.1 (2026100600)

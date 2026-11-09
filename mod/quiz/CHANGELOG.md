@@ -10,11 +10,11 @@
 - Display quiz attempt number, date, and attachments in the details column of the archive contents table
 - Fail artifact uploads early with a descriptive error message if referenced Moodle upload draft file is out of scope
 - Switch worker task UUID parameters of all external functions from `PARAM_TEXT` to `PARAM_ALPHANUMEXT`
+- Expose Moodle events that can trigger archive jobs
 
 
 ## Version 1.1.1 (2026100600)
 
-- Expose Moodle events that can trigger archive jobs
 - Ensure compatibility with Moodle 5.3
 - Hide course navigation popover footer in Moodle 5.3 attempt reports
 - Force white page background color on attempt reports in Moodle 5.3

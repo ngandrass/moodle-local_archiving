@@ -12,6 +12,7 @@
 - Fix handling of group submissions
 - Fail artifact uploads early with a descriptive error message if referenced Moodle upload draft file is out of scope
 - Switch worker task UUID parameters of all external functions from `PARAM_TEXT` to `PARAM_ALPHANUMEXT`
+- Expose Moodle events that can trigger archive jobs
 
 
 ## Version 1.0.1 (2026100600)

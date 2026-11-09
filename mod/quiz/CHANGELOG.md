@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDHH)
+## Version 1.2.0 (2026110900)
 
 - Only archive explicitly targeted quiz attempts if an archive job was scoped to a specific set of attempt IDs
 - Display quiz attempt number, date, and attachments in the details column of the archive contents table

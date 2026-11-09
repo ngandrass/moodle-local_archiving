@@ -935,9 +935,10 @@ class archive_job {
         return $this->context;
     }
 
-    /** Retrieves the course module the archive job relates to.
+    /**
+     * Retrieves the ID of the course module the archive job relates to
      *
-     * @return int ID of the course module.
+     * @return int ID of the course module
      */
     public function get_cmid(): int {
         return $this->cmid;

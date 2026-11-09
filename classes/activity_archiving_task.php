@@ -226,6 +226,18 @@ final class activity_archiving_task {
     }
 
     /**
+     * Sets the last modified timestamp of this task to now
+     *
+     * @return void
+     * @throws \dml_exception
+     */
+    private function touch(): void {
+        global $DB;
+
+        $DB->set_field(db_table::ACTIVITY_TASK->value, 'timemodified', time(), ['id' => $this->taskid]);
+    }
+
+    /**
      * Returns an instance of the activity archiving driver that handles this task
      *
      * @return archivingmod Instance of the activity archiving driver
@@ -420,6 +432,7 @@ final class activity_archiving_task {
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
             'settings' => null,
+            'timemodified' => time(),
         ]);
         $this->settings = new \stdClass();
     }
@@ -467,6 +480,7 @@ final class activity_archiving_task {
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
             'status' => $status->value,
+            'timemodified' => time(),
         ]);
 
         // Update local status copy and log.
@@ -505,6 +519,7 @@ final class activity_archiving_task {
 
         // Store task content metadata in database.
         $DB->insert_records(db_table::CONTENT->value, $taskcontentmetadata);
+        $this->touch();
     }
 
     /**
@@ -582,6 +597,7 @@ final class activity_archiving_task {
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
             'wstoken' => $wstoken,
+            'timemodified' => time(),
         ]);
 
         // Log token creation.
@@ -610,6 +626,7 @@ final class activity_archiving_task {
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
             'wstoken' => null,
+            'timemodified' => time(),
         ]);
 
         // Log token destruction.
@@ -651,7 +668,8 @@ final class activity_archiving_task {
      * Updates the progress of this task to the given percentage (0 to 100).
      * Setting this to 100 does not automatically complete the task. Completion
      * is exclusively determined by task status. The progress value is solely
-     * an additional feedback indicator.
+     * an additional feedback indicator. Updating the progress sets the last
+     * modified timestamp of this task to now.
      *
      * @param int $progress New task progress in percent (0 to 100)
      * @return void
@@ -668,6 +686,7 @@ final class activity_archiving_task {
         $DB->update_record(db_table::ACTIVITY_TASK->value, [
             'id' => $this->taskid,
             'progress' => $progress,
+            'timemodified' => time(),
         ]);
 
         $this->get_logger()->info("Activity archiving task {$this->taskid} progress updated: {$progress}%");
@@ -734,6 +753,7 @@ final class activity_archiving_task {
             'fileid' => $targetfile->get_id(),
             'sha256sum' => $sha256sum,
         ]);
+        $this->touch();
     }
 
     /**
@@ -754,6 +774,7 @@ final class activity_archiving_task {
             'taskid' => $this->taskid,
             'fileid' => $artifactfile->get_id(),
         ]);
+        $this->touch();
 
         // Delete file if requested.
         if ($delete) {

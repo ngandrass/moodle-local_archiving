@@ -25,10 +25,13 @@
             "id": 1,
             "triggername": "Manual",
             "status": {
-                "text": "Completed",
-                "help": "The job has been completed.",
-                "color": "success"
+                "badge_text": "Running",
+                "badge_color": "primary",
+                "tooltip_text": "The job is currently ...",
+                "progress": "42",
+                "has_progress": true
             },
+            "completed": 1,
             "timecreated": 1747836796,
             "timemodified": 1747836808
         }
@@ -47,25 +50,29 @@
     <tr>
         <td>{{#str}} status {{/str}}</td>
         <td>
-            <span class="badge badge-{{job.status.color}}"
-                  data-toggle="tooltip"
-                  data-placement="top"
-                  title="{{job.status.help}}"
+            <div
+                data-jobid="{{job.id}}"
+                data-ref="status"
+                {{#job.completed}} data-finalized="true" {{/job.completed}}
             >
-                {{job.status.text}}
-            </span>
+                {{#job.status}}
+                    {{> local_archiving/components/job_status }}
+                {{/job.status}}
+            </div>
         </td>
     </tr>
     <tr>
         <td>{{#str}} timecreated {{/str}}</td>
         <td>
-            {{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
+            {{#userdate}} {{job.timecreated}}, {{#str}} strftimedatetimeaccurate, core_langconfig {{/str}} {{/userdate}}
         </td>
     </tr>
     <tr>
         <td>{{#str}} lastmodified {{/str}}</td>
         <td>
-            {{#userdate}} {{job.timemodified}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
+            <div data-jobid="{{job.id}}" data-ref="timemodified">
+                {{#userdate}} {{job.timemodified}}, {{#str}} strftimedatetimeaccurate, core_langconfig {{/str}} {{/userdate}}
+            </div>
         </td>
     </tr>
 </table>

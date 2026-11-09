@@ -21,6 +21,7 @@ use local_archiving\local\type\archive_job_fingerprint;
 use local_archiving\local\type\archive_job_status;
 use local_archiving\local\type\db_table;
 use local_archiving\local\type\log_level;
+use local_archiving\local\type\task_content_metadata;
 use local_archiving\local\util\course_util;
 use local_archiving\task\process_archive_job;
 use local_archiving\task\retrieve_remote_file;
@@ -507,9 +508,11 @@ final class archive_job_test extends \advanced_testcase {
             try {
                 $job->execute();
 
-                // Check job progress.
-                $this->assertGreaterThanOrEqual(0, $job->get_progress(), 'Job progress should be non-negative');
-                $this->assertLessThanOrEqual(100, $job->get_progress(), 'Job progress should not exceed 100%');
+                // Check job progress. A queued job has no progress yet (null), so
+                // treat that as 0 when validating the 0-100% range.
+                $progress = $job->get_progress();
+                $this->assertGreaterThanOrEqual(0, $progress ?? 0, 'Job progress should be non-negative');
+                $this->assertLessThanOrEqual(100, $progress ?? 0, 'Job progress should not exceed 100%');
 
                 // Let backups async backups complete.
                 while ($task = \core\task\manager::get_next_adhoc_task(time())) {
@@ -601,7 +604,7 @@ final class archive_job_test extends \advanced_testcase {
 
         // Validate that the job was indeed postponed.
         $this->assertSame(archive_job_status::QUEUED, $job->get_status(), 'Job should remain in QUEUED status');
-        $this->assertSame(0, $job->get_progress(), 'Job progress should remain at 0%');
+        $this->assertNull($job->get_progress(), 'A postponed (queued) job should have no progress');
 
         $logs = $job->get_logger()->get_logs();
         $jobwaitlogged = false;
@@ -867,9 +870,9 @@ final class archive_job_test extends \advanced_testcase {
         $job = $this->generator()->create_archive_job();
 
         // Check initial progress.
-        $this->assertSame(0, $job->get_progress(), 'Initial job progress should be 0%');
+        $this->assertNull($job->get_progress(), 'An uninitialized job should have no progress yet');
         $job->set_status(archive_job_status::QUEUED);
-        $this->assertSame(0, $job->get_progress(), 'Queued jobs are still at 0% progress');
+        $this->assertNull($job->get_progress(), 'A queued job has not started and should have no progress');
 
         // Ensure we get progress during activity.
         $intermetiatestates = [
@@ -898,6 +901,42 @@ final class archive_job_test extends \advanced_testcase {
             $job->set_status($state);
             $this->assertSame(100, $job->get_progress(), "Progress should be 100% after {$state->name} state");
         }
+    }
+
+    /**
+     * Tests that the content count includes all activity tasks of a job.
+     *
+     * @covers \local_archiving\archive_job::get_content_count
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_content_count(): void {
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $userid = get_admin()->id;
+
+        // A fresh job has no archived content yet.
+        $this->assertSame(0, $job->get_content_count(), 'A job without any task content should count as zero.');
+
+        // Archive two objects across two tasks.
+        $task1 = $this->generator()->create_activity_archiving_task([], $job);
+        $task1->store_task_content_metadata([
+            new task_content_metadata($task1->get_id(), $userid, null, null, 'Content 1'),
+            new task_content_metadata($task1->get_id(), $userid, null, null, 'Content 2'),
+        ]);
+        $task2 = $this->generator()->create_activity_archiving_task([], $job);
+        $task2->store_task_content_metadata([
+            new task_content_metadata($task2->get_id(), $userid, null, null, 'Content 3'),
+        ]);
+
+        $this->assertSame(
+            3,
+            $job->get_content_count(),
+            'The content count must span all tasks of the job.'
+        );
     }
 
     /**
@@ -1608,5 +1647,49 @@ final class archive_job_test extends \advanced_testcase {
         }
 
         return $res;
+    }
+
+    /**
+     * Tests retrieving the job modification time with and without taking its
+     * activity archiving tasks into account.
+     *
+     * @covers \local_archiving\archive_job::get_timemodified
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_get_timemodified_includes_tasks(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $job = $this->generator()->create_archive_job();
+        $jobtime = 1000000000;
+        $DB->set_field(db_table::JOB->value, 'timemodified', $jobtime, ['id' => $job->get_id()]);
+
+        // Without any tasks, both variants return the job time.
+        $this->assertSame($jobtime, $job->get_timemodified(), 'Job time should be returned');
+        $this->assertSame($jobtime, $job->get_timemodified(includetasks: true), 'Job time should be returned without tasks');
+
+        // Create two tasks, one of them newer than the job.
+        $task1 = $this->generator()->create_activity_archiving_task([], $job);
+        $task2 = $this->generator()->create_activity_archiving_task([], $job);
+        $DB->set_field(db_table::ACTIVITY_TASK->value, 'timemodified', $jobtime - 100, ['id' => $task1->get_id()]);
+        $DB->set_field(db_table::ACTIVITY_TASK->value, 'timemodified', $jobtime + 100, ['id' => $task2->get_id()]);
+
+        $this->assertSame($jobtime, $job->get_timemodified(), 'Tasks must be ignored by default');
+        $this->assertSame(
+            $jobtime + 100,
+            $job->get_timemodified(includetasks: true),
+            'The newest task time should be returned if it is newer than the job time'
+        );
+
+        // Make the job newer than all of its tasks.
+        $DB->set_field(db_table::JOB->value, 'timemodified', $jobtime + 200, ['id' => $job->get_id()]);
+        $this->assertSame(
+            $jobtime + 200,
+            $job->get_timemodified(includetasks: true),
+            'The job time should be returned if it is newer than all task times'
+        );
     }
 }

@@ -25,10 +25,13 @@
             "id": 1,
             "triggername": "Manual",
             "status": {
-                "text": "Completed",
-                "help": "The job has been completed.",
-                "color": "success"
+                "badge_text": "Running",
+                "badge_color": "primary",
+                "tooltip_text": "The job is currently ...",
+                "progress": "42",
+                "has_progress": true
             },
+            "completed": 1,
             "metadata": [
                 {"key": "foo", "humankey": "Foo value", "value": "bar"},
                 {"key": "lorem", "humankey": "The Lorem Gauge", "value": "ipsum"}
@@ -54,7 +57,9 @@
             {{> local_archiving/components/job_info }}
         </div>
         <div class="col-6">
-            {{> local_archiving/components/job_metadata }}
+            <div data-jobid="{{job.id}}" data-ref="metadata">
+                {{> local_archiving/components/job_metadata }}
+            </div>
         </div>
     </div>
     <div class="row">
@@ -70,3 +75,7 @@
         </div>
     </div>
 </div>
+
+{{#js}}
+    require(['local_archiving/job_automatic_update'], (JobUpdate) => JobUpdate.init());
+{{/js}}

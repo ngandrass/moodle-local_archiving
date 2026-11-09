@@ -1,0 +1,80 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_archiving/components/job_activity
+
+    This template renders a representation of a jobs related activity, providing
+    information about its name, contained content count and related artifact
+    file(-s).
+
+    Example context (json):
+    {
+        "cm_url": "http://127.0.0.1/mod/quiz/view.php?id=42",
+        "cm_name": "Very quiz, much important, such archiveable",
+        "job_url": "http://127.0.0.1/local/archiving/job.php?id=987",
+        "content_count": 4,
+        "content_is_multiple": true,
+        "files": [
+            "archive-QA-SHIBA-quiz-Very quiz, much important, such archiveable-42_2015-10-21-16-29-00.zip",
+            "local_archiving-activity-backup-123-20151021-162900.mbz"
+        ]
+    }
+}}
+
+<a href="{{cm_url}}">{{cm_name}}</a>
+
+{{#content_count}}
+    <a
+        class="text-muted ml-1 float-right"
+        data-toggle="tooltip"
+        data-bs-toggle="tooltip"
+        data-placement="top"
+        data-bs-placement="top"
+        href="{{job_url}}"
+        title="{{#str}} number_of_archived_objects, local_archiving {{/str}}"
+    >
+        <small>
+            {{.}}
+            <i
+                {{#content_is_multiple}}
+                    class="fa-solid fa-cubes ml-2"
+                {{/content_is_multiple}}
+                {{^content_is_multiple}}
+                    class="fa-solid fa-cube fa-xs mr-1 ml-2"
+                {{/content_is_multiple}}
+                aria-hidden="true"
+            ></i>
+        </small>
+    </a>
+{{/content_count}}
+
+<ul class="list-group list-group-flush small mb-0 mt-1">
+    {{#files}}
+        <li class="list-group-item bg-transparent px-0 py-1 text-break">
+            <i
+                class="fa-regular fa-file-zipper"
+                aria-hidden="true"
+            ></i>
+            &nbsp;{{.}}
+        </li>
+    {{/files}}
+    {{^files}}
+        <li class="list-group-item bg-transparent px-0 py-1 text-break text-muted">
+            {{#str}} no_files_attached, local_archiving {{/str}}
+        </li>
+    {{/files}}
+</ul>

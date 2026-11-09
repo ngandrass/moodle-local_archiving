@@ -32,6 +32,8 @@ global $OUTPUT, $PAGE, $USER;
 // Try to find job.
 $jobid = required_param('jobid', PARAM_INT);
 $job = archive_job::get_by_id($jobid);
+$jobstatus = $job->get_status()->status_display_args();
+$jobprogress = $job->get_progress();
 $ctx = $job->get_context();
 [$course, $cm] = get_course_and_cm_from_cmid($ctx->instanceid);
 
@@ -55,10 +57,16 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
     'job' => [
         'id' => $job->get_id(),
         'triggername' => get_string('pluginname', 'archivingtrigger_' . $job->get_trigger()) ?: $job->get_trigger(),
-        'status' => $job->get_status()->status_display_args(),
+        'status' => [
+            'badge_text' => $jobstatus->text,
+            'badge_color' => $jobstatus->color,
+            'tooltip_text' => $jobstatus->help,
+            'progress' => $jobprogress,
+            'has_progress' => $jobprogress !== null && $jobprogress < 100,
+        ],
         'completed' => $job->is_completed(),
         'timecreated' => $job->get_timecreated(),
-        'timemodified' => $job->get_timemodified(),
+        'timemodified' => $job->get_timemodified(includetasks: true),
         'logs' => array_reduce(
             $job->get_logger()->get_logs(limitnum: 99999),
             fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",
@@ -67,7 +75,6 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
     ],
     'urls' => [
         'back' => new moodle_url('/local/archiving/index.php', ['courseid' => $course->id]),
-        'refresh' => $PAGE->url,
     ],
 ]);
 echo $OUTPUT->footer();

@@ -117,7 +117,6 @@ class job_overview_table extends \table_sql {
         $this->userfilter = $userid > 0 ? get_archive_users::get_exported_user($userid, $ctx) : null;
 
         $refreshhtml = $OUTPUT->render_from_template('local_archiving/components/refresh_button', [
-            'lastupdated' => time(),
             'refreshurl' => $this->add_filter_params($PAGE->url),
         ]);
 
@@ -198,7 +197,9 @@ class job_overview_table extends \table_sql {
             'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, j.origin, u.username, ctx.instanceid AS cmid, ' .
                 '(SELECT COUNT(c.id) FROM {' . db_table::CONTENT->value . '} c ' .
                     'JOIN {' . db_table::ACTIVITY_TASK->value . '} t ON t.id = c.taskid ' .
-                    'WHERE t.jobid = j.id) AS contentcount',
+                    'WHERE t.jobid = j.id) AS contentcount, ' .
+                '(SELECT MAX(t.timemodified) FROM {' . db_table::ACTIVITY_TASK->value . '} t ' .
+                    'WHERE t.jobid = j.id) AS tasktimemodified',
             '{' . db_table::JOB->value . '} j ' .
                 'JOIN {user} u ON j.userid = u.id ' .
                 'JOIN {context} ctx ON ctx.id = j.contextid',
@@ -280,49 +281,42 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_contextid($values) {
+        global $OUTPUT;
+
         $cm = $this->coursemodinfo->get_cm($values->cmid);
-
-        $html = \html_writer::link($cm->get_url(), $cm->get_formatted_name());
-
-        // Show number of archived objects, if known.
-        if ($values->contentcount > 0) {
-            $contenticon = $values->contentcount > 1 ? 'fa-solid fa-cubes' : 'fa-solid fa-cube fa-xs mr-1';
-            $html .= \html_writer::link(
-                new \moodle_url('/local/archiving/job.php', ['id' => $values->id]),
-                \html_writer::tag(
-                    'small',
-                    s($values->contentcount) . '<i class="' . $contenticon . ' ml-2" aria-hidden="true"></i>'
-                ),
-                ['class' => 'text-muted ml-1 float-right'] +
-                    $this->tooltip_attributes(get_string('number_of_archived_objects', 'local_archiving'))
-            );
-        }
-
-        // List names of all files that exist in storage.
+        $cmurl = $cm->get_url();
+        $cmname = $cm->get_formatted_name(['escape' => false]);
         $filenames = [];
         foreach ($this->get_file_handles($values->id) as $file) {
             if (!$file->deleted) {
-                $filenames[] = \html_writer::tag(
-                    'li',
-                    '<i class="fa-regular fa-file-zipper" aria-hidden="true"></i>&nbsp;' . s($file->filename),
-                    ['class' => 'list-group-item bg-transparent px-0 py-1 text-break']
-                );
+                $filenames[] = $file->filename;
             }
         }
 
-        if (empty($filenames)) {
-            $filenames[] = \html_writer::tag(
-                'li',
-                get_string('no_files_attached', 'local_archiving'),
-                ['class' => 'list-group-item bg-transparent px-0 py-1 text-break text-muted']
-            );
-        }
-
-        $html .= \html_writer::tag(
-            'ul',
-            implode('', $filenames),
-            ['class' => 'list-group list-group-flush small mb-0 mt-1']
+        // Identifiable element for dynamic updates.
+        $html = \html_writer::start_div(
+            attributes: [
+                'data-jobid' => $values->id,
+                'data-ref' => 'activity',
+            ],
         );
+
+        $html .= $OUTPUT->render_from_template(
+            'local_archiving/components/job_activity',
+            [
+                'cm_url' => $cmurl->out(false),
+                'cm_name' => $cmname,
+                'job_url' => (new \moodle_url(
+                    '/local/archiving/job.php',
+                    ['id' => $values->id]
+                ))->out(false),
+                'content_count' => ($values->contentcount > 0) ? $values->contentcount : null,
+                'content_is_multiple' => $values->contentcount > 1,
+                'files' => $filenames,
+            ],
+        );
+
+        $html .= \html_writer::end_div();
 
         return $html;
     }
@@ -372,24 +366,37 @@ class job_overview_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_status($values) {
+        global $OUTPUT;
+
         $job = archive_job::get_by_id($values->id);
         $status = archive_job_status::from($values->status)->status_display_args();
-
-        $html = \html_writer::span($status->text, 'badge badge-' . $status->color, $this->tooltip_attributes($status->help));
-        $html .= \html_writer::empty_tag('br');
-
         $progress = $job->get_progress();
-        if ($progress !== null && $progress < 100) {
-            $progresslabel = get_string('progress', 'local_archiving');
-            $html .= \html_writer::span(
-                \html_writer::tag('i', '', ['class' => 'fa fa-spinner', 'aria-hidden' => 'true']) . '&nbsp;' . $progress . '%',
-                '',
-                ['aria-label' => $progresslabel] + $this->tooltip_attributes($progresslabel)
-            );
-            $html .= \html_writer::empty_tag('br');
-        }
 
-        $html .= \html_writer::tag('small', userdate($values->timemodified, '%H:%M:%S'));
+        // Identifiable span for dynamic updates.
+        $spanattributes = [
+            'data-jobid' => $values->id,
+            'data-ref' => 'status',
+            'data-layout' => 'vertical',
+        ];
+        if ($job->is_completed()) {
+            $spanattributes['data-finalized'] = 'true';
+        }
+        $html = \html_writer::start_span(attributes: $spanattributes);
+
+        $html .= $OUTPUT->render_from_template(
+            'local_archiving/components/job_status',
+            [
+                'badge_text' => $status->text,
+                'badge_color' => $status->color,
+                'tooltip_text' => $status->help,
+                'progress' => $progress,
+                'has_progress' => $progress !== null && $progress < 100,
+                'time_modified' => max((int) $values->timemodified, (int) $values->tasktimemodified),
+                'layout_vertical' => true,
+            ],
+        );
+
+        $html .= \html_writer::end_span();
 
         return $html;
     }
@@ -410,6 +417,12 @@ class job_overview_table extends \table_sql {
         $html = \html_writer::start_span($groupclass);
 
         // Action: Download.
+        $html .= \html_writer::start_span( // Identifiable span for dynamic updates.
+            attributes: [
+                'data-jobid' => $values->id,
+                'data-ref' => 'action-download',
+            ],
+        );
         $files = $this->get_file_handles($values->id);
         if (archive_job_status::from($values->status)->is_final() && count($files) > 0) {
             $downloadurl = new \moodle_url('/local/archiving/download.php', ['jobid' => $values->id]);
@@ -422,6 +435,7 @@ class job_overview_table extends \table_sql {
                 'fa-download'
             );
         }
+        $html .= \html_writer::end_span(); // End of identifiable span for dynamic updates.
 
         // Action: Show job details.
         $html .= $this->action_button(
@@ -480,10 +494,6 @@ class job_overview_table extends \table_sql {
     /**
      * Renders an icon-only action button.
      *
-     * We create a wrapper span around the button to ensure that the tooltip is
-     * displayed even when the button is disabled. Otherwise pointer events will
-     * be ignored by the browser.
-     *
      * @param \moodle_url|null $url Target of the button, or null to render a disabled button
      * @param string $btnclass Bootstrap button class (e.g. 'btn-success')
      * @param string $label Accessible label and tooltip of the button
@@ -491,30 +501,16 @@ class job_overview_table extends \table_sql {
      * @return string HTML code of the button
      */
     protected function action_button(?\moodle_url $url, string $btnclass, string $label, string $icon): string {
-        $btnattributes = [
-            'class' => "btn {$btnclass} m-1",
-            'role' => 'button',
-            'title' => $label,
-            'aria-label' => $label,
-        ];
+        global $OUTPUT;
 
-        // Render buttons with null URLs as disabled.
-        if ($url === null) {
-            $btnattributes['class'] .= ' disabled';
-            $btnattributes['aria-disabled'] = 'true';
-            $btnattributes['tabindex'] = '-1';
-        }
-
-        $buttonhtml = \html_writer::link(
-            $url ?? '#',
-            \html_writer::tag('i', '', ['class' => "fa {$icon}", 'aria-hidden' => 'true']),
-            $btnattributes
-        );
-
-        return \html_writer::span(
-            $buttonhtml,
-            'd-inline-block',
-            $this->tooltip_attributes($label)
+        return $OUTPUT->render_from_template(
+            'local_archiving/components/action_button',
+            [
+                'label' => $label,
+                'btnclass' => $btnclass,
+                'url' => $url ? $url->out(false) : null,
+                'icon' => $icon,
+            ],
         );
     }
 

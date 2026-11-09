@@ -936,6 +936,15 @@ class archive_job {
     }
 
     /**
+     * Retrieves the ID of the course module the archive job relates to
+     *
+     * @return int ID of the course module
+     */
+    public function get_cmid(): int {
+        return $this->cmid;
+    }
+
+    /**
      * Retrieves the ID of the user that owns this job
      *
      * @return int ID of the user that owns this job
@@ -974,12 +983,31 @@ class archive_job {
     /**
      * Retrieves the unix timestamp this job was last modified
      *
+     * @param bool $includetasks If true, tiemmodified of associated activity
+     * archiving tasks are also taken into account. The newest timestamp of
+     * either the job or any of its tasks is returned.
      * @return int Unix timestamp of last modification time
      * @throws \dml_exception
      */
-    public function get_timemodified(): int {
+    public function get_timemodified(bool $includetasks = false): int {
         global $DB;
-        return $DB->get_field(db_table::JOB->value, 'timemodified', ['id' => $this->id], MUST_EXIST);
+
+        // Only job.
+        if (!$includetasks) {
+            return $DB->get_field(db_table::JOB->value, 'timemodified', ['id' => $this->id], MUST_EXIST);
+        }
+
+        // Job and tasks.
+        $record = $DB->get_record_sql(
+            'SELECT j.timemodified AS jobtime, ' .
+                '(SELECT MAX(t.timemodified) FROM {' . db_table::ACTIVITY_TASK->value . '} t WHERE t.jobid = j.id) AS tasktime ' .
+            'FROM {' . db_table::JOB->value . '} j ' .
+            'WHERE j.id = :id',
+            ['id' => $this->id],
+            MUST_EXIST
+        );
+
+        return max((int) $record->jobtime, (int) $record->tasktime);
     }
 
     /**
@@ -1073,8 +1101,6 @@ class archive_job {
      */
     public function get_progress(): ?int {
         switch ($this->get_status()) {
-            case archive_job_status::UNINITIALIZED:
-            case archive_job_status::QUEUED:
             case archive_job_status::PRE_PROCESSING:
                 return 0;
             case archive_job_status::ACTIVITY_ARCHIVING:
@@ -1100,6 +1126,23 @@ class archive_job {
             default:
                 return null; // @codeCoverageIgnore
         }
+    }
+
+    /**
+     * Counts the number of archived objects associated with this job.
+     *
+     * @return int Number of archived objects for this job
+     * @throws \dml_exception
+     */
+    public function get_content_count(): int {
+        global $DB;
+
+        return $DB->count_records_sql(
+            'SELECT COUNT(c.id) FROM {' . db_table::CONTENT->value . '} c ' .
+                'JOIN {' . db_table::ACTIVITY_TASK->value . '} t ON t.id = c.taskid ' .
+                'WHERE t.jobid = :jobid',
+            ['jobid' => $this->id]
+        );
     }
 
     /**

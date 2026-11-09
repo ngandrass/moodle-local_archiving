@@ -75,7 +75,7 @@ echo $renderer->render_from_template('local_archiving/job_details', [
         ],
         'completed' => $job->is_completed(),
         'timecreated' => $job->get_timecreated(),
-        'timemodified' => $job->get_timemodified(),
+        'timemodified' => $job->get_timemodified(includetasks: true),
         'metadata' => array_map(
             fn($key, $value): array => [
                 'key' => $key,

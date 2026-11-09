@@ -28,6 +28,7 @@
 - Automatically update logs on the job details page without needing to reload the page
 - Show spinning progress indicator and dynamically updated progress in percent for running archive jobs
 - Add new AJAX web service function `local_archiving_get_job_metadata` to query the current state of an archive job
+- Include activity archiving task updates in jobs modification timestamps, always showing the latest modification time
 
 
 ## Version 1.1.1 (2026100600)

@@ -36,7 +36,6 @@ use core_external\external_value;
 use local_archiving\archive_job;
 use local_archiving\file_handle;
 use local_archiving\local\logging\logger;
-use local_archiving\local\type\archive_job_status;
 
 /**
  * API endpoint to get the metadata of an archive job for client-side polling
@@ -246,7 +245,7 @@ class get_job_metadata extends external_api {
             'status' => $status->value,
             'status_display_args' => (array) $status->status_display_args(),
             'timecreated' => $job->get_timecreated(),
-            'timemodified' => $job->get_timemodified(),
+            'timemodified' => $job->get_timemodified(includetasks: true),
             'action_urls' => [
                 'job' => (
                     new \moodle_url('/local/archiving/job.php', ['id' => $job->get_id()])

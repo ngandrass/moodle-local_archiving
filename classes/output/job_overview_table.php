@@ -197,7 +197,9 @@ class job_overview_table extends \table_sql {
             'j.id, j.status, j.timecreated, j.timemodified, j.contextid, j.userid, j.origin, u.username, ctx.instanceid AS cmid, ' .
                 '(SELECT COUNT(c.id) FROM {' . db_table::CONTENT->value . '} c ' .
                     'JOIN {' . db_table::ACTIVITY_TASK->value . '} t ON t.id = c.taskid ' .
-                    'WHERE t.jobid = j.id) AS contentcount',
+                    'WHERE t.jobid = j.id) AS contentcount, ' .
+                '(SELECT MAX(t.timemodified) FROM {' . db_table::ACTIVITY_TASK->value . '} t ' .
+                    'WHERE t.jobid = j.id) AS tasktimemodified',
             '{' . db_table::JOB->value . '} j ' .
                 'JOIN {user} u ON j.userid = u.id ' .
                 'JOIN {context} ctx ON ctx.id = j.contextid',
@@ -389,7 +391,7 @@ class job_overview_table extends \table_sql {
                 'tooltip_text' => $status->help,
                 'progress' => $progress,
                 'has_progress' => $progress !== null && $progress < 100,
-                'time_modified' => $values->timemodified,
+                'time_modified' => max((int) $values->timemodified, (int) $values->tasktimemodified),
                 'layout_vertical' => true,
             ],
         );

@@ -66,7 +66,7 @@ echo $renderer->render_from_template('local_archiving/job_logs', [
         ],
         'completed' => $job->is_completed(),
         'timecreated' => $job->get_timecreated(),
-        'timemodified' => $job->get_timemodified(),
+        'timemodified' => $job->get_timemodified(includetasks: true),
         'logs' => array_reduce(
             $job->get_logger()->get_logs(limitnum: 99999),
             fn ($log, $entry) => $log . logger::format_log_entry($entry) . "\r\n",

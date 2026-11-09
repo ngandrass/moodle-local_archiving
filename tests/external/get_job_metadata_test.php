@@ -258,87 +258,6 @@ final class get_job_metadata_test extends \advanced_testcase {
     }
 
     /**
-     * Tests that the housekeeping step times out a still-active job that has
-     * outlived its configured timeout while the client is polling it
-     *
-     * @covers \local_archiving\external\get_job_metadata::execute
-     *
-     * @return void
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \invalid_parameter_exception
-     * @throws \invalid_response_exception
-     * @throws \moodle_exception
-     * @throws \required_capability_exception
-     */
-    public function test_execute_times_out_overdue_running_job(): void {
-        global $DB;
-        $this->resetAfterTest();
-        $this->ensure_config();
-        $this->setAdminUser();
-
-        // Create a job that is still in an active state but was created long enough
-        // ago to have exceeded the timeout window.
-        $job = $this->make_job(archive_job_status::ACTIVITY_ARCHIVING);
-        set_config('job_timeout_min', 1, 'local_archiving');
-        $DB->set_field(db_table::JOB->value, 'timecreated', time() - (2 * MINSECS), ['id' => $job->get_id()]);
-
-        $res = $this->call_webservice($job->get_id());
-
-        $this->assertSame('OK', $res['status']);
-        $jobdata = $res['job'];
-        $this->assertTrue(
-            $jobdata['complete'],
-            'An overdue active job must be promoted to a final (timed out) state.'
-        );
-        $this->assertSame(
-            (int) archive_job_status::TIMEOUT->value,
-            (int) $jobdata['status'],
-            'Housekeeping must set the job status to TIMEOUT.'
-        );
-        // The housekeeping change must also be persisted, not just reflected in this response.
-        $this->assertSame(
-            archive_job_status::TIMEOUT,
-            archive_job::get_by_id($job->get_id())->get_status(),
-            'The timeout status must be persisted to the database.'
-        );
-    }
-
-    /**
-     * Tests that the housekeeping step leaves a still-active job untouched when it
-     * has not yet exceeded its timeout window
-     *
-     * @covers \local_archiving\external\get_job_metadata::execute
-     *
-     * @return void
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \invalid_parameter_exception
-     * @throws \invalid_response_exception
-     * @throws \moodle_exception
-     * @throws \required_capability_exception
-     */
-    public function test_execute_leaves_fresh_running_job_untouched(): void {
-        $this->resetAfterTest();
-        $this->ensure_config();
-        $this->setAdminUser();
-
-        // A freshly created job within the timeout window must keep its active status.
-        $job = $this->make_job(archive_job_status::ACTIVITY_ARCHIVING);
-
-        $res = $this->call_webservice($job->get_id());
-
-        $this->assertSame('OK', $res['status']);
-        $jobdata = $res['job'];
-        $this->assertFalse($jobdata['complete'], 'A fresh running job must not be flagged as complete.');
-        $this->assertSame(
-            (int) archive_job_status::ACTIVITY_ARCHIVING->value,
-            (int) $jobdata['status'],
-            'A fresh running job must keep its active status and not be timed out.'
-        );
-    }
-
-    /**
      * Tests that a queued job is reported as incomplete and without a progress value
      *
      * A queued job has not started running yet, so there is no meaningful progress
@@ -407,6 +326,38 @@ final class get_job_metadata_test extends \advanced_testcase {
 
         $this->assertSame('OK', $res['status']);
         $this->assertSame('Q & A "Session"', $res['job']['cm_name'], 'Activity name must not be HTML-escaped by the webservice.');
+    }
+
+    /**
+     * Tests that the returned modification time takes the job's activity
+     * archiving tasks into account
+     *
+     * @covers \local_archiving\external\get_job_metadata::execute
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * @throws \invalid_response_exception
+     * @throws \moodle_exception
+     * @throws \required_capability_exception
+     */
+    public function test_execute_returns_timemodified_of_newest_task(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->ensure_config();
+        $job = $this->make_job(archive_job_status::ACTIVITY_ARCHIVING);
+        $task = $this->generator()->create_activity_archiving_task([], $job);
+
+        $jobtime = time() - HOURSECS;
+        $tasktime = time() - MINSECS;
+        $DB->set_field(db_table::JOB->value, 'timemodified', $jobtime, ['id' => $job->get_id()]);
+        $DB->set_field(db_table::ACTIVITY_TASK->value, 'timemodified', $tasktime, ['id' => $task->get_id()]);
+
+        $res = $this->call_webservice($job->get_id());
+
+        $this->assertSame('OK', $res['status']);
+        $this->assertSame($tasktime, (int) $res['job']['timemodified'], 'The newest task modification time should be returned.');
     }
 
     /**

@@ -1,6 +1,6 @@
 # Changelog
 
-## Version X.Y.Z (YYYYMMDDHH)
+## Version 1.1.0 (2026110900)
 
 - Add support for partial archiving by passing explicit submission IDs
 - Display submission attempt number and date in the details column of the archive contents table

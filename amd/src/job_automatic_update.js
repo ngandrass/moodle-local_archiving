@@ -28,6 +28,9 @@ import {getString} from 'core/str';
 import UserDate from 'core/user_date';
 import Templates from 'core/templates';
 import Notification from 'core/notification';
+import $ from 'jquery';
+import {eventTypes} from 'core_filters/events';
+import {Bootstrap} from 'theme_boost/loader';
 
 /**
  * Polling interval for status updates.
@@ -38,6 +41,16 @@ import Notification from 'core/notification';
  */
 const JOB_STATUS_POLLING_MS = 6000;
 
+/**
+ * Selector matching Bootstrap tooltip triggers.
+ */
+const TOOLTIP_SELECTOR = '[data-bs-toggle="tooltip"]';
+
+/**
+ * Whether Bootstrap 5 is used (Moodle 5). Bootstrap 4 (Moodle 4.5) does not
+ * provide the static instance accessors of Bootstrap 5.
+ */
+const IS_BOOTSTRAP5 = typeof Bootstrap?.Tooltip?.getOrCreateInstance === 'function';
 
 /**
  * Initializes automatic job status polling for any job listings page.
@@ -51,6 +64,10 @@ export const init = () => {
     const jobIds = getUnfinishedJobIds();
 
     if (jobIds) {
+        // Bootstrap 4 (Moodle 4.5) delegates tooltips globally, so new content needs no initialization.
+        if (IS_BOOTSTRAP5) {
+            document.addEventListener(eventTypes.filterContentUpdated, onContentUpdated);
+        }
         scheduleJobUpdate(jobIds);
     }
 };
@@ -72,6 +89,50 @@ const getElementSelector = (jobId, ref) => `[data-jobid="${jobId}"][data-ref="${
  * @returns {boolean} True if the targeted element exists
  */
 const hasElement = (jobId, ref) => document.querySelector(getElementSelector(jobId, ref)) !== null;
+
+/**
+ * Initializes tooltips of top-level nodes that were dynamically inserted into
+ * any of our updatable elements (Bootstrap 5 only).
+ *
+ * Core (Moodle 5) only initializes tooltips nested inside new nodes, but not
+ * the new top-level nodes themselves.
+ *
+ * @param {CustomEvent} e The filterContentUpdated event
+ * @returns {void}
+ */
+const onContentUpdated = (e) => {
+    e.detail.nodes.forEach((node) => {
+        if (
+            node instanceof HTMLElement &&
+            node.matches(TOOLTIP_SELECTOR) &&
+            node.closest('[data-jobid][data-ref]')
+        ) {
+            Bootstrap.Tooltip.getOrCreateInstance(node);
+        }
+    });
+};
+
+/**
+ * Disposes all tooltips within the elements matched by the given selector.
+ *
+ * This must be called before the content of an element is replaced. Otherwise,
+ * a currently shown tooltip would stay open forever, since its trigger element
+ * is removed from the DOM.
+ *
+ * @param {string} selector CSS selector of the elements whose content is replaced
+ * @returns {void}
+ */
+const disposeTooltips = (selector) => {
+    document.querySelectorAll(selector).forEach((container) => {
+        container.querySelectorAll(TOOLTIP_SELECTOR).forEach((el) => {
+            if (IS_BOOTSTRAP5) {
+                Bootstrap.Tooltip.getInstance(el)?.dispose();
+            } else {
+                $(el).tooltip('dispose');
+            }
+        });
+    });
+};
 
 /**
  * Collects the IDs of all jobs whose status is not yet finalized.
@@ -251,6 +312,7 @@ const renderStatus = async(job) => {
         templateContext,
     ).then(
         ({html, js}) => {
+            disposeTooltips(elementSelector);
             Templates.replaceNodeContents(elementSelector, html, js,);
             return;
         }
@@ -288,6 +350,7 @@ const renderActivity = async(job) => {
             "files": job.files ?? [],
         },
     ).then(({html, js}) => {
+        disposeTooltips(elementSelector);
         Templates.replaceNodeContents(
             elementSelector,
             html,
@@ -394,6 +457,7 @@ const renderDownloadAction = async(job) => {
         'local_archiving/components/action_button',
         templateContext,
     ).then(({html, js}) => {
+        disposeTooltips(elementSelector);
         Templates.replaceNodeContents(elementSelector, html, js);
         return;
     }).catch((error) => {
@@ -425,6 +489,7 @@ const renderMetadata = async(job) => {
             }
         },
     ).then(({html, js}) => {
+        disposeTooltips(elementSelector);
         Templates.replaceNodeContents(elementSelector, html, js);
         return;
     }).catch((error) => {

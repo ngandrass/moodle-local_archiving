@@ -236,11 +236,6 @@ class get_job_metadata extends external_api {
         self::validate_context($context);
         require_capability('local/archiving:view', $context);
 
-        // Housekeeping.
-        if (!$job->is_completed() && $job->is_overdue()) {
-            $job->set_status(archive_job_status::TIMEOUT);
-        }
-
         // Build response.
         $status = $job->get_status();
         $jobmeta = $job->get_metadata_entries();

@@ -112,8 +112,9 @@ const scheduleJobUpdate = (jobIds) => {
 /**
  * Performs one polling round for all given jobs.
  *
- * For each job the current status is fetched and the status cell is re-rendered.
- * As soon as a job completed, its filesize and action cells are updated as well.
+ * The current status of all jobs is fetched with a single batched HTTP request
+ * and all elements related to each job are re-rendered. As soon as a job
+ * completed, its download action and metadata elements are updated as well.
  * If any jobs are still running, another polling round is scheduled. Jobs whose
  * status could not be retrieved are dropped from polling to prevent repeated
  * error notifications.
@@ -125,10 +126,20 @@ const updateJobs = async(jobIds) => {
     // Jobs that have not reached a final state yet and need to be polled again.
     const pendingJobIds = [];
 
-    for (const jobId of jobIds) {
+    // Request data for all jobs at once. Moodle bundles all calls into a single
+    // HTTP request but returns one promise per call. Each promise is wrapped
+    // immediately to attach error handling before any of them may reject.
+    const responses = Ajax.call(
+        jobIds.map(buildRequest),
+        true, // Async.
+        true, // Login required.
+        true, // No session update.
+    ).map(resolveJobMetadata);
+
+    for (const [index, jobId] of jobIds.entries()) {
         try {
             // Get latest job data. Stop polling this job if it could not be retrieved.
-            const jobMetadata = await getJobMetadata(jobId);
+            const jobMetadata = await responses[index];
             if (!jobMetadata) {
                 continue;
             }
@@ -165,36 +176,37 @@ const updateJobs = async(jobIds) => {
 };
 
 /**
- * Fetches the current status of a single job from the "local_archiving_get_job_metadata"
- * webservice.
+ * Builds a "local_archiving_get_job_metadata" webservice request for a single
+ * job.
  *
  * Optional (expensive) data is only requested if the current page contains an
  * element that renders it.
  *
+ * @param {string} jobId The ID of the job to fetch the status for
+ * @returns {object} Request object to be passed to Ajax.call()
+ */
+const buildRequest = (jobId) => ({
+    methodname: 'local_archiving_get_job_metadata',
+    args: {
+        jobid: jobId,
+        includelogs: hasElement(jobId, 'logs-content'),
+        includemetadata: hasElement(jobId, 'metadata'),
+        includefiles: hasElement(jobId, 'activity'),
+    },
+});
+
+/**
+ * Resolves and validates the webservice response for a single job.
+ *
  * Failures are reported to the user via a notification.
  *
- * @param {string} job The ID of the job to fetch the status for
+ * @param {Promise<object>} request The pending webservice call as returned by Ajax.call()
  * @returns {Promise<object|null>} The webservice response containing "status"
  * and "job", or null if the webservice call failed or returned a non-"OK" status
  */
-const getJobMetadata = async(job) => {
+const resolveJobMetadata = async(request) => {
     try {
-        // Background polling must not refresh the session. Otherwise, an open
-        // report page would keep the user logged in until all jobs finished.
-        const data = await Ajax.call(
-            [{
-                methodname: 'local_archiving_get_job_metadata',
-                args: {
-                    jobid: job,
-                    includelogs: hasElement(job, 'logs-content'),
-                    includemetadata: hasElement(job, 'metadata'),
-                    includefiles: hasElement(job, 'activity'),
-                },
-            }],
-            true, // Async.
-            true, // Login required.
-            true, // No session update.
-        )[0];
+        const data = await request;
 
         if (data.status !== 'OK' || !data.job) {
             throw Error(`Failed to retrieve job status: ${data.status}`);
